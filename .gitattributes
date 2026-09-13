@@ -1,0 +1,11 @@
+# Normalize line endings for all text files
+* text=auto eol=lf
+
+# Explicitly mark binary files so Git doesn't try to diff/merge them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
