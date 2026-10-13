@@ -59,19 +59,19 @@ The anonymized company files could not be used and were removed. `data/sample/` 
 | File | Rows | Columns |
 | --- | --- | --- |
 | `Locations.xlsx` | 2,000 | Location, Aisle, Section, Level, Position, Warehouse |
-| `Inventory.xlsx` | 2,000 | Part, Part Description, Quantity, Unit, Location, Warehouse |
-| `transactions.xlsx` | 20,000 | Part, Part Description, Location, Transferred Quantity, Initial Quantity, Transaction Code, Date |
+| `Inventory.xlsx` | 1,625 (1,545 parts) | Part, Part Description, Quantity, Unit, Location, Warehouse |
+| `transactions.xlsx` | 20,000 | Transaction Type, Part, Part Description, Location, Transferred Quantity, Initial Quantity, Transaction Code, Date |
 
 ### What the demo data contains
 
 - One warehouse, `NO`, with 9 aisles (A–I) of 222–223 locations. Location code `<aisle>-<section>-<level>-<position>`, e.g. `A-01-02-03`.
-- One car part per location: 87 part types for 20 petrol and diesel car models in three engine versions. Part numbers are 7-digit text.
-- **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. 1,830 locations are occupied and 170 hold a zero-stock part, so they count as empty.
-- Negative Transferred Quantity is a pick (18,596 lines), positive is a receipt (1,404 lines). Initial Quantity + Transferred Quantity is the stock after the line; each part's last line ends at its inventory quantity.
-- Transaction Code groups lines: 56% of the 10,499 pick codes hold 2–4 parts. Some part pairs (e.g. oil filter + drain plug washer, brake pads + brake discs for the same car) are built in to be picked together; 136 pairs are picked together 10 or more times.
-- Movement: a few fast movers, most parts move rarely, and 630 parts never move (dead stock).
-- Dates: random weekdays 2025-10-01 to 2026-09-30, 07:00–15:30, same date for all lines on one code. No real seasonality or trends.
-- The demo data has no transaction types and no from/to locations; each line uses the part's own location.
+- Car parts: 87 part types for 20 petrol and diesel car models in three engine versions. Part numbers are 7-digit text. 80 parts are stored in two locations.
+- **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. 1,584 locations are occupied and 416 empty (375 with no part, 41 with only a zero-stock part). Occupancy varies by aisle, from 65% to 87%.
+- Transaction types follow the real process: **Move to Repair** (shelf pick to `FLSKRS`, 9,635 lines, one part per code), **Issue Part** (used, at `FLSKRS`, 8,867 lines grouped by job code), **Return to Stock** (back to the same shelf, 953 lines) and **Receipt** (goods received, 545 lines, code `0`). The real two-step return via `RETURN-SKRS` and Putaway is simplified to one line.
+- On shelf lines, Initial Quantity + Transferred Quantity is the stock after the line, and the last line per part and location ends at its inventory quantity. On Issue Part lines, Initial Quantity is what was waiting at `FLSKRS`.
+- Pick-together analysis uses Issue Part: 59% of the 4,869 job codes hold 2–4 parts. Some pairs (e.g. brake pads + brake discs for the same car) are built in; 77 pairs are used together 10 or more times.
+- Movement: a few fast movers, most parts move rarely, and 636 parts never move (dead stock).
+- Dates: random weekdays 2025-10-01 to 2026-09-30, 07:00–15:30. A job is picked in the morning and issued or returned later the same day. No real seasonality or trends.
 
 ### Findings from the original company export (2026-09-30)
 

@@ -2,18 +2,28 @@
 
 Creates three Excel files:
 - Locations.xlsx    2,000 shelf locations spread over 9 aisles (A-I).
-- Inventory.xlsx    every location with one random car part, description and quantity.
-- transactions.xlsx 20,000 random transaction lines for the inventory parts, with descriptions.
+- Inventory.xlsx    the parts on the shelves: about 1,650 occupied locations, each
+                    with a car part, description and quantity.
+- transactions.xlsx 20,000 transaction lines for the inventory parts.
 
 Rules:
 - Location code: <aisle>-<section>-<level>-<position>, e.g. A-01-02-03.
+- Aisles are 72-95% full; the other locations are empty and not in Inventory.xlsx.
+- Most parts have one location; 80 parts are stored in two.
+- Transaction types follow the real warehouse process:
+  Move to Repair  pick from the shelf, one part per Transaction Code.
+  Issue Part      the part is used, at the virtual location FLSKRS. All parts on
+                  one job share its Transaction Code (basis for pick-together analysis).
+  Return to Stock an unused part goes back to its shelf.
+  Receipt         goods received to a shelf, Transaction Code 0.
 - Some parts move often, some rarely, and about 15% never move (dead stock).
-- Several lines can share one Transaction Code (parts picked together). Some part
-  pairs are picked together often, so pick-together analysis has a pattern to find.
-- Dates: weekdays 2025-10-01 to 2026-09-30, 07:00-15:30. All lines on one
-  Transaction Code share the same date.
-- Quantities are consistent: Initial Quantity + Transferred Quantity is the stock
-  after the line, and the last line per part ends at the quantity in Inventory.xlsx.
+  Some part pairs are used together often, so pick-together analysis has a pattern.
+- Dates: weekdays 2025-10-01 to 2026-09-30, 07:00-15:30. A job is picked in the
+  morning and issued or returned later the same day.
+- Shelf quantities are consistent: Initial Quantity + Transferred Quantity is the
+  stock after the line, per part and location, and the last line ends at the
+  quantity in Inventory.xlsx. On Issue Part lines, Initial Quantity is what was
+  waiting at FLSKRS for that part (it arrives there through Move to Repair).
 - Fixed seed, so running the script again gives the same files.
 
 Run from the project root:
@@ -31,6 +41,8 @@ WAREHOUSE = "NO"
 AISLES = list("ABCDEFGHI")
 N_LOCATIONS = 2000
 N_TRANSACTIONS = 20000
+N_DOUBLE = 80                   # parts stored in two locations
+VIRTUAL = "FLSKRS"              # where picked parts wait until issued or returned
 START, END = "2025-10-01", "2026-09-30"
 
 PART_TYPES = [
@@ -99,92 +111,165 @@ def make_locations():
 
 
 def make_inventory(rng, locations):
+    # Each aisle is only partly filled, and the fill rate differs per aisle.
+    fill = dict(zip(AISLES, rng.uniform(0.72, 0.95, len(AISLES))))
+    is_used = rng.random(len(locations)) < locations["Aisle"].map(fill).values
+    used = locations.loc[is_used, "Location"].tolist()
+    n_parts = len(used) - N_DOUBLE
+
     combos = [(t, u, f"{v} {e}") for t, u in PART_TYPES for v in VEHICLES for e in ENGINES]
-    picked = rng.choice(len(combos), size=len(locations), replace=False)
-    part_numbers = rng.choice(np.arange(1_000_000, 9_999_999), size=len(locations), replace=False)
-    rows = []
-    for loc, idx, pn in zip(locations["Location"], picked, part_numbers):
-        part_type, unit, vehicle = combos[idx]
-        qty = 0 if rng.random() < 0.08 else int(rng.integers(1, 41 if unit != "L" else 201))
-        rows.append({
-            "Part": str(pn), "Part Description": f"{part_type} - {vehicle}",
-            "Part Type": part_type, "Vehicle": vehicle,
-            "Quantity": qty, "Unit": unit, "Location": loc, "Warehouse": WAREHOUSE,
-        })
-    return pd.DataFrame(rows)
+    picked = rng.choice(len(combos), size=n_parts, replace=False)
+    part_numbers = rng.choice(np.arange(1_000_000, 9_999_999), size=n_parts, replace=False)
+    parts = pd.DataFrame([
+        {"Part": str(pn), "Part Description": f"{combos[c][0]} - {combos[c][2]}",
+         "Part Type": combos[c][0], "Vehicle": combos[c][2], "Unit": combos[c][1]}
+        for c, pn in zip(picked, part_numbers)
+    ])
+
+    # One location per part, plus a second location for some parts.
+    owner = np.concatenate([np.arange(n_parts), rng.choice(n_parts, N_DOUBLE, replace=False)])
+    rows = pd.DataFrame({"part": owner, "Location": np.array(used)[rng.permutation(len(used))]})
+    return parts, rows
 
 
-def make_transactions(rng, inventory):
-    n_parts = len(inventory)
+def make_transactions(rng, parts, rows):
+    """Simulate the warehouse process forward in time.
+
+    A job picks parts from the shelf (Move to Repair, to the virtual location
+    FLSKRS). Later the same day each part is consumed (Issue Part, at FLSKRS) or,
+    if not used, partly or fully sent back (Return to Stock, to the shelf).
+    When a shelf runs short, goods are received first (Receipt).
+    """
+    n = len(parts)
     # Popularity: a few fast movers, many slow movers, ~15% never move.
-    weights = rng.pareto(1.2, n_parts) + 0.05
-    weights[rng.random(n_parts) < 0.15] = 0
+    weights = rng.pareto(1.2, n) + 0.05
+    weights[rng.random(n) < 0.15] = 0
     weights /= weights.sum()
 
-    by_key = {(r["Part Type"], r["Vehicle"]): i for i, r in inventory.iterrows()}
+    by_key = {(r["Part Type"], r["Vehicle"]): i for i, r in parts.iterrows()}
     pair_idx = [
         (by_key[(a, v)], by_key[(b, v)])
-        for a, b in PAIRS for v in inventory["Vehicle"].unique()
+        for a, b in PAIRS for v in parts["Vehicle"].unique()
         if (a, v) in by_key and (b, v) in by_key and weights[by_key[(a, v)]] > 0
     ]
+    liquid = (parts["Unit"] == "L").values
+    rows_of = rows.groupby("part").groups
+    start = np.where(liquid[rows["part"]], rng.integers(0, 201, len(rows)), rng.integers(0, 41, len(rows)))
 
+    # A pool of jobs in random date order; the first K are used.
     workdays = pd.bdate_range(START, END)
-    lines, code = [], 4_100_000
-    while len(lines) < N_TRANSACTIONS:
-        code += int(rng.integers(1, 4))
-        ts = rng.choice(workdays) + pd.Timedelta(minutes=int(rng.integers(7 * 60, 15 * 60 + 30)))
-        roll = rng.random()
-        if roll < 0.12:                       # receipt of goods: one part, stock goes up
-            parts, sign = [int(rng.choice(n_parts, p=weights))], 1
-        elif roll < 0.30 and pair_idx:        # parts often used together
-            parts, sign = list(pair_idx[rng.integers(len(pair_idx))]), -1
-        else:                                 # picks: 1-4 parts on one code
-            size = rng.choice([1, 2, 3, 4], p=[0.55, 0.25, 0.13, 0.07])
-            parts, sign = list(rng.choice(n_parts, size=size, replace=False, p=weights)), -1
-        for i in parts:
-            unit = inventory.at[i, "Unit"]
-            if sign > 0:
-                qty = int(rng.integers(5, 51)) if unit != "L" else int(rng.integers(20, 201))
+    pool = []
+    for _ in range(12000):
+        t = rng.choice(workdays) + pd.Timedelta(minutes=int(rng.integers(7 * 60, 12 * 60)))
+        if rng.random() < 0.2 and pair_idx:
+            job_parts = list(pair_idx[rng.integers(len(pair_idx))])
+        else:
+            size = rng.choice([1, 2, 3, 4], p=[0.45, 0.3, 0.15, 0.1])
+            job_parts = list(rng.choice(n, size=size, replace=False, p=weights))
+        items = []
+        for i in job_parts:
+            q = int(rng.integers(4, 9)) if liquid[i] else int(rng.choice([1, 1, 1, 2, 2, 4]))
+            r = 0
+            if rng.random() < 0.1:                       # not all of it was used
+                r = q if (q == 1 or rng.random() < 0.6) else int(rng.integers(1, q))
+            back = min(t + pd.Timedelta(minutes=int(rng.integers(30, 240))), t.normalize() + pd.Timedelta(hours=15.5))
+            items.append((int(i), q, r, back))
+        pool.append((t, items))
+
+    def simulate(k):
+        sim = np.random.default_rng(SEED + 1)
+        events = []                                      # (time, order, kind, job, part, qty)
+        for j, (t, items) in enumerate(pool[:k]):
+            for i, q, r, back in items:
+                events.append((t, len(events), "pick", j, i, q))
+                if q - r > 0:
+                    events.append((back, len(events), "issue", j, i, q - r))
+                if r > 0:
+                    events.append((back, len(events), "return", j, i, r))
+        events.sort(key=lambda e: (e[0], e[1]))
+
+        stock, virtual = start.copy(), np.zeros(n, dtype=int)
+        picked_from, job_code, lines = {}, {}, []
+        code, last = 4_100_000, events[0][0]
+
+        def next_code():
+            nonlocal code
+            code += int(sim.integers(1, 4))
+            return code
+
+        for t, _, kind, j, i, q in events:
+            if kind == "pick":
+                row = max(rows_of[i], key=lambda x: stock[x])
+                if stock[row] < q:                       # shelf too low: receive goods first
+                    batch = q - stock[row] + int(sim.integers(20, 201) if liquid[i] else sim.integers(5, 41))
+                    rt = max(last, t.normalize() + pd.Timedelta(hours=7), t - pd.Timedelta(minutes=int(sim.integers(5, 120))))
+                    lines.append(("Receipt", row, batch, stock[row], 0, rt))
+                    stock[row] += batch
+                lines.append(("Move to Repair", row, -q, stock[row], next_code(), t))
+                stock[row] -= q
+                virtual[i] += q
+                picked_from[(j, i)] = row
+                job_code.setdefault(j, next_code())
+            elif kind == "issue":
+                lines.append(("Issue Part", -1 - i, -q, virtual[i], job_code[j], t))
+                virtual[i] -= q
             else:
-                qty = int(rng.choice([1, 1, 1, 2, 2, 4])) if unit != "L" else int(rng.integers(4, 9))
-            lines.append({"i": i, "ts": ts, "code": code, "delta": sign * qty})
-    tx = pd.DataFrame(lines[:N_TRANSACTIONS]).sort_values(["ts", "code"]).reset_index(drop=True)
+                row = picked_from[(j, i)]
+                lines.append(("Return to Stock", row, q, stock[row], next_code(), t))
+                stock[row] += q
+                virtual[i] -= q
+            last = t
+        return lines
 
-    # Walk each part backwards from today's stock, so quantities add up.
-    initial = np.zeros(len(tx), dtype=int)
-    for i, idx in tx.groupby("i").groups.items():
-        stock = int(inventory.at[i, "Quantity"])
-        for row in reversed(idx):
-            delta = tx.at[row, "delta"]
-            if stock - delta < 0:             # receipt bigger than stock after it
-                delta = stock if stock > 0 else -1  # shrink it, or make it a pick
-                tx.at[row, "delta"] = delta
-            stock -= delta
-            initial[row] = stock
-    tx["initial"] = initial
+    # Smallest K that gives at least N_TRANSACTIONS lines, so dates cover the whole year.
+    lo, hi = 1, len(pool)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if len(simulate(mid)) >= N_TRANSACTIONS:
+            hi = mid
+        else:
+            lo = mid + 1
+    tx = pd.DataFrame(simulate(lo)[:N_TRANSACTIONS], columns=["type", "row", "delta", "initial", "code", "ts"])
 
-    return pd.DataFrame({
-        "Part": inventory.loc[tx["i"], "Part"].values,
-        "Part Description": inventory.loc[tx["i"], "Part Description"].values,
-        "Location": inventory.loc[tx["i"], "Location"].values,
-        "Transferred Quantity": tx["delta"].values,
-        "Initial Quantity": tx["initial"].values,
-        "Transaction Code": tx["code"].values,
-        "Date": tx["ts"].values,
+    # Today's stock per shelf location = start stock + all shelf movements.
+    shelf = tx[tx["row"] >= 0]
+    quantity = start + np.bincount(shelf["row"], weights=shelf["delta"], minlength=len(rows)).astype(int)
+
+    part = np.where(tx["row"] >= 0, rows["part"].values[tx["row"].clip(lower=0)], -1 - tx["row"])
+    transactions = pd.DataFrame({
+        "Transaction Type": tx["type"],
+        "Part": parts["Part"].values[part],
+        "Part Description": parts["Part Description"].values[part],
+        "Location": np.where(tx["row"] >= 0, rows["Location"].values[tx["row"].clip(lower=0)], VIRTUAL),
+        "Transferred Quantity": tx["delta"],
+        "Initial Quantity": tx["initial"],
+        "Transaction Code": tx["code"],
+        "Date": tx["ts"],
     })
+    return transactions, quantity
 
 
 def main():
     rng = np.random.default_rng(SEED)
     locations = make_locations()
-    inventory = make_inventory(rng, locations)
-    transactions = make_transactions(rng, inventory)
+    parts, rows = make_inventory(rng, locations)
+    transactions, quantity = make_transactions(rng, parts, rows)
+
+    inventory = pd.DataFrame({
+        "Part": parts["Part"].values[rows["part"]],
+        "Part Description": parts["Part Description"].values[rows["part"]],
+        "Quantity": quantity,
+        "Unit": parts["Unit"].values[rows["part"]],
+        "Location": rows["Location"],
+        "Warehouse": WAREHOUSE,
+    }).sort_values("Location")
 
     OUT.mkdir(exist_ok=True)
     locations.to_excel(OUT / "Locations.xlsx", index=False)
-    inventory.drop(columns=["Part Type", "Vehicle"]).to_excel(OUT / "Inventory.xlsx", index=False)
+    inventory.to_excel(OUT / "Inventory.xlsx", index=False)
     transactions.to_excel(OUT / "transactions.xlsx", index=False)
-    print(f"Locations: {len(locations)}, Inventory: {len(inventory)}, Transactions: {len(transactions)}")
+    print(f"Locations: {len(locations)}, Inventory: {len(inventory)} rows / {len(parts)} parts, "
+          f"Transactions: {len(transactions)}")
 
 
 if __name__ == "__main__":

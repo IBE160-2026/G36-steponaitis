@@ -2,7 +2,7 @@
 title: "Product Brief: Smart Warehouse Planner"
 status: final
 created: 2026-09-27
-updated: 2026-09-27
+updated: 2026-10-13
 ---
 
 # Product Brief: Smart Warehouse Planner
@@ -13,7 +13,7 @@ Smart Warehouse Planner is a web-based planning tool for a spare-parts warehouse
 
 The tool is not connected to the main system and never changes it: it suggests, and people decide. Recommendations can be tried out in a separate planning copy of the warehouse, so the planner can rearrange placement and see the result before anything is physically moved.
 
-The project is the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and is developed on real warehouse data that has been altered for confidentiality. It is also meant for real use: the author and colleagues intend to use it in their own warehouse once the course is complete.
+The project is the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and is developed on synthetic demo data modelled on the real warehouse, since real company data cannot be shared. It is also meant for real use: the author and colleagues intend to use it in their own warehouse once the course is complete.
 
 ## The Problem
 
@@ -36,7 +36,7 @@ A browser-based tool where the warehouse planner can:
 
 ## What Makes This Different
 
-- **Built from inside the problem.** The author works in the warehouse the tool targets and has real (anonymized) data. Requirements come from daily work, not guesswork.
+- **Built from inside the problem.** The author works in the warehouse the tool targets and knows how the real data and process look. Requirements come from daily work, not guesswork.
 - **Pick-together analysis.** Sorting by pick frequency is standard practice. Finding which parts are actually picked together, using transaction numbers, is what a spreadsheet or simple tool cannot do.
 - **Plan before you move.** The planning copy lets the planner test a new placement safely instead of committing labor on a hunch.
 - **Right-sized.** Enterprise warehouse systems with placement optimization are expensive and heavy. This is a focused tool that starts from the Excel files the warehouse already has.
@@ -90,7 +90,7 @@ A browser-based tool where the warehouse planner can:
 
 - **Solo scope.** The MVP has thirteen must-have items for one person in about two months. The plan leaves little slack, so progress should be checked early against the MVP list.
 - **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
-- **Confidentiality.** Real company data must not leave the company. The course version uses altered data.
+- **Confidentiality.** Real company data must not leave the company. The course version uses synthetic demo data.
 - **Distance data uncertain.** Without it, improvement cannot be shown in meters.
 - **Data quality.** The Excel files have not yet been reviewed.
 
