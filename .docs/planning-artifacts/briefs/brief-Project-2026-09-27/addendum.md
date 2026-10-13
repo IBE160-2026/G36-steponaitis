@@ -1,7 +1,7 @@
 ---
 title: "Addendum: Smart Warehouse Planner"
 created: 2026-09-27
-updated: 2026-09-27
+updated: 2026-10-13
 ---
 
 # Addendum: Smart Warehouse Planner
@@ -50,40 +50,39 @@ Originally described as an important part of the project (illustrative figures o
 
 The current MVP and stretch lists live in the brief's **Scope** section, which is the single source of truth.
 
-## Data findings from the demo files (2026-09-30)
+## Demo data (2026-10-13)
 
-Source: `data/sample/` (anonymized). Originals go in `data/private/`, which git ignores.
+The anonymized company files could not be used and were removed. `data/sample/` now holds synthetic data made by `data/generate_demo_data.py` (fixed seed). Originals go in `data/private/`, which git ignores.
 
 ### Files
 
 | File | Rows | Columns |
 | --- | --- | --- |
-| `locations.xlsx` | 3,105 | Name, Warehouse |
-| `inventory.xlsx` | 2,862 (2,711 parts) | Part Description, Part, Total Quantity, ATP, Unit, Part Location, Warehouse |
-| `transactions.xlsx` | 31,326 | Transaction (type), Part, From Location, To Location, Initial/Transacted/Final Quantity, Unit, Warehouse, Transaction No, Transaction Date |
+| `Locations.xlsx` | 2,000 | Location, Aisle, Section, Level, Position, Warehouse |
+| `Inventory.xlsx` | 2,000 | Part, Part Description, Quantity, Unit, Location, Warehouse |
+| `transactions.xlsx` | 20,000 | Part, Part Description, Location, Transferred Quantity, Initial Quantity, Transaction Code, Date |
 
-### How the warehouse process shows up in the data (confirmed by the user)
+### What the demo data contains
+
+- One warehouse, `NO`, with 9 aisles (A–I) of 222–223 locations. Location code `<aisle>-<section>-<level>-<position>`, e.g. `A-01-02-03`.
+- One car part per location: 87 part types for 20 petrol and diesel car models in three engine versions. Part numbers are 7-digit text.
+- **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. 1,830 locations are occupied and 170 hold a zero-stock part, so they count as empty.
+- Negative Transferred Quantity is a pick (18,596 lines), positive is a receipt (1,404 lines). Initial Quantity + Transferred Quantity is the stock after the line; each part's last line ends at its inventory quantity.
+- Transaction Code groups lines: 56% of the 10,499 pick codes hold 2–4 parts. Some part pairs (e.g. oil filter + drain plug washer, brake pads + brake discs for the same car) are built in to be picked together; 136 pairs are picked together 10 or more times.
+- Movement: a few fast movers, most parts move rarely, and 630 parts never move (dead stock).
+- Dates: random weekdays 2025-10-01 to 2026-09-30, 07:00–15:30, same date for all lines on one code. No real seasonality or trends.
+- The demo data has no transaction types and no from/to locations; each line uses the part's own location.
+
+### Findings from the original company export (2026-09-30)
+
+These still apply when real data is imported.
 
 - **Move to Repair** = a part is picked from a shelf and moved to `FLSKRS`. This is the physical pick and the basis for pick frequency.
 - **Return to Stock** = a picked part was not consumed and goes back (`FLSKRS` → `RETURN-SKRS`, then **Putaway** to a shelf).
 - **Issue Part** = the part is consumed (`FLSKRS` → `FLSKRS`). It shows the exact consumption.
 - **FLSKRS** is a virtual location.
-- **Pick-together analysis uses Issue Part**, not Move to Repair: Move to Repair almost always has one part per transaction number (100 of ~12,000 have two), while 54% of Issue Part transaction numbers hold several parts.
-
-### Dates
-
-The original export has dates; they were removed from the demo files. `data/add_demo_dates.py` adds a random **Transaction Date** (weekdays 2025-10-01 to 2026-09-30, 07:00–15:30, same date for all lines on one transaction number, fixed seed). Demo dates are evenly spread, so they show no real seasonality or trends.
-
-### Data the import must handle
-
-- Part numbers and location codes come in several patterns by design (e.g. `2007060` and `1008614-00`; `A-01-01-01-A1`, `A-07-02-00-A`, `06-01-30-D1`). Treat part numbers as text; do not assume a single location format.
-- 135 parts are stored in more than one location.
-- 7 inventory rows repeat the same part in the same location; merge them on import.
-- **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. Locations holding only zero-stock parts count as empty, and several zero-stock parts can share one location. With the demo data, 2,015 locations are occupied and 1,090 empty (809 with no parts, 281 with only zero-stock parts).
-- 9,873 lines have Transaction No `0` (receiving and putaway); they are not groupable.
-- Volume for analysis: 9,794 shelf picks covering 1,113 parts; 126 part pairs are used together 10 or more times.
-
-### Demo adjustments
-
-- **Parts without a description removed.** 386 parts appeared in the transactions but not in the inventory, so they had no description or location. All 8,776 of their transaction lines were removed; every part in the transactions is now in the inventory.
+- **Pick-together analysis uses Issue Part**, not Move to Repair: Move to Repair almost always has one part per transaction number, while about half of Issue Part transaction numbers hold several parts.
+- Part numbers and location codes come in several patterns (e.g. `2007060` and `1008614-00`; `A-01-01-01-A1`, `A-07-02-00-A`, `06-01-30-D1`). Treat part numbers as text; do not assume a single location format.
+- Some parts are stored in more than one location, and some inventory rows repeat the same part in the same location; merge them on import.
+- Receiving and putaway lines have Transaction No `0`; they are not groupable.
 - **No capacity or size data** exists and none can be provided. Occupancy means occupied or empty only, and recommendations cannot check whether a part fits a location; the planner judges that.
