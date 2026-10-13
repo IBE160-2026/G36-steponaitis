@@ -31,8 +31,8 @@ A browser-based tool where the warehouse planner can:
 3. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
 4. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
 5. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
-6. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks which zones or aisles count as the best locations, and recommendations are made against that. If distance data between locations can be provided, it is used as well.
-7. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best zones).
+6. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
+7. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
 
 ## What Makes This Different
 
@@ -54,6 +54,7 @@ A browser-based tool where the warehouse planner can:
 - Two parts that appear together on at least 5 Issue Part transactions in the last 12 months are shown as a pick group; a pair with 4 is not.
 - Importing a file with a missing required column gives a clear error message naming the column, and no data from that file is saved.
 - A location holding no part with stock above zero is shown as empty.
+- A location in a marked aisle, in a marked level, or marked on its own counts as a best location; all other locations do not.
 - Changes in the planning copy do not change the imported inventory.
 - Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only suggests locations that are empty.
 - Running the full core flow (import → classify → pick groups → recommendations → planning copy) on the demo data in `data/sample/` works without errors, following the README.
@@ -75,10 +76,11 @@ These are the first versions of the rules to implement and test against. The thr
 - **Movement classes.** By picks per part in the period: fast-moving 24 or more (about two a month), medium-moving 6–23, slow-moving 1–5, dead stock 0. With the demo data this gives about 80 fast, 250 medium, 580 slow and 640 dead-stock parts.
 - **Pick groups.** Issue Part lines that share a transaction number belong to the same job. Two parts form a pick group when they appear on the same job at least 5 times in the period (about 130 pairs in the demo data). Transaction number `0` is never grouped.
 - **Occupancy.** A location is occupied when it holds at least one part with stock above zero; otherwise it is empty.
-- **Best zones.** The planner marks whole aisles, or levels within an aisle, as best zones.
+- **Best locations.** The planner can mark three things as best: whole aisles (e.g. aisle A), levels (e.g. level 1 in all aisles, or level 2 in aisle C) and single locations (e.g. `D-04-01-02`). A location counts as best when it is marked in any of these ways. Marks can be removed again. Best locations come only from the planner's marks, not from distance or walk path.
+- **Walk path.** Each location has a Walk Path value: 0 at the first location in aisle A and 10 more for each next location along the walk. The walking distance between two locations is the difference between their values.
 - **Recommendations**, applied in this order and only to empty locations:
-  1. A fast-moving part outside the best zones gets a suggested empty location in a best zone. Parts with the most picks go first.
-  2. A slow-moving or dead-stock part in a best zone gets a suggested empty location outside the best zones, to free space for rule 1.
+  1. A fast-moving part outside the best locations gets a suggested empty best location. Parts with the most picks go first, and empty best locations are offered in location-code order.
+  2. A slow-moving or dead-stock part in a best location gets a suggested empty location outside the best locations, to free space for rule 1.
   3. When two parts in a pick group are in different aisles, the part with fewer picks gets a suggested empty location in the aisle of the other part.
 
   A part gets at most one recommendation. If no empty location fits, the part is listed as "no space" instead.
@@ -96,7 +98,7 @@ The core flow is: import → classify → find pick groups → get recommendatio
 - Search for parts and locations
 - Transaction analysis and movement classification (fast, medium, slow, dead stock)
 - Pick-together analysis (data analysis of shared transaction numbers)
-- Marking which aisles or levels are the best zones
+- Marking the best locations: whole aisles, levels and single locations
 - Recommended part locations, using the rules above
 - Planning copy of the warehouse, with a before/after table per aisle
 
@@ -112,11 +114,12 @@ The core flow is: import → classify → find pick groups → get recommendatio
 - Drag-and-drop part placement
 - Whole-warehouse optimization
 - QR/barcode scanning
-- Distance-based recommendations and estimated walking-distance reduction before vs. after (only if distance data between locations can be provided)
+- Estimated walking-distance reduction before vs. after, using the walk path
 
 **Out**
 
 - AI-generated explanations for recommendations
+- Distance-based recommendations: recommendations use only movement class, pick groups and the planner's best-location marks
 - Any connection to the company's main system (no live sync, no writing back)
 
 ## Constraints and Risks
@@ -124,13 +127,12 @@ The core flow is: import → classify → find pick groups → get recommendatio
 - **Solo scope.** One person in about two months. The core flow is finished and tested before any stage 2 or "if time allows" item is started, and progress is checked early against the core list.
 - **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
 - **Confidentiality.** Real company data must not leave the company and is never committed to the repo, which is public. The course version uses only synthetic demo data made by `data/generate_demo_data.py`. The earlier anonymized company files are no longer used and were removed from the git history before they were ever pushed.
-- **Distance data uncertain.** Without it, improvement cannot be shown in meters.
+- **Walk path is not meters.** The walk path gives the order of locations along the walk in steps of 10, not measured distance, so walking-distance estimates are relative until real distances are measured.
 - **Real data differs from the demo data.** The demo data follows the format and process of the real export (see the addendum), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data when the tool is used at work after the course.
 
 ## Open Questions
 
-- How does the planner define the best locations: by aisle, zone, shelf height, or something else?
-- Can distance data between locations be provided, and in what form?
+- Does the walk path order (aisle by aisle, location by location) match how people actually walk in the warehouse?
 - Who exactly will use the tool at work?
 
 ## Vision

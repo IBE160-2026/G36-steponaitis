@@ -58,13 +58,14 @@ The anonymized company files are no longer used. They were removed from the repo
 
 | File | Rows | Columns |
 | --- | --- | --- |
-| `Locations.xlsx` | 2,000 | Location, Aisle, Section, Level, Position, Warehouse |
+| `Locations.xlsx` | 2,000 | Location, Walk Path, Aisle, Section, Level, Position, Warehouse |
 | `Inventory.xlsx` | 1,625 (1,545 parts) | Part, Part Description, Quantity, Unit, Location, Warehouse |
 | `transactions.xlsx` | 20,000 | Transaction Type, Part, Part Description, Location, Transferred Quantity, Initial Quantity, Transaction Code, Date |
 
 ### What the demo data contains
 
 - One warehouse, `NO`, with 9 aisles (A–I) of 222–223 locations. Location code `<aisle>-<section>-<level>-<position>`, e.g. `A-01-02-03`.
+- **Walk Path** (user decision, 2026-10-13): 0 at `A-01-01-01`, then 10 more for each next location in file order (aisle A 0–2,220 … aisle I 17,780–19,990). It replaces the missing distance data.
 - Car parts: 87 part types for 20 petrol and diesel car models in three engine versions. Part numbers are 7-digit text. 80 parts are stored in two locations.
 - **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. 1,584 locations are occupied and 416 empty (375 with no part, 41 with only a zero-stock part). Occupancy varies by aisle, from 65% to 87%.
 - Transaction types follow the real process: **Move to Repair** (shelf pick to `FLSKRS`, 9,635 lines, one part per code), **Issue Part** (used, at `FLSKRS`, 8,867 lines grouped by job code), **Return to Stock** (back to the same shelf, 953 lines) and **Receipt** (goods received, 545 lines, code `0`). The real two-step return via `RETURN-SKRS` and Putaway is simplified to one line.

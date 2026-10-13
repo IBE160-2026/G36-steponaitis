@@ -8,6 +8,8 @@ Creates three Excel files:
 
 Rules:
 - Location code: <aisle>-<section>-<level>-<position>, e.g. A-01-02-03.
+- Walk Path: 0 at the first location in aisle A, then 10 more for each next
+  location in file order (A-01-01-01 = 0, A-01-01-02 = 10, ...).
 - Aisles are 72-95% full; the other locations are empty and not in Inventory.xlsx.
 - Most parts have one location; 80 parts are stored in two.
 - Transaction types follow the real warehouse process:
@@ -107,7 +109,11 @@ def make_locations():
                 "Aisle": aisle, "Section": s, "Level": lv, "Position": p,
                 "Warehouse": WAREHOUSE,
             })
-    return pd.DataFrame(rows)
+    locations = pd.DataFrame(rows)
+    # Walk path: the order of the walk through the warehouse, from the first
+    # location in aisle A (0) and 10 more for each next location.
+    locations.insert(1, "Walk Path", np.arange(len(locations)) * 10)
+    return locations
 
 
 def make_inventory(rng, locations):
