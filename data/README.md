@@ -1,7 +1,7 @@
 # Data
 
 - `sample/` — synthetic demo Excel files used during the course. These are committed to the repo.
-- `private/` — original company files. This folder is ignored by git and must never be committed.
+- `private/` — ignored by git. Real company data must never be committed, and the course project does not use it.
 
 ## Demo data
 

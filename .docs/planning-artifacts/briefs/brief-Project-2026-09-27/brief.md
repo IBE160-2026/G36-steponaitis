@@ -90,13 +90,12 @@ A browser-based tool where the warehouse planner can:
 
 - **Solo scope.** The MVP has thirteen must-have items for one person in about two months. The plan leaves little slack, so progress should be checked early against the MVP list.
 - **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
-- **Confidentiality.** Real company data must not leave the company. The course version uses synthetic demo data.
+- **Confidentiality.** Real company data must not leave the company and is never committed to the repo, which is public. The course version uses only synthetic demo data made by `data/generate_demo_data.py`. The earlier anonymized company files are no longer used and were removed from the git history before they were ever pushed.
 - **Distance data uncertain.** Without it, improvement cannot be shown in meters.
-- **Data quality.** The Excel files have not yet been reviewed.
+- **Real data differs from the demo data.** The demo data follows the format and process of the real export (see the addendum), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data when the tool is used at work after the course.
 
 ## Open Questions
 
-- What exactly do the Excel files contain (columns, time span, volume)? To be reviewed when shared.
 - How does the planner define the best locations: by aisle, zone, shelf height, or something else?
 - Can distance data between locations be provided, and in what form?
 - Who exactly will use the tool at work?

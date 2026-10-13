@@ -52,7 +52,7 @@ The current MVP and stretch lists live in the brief's **Scope** section, which i
 
 ## Demo data (2026-10-13)
 
-The anonymized company files could not be used and were removed. `data/sample/` now holds synthetic data made by `data/generate_demo_data.py` (fixed seed). Originals go in `data/private/`, which git ignores.
+The anonymized company files are no longer used. They were removed from the repo and its git history on 2026-10-13 (they had never been pushed). `data/sample/` holds only synthetic data made by `data/generate_demo_data.py` (fixed seed). Real company data is never committed; `data/private/` is ignored by git.
 
 ### Files
 
