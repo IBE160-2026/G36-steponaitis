@@ -8,6 +8,62 @@ updated: 2026-10-14
 
 Detail captured during the brief conversation that belongs in the PRD rather than the brief. The product is a planning tool, not connected to the company's main system; locations, moves and labels operate on imported data.
 
+On 2026-10-14 the brief was rewritten to follow the standard product-brief template (Executive Summary, Problem, Solution, Differentiators, Users, Success Criteria, Scope, Vision). The detail that no longer fits there — rules, the full test criteria, constraints and risks, open questions and stage 2 feature detail — was moved here unchanged. It is still binding for the PRD and implementation.
+
+## Rules
+
+These are the first versions of the rules to implement and test against. The thresholds are settings, so they can be tuned later without changing the logic.
+
+- **Period.** Analysis uses the last 12 months before the newest transaction date in the import.
+- **Pick.** One Move to Repair line is one pick (a shelf pick). Return to Stock, Issue Part and Receipt lines are not picks.
+- **Movement classes.** By picks per part in the period: fast-moving 24 or more (about two a month), medium-moving 6–23, slow-moving 1–5, dead stock 0. With the demo data this gives about 80 fast, 250 medium, 580 slow and 640 dead-stock parts.
+- **Pick groups.** Issue Part lines that share a transaction number belong to the same job. Two parts form a pick group when they appear on the same job at least 5 times in the period (about 130 pairs in the demo data). Transaction number `0` is never grouped.
+- **Occupancy.** A location is occupied when it holds at least one part with stock above zero; otherwise it is empty.
+- **Best locations.** The planner can mark three things as best: whole aisles (e.g. aisle A), levels (e.g. level 1 in all aisles, or level 2 in aisle C) and single locations (e.g. `D-04-01-02`). A location counts as best when it is marked in any of these ways. Marks can be removed again. Best locations come only from the planner's marks, not from distance or walk path.
+- **Walk path.** Each location has a Walk Path value: 0 at the first location in aisle A and 10 more for each next location along the walk. The walking distance between two locations is the difference between their values.
+- **Current location.** A part stored in more than one location uses the location with the most stock as its current location.
+- **Recommendations**, applied in this order and only to empty locations:
+  1. A fast-moving part outside the best locations gets a suggested empty best location. Parts with the most picks go first, and empty best locations are offered in location-code order.
+  2. A slow-moving or dead-stock part in a best location gets a suggested empty location outside the best locations, offered in location-code order. This frees best locations for rule 1 once the moves are applied in the planning copy and the recommendations are run again.
+  3. When two parts in a pick group are in different aisles, the part with fewer picks gets a suggested empty location in the aisle of the other part, offered in location-code order. Pairs with the most shared jobs go first, ties by part number. Rule 3 never moves a part out of a best location.
+
+  A part gets at most one recommendation, and each empty location is suggested to at most one part. If no empty location fits, the part is listed as "no space" instead. Parts with the same number of picks are ordered by part number. Recommendations do not use categories; if one moves a part into an aisle meant for another category, the category check (stage 2) lists it.
+- **Categories (stage 2).** Categories come only from keywords in the part description, never from part numbers, because part numbers change over time. Parts share common keywords such as filter, rotor and oil. The planner sets keyword rules that map a keyword to a category (e.g. "filter" → Filters). Keywords match whole words, ignoring upper and lower case, so "oil" matches "Engine oil" but not "Coil spring". The planner sets the order of the rules, and a part gets the category of the first rule that matches (so "Oil filter" is a filter only if the "filter" rule comes before the "oil" rule); a part with no match has no category. The planner assigns one or more categories to each aisle. The category check lists every part whose category is not assigned to its aisle. Parts without a category and aisles without categories are not checked. The imported files have no categories and no keyword list exists yet. A starter keyword list for the demo data is made in stage 2: AI (Claude Code, during development) drafts it from the part descriptions, and the planner checks it. The tool itself applies the keyword rules without AI, so the check gives the same result every time and can be tested.
+- **Test dataset.** Before implementation, a small hand-made dataset (about 20 parts) is written with the expected class, pick groups and recommendations for each part, and used as the answer key in automated tests. It covers the edge cases: a tie in picks, a part stored in two locations, a part in several pick groups, and a part with no empty location that fits ("no space").
+
+## Testable success criteria (full list)
+
+Checked with automated tests on the test dataset above:
+
+- A part with 24 or more picks in the last 12 months is classified as fast-moving, 6–23 as medium-moving, 1–5 as slow-moving, and 0 as dead stock.
+- Two parts that appear together on at least 5 Issue Part transactions in the last 12 months are shown as a pick group; a pair with 4 is not.
+- Importing a file with a missing required column gives a clear error message naming the column, and no data from that file is saved.
+- A location holding no part with stock above zero is shown as empty.
+- A location in a marked aisle, in a marked level, or marked on its own counts as a best location; all other locations do not.
+- Changes in the planning copy do not change the imported inventory.
+- Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only suggests locations that are empty, each to at most one part.
+- Running the full core flow (import → classify → pick groups → recommendations → planning copy) on the demo data in `data/sample/` works without errors, following the README.
+
+## Solution detail
+
+- **Import** covers locations, inventory and transaction history (part number, quantity, transaction number and related fields).
+- **Planning copy result** is shown as a before/after table per aisle: which parts move in and out, and how many fast movers sit in the best locations.
+- **Login (stage 2).** The planner creates a user, logs in and lands on a dashboard. What the dashboard shows is decided later.
+- **Warehouse view (stage 2).** All aisles with their locations, and the occupancy of the warehouse and each aisle. Occupied locations are red and empty ones green. Each location also has a text label (occupied or empty) and a tooltip with the location code and the part stored there, so the view does not rely on color alone.
+
+## Constraints and Risks
+
+- **Solo scope.** One person in about two months. The core flow is finished and tested before any stage 2 or "if time allows" item is started, and progress is checked early against the core list.
+- **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
+- **Confidentiality.** Real company data must not leave the company and is never committed to the repo, which is public. The course version uses only synthetic demo data made by `data/generate_demo_data.py`. The earlier anonymized company files are no longer used and were removed from the git history before they were ever pushed.
+- **Walk path is not meters.** The walk path gives the order of locations along the walk in steps of 10, not measured distance, so walking-distance estimates are relative until real distances are measured.
+- **Real data differs from the demo data.** The demo data follows the format and process of the real export (see below), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data before it is used with real files.
+
+## Open Questions
+
+- Does the walk path order (aisle by aisle, location by location) match how people actually walk in the warehouse?
+- What should the dashboard show after login?
+
 ## Feature detail for the PRD (from user notes, 2026-09-27)
 
 ### Core website functionality
