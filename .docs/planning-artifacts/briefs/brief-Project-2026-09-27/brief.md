@@ -2,7 +2,7 @@
 title: "Product Brief: Smart Warehouse Planner"
 status: final
 created: 2026-09-27
-updated: 2026-10-13
+updated: 2026-10-14
 ---
 
 # Product Brief: Smart Warehouse Planner
@@ -28,11 +28,12 @@ A browser-based tool where the warehouse planner can:
 
 1. **Import data** — CSV/Excel files for locations, inventory, and transaction history (part number, quantity, transaction number and related fields).
 2. **Manage the warehouse data** — view parts and locations, see which part is in each location, create and edit locations, move parts, search, and (stage 2) track warehouse and aisle occupancy.
-3. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
-4. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
-5. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
-6. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
-7. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
+3. **See the whole warehouse (stage 2)** — a visual view of the warehouse with all aisles and their locations. Occupied locations are marked in red and empty locations in green, so the planner sees the whole picture while planning.
+4. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
+5. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
+6. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
+7. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
+8. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
 
 ## What Makes This Different
 
@@ -105,11 +106,11 @@ The core flow is: import → classify → find pick groups → get recommendatio
 
 - Basic warehouse dashboard
 - Warehouse and aisle occupancy tracking
+- Warehouse view: all aisles with their locations, occupied in red and empty in green
 - Label generation and printing, with QR codes or barcodes for locations
 
 **If time allows**
 
-- Warehouse map/layout view
 - Drag-and-drop part placement
 - Whole-warehouse optimization
 - QR/barcode scanning
@@ -136,4 +137,4 @@ The core flow is: import → classify → find pick groups → get recommendatio
 
 ## Vision
 
-If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. Later steps could include a warehouse map, scanning with handheld devices, a distance model that shows savings in meters, and use in other warehouses in the company.
+If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. Later steps could include scanning with handheld devices, a distance model that shows savings in meters, and use in other warehouses in the company.
