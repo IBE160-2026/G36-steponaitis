@@ -1,7 +1,7 @@
 ---
 title: "Addendum: Smart Warehouse Planner"
 created: 2026-09-27
-updated: 2026-10-13
+updated: 2026-10-14
 ---
 
 # Addendum: Smart Warehouse Planner
@@ -19,8 +19,8 @@ Detail captured during the brief conversation that belongs in the PRD rather tha
 - Create, edit and manage locations
 - Move parts between locations
 - Search for parts and locations
-- Generate and print warehouse labels
-- Generate QR codes or barcodes for locations
+- Generate and print warehouse labels (stage 2)
+- Generate QR codes or barcodes for locations (stage 2)
 
 ### Movement classification
 
@@ -33,13 +33,13 @@ Historical transactions determine how often each part is picked. Parts are class
 
 The classification drives location recommendations.
 
-### AI: pick-together analysis (moved into MVP, 2026-09-27)
+### Pick-together analysis (moved into MVP, 2026-09-27)
 
-Parts that often appear on the same transaction number (for example, an air filter and a cabin filter) are recommended to be stored close together. This is the only AI feature in the product.
+Parts that often appear on the same transaction number (for example, an air filter and a cabin filter) are recommended to be stored close together. It is data analysis of shared transaction numbers, not a language model (renamed from "AI" after teacher feedback, 2026-10-06).
 
-### Walking-distance measurement (stretch, conditional)
+### Walking-distance measurement (if time allows)
 
-Originally described as an important part of the project (illustrative figures only: 26,400 → 20,100 m/month, −23.9%). First dropped because no distance model between locations exists; later returned as a stretch goal, available only if distance data between locations can be provided. In the MVP, "better location" is defined by the planner marking the best zones or aisles.
+Originally described as an important part of the project (illustrative figures only: 26,400 → 20,100 m/month, −23.9%). First dropped because no distance model between locations exists. Since 2026-10-13 the locations have a Walk Path value, so a before/after walking-distance estimate is an "if time allows" item, in relative steps rather than meters. Recommendations never use distance: best locations come only from the planner's marks on aisles, levels and single locations.
 
 ### Dropped (2026-09-27)
 

@@ -20,21 +20,28 @@ The project is the solo semester project for IBE160 *Programmering med KI* (Høg
 - **Placement is not based on usage.** Parts are placed where space was free when they arrived and are rarely re-evaluated. Fast movers can sit in poor locations while slow and dead stock occupy good ones.
 - **Parts used together are stored apart.** Parts that appear on the same transaction can be far from each other, so one pick means several trips.
 - **The overview is scattered.** Locations, inventory and transaction history live in separate Excel files. Answering "what is in this aisle?", "how full is it?" or "which parts barely move?" takes manual work.
+- **Parts end up in the wrong aisle.** Parts are put away in aisles meant for other kinds of parts, so the aisle no longer tells where to look.
 - **Changing placement is risky without a plan.** Moving parts costs labor, and there is no easy way to try a new arrangement before doing it for real.
 
 ## The Solution
 
 A browser-based tool where the warehouse planner can:
 
+**Core flow**
+
 1. **Import data** — CSV/Excel files for locations, inventory, and transaction history (part number, quantity, transaction number and related fields).
-2. **Manage the warehouse data** — view parts and locations, see which part is in each location, create and edit locations, move parts, search, and (stage 2) track warehouse and aisle occupancy.
-3. **See the whole warehouse (stage 2)** — a visual view of the warehouse with all aisles and their locations. Occupied locations are marked in red and empty locations in green, so the planner sees the whole picture while planning.
-4. **Check categories (stage 2)** — parts get a category from keywords in their description, and the planner sets which categories belong in each aisle. A category check lists parts placed in the wrong aisle, which helps keep the warehouse well organized.
-5. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
-6. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
-7. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
-8. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
-9. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
+2. **Manage the warehouse data** — view parts and locations, see which part is in each location, create and edit locations, move parts, and search.
+3. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
+4. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
+5. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
+6. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
+
+**Stage 2**
+
+7. **Log in** — the planner creates a user and logs in, and lands on a dashboard. What the dashboard shows is decided later.
+8. **See the whole warehouse** — a visual view of the warehouse with all aisles and their locations, and the occupancy of the warehouse and each aisle. Occupied locations are marked in red and empty locations in green. Each location also has a text label (occupied or empty) and a tooltip with the location code and the part stored there, so the view does not rely on color alone. It helps the planner see the whole picture while planning.
+9. **Check categories** — parts get a category from keywords in their description, and the planner sets which categories belong in each aisle. A category check lists parts placed in the wrong aisle, which helps keep the warehouse well organized.
+10. **Label locations** — generate and print labels with QR codes or barcodes.
 
 ## What Makes This Different
 
@@ -58,7 +65,7 @@ A browser-based tool where the warehouse planner can:
 - A location holding no part with stock above zero is shown as empty.
 - A location in a marked aisle, in a marked level, or marked on its own counts as a best location; all other locations do not.
 - Changes in the planning copy do not change the imported inventory.
-- Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only suggests locations that are empty.
+- Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only suggests locations that are empty, each to at most one part.
 - Running the full core flow (import → classify → pick groups → recommendations → planning copy) on the demo data in `data/sample/` works without errors, following the README.
 
 **Judged by the author:**
@@ -79,13 +86,14 @@ These are the first versions of the rules to implement and test against. The thr
 - **Occupancy.** A location is occupied when it holds at least one part with stock above zero; otherwise it is empty.
 - **Best locations.** The planner can mark three things as best: whole aisles (e.g. aisle A), levels (e.g. level 1 in all aisles, or level 2 in aisle C) and single locations (e.g. `D-04-01-02`). A location counts as best when it is marked in any of these ways. Marks can be removed again. Best locations come only from the planner's marks, not from distance or walk path.
 - **Walk path.** Each location has a Walk Path value: 0 at the first location in aisle A and 10 more for each next location along the walk. The walking distance between two locations is the difference between their values.
+- **Current location.** A part stored in more than one location uses the location with the most stock as its current location.
 - **Recommendations**, applied in this order and only to empty locations:
   1. A fast-moving part outside the best locations gets a suggested empty best location. Parts with the most picks go first, and empty best locations are offered in location-code order.
   2. A slow-moving or dead-stock part in a best location gets a suggested empty location outside the best locations, to free space for rule 1.
-  3. When two parts in a pick group are in different aisles, the part with fewer picks gets a suggested empty location in the aisle of the other part.
+  3. When two parts in a pick group are in different aisles, the part with fewer picks gets a suggested empty location in the aisle of the other part, offered in location-code order.
 
-  A part gets at most one recommendation. If no empty location fits, the part is listed as "no space" instead.
-- **Categories (stage 2).** The planner sets keyword rules that map words in the part description to a category (e.g. "filter" → Filters). A part gets the category of the first rule that matches; a part with no match has no category. The planner assigns one or more categories to each aisle. The category check lists every part whose category is not assigned to its aisle. Parts without a category and aisles without categories are not checked.
+  A part gets at most one recommendation, and each empty location is suggested to at most one part. If no empty location fits, the part is listed as "no space" instead. Parts with the same number of picks are ordered by part number. Recommendations do not use categories; if one moves a part into an aisle meant for another category, the category check (stage 2) lists it.
+- **Categories (stage 2).** Categories come only from keywords in the part description, never from part numbers, because part numbers change over time. Parts share common keywords such as filter, rotor and oil. The planner sets keyword rules that map a keyword to a category (e.g. "filter" → Filters). A part gets the category of the first rule that matches; a part with no match has no category. The planner assigns one or more categories to each aisle. The category check lists every part whose category is not assigned to its aisle. Parts without a category and aisles without categories are not checked. The imported files have no categories and no keyword list exists yet. A starter keyword list for the demo data is made in stage 2: AI (Claude Code, during development) drafts it from the part descriptions, and the planner checks it. The tool itself applies the keyword rules without AI, so the check gives the same result every time and can be tested.
 - **Test dataset.** Before implementation, a small hand-made dataset (about 20 parts) is written with the expected class, pick groups and recommendations for each part, and used as the answer key in automated tests.
 
 ## Scope
@@ -106,9 +114,8 @@ The core flow is: import → classify → find pick groups → get recommendatio
 
 **Stage 2 (after the core flow is finished and tested)**
 
-- Basic warehouse dashboard
-- Warehouse and aisle occupancy tracking
-- Warehouse view: all aisles with their locations, occupied in red and empty in green
+- User account and login, with a dashboard after login (contents decided later)
+- Warehouse view: all aisles with their locations and the occupancy of the warehouse and each aisle; occupied in red and empty in green, with a text label and a tooltip
 - Category check: categories from description keywords, categories per aisle, list of parts in the wrong aisle
 - Label generation and printing, with QR codes or barcodes for locations
 
@@ -131,12 +138,12 @@ The core flow is: import → classify → find pick groups → get recommendatio
 - **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
 - **Confidentiality.** Real company data must not leave the company and is never committed to the repo, which is public. The course version uses only synthetic demo data made by `data/generate_demo_data.py`. The earlier anonymized company files are no longer used and were removed from the git history before they were ever pushed.
 - **Walk path is not meters.** The walk path gives the order of locations along the walk in steps of 10, not measured distance, so walking-distance estimates are relative until real distances are measured.
-- **Real data differs from the demo data.** The demo data follows the format and process of the real export (see the addendum), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data when the tool is used at work after the course.
+- **Real data differs from the demo data.** The demo data follows the format and process of the real export (see the addendum), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data before it is used with real files.
 
 ## Open Questions
 
 - Does the walk path order (aisle by aisle, location by location) match how people actually walk in the warehouse?
-- Who exactly will use the tool at work?
+- What should the dashboard show after login?
 
 ## Vision
 
