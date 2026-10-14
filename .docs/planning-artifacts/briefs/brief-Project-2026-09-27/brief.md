@@ -29,11 +29,12 @@ A browser-based tool where the warehouse planner can:
 1. **Import data** — CSV/Excel files for locations, inventory, and transaction history (part number, quantity, transaction number and related fields).
 2. **Manage the warehouse data** — view parts and locations, see which part is in each location, create and edit locations, move parts, search, and (stage 2) track warehouse and aisle occupancy.
 3. **See the whole warehouse (stage 2)** — a visual view of the warehouse with all aisles and their locations. Occupied locations are marked in red and empty locations in green, so the planner sees the whole picture while planning.
-4. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
-5. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
-6. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
-7. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
-8. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
+4. **Check categories (stage 2)** — parts get a category from keywords in their description, and the planner sets which categories belong in each aisle. A category check lists parts placed in the wrong aisle, which helps keep the warehouse well organized.
+5. **Label locations (stage 2)** — generate and print labels with QR codes or barcodes.
+6. **Understand movement** — every part is classified from its transaction history as fast-moving, medium-moving, slow-moving, or very low / dead stock.
+7. **Find parts that belong together (data analysis)** — the system analyzes which parts are frequently picked on the same transaction number (for example, an air filter and a cabin filter) and flags them as groups.
+8. **Get location recommendations** — based on movement class and pick-together groups, the tool suggests where parts should be stored. The planner marks the best locations, as whole aisles, levels or single locations, and recommendations are made against that. Best locations come only from these marks, not from distance.
+9. **Plan in a copy** — create a separate planning copy of the warehouse, apply or adjust recommendations there, and review the new arrangement before moving parts physically. The result is shown as a before/after table per aisle (which parts move in and out, and how many fast movers sit in the best locations).
 
 ## What Makes This Different
 
@@ -84,6 +85,7 @@ These are the first versions of the rules to implement and test against. The thr
   3. When two parts in a pick group are in different aisles, the part with fewer picks gets a suggested empty location in the aisle of the other part.
 
   A part gets at most one recommendation. If no empty location fits, the part is listed as "no space" instead.
+- **Categories (stage 2).** The planner sets keyword rules that map words in the part description to a category (e.g. "filter" → Filters). A part gets the category of the first rule that matches; a part with no match has no category. The planner assigns one or more categories to each aisle. The category check lists every part whose category is not assigned to its aisle. Parts without a category and aisles without categories are not checked.
 - **Test dataset.** Before implementation, a small hand-made dataset (about 20 parts) is written with the expected class, pick groups and recommendations for each part, and used as the answer key in automated tests.
 
 ## Scope
@@ -107,6 +109,7 @@ The core flow is: import → classify → find pick groups → get recommendatio
 - Basic warehouse dashboard
 - Warehouse and aisle occupancy tracking
 - Warehouse view: all aisles with their locations, occupied in red and empty in green
+- Category check: categories from description keywords, categories per aisle, list of parts in the wrong aisle
 - Label generation and printing, with QR codes or barcodes for locations
 
 **If time allows**
