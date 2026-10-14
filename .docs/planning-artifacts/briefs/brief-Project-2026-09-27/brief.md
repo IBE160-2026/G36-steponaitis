@@ -13,7 +13,7 @@ Smart Warehouse Planner is a web-based planning tool for a spare-parts warehouse
 
 The tool is not connected to the main system and never changes it: it suggests, and people decide. Recommendations can be tried out in a separate planning copy of the warehouse, so the planner can rearrange placement and see the result before anything is physically moved.
 
-The project is the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and is developed on synthetic demo data modelled on the real warehouse, since real company data cannot be shared. It is also meant for real use: the author and colleagues intend to use it in their own warehouse once the course is complete.
+The project is the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and is developed on synthetic demo data.
 
 ## The Problem
 
@@ -36,7 +36,7 @@ A browser-based tool where the warehouse planner can:
 
 ## What Makes This Different
 
-- **Built from inside the problem.** The author works in the warehouse the tool targets and knows how the real data and process look. Requirements come from daily work, not guesswork.
+- **Built from inside the problem.** The author works in the warehouse the tool targets and knows how the real data and process look. Requirements come from daily work.
 - **Pick-together analysis.** Sorting by pick frequency is standard practice. Finding which parts are actually picked together, using transaction numbers, is what a spreadsheet or simple tool cannot do.
 - **Plan before you move.** The planning copy lets the planner test a new placement safely instead of committing labor on a hunch.
 - **Right-sized.** Enterprise warehouse systems with placement optimization are expensive and heavy. This is a focused tool that starts from the Excel files the warehouse already has.
@@ -63,7 +63,6 @@ A browser-based tool where the warehouse planner can:
 
 - **Classification that matches reality.** The movement classes agree with the author's knowledge of which parts actually move.
 - **Pick groups that make sense.** The top groups are ones the author recognizes as genuinely picked together, like the air filter and cabin filter example.
-- **Used after the course.** The author and colleagues use the tool on real company data and physically move parts based on its recommendations.
 
 **Course:** the project, including documentation of AI-assisted development, testing and quality assurance, satisfies IBE160.
 
