@@ -20,8 +20,7 @@ Alle endringer er ukommittert (bortsett fra denne loggen).
 - Lukket punktet om at briefen ikke var oppdatert med konkurrentfunnene (se `issues.md`).
 
 ### Åpne punkter
-- Konkurranserapporten er tapt; briefens formuleringer bygger på sammendraget i loggen og må sjekkes på nytt før de siteres. Avgjør om research kjøres på nytt (og commit resultatet med en gang).
-- Reell frist er ukjent. Briefen antok ca. to måneder fra 2026-09-27; PRD, arkitektur, epics og all kode gjenstår.
+- Lukket senere samme økt: brukeren sa at konkurranserapporten og fristen ikke er viktige. Seksjonen «Competitor research» og spørsmålet om frist er fjernet fra addendumet, og alle rapportrelaterte punkter i `issues.md` er lukket. Briefens omskrevne «What Makes This Different» nevner fortsatt Optioryx, FORTNA og Infios uten kilde i repoet.
 - Testdatasettet med fasit (ca. 20 deler) er ikke laget; lærertilbakemeldingen krever det før implementering.
 - Beslutninger tatt som anbefalt standard uten eksplisitt svar: «create/edit locations» droppet; ny plan fra en annen plans resultat er utenfor omfang; sletting bekreftes (arkivering i stedet avgjøres i PRD).
 - Hvordan brukere opprettes og lagres i trinn 2 (planlegger oppretter eller seedes) er bare satt som minimum og må konkretiseres i PRD/arkitektur.
