@@ -8,7 +8,7 @@ updated: 2026-11-01
 
 Detail captured during the brief conversation that belongs in the PRD rather than the brief. The product is a planning tool, not connected to the company's main system; locations, moves and labels operate on imported data.
 
-On 2026-10-14 the brief was rewritten to follow the standard product-brief template (Executive Summary, Problem, Solution, Differentiators, Users, Success Criteria, Scope, Vision). The detail that no longer fits there — rules, the full test criteria, constraints and risks, open questions and stage 2 feature detail — was moved here unchanged. It is still binding for the PRD and implementation.
+On 2026-10-14 the brief was rewritten to follow the standard product-brief template (Executive Summary, Problem, Solution, Differentiators, Users, Success Criteria, Scope, Vision). The detail that no longer fits there — rules, the full test criteria, constraints and risks, open questions and stage 2 feature detail — was moved here (with small edits since). It is still binding for the PRD and implementation.
 
 ## Rules
 
@@ -109,7 +109,7 @@ The classification drives location recommendations.
 
 ### Pick-together analysis (moved into MVP, 2026-09-27)
 
-Parts that often appear on the same transaction number (for example, an air filter and a cabin filter) are recommended to be stored close together. It is data analysis of shared transaction numbers, not a language model (renamed from "AI" after teacher feedback, 2026-10-06).
+Parts that often appear on the same transaction number (for example, an air filter and a cabin filter) are recommended to be stored in the same aisle. It is data analysis of shared transaction numbers, not a language model (renamed from "AI" after teacher feedback, 2026-10-06).
 
 ### Walking-distance estimate (dropped, 2026-11-01)
 
@@ -117,7 +117,7 @@ Originally described as an important part of the project (illustrative figures o
 
 ### Dropped (2026-09-27)
 
-- **AI-generated explanations for recommendations.** Dropped; AI scope is pick-together analysis only.
+- **AI-generated explanations for recommendations.** Dropped; each recommendation is explained by the rule behind it.
 - An unfinished "another advanced feature" line from the original notes.
 
 ### Dropped (2026-10-28)
@@ -128,7 +128,7 @@ Originally described as an important part of the project (illustrative figures o
 
 ## MVP and stretch lists (detailed scope)
 
-The brief's **Scope** section is a short boundary list. The detailed lists below were moved here from the brief on 2026-11-01 and are still binding for the PRD. The brief's Scope stays the source of truth for what is in, stage 2, "if time allows" and out; this section holds the detail behind each item.
+The brief's **Scope** section is a short boundary list. The detailed lists below were moved here from the brief on 2026-11-01 and are still binding for the PRD. The brief's Scope stays the source of truth for what is in, stage 2 and "if time allows"; this section holds the detail behind each item.
 
 **Core (built, tested and stable first)**
 

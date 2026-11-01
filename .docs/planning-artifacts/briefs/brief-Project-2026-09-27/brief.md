@@ -9,7 +9,7 @@ updated: 2026-11-01
 
 ## Executive Summary
 
-Smart Warehouse Planner is a web-based planning tool for a spare-parts warehouse. It imports the Excel files the warehouse already has (locations, inventory and transaction history), shows which parts are stored where, and classifies every part by how often it is picked. Using data analysis of transaction numbers, it also finds parts that are frequently used together. From this it recommends better locations: fast movers in the best spots, and parts that belong together stored near each other.
+Smart Warehouse Planner is a web-based planning tool for a spare-parts warehouse. It imports the Excel files the warehouse already has (locations, inventory and transaction history), shows which parts are stored where, and classifies every part by how often it is picked. Using data analysis of transaction numbers, it also finds parts that are frequently used together. From this it recommends better locations: fast movers in the best spots, and parts that belong together stored in the same aisle.
 
 Today parts are placed wherever space was free when they arrived and are rarely re-evaluated, so fast movers sit in poor locations and parts used on the same job are spread across the warehouse. Every extra trip costs picking time, and moving parts costs labor, so a change of placement needs a plan backed by data rather than a hunch. The data to make that plan already exists in the warehouse's own exports; it is just not used for placement. And with AI-assisted development, a focused tool for it is now within reach of one person in one semester.
 
@@ -20,7 +20,7 @@ The tool is not connected to the company's main system and never changes it: it 
 The warehouse planner decides where parts go, but has to do it from three separate Excel files (locations, inventory, transaction history) and from experience. Placement is rarely revisited, because checking it by hand is slow and a wrong move costs real labor. The result:
 
 - **Placement is not based on usage.** Parts go where space was free on arrival. Fast movers can sit in poor locations while slow and dead stock occupy good ones.
-- **Parts used together are stored apart.** Parts on the same job can be far from each other, so one job means several trips.
+- **Parts used together are stored apart.** Parts on the same job can sit in different aisles, so one job means several trips.
 - **The overview is scattered.** Answering "what is in this aisle?", "how full is it?" or "which parts barely move?" takes manual work across files.
 - **Parts end up in the wrong aisle.** Parts are put away in aisles meant for other kinds of parts, so the aisle no longer tells where to look.
 - **Changing placement is risky without a plan.** There is no easy way to try a new arrangement before doing it for real.
