@@ -91,10 +91,8 @@ None of this is a technical moat. The advantage is domain knowledge, transparent
 - Category check for parts in the wrong aisle
 - Location labels with QR codes or barcodes
 
-**If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and an estimated walking-distance reduction.
-
-**Out:** AI-generated explanations for recommendations; distance-based recommendations; any connection to the company's main system (no live sync, no writing back); real company data in the repo.
+**If time allows:** drag-and-drop placement, whole-warehouse optimization, and QR/barcode scanning.
 
 ## Vision
 
-If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. In two to three years it could be used on handheld devices for scanning, show savings in meters through a real distance model, and serve other warehouses in the company.
+If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. In two to three years it could be used on handheld devices for scanning, and serve other warehouses in the company.

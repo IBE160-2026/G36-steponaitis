@@ -20,7 +20,7 @@ These are the first versions of the rules to implement and test against. The thr
 - **Pick groups.** Issue Part lines that share a transaction number belong to the same job. Two parts form a pick group when they appear on the same job at least 5 times in the period (about 130 pairs in the demo data). Transaction number `0` is never grouped.
 - **Occupancy.** A location is occupied when it holds at least one part with stock above zero; otherwise it is empty.
 - **Best locations.** The planner can mark three things as best: whole aisles (e.g. aisle A), levels (e.g. level 1 in all aisles, or level 2 in aisle C) and single locations (e.g. `D-04-01-02`). A location counts as best when it is marked in any of these ways. Marks can be removed again. Best locations come only from the planner's marks, not from distance or walk path.
-- **Walk path.** Each location has a Walk Path value: 0 at the first location in aisle A and 10 more for each next location along the walk. The walking distance between two locations is the difference between their values.
+- **Walk path.** Each location has a Walk Path value that gives its place in the order by aisle letter and location number: 0 at the first location in aisle A and 10 more for each next location. It is an ordering only, not a distance.
 - **Current location.** A part stored in more than one location uses the location with the most stock as its current location.
 - **Recommendations**, applied in this order and only to empty locations:
   1. A fast-moving part outside the best locations gets a suggested empty best location. Parts with the most picks go first, and empty best locations are offered in location-code order.
@@ -63,7 +63,7 @@ Checked with automated tests on the test dataset above:
 - **Deleting a plan** asks for confirmation and affects only that plan. Any user can delete any plan; archiving instead of deleting is left to the PRD.
 - **Concurrent editing.** Plans are shared, so two users could edit the same plan. Last save wins, with a warning if the plan changed since it was opened. No live collaboration.
 - **New Plan** is the entry point of the flow. The planner starts a new plan by uploading all three files, or by reusing the original imported files of an existing plan (not its edited state). Starting a new plan from the result of an earlier plan is not in scope: after the moves are done, a fresh export from the main system is the source of truth.
-- **Move list.** A plan can be printed as a move list in a browser print view (no PDF or CSV export). Each line has part, description, from, to, the rule behind it and a tick box. Lines are ordered by round first (see Rounds) and then by the Walk Path of the part's current location, so dependent moves come in the right order and the walk stays short. Because plans stay editable after printing, the print view shows the plan name, the "data as of" date and the time it was generated, so an old printout can be recognized. Core, not stage 2.
+- **Move list.** A plan can be printed as a move list in a browser print view (no PDF or CSV export). Each line has part, description, from, to, the rule behind it and a tick box. Lines are ordered by round first (see Rounds) and then by the Walk Path of the part's current location, so dependent moves come in the right order. Because plans stay editable after printing, the print view shows the plan name, the "data as of" date and the time it was generated, so an old printout can be recognized. Core, not stage 2.
 - **Users (stage 2).** Login tracks who uses the app and gives it a more professional look. The app may be used by more people in the future. Plans are shared between all users. Every plan stores `created_by` and `last_edited_by` from the start, even before login exists. A browser print view cannot tell whether anything was actually printed, so "printed by" is not tracked. Minimum login: users are created by the planner or seeded, with no self-registration, password reset or roles; passwords are stored hashed; the README lists demo credentials for examiners.
 - **Scope note.** Saved plans and the move list add work to a core the teacher already called tight. Keep the order: finish and test import → classify → pick groups → recommendations → planning copy first, then saved plans and the move list, then stage 2.
 
@@ -73,7 +73,6 @@ Checked with automated tests on the test dataset above:
 - **Stored uploads.** Saved plans keep the uploaded data on disk. The database and any uploads folder must be git-ignored (`.gitignore` rules added 2026-10-28), so uploaded warehouse data never reaches the public repo; `data/sample/` stays committed.
 - **Stale data (accepted).** The company's main system stays the source of truth. The tool's picture is only as current as the latest import, so data must be re-imported before planning.
 - **Confidentiality.** Real company data must not leave the company and is never committed to the repo, which is public. The course version uses only synthetic demo data made by `data/generate_demo_data.py`. The earlier anonymized company files are no longer used and were removed from the git history before they were ever pushed.
-- **Walk path is not meters.** The walk path gives the order of locations along the walk in steps of 10, not measured distance, so walking-distance estimates are relative until real distances are measured.
 - **Real data differs from the demo data.** The demo data follows the format and process of the real export (see below), but real files may have other column names, several location-code patterns and duplicate rows. The import must be checked against real data before it is used with real files.
 
 ## Open Questions
@@ -112,9 +111,9 @@ The classification drives location recommendations.
 
 Parts that often appear on the same transaction number (for example, an air filter and a cabin filter) are recommended to be stored close together. It is data analysis of shared transaction numbers, not a language model (renamed from "AI" after teacher feedback, 2026-10-06).
 
-### Walking-distance measurement (if time allows)
+### Walking-distance estimate (dropped, 2026-11-01)
 
-Originally described as an important part of the project (illustrative figures only: 26,400 → 20,100 m/month, −23.9%). First dropped because no distance model between locations exists. Since 2026-10-13 the locations have a Walk Path value, so a before/after walking-distance estimate is an "if time allows" item, in relative steps rather than meters. Recommendations never use distance: best locations come only from the planner's marks on aisles, levels and single locations.
+Originally described as an important part of the project (illustrative figures only: 26,400 → 20,100 m/month, −23.9%). It will not be implemented, and distance estimates are not relevant. Recommendations are based only on the planner's marks on aisles, levels and single locations.
 
 ### Dropped (2026-09-27)
 
@@ -150,9 +149,7 @@ The brief's **Scope** section is a short boundary list. The detailed lists below
 - Category check: categories from description keywords, categories per aisle, list of parts in the wrong aisle
 - Location labels with QR codes or barcodes
 
-**If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and an estimated walking-distance reduction using the walk path.
-
-**Out:** AI-generated explanations for recommendations; distance-based recommendations; any connection to the company's main system (no live sync, no writing back); real company data in the repo.
+**If time allows:** drag-and-drop placement, whole-warehouse optimization, and QR/barcode scanning.
 
 ## Moved from the brief (2026-11-01)
 
@@ -186,7 +183,7 @@ The anonymized company files are no longer used. They were removed from the repo
 ### What the demo data contains
 
 - One warehouse, `NO`, with 9 aisles (A–I) of 222–223 locations. Location code `<aisle>-<section>-<level>-<position>`, e.g. `A-01-02-03`.
-- **Walk Path** (user decision, 2026-10-13): 0 at `A-01-01-01`, then 10 more for each next location in file order (aisle A 0–2,220 … aisle I 17,780–19,990). It replaces the missing distance data.
+- **Walk Path** (user decision, 2026-10-13): 0 at `A-01-01-01`, then 10 more for each next location in file order (aisle A 0–2,220 … aisle I 17,780–19,990). It is an ordering by aisle letter and location number, not a measure of distance.
 - Car parts: 87 part types for 20 petrol and diesel car models in three engine versions. Part numbers are 7-digit text. 80 parts are stored in two locations.
 - **Occupancy rule (user decision):** a location is occupied only if it holds at least one part with stock above zero. 1,584 locations are occupied and 416 empty (375 with no part, 41 with only a zero-stock part). Occupancy varies by aisle, from 65% to 87%.
 - Transaction types follow the real process: **Move to Repair** (shelf pick to `FLSKRS`, 9,635 lines, one part per code), **Issue Part** (used, at `FLSKRS`, 8,867 lines grouped by job code), **Return to Stock** (back to the same shelf, 953 lines) and **Receipt** (goods received, 545 lines, code `0`). The real two-step return via `RETURN-SKRS` and Putaway is simplified to one line.
