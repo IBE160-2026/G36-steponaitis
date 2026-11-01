@@ -13,3 +13,5 @@
 - [ ] 2026-10-28 [brief-oppdatering-for-prd](998-2026-10-28-22-46-16-brief-oppdatering-for-prd.md) — hvordan brukere opprettes i trinn 2 må konkretiseres i PRD/arkitektur
 - [ ] 2026-11-01 [brief-mot-mal](996-2026-11-01-08-28-13-brief-mot-mal.md) — «hvorfor nå»-argumentet i briefens Executive Summary er et forslag og må bekreftes eller skrives om av forfatteren
 - [ ] 2026-11-01 [brief-mot-mal](996-2026-11-01-08-28-13-brief-mot-mal.md) — brukersuksess i briefen er kvalitativ; avgjør om den skal få tall (f.eks. antall gjenkjente topp-10 plukkgrupper)
+- [ ] 2026-11-01 [fjern-out-fra-brief](994-2026-11-01-08-55-03-fjern-out-fra-brief.md) — Good/Better/Best-markering er ikke beskrevet i brief/addendum ennå (bare «best»)
+- [ ] 2026-11-01 [fjern-out-fra-brief](994-2026-11-01-08-55-03-fjern-out-fra-brief.md) — Walk Path og «savings in meters»-formuleringen i Vision står igjen; avklar om de skal fjernes
