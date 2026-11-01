@@ -2,7 +2,7 @@
 title: "Product Brief: Smart Warehouse Planner"
 status: final
 created: 2026-09-27
-updated: 2026-10-28
+updated: 2026-11-01
 ---
 
 # Product Brief: Smart Warehouse Planner
@@ -11,17 +11,21 @@ updated: 2026-10-28
 
 Smart Warehouse Planner is a web-based planning tool for a spare-parts warehouse. It imports the Excel files the warehouse already has (locations, inventory and transaction history), shows which parts are stored where, and classifies every part by how often it is picked. Using data analysis of transaction numbers, it also finds parts that are frequently used together. From this it recommends better locations: fast movers in the best spots, and parts that belong together stored near each other.
 
-Today parts are placed wherever space was free when they arrived and are rarely re-evaluated, so fast movers sit in poor locations and parts used on the same job are spread across the warehouse. Every extra trip costs picking time, and moving parts costs labor, so a change of placement needs a plan backed by data rather than a hunch.
+Today parts are placed wherever space was free when they arrived and are rarely re-evaluated, so fast movers sit in poor locations and parts used on the same job are spread across the warehouse. Every extra trip costs picking time, and moving parts costs labor, so a change of placement needs a plan backed by data rather than a hunch. The data to make that plan already exists in the warehouse's own exports; it is just not used for placement. And with AI-assisted development, a focused tool for it is now within reach of one person in one semester.
 
-The tool is not connected to the company's main system and never changes it: it suggests, and people decide. Recommendations are tried out in a separate planning copy of the warehouse, so the planner can see the result before anything is physically moved. Each piece of work is saved as a plan that can be reopened later and printed as an ordered move list for the people doing the moving. The project is the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and is developed on synthetic demo data.
+The tool is not connected to the company's main system and never changes it: it suggests, and people decide. Recommendations are tried out in a separate planning copy of the warehouse, so the planner can see the result before anything is physically moved. Each piece of work is saved as a plan that can be reopened later and printed as an ordered move list for the people doing the moving. It is built as the solo semester project for IBE160 *Programmering med KI* (Høgskolen i Molde, autumn 2026) and developed on synthetic demo data.
 
 ## The Problem
 
+The warehouse planner decides where parts go, but has to do it from three separate Excel files (locations, inventory, transaction history) and from experience. Placement is rarely revisited, because checking it by hand is slow and a wrong move costs real labor. The result:
+
 - **Placement is not based on usage.** Parts go where space was free on arrival. Fast movers can sit in poor locations while slow and dead stock occupy good ones.
 - **Parts used together are stored apart.** Parts on the same job can be far from each other, so one job means several trips.
-- **The overview is scattered.** Locations, inventory and transaction history live in separate Excel files. Answering "what is in this aisle?", "how full is it?" or "which parts barely move?" takes manual work.
+- **The overview is scattered.** Answering "what is in this aisle?", "how full is it?" or "which parts barely move?" takes manual work across files.
 - **Parts end up in the wrong aisle.** Parts are put away in aisles meant for other kinds of parts, so the aisle no longer tells where to look.
-- **Changing placement is risky without a plan.** Moving parts costs labor, and there is no easy way to try a new arrangement before doing it for real.
+- **Changing placement is risky without a plan.** There is no easy way to try a new arrangement before doing it for real.
+
+The cost of the status quo is extra walking on every pick and every job, and rearrangements that rest on a hunch instead of data.
 
 ## The Solution
 
@@ -33,7 +37,7 @@ A browser-based tool where the warehouse planner starts a New Plan by uploading 
 4. **Get recommendations** — the planner marks the best locations (whole aisles, levels or single locations), and the tool suggests moves based on movement class and pick groups. Each suggestion states the rule behind it.
 5. **Plan in a copy** — recommendations are applied and adjusted in a separate planning copy, and a before/after table per aisle shows what moves in and out. The plan is saved, can be reopened and edited later, and can be printed as a move list.
 
-Once this core flow works, a second stage adds login (colleagues share the saved plans, and the landing page is the plans list), a visual view of the whole warehouse and its occupancy, a category check that lists parts placed in the wrong aisle, and printable location labels with QR codes or barcodes.
+The outcome is a placement plan the planner trusts enough to hand to the people who move the parts. Login, a visual warehouse view, a category check and printable location labels follow once this core flow works (see Scope).
 
 ## What Makes This Different
 
@@ -42,57 +46,55 @@ Once this core flow works, a second stage adds login (colleagues share the saved
 - **Plan before you move, then hand over.** The planning copy lets the planner test a new placement safely instead of committing labor on a hunch. Saved plans can be reopened, and a plan prints as a move list ordered for the walk.
 - **Right-sized.** Dedicated slotting and enterprise warehouse systems are typically sold on quote and with implementation work, and rarely publish how they decide where a part goes. This is a focused tool that starts from the Excel files the warehouse already has and needs no consultant.
 
+None of this is a technical moat. The advantage is domain knowledge, transparent rules and a deliberately small scope, and a competitor with the same data could build the same thing.
+
 ## Who This Serves
 
 - **Primary: the warehouse planner (the author).** Responsible for placement: manages locations, decides where parts go, and wants a data-backed plan for rearranging. Success is a placement plan they trust enough to act on.
-- **Secondary: warehouse colleagues.** Find parts faster through better placement and clear labels, and carry out the printed move list.
+- **Secondary: warehouse colleagues.** Find parts faster through better placement and clear labels, and carry out the printed move list. Success is a move list they can follow in one walk, in the right order.
 - **Later: other planners.** The app may be used by more people in the future; they share the same saved plans.
 
 ## Success Criteria
 
-**Checked with automated tests** on a small hand-made dataset with a known answer key (full list and rules in the addendum):
-
-- Movement classes and pick groups match the answer key exactly, including edge cases (ties, a part in two locations, a part with no free location).
-- Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only uses empty locations, each for at most one part.
-- Changes in the planning copy never change the imported inventory.
-- An import with a missing required column fails with a clear message naming the column, and saves nothing.
-- A saved plan reopens with identical state (marks, planning copy, recommendations); deleting one plan leaves the others unchanged.
-- A new plan started from an existing plan's files gives the same classes, pick groups and recommendations as the original.
-- The move list contains exactly the plan's moves, ordered by round and then walk path, and each line names part, from, to and rule.
-- The full core flow (New Plan → classify → pick groups → recommendations → planning copy → move list) runs without errors on the demo data in `data/sample/`, following the README.
-
-**Judged by the author:**
+**User success (judged by the author)**
 
 - The movement classes agree with the author's knowledge of which parts actually move.
 - The top pick groups are ones the author recognizes as genuinely used together.
+- The author would act on the recommendations and the printed move list.
+
+**Measurable (automated tests on a small hand-made dataset with a known answer key; full list and rules in the addendum)**
+
+- Movement classes and pick groups match the answer key exactly, including edge cases.
+- Every recommendation names the part, its current location, the suggested location and the rule behind it, and only uses empty locations, each for at most one part.
+- Changes in the planning copy never change the imported inventory, and a saved plan reopens with identical state.
+- The move list contains exactly the plan's moves, in round and walk-path order.
+- An import with a missing required column fails with a clear message and saves nothing.
+- The full core flow runs without errors on the demo data in `data/sample/`, following the README.
 
 **Course:** the project, including documentation of AI-assisted development, testing and quality assurance, satisfies IBE160.
 
 ## Scope
 
-**Core (built, tested and stable first)**
+**In for the first version (core, built, tested and stable first)**
 
-- New Plan: start a plan by uploading all three files, or by reusing the files from an existing plan; CSV/Excel import with clear errors for missing columns
-- Saved plans: every plan is stored and shared, can be reopened, edited and deleted
-- Parts, locations and which part is where; moving parts inside a plan; search
-- Movement classification (fast, medium, slow, dead stock)
-- Pick-together analysis from shared transaction numbers
-- Marking best locations: whole aisles, levels and single locations
-- Location recommendations
+- New Plan from uploaded files or from an existing plan's files, and saved plans
+- Parts, locations and which part is where, with search and moving parts inside a plan
+- Movement classification and pick-together analysis
+- Best-location marking and location recommendations
 - Planning copy with a before/after table per aisle
-- Printable move list: a browser print view of a plan's moves, ordered by round and then walk path
+- Printable move list
 
 **Stage 2 (after the core flow is finished and tested)**
 
-- User accounts and login, to track who uses the app and give it a professional look; plans stay shared between users, and the landing page is the saved-plans list
-- Warehouse view: all aisles and locations with occupancy; occupied in red, empty in green, plus text label and tooltip
-- Category check: categories from description keywords, categories per aisle, list of parts in the wrong aisle
+- User accounts and login
+- Warehouse view with occupancy
+- Category check for parts in the wrong aisle
 - Location labels with QR codes or barcodes
 
-**If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and an estimated walking-distance reduction using the walk path.
+**If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and an estimated walking-distance reduction.
 
 **Out:** AI-generated explanations for recommendations; distance-based recommendations; any connection to the company's main system (no live sync, no writing back); real company data in the repo.
 
 ## Vision
 
-If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. Later steps could include scanning with handheld devices, a distance model that shows savings in meters, and use in other warehouses in the company.
+If it proves itself, Smart Warehouse Planner becomes the everyday tool for keeping the warehouse organized and placement matched to demand, re-run on fresh transaction data to catch parts that have sped up or slowed down. In two to three years it could be used on handheld devices for scanning, show savings in meters through a real distance model, and serve other warehouses in the company.

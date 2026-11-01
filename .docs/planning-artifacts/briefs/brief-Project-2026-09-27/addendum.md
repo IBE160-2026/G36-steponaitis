@@ -1,7 +1,7 @@
 ---
 title: "Addendum: Smart Warehouse Planner"
 created: 2026-09-27
-updated: 2026-10-28
+updated: 2026-11-01
 ---
 
 # Addendum: Smart Warehouse Planner
@@ -127,9 +127,49 @@ Originally described as an important part of the project (illustrative figures o
 - **Comparing plans.**
 - **"Printed by" tracking.** A browser print view cannot show whether anything was printed.
 
-## MVP and stretch lists
+## MVP and stretch lists (detailed scope)
 
-The current MVP and stretch lists live in the brief's **Scope** section, which is the single source of truth.
+The brief's **Scope** section is a short boundary list. The detailed lists below were moved here from the brief on 2026-11-01 and are still binding for the PRD. The brief's Scope stays the source of truth for what is in, stage 2, "if time allows" and out; this section holds the detail behind each item.
+
+**Core (built, tested and stable first)**
+
+- New Plan: start a plan by uploading all three files, or by reusing the files from an existing plan; CSV/Excel import with clear errors for missing columns
+- Saved plans: every plan is stored and shared, can be reopened, edited and deleted
+- Parts, locations and which part is where; moving parts inside a plan; search
+- Movement classification (fast, medium, slow, dead stock)
+- Pick-together analysis from shared transaction numbers
+- Marking best locations: whole aisles, levels and single locations
+- Location recommendations
+- Planning copy with a before/after table per aisle
+- Printable move list: a browser print view of a plan's moves, ordered by round and then walk path
+
+**Stage 2 (after the core flow is finished and tested)**
+
+- User accounts and login, to track who uses the app and give it a professional look; plans stay shared between users, and the landing page is the saved-plans list
+- Warehouse view: all aisles and locations with occupancy; occupied in red, empty in green, plus text label and tooltip
+- Category check: categories from description keywords, categories per aisle, list of parts in the wrong aisle
+- Location labels with QR codes or barcodes
+
+**If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and an estimated walking-distance reduction using the walk path.
+
+**Out:** AI-generated explanations for recommendations; distance-based recommendations; any connection to the company's main system (no live sync, no writing back); real company data in the repo.
+
+## Moved from the brief (2026-11-01)
+
+On 2026-11-01 the brief was tightened against `product-brief-template.md`: Success Criteria now mixes user success signals with a short measurable list, and Scope is a boundary list. What was cut from the brief, so nothing is lost:
+
+- **Success criteria, detailed test list.** The brief used to list these test criteria in full; the complete versions are in "Testable success criteria (full list)" above.
+  - Movement classes and pick groups match the answer key exactly, including edge cases (ties, a part in two locations, a part with no free location).
+  - Every recommendation names the part, its current location, the suggested location and the rule that produced it, and only uses empty locations, each for at most one part.
+  - Changes in the planning copy never change the imported inventory.
+  - An import with a missing required column fails with a clear message naming the column, and saves nothing.
+  - A saved plan reopens with identical state (marks, planning copy, recommendations); deleting one plan leaves the others unchanged.
+  - A new plan started from an existing plan's files gives the same classes, pick groups and recommendations as the original.
+  - The move list contains exactly the plan's moves, ordered by round and then walk path, and each line names part, from, to and rule.
+  - The full core flow (New Plan → classify → pick groups → recommendations → planning copy → move list) runs without errors on the demo data in `data/sample/`, following the README.
+- **Solution, stage 2 paragraph.** "Once this core flow works, a second stage adds login (colleagues share the saved plans, and the landing page is the plans list), a visual view of the whole warehouse and its occupancy, a category check that lists parts placed in the wrong aisle, and printable location labels with QR codes or barcodes." Now one sentence in the brief, pointing to Scope; detail is under "Stage 2" above and in "Solution detail".
+- **Problem, wording.** The bullet "Changing placement is risky without a plan" said "Moving parts costs labor"; the labor cost now sits in the intro to The Problem and in the Executive Summary.
+- **Added to the brief (not from here):** "why now" in the Executive Summary, how the planner copes today and the cost of the status quo in The Problem, an honest note on the lack of a technical moat in What Makes This Different, a success signal for colleagues in Who This Serves, and "the author would act on the recommendations and the printed move list" as a user success signal. The "why now" argument (the data already exists, and AI-assisted development makes a one-person tool feasible) is the author's to confirm.
 
 ## Demo data (2026-10-13)
 
