@@ -1,0 +1,131 @@
+# PRD Quality Review — Smart Warehouse Planner (prd-Project-2026-11-01)
+
+## Overall verdict
+
+For an internal tool, this is a disciplined and unusually precise capability spec. It has a binding glossary, 45 contiguous FRs with testable consequences, explicit non-goals, real counter-metrics, and an honest analysis of the rule 3 loops. Together these give UX, architecture and stories a solid base. The risk sits where the answer-key tests will be built: the recommendation, round, undo and move-list engine (FR-22–FR-36). The glossary and FR-22 disagree on what a run does to the round. "No space" and three tie cases are undefined. Undo across runs can re-open dependencies inside a round. Manual moves into a location freed in the same round break the move list's promise to colleagues. These five high findings hit three of the five edge cases §7.3 says the answer key must cover, so they should be settled before that dataset is written. The rest is medium or low tightening.
+
+## Decision-readiness — adequate
+
+Decisions are stated as decisions and dated ("decision 2026-11-02", §10 "user decision 2026-11-02"). The PRD addendum names a rejected alternative with its cost ("computing each move's round from its dependencies … harder to explain on a printout"). The rule 3 loop analysis in `addendum.md` is the strongest part of the package: it found two real loops in the brief's rules and closed them with limits the user accepted. Both open questions in §9 are real, though Q2 is a risk with its answer in the same sentence.
+
+The PRD is weaker at naming what its own inferences cost. 29 assumptions are still open, and 12 of them (A-14–A-19, A-22–A-27) define the rule engine that the answer-key dataset (§7.3) must encode "before the rules are implemented". There is no `[NOTE FOR PM]` anywhere, even though at least three tensions need one: manual moves into freed locations (see Done-ness H5), round trips caused by A-19, and rule 1 splitting pick groups (see Strategic coherence).
+
+### Findings
+
+- **[medium]** Rule-engine assumptions are still open and no tension is flagged (§11; FR-22–FR-36) — A-14–A-19 and A-22–A-27 each change expected outputs in the answer key. If one is reversed after the dataset exists, the expected results must be rewritten. No `[NOTE FOR PM]` marks the real trade-offs. In a solo project the author can settle these in one sitting. *Fix:* Confirm or reverse A-14–A-27 before writing the answer-key dataset, and turn the confirmed ones into dated decisions, as was done for A-20/A-21. Add `[NOTE FOR PM]` callouts at the three tensions named above.
+- **[medium]** The cost of A-19, a part sent away and back, is not named (FR-25, A-19) — "The other part's aisle is the aisle of its current location at the time of the run … A later round corrects the result." Example: pick group P–Q (10 shared jobs; P has fewer picks; P in aisle A, Q in aisle B) and pick group Q–S (12 shared jobs; Q has fewer picks; S in aisle A). Round 1 moves Q to A and P to B. Round 2 moves P back to A. Colleagues make two physical moves of P for nothing, which is the labor SM-C1 says not to waste. *Fix:* Either skip a pick group whose other part already has a recommendation in the same run (the next round handles it), or keep A-19 with a `[NOTE FOR PM]` that names the round-trip cost, plus an answer-key case for it.
+- **[low]** The deployment model is implicit (§2.1, NFR-2, NFR-5, FR-9) — "Up to about 10 users … open, continue and print the same shared plans" and the concurrent-edit warning imply one shared server. NFR-2 only says the app runs locally for examiners. *Fix:* One line in the style of NFR-10: "Where the shared instance runs is decided in architecture; examiners run it locally."
+
+## Substance over theater — strong
+
+Nothing here is furniture. There are three personas (planner, colleague, other planners) and each drives requirements: the colleague drives the move list and its order (FR-36), and other planners drive sharing, the concurrent-edit warning and authorship fields (FR-9, FR-10). §2.2 Non-Users says honestly that examiners are not target users. The Vision is specific to this warehouse and its three exports and could not be pasted into another PRD. NFRs have numbers or concrete limits: NFR-4 names the generator script and the git-ignore rule, and NFR-6 gives 10 s, 5 s and 1 s targets. The counter-metrics are thought through rather than ornamental: SM-C3 turns the teacher's feedback into a rule. The only filler is one FR consequence (FR-29: "A recommendation that is not applied creates no move"), noted under Mechanical notes.
+
+## Strategic coherence — adequate
+
+The thesis is clear and carried through. Usage data already exists in the exports. Transparent rules turn it into moves. A planning copy makes those moves safe to try, and a move list in round order makes them safe to hand over. MVP scope is problem-solving, the build order in §7.1 follows the thesis rather than ease, and stage 2 is gated on SM-1 and SM-2. Primary metrics measure delivery (tests pass, demo runs), which fits a graded course project. Secondary metrics stay qualitative by recorded decision.
+
+Two gaps weaken the arc. First, the rules work against one of the PRD's own counter-metrics, and the product gives the planner no way to see it. Second, the SM-to-FR links are blanket ranges rather than real coverage.
+
+### Findings
+
+- **[medium]** Rules 1 and 2 ignore pick groups, and the before/after table cannot show the cost (FR-23, FR-24, FR-25 A-18, FR-35, SM-C2) — Rule 1 sends a fast-moving part to the first empty best location "in location-code order", wherever its pick-group partner is. Once the part is there, A-18 ("Rule 3 never moves a part out of a best location") makes the split permanent. Rule 2 sends a slow-moving part to the first empty non-best location in code order, often away from its partner, and rule 3 then moves it a second time in the next round. SM-C2 says fast-moving parts in best locations are "not a score to maximize at the cost of splitting pick groups". Yet FR-35 measures only that number, so the planner never sees pick groups being split or joined. *Fix:* Either prefer empty locations in the partner's aisle as the first tie-break in rules 1 and 2 (a small change that can be tested), or accept the behavior and add "pick groups in the same aisle, before and after" to FR-35 so SM-C2 can be observed.
+- **[medium]** SM-to-FR links are blanket ranges and miss the brief's own test items (§8 SM-1, SM-2) — SM-1 "Validates FR-3–FR-5, FR-15–FR-36". That range includes display-only FRs (FR-19, FR-21, FR-27) and the configuration-file rule in FR-17. It leaves out FR-2 (a reused import gives the same results), FR-8 (a plan reopens with identical state) and FR-11 (deleting one plan leaves the others unchanged), which are three of the brief addendum's "Testable success criteria (full list)". SM-2 "Validates FR-1–FR-36", but its demo flow never deletes a plan, searches, undoes, resets, changes a target, reuses an import or edits concurrently. Neither metric names NFR-1, although SM-1 is how NFR-1 is measured. *Fix:* Have SM-1 list the FRs its automated tests actually cover, adding FR-2, FR-8, FR-11 and NFR-1 and dropping display-only FRs. Limit SM-2 to the FRs on its stated flow. Leave the rest to story-level acceptance criteria.
+
+## Done-ness clarity — thin
+
+Most of the 45 FRs would let an engineer write a passing test today. FR-3, FR-11, FR-15–FR-18, FR-20, FR-36 and FR-41 are exemplary, with boundary values and worked examples ("oil" matches "Engine oil" but not "Coil spring"). The verdict is *thin* because the gaps sit in the rule engine, exactly where SM-1's answer-key tests are built. Of the five edge cases §7.3 requires ("a tie in picks, a part stored in two locations, a part in several pick groups, a part with 'no space', and the class boundaries"), three land on behavior the PRD does not define: equal stock across two locations, a part in several pick groups, and "no space". FR-22 and NFR-1 promise deterministic runs that the current tie-breaks cannot guarantee.
+
+### Findings
+
+- **[high]** The glossary and FR-22 disagree on what a run does to the round (§3 Round, FR-22 A-14, FR-33, §10) — The glossary says "Each run starts a new round (round 1, 2, …)". FR-22 says "A run with no new move since the previous run replaces that run's recommendations and keeps its round." The brief's addendum agrees with the glossary ("Each run … is a round"), and §10 does not list the change. §0 says downstream documents use the glossary verbatim, so story writers and test authors will pick different rules. "New move" is also undefined when a move was made and then undone before the run. After a reset, the glossary's "current round … the round of the latest run" still points at the pre-reset run, which contradicts FR-33's "starts again from round 0". *Fix:* Settle A-14. If it stands, rewrite the glossary: "A run starts a new round when the planning copy has at least one move it did not have at the previous run; otherwise it keeps the previous round. After a reset the current round is 0 and the next run is round 1." Then list the change in §10.
+- **[high]** "No space" outcomes are undefined for later rules and for blocked pick groups (FR-25, FR-26, FR-8) — FR-26 says "a part that already has one gets none from a later rule" and that a "no space" part is listed "instead of a recommendation". It is therefore open whether a fast-moving part that is "no space" under rule 1 can still get a rule 3 recommendation in the same run. It is also open whether a part in several pick groups can be "no space" for P–Q and still get a recommendation for P–R, or be listed "no space" twice. FR-8 adds to the confusion by calling these "recommendations (including outdated and "no space" ones)". FR-25 also leaves a gap. It defines the result when the part to move sits in a best location ("the pick group gets no recommendation"), but not when the second limit blocks it ("does not move a part out of the aisle of a pick-group partner it shares at least as many jobs with"). Does the pick group get nothing, get "no space", or does the other part move instead? *Fix:* Add to FR-26: "A part listed as 'no space' under one rule [is / is not] considered by later rules, and is listed as 'no space' at most once per run." Add to FR-25: "When either limit blocks the part, the pick group gets no recommendation and is not 'no space'; the other part is not moved instead." In FR-8, write "recommendations (including outdated ones) and 'no space' parts".
+- **[high]** Three tie and edge cases make runs non-deterministic (§3 Current location, FR-23, FR-25 A-16; FR-22, NFR-1) — FR-22 promises "Two runs on the same state give the same recommendations", but:
+  - **Equal stock.** "Current location … the location with the most stock" has no tie-break when a part holds equal stock in two locations, and a part stored in two locations is a required answer-key case.
+  - **Pick-group ties.** A-16 breaks pick-group ties by "the lower part number of each pair". P–Q and P–R stay tied when P is the lower number in both, which is the "part in several pick groups" case.
+  - **No current location.** FR-23 applies rule 1 to "a fast-moving part whose current location is not a best location". A fast-moving part with zero stock everywhere has no current location (§3), and it is unclear whether that counts as "not a best location". Fast movers that are out of stock are common.
+
+  *Fix:* (a) Add "on equal stock, the location first in location-code order". (b) Extend A-16 to "then by the higher part number of each pair". (c) Add to FR-26: "Rules 1–3 skip parts with no current location."
+- **[high]** Undo across runs is undefined and can re-open same-round dependencies (FR-33, FR-28, FR-22, FR-9) — The title of FR-33 says undo reverses "the last change", and FR-9 counts "mark, run, … reset" as changes, but the consequence says undo reverses "the most recent move". So it is unclear whether a mark or a run can be undone. Several things are not stated:
+  - what undoing a move made before the latest run does to that run's recommendations and to the current round;
+  - whether an undone applied recommendation becomes applicable again;
+  - whether "outdated" (FR-28: "becomes outdated when its part has been moved, or … no longer empty") is permanent or re-checked live;
+  - what undo does to an FR-32 combination (back to the intermediate location or to the original one) or to a move FR-32 removed.
+
+  A concrete unsafe sequence:
+  1. In round 1, rule 2 moves part S out of location L.
+  2. Run 2 recommends part F into L. The planner applies F, undoes F, then undoes S, so L is occupied again.
+  3. The planner moves S out of L by hand. That manual move gets round 2.
+
+  If F's recommendation is live again, applying it gives two round-2 moves where F needs S's move to happen first, and FR-36's Walk Path order can print F first. The addendum's argument ("Every suggested location is already empty when the run is made") assumes the planning copy only moves forward after a run. *Fix:* Make FR-33 state:
+  - Undo reverses moves only, and runs cannot be undone.
+  - An undone applied recommendation does not come back.
+  - Outdated is permanent until the next run.
+  - Undoing a move made before the latest run marks all of that run's recommendations outdated.
+  - Undoing an FR-32 combination restores the state before the second move.
+
+  Add the sequence above to the answer key.
+- **[high]** A manual move into a location freed in the same round can be printed before the move that frees it (FR-31, FR-36; §2.1 Colleague; PRD addendum) — The colleague's JTBD is to "never need a location that has not been freed yet". The addendum says "Manual moves into occupied locations depend on nothing … it never waits for a location to be freed". That is true in the app but not physically. A planner who moves part Z by hand into location L because a same-round move just emptied L expects L to be empty. FR-36 orders lines only by "the Walk Path of the from-location", so Z→L prints before Y: L→… whenever Z's from-location comes first. UJ-1 contains exactly this pattern: the planner applies recommendations, then "moves one part by hand". The safety property is never stated as a requirement in the PRD; it lives only in `addendum.md`. So the answer-key test can check the sort key but not the promise. *Fix:* Within a round, list a move into a location after any same-round move out of it, then by Walk Path. Alternatively, explicitly narrow the §2.1 promise to recommendations and say that manual moves may briefly share a location. Either way, add to FR-36 a testable consequence: "No line's to-location is emptied by a later line in the list, and no line moves a part that a later line places."
+- **[medium]** A move's rule label can contradict the rule's definition (FR-30 A-22, FR-28, §3 Rule) — FR-30 lets the planner change the target to any empty location, and "The move keeps the recommendation's rule", so a "Rule 1" move can land in a non-best location. That contradicts the glossary's "Rule 1 (fast-moving part into a best location)". FR-28 outdates a recommendation only when its part moved or its location filled, not when the planner removes the best-location mark it relied on. Applying it then also prints a false rule on the move list. FR-30 also does not say whether a changed target is saved before the recommendation is applied. If it is, two recommendations can point to the same location, which breaks FR-26's "Each empty location is suggested to at most one part per run", and the order of "Apply all" decides which one wins. *Fix:* Restrict a changed target to locations that satisfy the rule (best for rule 1, non-best for rule 2, the partner's aisle for rule 3), or relabel such moves Manual. Outdate recommendations whose rule no longer holds after a mark change. Define "change target" as applying with another target, not as a stored edit.
+- **[medium]** FR-32 can drop stock from the move list, and its title overstates (FR-32, FR-31) — "Keep one move per part and round" and "A part moved again in the same round has its moves combined" do not hold for a part stored in two locations and moved out of both: that gives two moves, which the consequences do not cover. FR-31 adds stock together when the to-location already holds the same part, and later moves "all of the part's stock at the from-location". So if X moves L1→L2 while L2 already holds X, then moves L2→L3, the two are combined into one "L1→L3" line. The move of L2's original stock disappears, which breaks FR-36's "exactly the plan's moves". *Fix:* Combine only when the to-location held none of the part before the first move; otherwise keep two moves. Retitle FR-32 to match.
+- **[medium]** Before/after counts and lists are not pinned down (FR-35) — "The number of fast-moving parts in best locations" does not say whether a part counts by its current location or by any location holding its stock, whether a part in two best locations counts once, or which aisle it counts in. "Parts that move in (with from-location)" does not say whether this is the net change from import to planning copy or each move's from-location; the two differ when a part moves in two rounds. SM-1 claims FR-35 as answer-key validated, and the UJ-1 climax rests on this number. *Fix:* "A part counts once, in the aisle of its current location, and is 'in a best location' when its current location is best. The in/out lists compare each part's locations in the import with its locations in the planning copy (net change)."
+- **[medium]** Location-code order and part-number order have no defined sort rule (FR-23–FR-25, FR-36; FR-5) — Both values are "kept as text", and FR-5 accepts mixed patterns (`A-01-02-03`, `06-01-30-D1`, `1008614-00`). The choice of text, numeric or natural sort, and of case handling, decides which empty location rule 1 picks and how move-list ties break. *Fix:* Add one glossary line, for example: "Location-code order and part-number order are plain text order, character by character."
+- **[medium]** The import checks columns but not values (FR-3, FR-4, FR-5) — Nothing covers any of these:
+  - a blank or non-numeric Quantity, or a negative quantity;
+  - an unparseable Date;
+  - a blank Walk Path, Aisle or Level;
+  - the same location code listed twice in the Locations file;
+  - a file that cannot be read as `.xlsx`/`.csv`.
+
+  Each one changes classes, occupancy or move-list order, and SM-1 lists "import errors" as answer-key tested. *Fix:* Add to FR-3: "A required cell that is blank or of the wrong type, or a duplicate location code, rejects the import with a message naming the file, row and column; nothing is saved."
+- **[medium]** FR-2's "same results" conflicts with per-plan settings (FR-2, FR-17) — FR-17 says "Each plan stores the settings it was computed with … even if the settings change later". A plan that reuses an import after the configuration changed will therefore not give "the same movement classes and pick groups as the chosen plan", unless it copies the chosen plan's settings, which FR-2 does not say. *Fix:* State which settings a plan started from an existing import uses (the current ones or the chosen plan's), and qualify the FR-2 consequence to match.
+- **[low]** FR-9 "last save wins" has no defined scope (FR-9) — "The planner's change is saved and the last save wins" could mean the whole plan is overwritten with this planner's version, losing the other planner's moves, or that the single change is applied on top of the stored plan. Rounds and undo behave differently in the two cases. *Fix:* "Continuing overwrites the whole plan with this planner's version."
+- **[low]** Consequences with nothing to observe, and a development step written as an FR (FR-5 A-7, FR-27, FR-44) — "One import holds one warehouse" does not say what happens when the Warehouse column holds two values. FR-27 does not say what a "no space" entry shows. FR-44's "drafted with AI (Claude Code) during development … checked by the planner before it is committed" is a development step, not something the system does. *Fix:* For A-7, state "accepted as one warehouse" or "rejected". For FR-27, add "'No space' parts show the rule and the reason in numbers". Move FR-44's first consequence to the addendum or the AI-use documentation and keep the testable second one.
+
+## Scope honesty — adequate
+
+Omissions are explicit. §6 Non-Goals does real work: it covers capacity, walking distance, location editing, comparing plans, exports and AI explanations. Most FRs carry their own Out of Scope lines, and §7.4 separates "if time allows" from Vision. Assumptions are tagged inline and indexed. The weak point is §10. §0 promises "every difference is listed in §10", and examiners trace brief → PRD through that list, but it is incomplete, and its "all tagged as assumptions" sentence is not true.
+
+### Findings
+
+- **[medium]** §10 misses changes, and its "all tagged" claim is false (§0, §10; FR-22, FR-28, FR-30, FR-31, FR-36, FR-45) — These differences from the brief are not listed:
+  - FR-36 orders lines by "the Walk Path of the from-location"; the brief addendum's binding test criterion says "the Walk Path of the part's current location". The change is sensible, because manual moves can leave from a non-current location, but it must be listed.
+  - FR-22/A-14 runs that keep their round, against the brief's "Each run … is a round".
+  - FR-45 labels are QR only, against the brief's "QR codes or barcodes".
+
+  §10 also says "New detail, all tagged as assumptions: … round 0 for manual moves before the first run … outdated recommendations, adjusted targets". Yet the glossary and FR-31 state round 0 untagged, FR-28 is untagged, and FR-30's "must have been empty when the run was made" is untagged (A-22 covers only rule and round). *Fix:* Add the three changes to §10. Either tag the three details or reword them as dated decisions.
+
+## Downstream usability — adequate
+
+Downstream steps can pull requirements straight out of this PRD. The glossary is present and mostly respected. FR, UJ, SM and NFR IDs are contiguous and unique. Every cross-reference resolves. Each FR cites the glossary terms it uses rather than "see above". All three UJs have a named protagonist and a realized-by line. Three things will cost story writers time:
+
+- the Round contradiction (Done-ness, first finding), which sits in the glossary itself;
+- the move-list safety invariant, which exists only in `addendum.md` (Done-ness, fifth finding);
+- the drift and trace gaps below.
+
+### Findings
+
+- **[low]** Glossary drift (FR-30, UJ-1, §10, A-22; §1, UJ-1, §4.9; FR-18, FR-25, FR-27, FR-43) — The terms drift in several places:
+  - "Target" stands in for "suggested location" or "to-location": the FR-30 title "Change the target", UJ-1 "changes the target", §10 "adjusted targets", A-22 "changed target".
+  - "Fast movers" and "slow movers" (§1, UJ-1, §4.9) stand in for fast-moving and slow-moving parts. The Vision's "slow movers out of them" also leaves out dead stock, which rule 2 moves too.
+  - "Partner" and "pick-group partner" are used but never defined.
+  - "Pair" is used for a pick group or candidate (FR-18, A-16).
+  - In FR-43, "settings" means keyword rules and aisle categories, not the glossary's Settings.
+  - "Walk-path order" (§1, UJ-2) differs from "Walk Path".
+  - "Occupancy" is defined only inside FR-39.
+
+  *Fix:* Rename FR-30 "Change the suggested location". Add "Partner" and "Occupancy" to the glossary. Replace the other terms in place.
+- **[low]** Gaps in the UJ trace (FR-2, UJ-1, UJ-3) — FR-2 says "Realizes UJ-3", but UJ-3 continues a saved plan and never starts from an existing import, and UJ-3's realized-by list leaves FR-2 out, so FR-2 has no journey. UJ-1 uses the saved-plans list and autosave but does not list FR-7 and FR-9. UJ-3 applies recommendations but does not list FR-29. *Fix:* Either add a step to UJ-3 in which Justas starts a fresh plan from the same import, or drop the link from FR-2. Complete the realized-by lists.
+
+## Shape fit — strong
+
+The shape matches the product. It is a single-operator internal tool written as a capability spec. The three UJs are short, have a named protagonist, and carry the edge cases that matter (missing column, part not at its from-location, concurrent save). They are not padding. Metrics are operational, which suits a graded course project. The chain-top role (UX → architecture → stories) is served by global FR numbering and a glossary that downstream documents must use verbatim. Stage 2 FRs (FR-37–FR-45) are specified at core depth, which is slightly more than needed given SM-C3, but they keep the stage 2 trace intact at little cost. No findings.
+
+## Mechanical notes
+
+- **ID continuity:** FR-1–FR-45, UJ-1–UJ-3, SM-1–SM-5, SM-C1–SM-C3, NFR-1–NFR-10 and A-1–A-31 have no gaps or duplicates. A-20 and A-21 were retired cleanly into dated decisions in FR-25. All FR, UJ, SM and § cross-references resolve.
+- **Assumptions Index roundtrip:** clean. Every inline `[ASSUMPTION A-n]` appears in §11 with a matching location, and every index entry appears inline. Inline tags are inconsistent in form: A-1, A-2, A-3, A-10, A-19 and A-23 carry their text, while the rest are bare, so the bare tags such as FR-4's A-6 and FR-5's A-7 can only be read through §11. Untagged inferences are listed under Scope honesty.
+- **Glossary case:** the glossary bolds "**Rule 1**" while the FRs write "rule 1". This is harmless, but §0 says the terms are used verbatim.
+- **File names:** the glossary pins `Locations.xlsx`, `Inventory.xlsx` and `transactions.xlsx`, while FR-1 also accepts `.csv`. Name the files by role ("Locations file") and keep the `.xlsx` names as demo examples.
+- **Filler:** FR-29's "A recommendation that is not applied creates no move" adds nothing testable.
+- **Open Question 2** is a risk with its answer inside it ("a column-mapping screen is not planned"). It would read better as a Risks line.
+- **Required sections:** all present for the stakes: Vision, JTBD, non-users, UJs, glossary, FRs, NFRs, non-goals, scope with build order, SMs with counter-metrics, open questions and assumptions index. Front matter still says `status: draft`.
