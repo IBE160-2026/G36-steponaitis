@@ -13,7 +13,7 @@ Fullføre PRD-utkastet som ble startet 2026-11-01 (bare tittel og frontmatter), 
 - Beslutningslogg: `.docs/planning-artifacts/prds/prd-Project-2026-11-01/.memlog.md` (33 linjer).
 
 ### Resultat
-Alt ligger i `.docs/planning-artifacts/prds/prd-Project-2026-11-01/` og er **ikke committet** (mappen er utracket).
+Alt ligger i `.docs/planning-artifacts/prds/prd-Project-2026-11-01/`. Mappen er committet som `44bd2fb` («Legg til ferdig PRD for Smart Warehouse Planner») og pushet til `origin/main` sammen med loggcommitene, etter at brukeren ba om det.
 - `prd.md` (`status: final`): 48 FR (kjernen er FR-1–FR-38, trinn 2 FR-39–FR-48), 12 NFR, SM-1–SM-7 og SM-C1–SM-C3, UJ-1–UJ-3, ordliste, skjermoversikt (§4.0), kjernen delt i to milepæler (§7.1), case-liste for fasitdatasettet (§7.3), endringer fra briefen (§10) og 22 bekreftede antakelser (§11).
 - `addendum.md`: begrunnelser for rekkefølgen i flyttelista, angre, rule 3-grensene, «keep in place», milepælene og referansetall for demodataene.
 - Gjennomgangsrapporter: `review-rubric.md` og `reconcile-brief.md`, `reconcile-brief-addendum.md` og `reconcile-teacher-feedback.md`. Ingen kritiske funn. Alle høye funn er rettet.
