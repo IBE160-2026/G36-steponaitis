@@ -14,7 +14,10 @@ Finne Impeccable design-skillen for Claude Code på nettet og installere den, so
 - Brukeren kjørte `npx impeccable install --providers=claude --scope=global` (impeccable 4.8.2).
 - Installert: skillen i `~/.claude/skills/impeccable` (engine v0.1.21, darwin-arm64), 4 agenter i `~/.claude/agents` (asset-producer, documenter, finish-reviewer, manual-edit-applier), design-hooks i `~/.claude/settings.json`.
 - Verifisert at filene og hook-oppføringene finnes, og at `impeccable`-skillen nå vises i Claude Code.
-- Ingen endringer i repoet.
+- Ingen endringer i repoet ved installasjonen.
+- Deretter kjørt `/impeccable init`: prosjektet utforsket (README, PRD, data/), tre spørsmål stilt. Svar: stack avgjøres i arkitektursteget; appen brukes nå mest til kursdemoen (førstegangsforståelse viktigst); produktnavnet er «Smart Warehouse Planner», og firmaets navn og merkevare vises aldri.
+- `PRODUCT.md` skrevet i prosjektroten (plattform web, brukere, formål, posisjonering, kontekst, begrensninger, prinsipper, tilgjengelighet). Ikke committet ennå.
+- Ingen bildegenerering tilgjengelig, så ingen `buildPath` registrert (kode-først). Live-modus hoppet over fordi det ikke finnes noen app å kjøre ennå.
 
 ### Åpne punkter
-- Kjør `/impeccable init` i prosjektet for å sette designkontekst før UX-arbeidet starter.
+- Stack er ikke valgt; PRODUCT.md `## Stack` må oppdateres etter arkitektursteget.
