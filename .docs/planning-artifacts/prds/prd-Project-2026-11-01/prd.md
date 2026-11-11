@@ -84,7 +84,7 @@ Downstream documents use these terms exactly.
 
 - **Transaction types** — **Move to Repair** (a part is picked from a shelf), **Issue Part** (a part is consumed on a job, at a virtual location), **Return to Stock** (an unused part goes back to a shelf) and **Receipt** (goods received, transaction code `0`). Move to Repair, Return to Stock and Receipt are **shelf lines**.
 - **Pick** — one Move to Repair line. No other transaction type is a pick.
-- **Period** — the 12 months up to and including the newest transaction date in the import. It starts the day after the same date one year earlier.
+- **Period** — the 12 months up to and including the newest transaction date in the import. It starts the day after the same date one year earlier. A transaction counts by its date only; the time of day is ignored (decision 2026-11-11).
 - **Picks** — the number of picks of a part in the period, across all its locations.
 - **Movement class** — one of four classes from a part's picks: **fast-moving** (24 or more), **medium-moving** (6–23), **slow-moving** (1–5) and **dead stock** (0).
 - **Job** — all Issue Part lines in the period that share a transaction code (called "transaction number" in the brief). Transaction code `0` is never a job.
@@ -397,7 +397,7 @@ When the two parts of a pick group have current locations in different aisles, t
 - Pick groups are taken in order of most shared jobs first; ties are broken by the lower part number of the two parts, then by the higher, in part-number order.
 - When both parts have the same picks, the part that comes later in part-number order is the one that moves.
 - Empty locations in the partner's aisle are offered in location-code order.
-- A slow-moving or dead-stock part is never offered a best location, so rule 3 and rule 2 cannot undo each other's moves round after round (decision 2026-11-02).
+- A slow-moving or dead-stock part is never offered a best location, so rule 3 and rule 2 cannot undo each other's moves round after round (decision 2026-11-02). If every empty location in the partner's aisle is a best location, the part is listed as "no space" under rule 3 (decision 2026-11-11).
 - The pick group gets no recommendation, and is not listed as "no space", when:
   - the part that would move sits in a best location (rule 3 never moves a part out of a best location);
   - the part that would move is already in the aisle of another partner it shares at least as many jobs with, so a part in several pick groups is not moved back and forth between rounds (decision 2026-11-02);
@@ -412,9 +412,9 @@ The rules are applied in the order rule 1, rule 2, rule 3, with fixed limits.
 **Consequences (testable):**
 - Only empty locations in the planning copy are suggested; virtual locations never are.
 - Parts with no current location, and parts kept in place, are skipped by all rules.
-- A part gets at most one recommendation per run; a part that already has one gets none from a later rule.
+- A part gets at most one recommendation per run; a part that already has one gets none from a later rule, nor from its other pick groups under rule 3. Such a pick group is skipped silently: no block and no "no space" (decision 2026-11-11).
 - Each empty location is suggested to at most one part per run.
-- When a rule applies to a part but no empty location fits, the part is listed once as "no space" with that rule, and later rules skip it in the same run.
+- When a rule applies to a part but no empty location fits, the part is listed once as "no space" with that rule, and later rules skip it in the same run; for example, a part that is "no space" under rule 1 gets no rule 3 entry (decision 2026-11-11).
 - The answer-key test dataset gets exactly its expected recommendations and "no space" parts, in round 1 and round 2.
 
 #### FR-28: Explain each recommendation
@@ -698,9 +698,9 @@ The order inside stage 2 is decided in sprint planning.
 
 ### 7.3 Dependency before implementation: the answer-key test dataset
 
-**Status:** made 2026-11-11, in `data/answer-key/` (provisional folder until architecture). Its README lists four readings of this PRD that the expected results rely on.
+**Status:** made 2026-11-11, in `data/answer-key/` (final location, decision 2026-11-11).
 
-The answer-key test dataset is a small hand-made dataset (about 20 parts, more if the cases need it) with the expected result for each part. It is written before the rules are implemented, and it is committed with the tests (the folder is decided in architecture). It holds expected movement classes, pick groups, round 1 and round 2 recommendations and "no space" parts, and move-list content and order. It covers at least:
+The answer-key test dataset is a small hand-made dataset (about 20 parts, more if the cases need it) with the expected result for each part. It is written before the rules are implemented, and it is committed in `data/answer-key/`. It holds expected movement classes, pick groups, round 1 and round 2 recommendations and "no space" parts, and move-list content and order. It covers at least:
 - the class boundaries (0, 1, 5, 6, 23 and 24 picks) and both period boundaries;
 - a tie in picks;
 - a part stored in two locations (one of them a best location), and a part with equal stock in two locations;
@@ -767,6 +767,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Public deployment:** demo data only (user decision 2026-11-02).
 - **Demo flow metric:** must run from a clean checkout following only the README.
 - **Before/after table:** also shows pick groups in the same aisle.
+- **Answer-key details (user decision 2026-11-11):** the period counts transactions by date only; a slow-moving or dead-stock part whose partner's aisle has only best locations empty is "no space" under rule 3; a part that already has a recommendation is skipped silently in its other pick groups; a part that is "no space" under rule 1 gets no rule 3 entry; the answer-key test dataset lives in `data/answer-key/`.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions

@@ -2,8 +2,6 @@
 
 A small hand-made dataset with the expected result for every part (PRD §7.3). The rule modules (classification, pick groups, recommendations, rounds, move-list order) are tested against it directly, without the user interface (NFR-1, SM-1).
 
-**Folder:** provisional. The PRD leaves the folder to the architecture step; move it there if architecture decides otherwise.
-
 | File | What it is |
 | --- | --- |
 | `Locations.csv`, `Inventory.csv`, `transactions.csv` | The three import files (UTF-8 CSV, comma). Made by `build_inputs.py` from hand-written tables. |
@@ -110,14 +108,14 @@ The 6100–6200 pair has 4 real jobs and three traps, each of which would make i
 
 `expected.json` also lists the parts that move into and out of each aisle. 1008614-00 has no current location, so it is not counted anywhere. An optional extra run on the final state gives no recommendations, only 6600 "no space": the plan has settled.
 
-## Readings of the PRD this dataset relies on
+## Rules the PRD now states (decided 2026-11-11)
 
-These follow from the PRD text but are not spelled out in it. Confirm them, or change the dataset, before the rules are built:
+The dataset relies on these rules. Each was a reading of the PRD at first, and the author then confirmed it and added it to the PRD:
 
-1. **A slow part whose partner's aisle is all best** gets "no space" under rule 3 (6600). FR-26 bars it from best locations, and FR-27 lists the part as "no space" when no fitting location is empty. It is not one of FR-26's silent blocks.
-2. **A part in a second pick group in the same run** (8100–8300 in run 1) is skipped silently. It already has a recommendation, and FR-27 allows one per run. This is neither a block nor "no space".
-3. **A part that is "no space" under rule 1** (2400) is skipped by rule 3 with no second entry ("later rules skip it in the same run").
-4. **The period** counts a line by its date only. A line at 2025-09-30 09:00 is outside the period, and one at 2025-10-01 08:00 is inside.
+1. **A slow part whose partner's aisle is all best** gets "no space" under rule 3 (6600). See FR-26.
+2. **A part in a second pick group in the same run** (8100–8300 in run 1) is skipped silently, because it already has a recommendation: no block and no "no space". See FR-27.
+3. **A part that is "no space" under rule 1** (2400) is skipped by rule 3, with no second entry. See FR-27.
+4. **The period** counts a line by its date only. A line at 2025-09-30 09:00 is outside the period, and one at 2025-10-01 08:00 is inside. See the Period entry in the glossary.
 
 ## Not covered here
 
