@@ -2,7 +2,7 @@
 title: "PRD: Smart Warehouse Planner"
 status: final
 created: 2026-11-01
-updated: 2026-11-02
+updated: 2026-11-11
 ---
 
 # PRD: Smart Warehouse Planner
@@ -698,7 +698,7 @@ The order inside stage 2 is decided in sprint planning.
 
 ### 7.3 Dependency before implementation: the answer-key test dataset
 
-**Status:** not made yet.
+**Status:** made 2026-11-11, in `data/answer-key/` (provisional folder until architecture). Its README lists four readings of this PRD that the expected results rely on.
 
 The answer-key test dataset is a small hand-made dataset (about 20 parts, more if the cases need it) with the expected result for each part. It is written before the rules are implemented, and it is committed with the tests (the folder is decided in architecture). It holds expected movement classes, pick groups, round 1 and round 2 recommendations and "no space" parts, and move-list content and order. It covers at least:
 - the class boundaries (0, 1, 5, 6, 23 and 24 picks) and both period boundaries;
@@ -745,8 +745,10 @@ SM-3 to SM-5 are judged by the author, with no numeric target (decision 2026-11-
 
 ## 9. Open Questions
 
-1. **Walk Path and real walking.** Does the Walk Path order (aisle by aisle, location by location) match how people actually walk in the warehouse? (From the brief's addendum; affects only move-list order.)
-2. **Real data.** Real exports may have other column names, more location-code patterns and duplicate rows. In real data, a return goes through `RETURN-SKRS` and a Putaway line; under FR-5, a real Return to Stock line at `RETURN-SKRS` would reject the import. The import must be checked and adapted against real files before it is used with them; a column-mapping screen is not planned.
+No open questions remain. Both earlier questions were closed on 2026-11-11:
+
+1. **Walk Path and real walking — closed, no change.** The warehouse has long aisles about 90 cm wide, each of which can be entered from both ends, and people can walk around them. An aisle-by-aisle order therefore works as it is: a colleague can enter each aisle from either end, and the tick boxes let the list be worked in any order. Walk Path stays an ordering read from the Locations file, and the demo data is not changed (user decision 2026-11-11).
+2. **Real data — closed, out of scope.** The project will not import real exports, so the import is not adapted to them (other column names, other location-code patterns, returns through `RETURN-SKRS` and Putaway). The import is built and tested against the demo data and the answer-key test dataset only (user decision 2026-11-11).
 
 ## 10. Changes from the Brief and Addendum
 

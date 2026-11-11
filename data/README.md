@@ -1,6 +1,7 @@
 # Data
 
 - `sample/` — synthetic demo Excel files used during the course. These are committed to the repo.
+- `answer-key/` — the hand-made answer-key test dataset (PRD §7.3): about 27 parts with expected results, for the rule tests. Committed. See its README.
 - `private/` — ignored by git. Real company data must never be committed, and the course project does not use it.
 
 ## Demo data

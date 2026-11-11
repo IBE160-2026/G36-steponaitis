@@ -1,0 +1,31 @@
+Part,Part Description,Quantity,Unit,Location,Warehouse
+0100,Wiper blade - Volvo V70,4,PCS,A-01-01-01,NO
+0500,Fog light - Ford Focus,2,PCS,A-01-03-01,NO
+0600,"Brake disc, front - VW Golf",6,PCS,A-01-02-02,NO
+1008614-00,Oil filter - Toyota Corolla,0,PCS,A-01-01-03,NO
+10240,Air filter - VW Golf,10,PCS,B-01-01-03,NO
+1100,"Brake pad set, front - VW Golf",12,SET,C-01-01-01,NO
+1200,Spark plug - Ford Focus,2,PCS,A-01-02-01,NO
+1200,Spark plug - Ford Focus,8,PCS,B-01-01-02,NO
+2300,"Brake pad set, rear - VW Golf",9,SET,C-01-01-03,NO
+2400,Cabin filter - VW Golf,7,PCS,C-01-01-02,NO
+30400,"Shock absorber, front - Audi A4",4,PCS,D-01-01-03,NO
+3050,Strut top mount - Audi A4,4,PCS,B-01-02-03,NO
+4400,Radiator - Peugeot 308,5,PCS,B-01-01-01,NO
+4400,Radiator - Peugeot 308,5,PCS,A-01-03-02,NO
+5000,Engine oil 5W-30,60,L,A-01-02-03,NO
+6100,Glow plug - BMW 320d,8,PCS,B-01-03-01,NO
+6200,Fuel filter - BMW 320d,5,PCS,D-01-02-01,NO
+6600,Headlight bulb H7 - Ford Focus,10,PCS,C-01-02-03,NO
+7000,Headlight assembly - Ford Focus,3,PCS,A-01-03-03,NO
+8100,Timing belt kit - Skoda Octavia,3,KIT,B-01-02-01,NO
+8200,Water pump - Skoda Octavia,4,PCS,C-01-02-01,NO
+8300,Serpentine belt - Skoda Octavia,6,PCS,D-01-01-01,NO
+8400,Tie rod end - Opel Astra,4,PCS,C-01-02-02,NO
+8500,Ball joint - Opel Astra,6,PCS,B-01-02-02,NO
+8600,Control arm - Opel Astra,5,PCS,D-01-01-02,NO
+9000,Catalytic converter - Volvo V70,1,PCS,A-01-01-02,NO
+9100,Lambda sensor - Nissan Qashqai,3,PCS,D-01-02-02,NO
+9200,Exhaust gasket - Nissan Qashqai,8,PCS,D-01-02-03,NO
+9300,Door mirror glass - Mazda 3,2,PCS,B-01-03-02,NO
+9300,Door mirror glass - Mazda 3,3,PCS,B-01-03-02,NO

@@ -1,0 +1,577 @@
+Transaction Type,Part,Part Description,Location,Transaction Code,Date
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000007,2025-09-30 09:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000166,2025-09-30 09:00
+Move to Repair,9000,Catalytic converter - Volvo V70,A-01-01-02,5000364,2025-09-30 09:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000492,2025-09-30 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,5000492,2025-09-30 13:00
+Move to Repair,0100,Wiper blade - Volvo V70,A-01-01-01,5000001,2025-10-01 08:00
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000003,2025-10-06 08:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000008,2025-10-06 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000014,2025-10-06 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000040,2025-10-06 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000064,2025-10-06 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000094,2025-10-06 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000119,2025-10-06 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000142,2025-10-06 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000167,2025-10-06 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000177,2025-10-06 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000187,2025-10-06 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000227,2025-10-06 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000239,2025-10-06 08:00
+Move to Repair,6600,Headlight bulb H7 - Ford Focus,C-01-02-03,5000246,2025-10-06 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000251,2025-10-06 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000266,2025-10-06 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000282,2025-10-06 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000304,2025-10-06 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000322,2025-10-06 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000329,2025-10-06 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000344,2025-10-06 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000365,2025-10-06 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000374,2025-10-06 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000385,2025-10-06 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000415,2025-10-08 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000415,2025-10-08 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000425,2025-10-08 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000425,2025-10-08 13:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000434,2025-10-08 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000434,2025-10-08 13:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000442,2025-10-08 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000442,2025-10-08 13:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000449,2025-10-08 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000449,2025-10-08 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000455,2025-10-08 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000455,2025-10-08 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000461,2025-10-08 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000461,2025-10-08 13:00
+Issue Part,0600,"Brake disc, front - VW Golf",FLSKRS,5000467,2025-10-08 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000467,2025-10-08 13:00
+Issue Part,30400,"Shock absorber, front - Audi A4",FLSKRS,5000472,2025-10-08 13:00
+Issue Part,3050,Strut top mount - Audi A4,FLSKRS,5000472,2025-10-08 13:00
+Issue Part,6600,Headlight bulb H7 - Ford Focus,FLSKRS,5000477,2025-10-08 13:00
+Issue Part,7000,Headlight assembly - Ford Focus,FLSKRS,5000477,2025-10-08 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000482,2025-10-08 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,5000482,2025-10-08 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000486,2025-10-08 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000486,2025-10-08 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000482,2025-10-08 14:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000188,2025-10-15 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000015,2025-10-20 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000065,2025-10-20 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000386,2025-10-20 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000041,2025-10-21 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000095,2025-10-21 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000143,2025-10-21 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000120,2025-10-22 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000283,2025-10-23 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000189,2025-10-24 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000305,2025-10-27 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000345,2025-10-27 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000066,2025-10-30 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000267,2025-10-30 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000387,2025-10-30 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000252,2025-10-31 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000330,2025-10-31 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000016,2025-11-03 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000190,2025-11-03 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000096,2025-11-05 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000042,2025-11-06 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000144,2025-11-06 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000121,2025-11-07 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000228,2025-11-07 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000284,2025-11-10 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000375,2025-11-10 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000191,2025-11-11 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000067,2025-11-12 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000346,2025-11-12 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000388,2025-11-12 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000168,2025-11-14 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000178,2025-11-14 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000017,2025-11-17 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000306,2025-11-17 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000416,2025-11-17 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000416,2025-11-17 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000097,2025-11-19 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000366,2025-11-19 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000192,2025-11-20 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000043,2025-11-21 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000145,2025-11-21 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000426,2025-11-21 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000426,2025-11-21 13:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000068,2025-11-24 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000122,2025-11-24 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000268,2025-11-24 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000389,2025-11-24 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000253,2025-11-26 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000285,2025-11-26 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000331,2025-11-26 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000435,2025-11-27 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000435,2025-11-27 13:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000193,2025-12-01 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000347,2025-12-01 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000018,2025-12-02 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000098,2025-12-04 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000240,2025-12-04 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000323,2025-12-04 08:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000443,2025-12-05 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000443,2025-12-05 13:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000044,2025-12-08 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000069,2025-12-08 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000146,2025-12-08 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000307,2025-12-08 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000390,2025-12-08 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000123,2025-12-09 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000194,2025-12-09 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000229,2025-12-09 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000286,2025-12-12 08:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000009,2025-12-16 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000019,2025-12-16 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000269,2025-12-16 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000376,2025-12-16 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000450,2025-12-17 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000450,2025-12-17 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000456,2025-12-17 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000456,2025-12-17 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000462,2025-12-17 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000462,2025-12-17 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000487,2025-12-17 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000487,2025-12-17 13:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000070,2025-12-18 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000195,2025-12-18 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000391,2025-12-18 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000099,2025-12-19 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000045,2025-12-22 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000147,2025-12-22 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000254,2025-12-22 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000332,2025-12-22 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000348,2025-12-22 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000169,2025-12-24 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000179,2025-12-24 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000124,2025-12-25 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000417,2025-12-25 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000417,2025-12-25 13:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000196,2025-12-29 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000287,2025-12-29 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000308,2025-12-29 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000020,2025-12-30 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000071,2025-12-30 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000392,2025-12-30 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000100,2026-01-02 08:00
+Move to Repair,6600,Headlight bulb H7 - Ford Focus,C-01-02-03,5000247,2026-01-02 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000367,2026-01-02 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000197,2026-01-05 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000427,2026-01-05 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000427,2026-01-05 13:00
+Issue Part,0600,"Brake disc, front - VW Golf",FLSKRS,5000468,2026-01-05 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000468,2026-01-05 13:00
+Issue Part,30400,"Shock absorber, front - Audi A4",FLSKRS,5000473,2026-01-05 13:00
+Issue Part,3050,Strut top mount - Audi A4,FLSKRS,5000473,2026-01-05 13:00
+Issue Part,6600,Headlight bulb H7 - Ford Focus,FLSKRS,5000478,2026-01-05 13:00
+Issue Part,7000,Headlight assembly - Ford Focus,FLSKRS,5000478,2026-01-05 13:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000046,2026-01-06 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000148,2026-01-06 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000349,2026-01-07 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000270,2026-01-08 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000072,2026-01-12 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000125,2026-01-12 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000230,2026-01-12 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000393,2026-01-12 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000021,2026-01-13 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000198,2026-01-14 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000255,2026-01-15 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000288,2026-01-15 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000333,2026-01-15 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000436,2026-01-16 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000436,2026-01-16 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000101,2026-01-19 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000309,2026-01-19 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000377,2026-01-20 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000047,2026-01-22 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000149,2026-01-22 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000199,2026-01-23 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000073,2026-01-26 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000350,2026-01-26 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000394,2026-01-26 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000022,2026-01-27 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000126,2026-01-27 08:00
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000004,2026-02-02 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000102,2026-02-02 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000170,2026-02-02 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000180,2026-02-02 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000200,2026-02-02 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000241,2026-02-02 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000271,2026-02-02 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000289,2026-02-02 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000324,2026-02-02 08:00
+Receipt,9000,Catalytic converter - Volvo V70,A-01-01-02,0,2026-02-02 10:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000418,2026-02-02 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000418,2026-02-02 13:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000444,2026-02-02 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000444,2026-02-02 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000483,2026-02-02 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,5000483,2026-02-02 13:00
+Return to Stock,9000,Catalytic converter - Volvo V70,A-01-01-02,5000493,2026-02-03 15:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000074,2026-02-05 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000395,2026-02-05 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000048,2026-02-06 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000150,2026-02-06 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000256,2026-02-09 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000310,2026-02-09 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000334,2026-02-09 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000023,2026-02-10 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000201,2026-02-10 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000127,2026-02-12 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000231,2026-02-12 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000351,2026-02-13 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000103,2026-02-16 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000368,2026-02-16 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000428,2026-02-16 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000428,2026-02-16 13:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000075,2026-02-17 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000396,2026-02-17 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000290,2026-02-18 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000202,2026-02-19 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000049,2026-02-23 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000151,2026-02-23 08:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000010,2026-02-25 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000024,2026-02-25 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000272,2026-02-25 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000378,2026-02-25 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000451,2026-02-25 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000451,2026-02-25 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000457,2026-02-25 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000457,2026-02-25 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000463,2026-02-25 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000463,2026-02-25 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000488,2026-02-25 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000488,2026-02-25 13:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000076,2026-03-02 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000128,2026-03-02 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000203,2026-03-02 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000311,2026-03-02 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000397,2026-03-02 08:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,0,2026-03-02 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,0,2026-03-02 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000104,2026-03-03 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000352,2026-03-04 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000050,2026-03-09 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000152,2026-03-09 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000204,2026-03-09 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000257,2026-03-09 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000291,2026-03-09 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000335,2026-03-09 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000437,2026-03-09 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000437,2026-03-09 13:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000025,2026-03-11 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000171,2026-03-12 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000181,2026-03-12 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000419,2026-03-12 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000419,2026-03-12 13:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000077,2026-03-16 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000129,2026-03-16 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000232,2026-03-16 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000398,2026-03-16 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000105,2026-03-17 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000205,2026-03-18 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000273,2026-03-20 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000312,2026-03-23 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000353,2026-03-23 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000051,2026-03-24 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000153,2026-03-24 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000292,2026-03-24 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000026,2026-03-25 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000078,2026-03-26 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000399,2026-03-26 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000206,2026-03-27 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000429,2026-03-31 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000429,2026-03-31 13:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000445,2026-03-31 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000445,2026-03-31 13:00
+Issue Part,0600,"Brake disc, front - VW Golf",FLSKRS,5000469,2026-03-31 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000469,2026-03-31 13:00
+Issue Part,30400,"Shock absorber, front - Audi A4",FLSKRS,5000474,2026-03-31 13:00
+Issue Part,3050,Strut top mount - Audi A4,FLSKRS,5000474,2026-03-31 13:00
+Issue Part,6600,Headlight bulb H7 - Ford Focus,FLSKRS,5000479,2026-03-31 13:00
+Issue Part,7000,Headlight assembly - Ford Focus,FLSKRS,5000479,2026-03-31 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000106,2026-04-01 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000130,2026-04-01 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000242,2026-04-01 08:00
+Move to Repair,6600,Headlight bulb H7 - Ford Focus,C-01-02-03,5000248,2026-04-01 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000258,2026-04-01 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000325,2026-04-01 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000336,2026-04-01 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000369,2026-04-01 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000379,2026-04-01 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000207,2026-04-06 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000079,2026-04-07 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000400,2026-04-07 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000027,2026-04-08 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000052,2026-04-09 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000154,2026-04-09 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000293,2026-04-09 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000354,2026-04-10 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000274,2026-04-13 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000313,2026-04-13 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000208,2026-04-15 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000107,2026-04-16 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000131,2026-04-17 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000233,2026-04-17 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000080,2026-04-20 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000401,2026-04-20 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000420,2026-04-20 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000420,2026-04-20 13:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000172,2026-04-21 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000182,2026-04-21 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000028,2026-04-22 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000053,2026-04-24 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000155,2026-04-24 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000209,2026-04-24 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000259,2026-04-27 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000294,2026-04-27 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000337,2026-04-27 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000438,2026-04-27 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000438,2026-04-27 13:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000355,2026-04-29 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000108,2026-04-30 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000081,2026-05-04 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000132,2026-05-04 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000210,2026-05-04 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000314,2026-05-04 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000402,2026-05-04 08:00
+Receipt,9300,Door mirror glass - Mazda 3,B-01-03-02,0,2026-05-04 10:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000452,2026-05-05 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000452,2026-05-05 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000458,2026-05-05 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000458,2026-05-05 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000464,2026-05-05 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000464,2026-05-05 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000489,2026-05-05 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000489,2026-05-05 13:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000011,2026-05-06 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000029,2026-05-06 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000275,2026-05-06 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000380,2026-05-06 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000054,2026-05-11 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000156,2026-05-11 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000211,2026-05-12 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000295,2026-05-13 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000082,2026-05-14 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000403,2026-05-14 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000430,2026-05-14 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000430,2026-05-14 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000109,2026-05-15 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000370,2026-05-15 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000356,2026-05-18 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000133,2026-05-19 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000234,2026-05-19 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000030,2026-05-21 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000212,2026-05-21 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000260,2026-05-22 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000338,2026-05-22 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000055,2026-05-25 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000157,2026-05-25 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000315,2026-05-25 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000083,2026-05-26 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000404,2026-05-26 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000421,2026-05-29 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000421,2026-05-29 13:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000446,2026-05-29 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000446,2026-05-29 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000484,2026-05-29 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,5000484,2026-05-29 13:00
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000005,2026-06-01 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000110,2026-06-01 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000173,2026-06-01 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000183,2026-06-01 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000213,2026-06-01 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000243,2026-06-01 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000276,2026-06-01 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000296,2026-06-01 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000326,2026-06-01 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000031,2026-06-04 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000134,2026-06-04 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000357,2026-06-05 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000084,2026-06-08 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000214,2026-06-08 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000405,2026-06-08 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000056,2026-06-09 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000158,2026-06-09 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000381,2026-06-11 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000111,2026-06-15 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000316,2026-06-15 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000439,2026-06-15 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000439,2026-06-15 13:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000261,2026-06-16 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000297,2026-06-16 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000339,2026-06-16 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000215,2026-06-17 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000032,2026-06-18 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000085,2026-06-19 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000406,2026-06-19 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000135,2026-06-22 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000235,2026-06-22 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000277,2026-06-23 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000358,2026-06-24 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000057,2026-06-25 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000159,2026-06-25 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000216,2026-06-26 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000112,2026-06-29 08:00
+Move to Repair,6600,Headlight bulb H7 - Ford Focus,C-01-02-03,5000249,2026-06-29 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000371,2026-06-29 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000431,2026-06-29 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000431,2026-06-29 13:00
+Issue Part,0600,"Brake disc, front - VW Golf",FLSKRS,5000470,2026-06-29 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000470,2026-06-29 13:00
+Issue Part,30400,"Shock absorber, front - Audi A4",FLSKRS,5000475,2026-06-29 13:00
+Issue Part,3050,Strut top mount - Audi A4,FLSKRS,5000475,2026-06-29 13:00
+Issue Part,6600,Headlight bulb H7 - Ford Focus,FLSKRS,5000480,2026-06-29 13:00
+Issue Part,7000,Headlight assembly - Ford Focus,FLSKRS,5000480,2026-06-29 13:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000033,2026-07-02 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000086,2026-07-02 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000407,2026-07-02 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000298,2026-07-03 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000217,2026-07-06 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000317,2026-07-06 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000422,2026-07-06 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000422,2026-07-06 13:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000136,2026-07-07 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000174,2026-07-08 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000184,2026-07-08 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000058,2026-07-10 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000160,2026-07-10 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000113,2026-07-13 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000262,2026-07-13 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000340,2026-07-13 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000359,2026-07-13 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000087,2026-07-14 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000218,2026-07-14 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000408,2026-07-14 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000453,2026-07-14 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000453,2026-07-14 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000459,2026-07-14 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000459,2026-07-14 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000465,2026-07-14 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000465,2026-07-14 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000490,2026-07-14 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000490,2026-07-14 13:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000012,2026-07-16 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000034,2026-07-16 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000278,2026-07-16 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000382,2026-07-16 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000299,2026-07-20 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000137,2026-07-23 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000219,2026-07-23 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000236,2026-07-23 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000059,2026-07-27 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000088,2026-07-27 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000161,2026-07-27 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000318,2026-07-27 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000409,2026-07-27 08:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000447,2026-07-27 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000447,2026-07-27 13:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000114,2026-07-28 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000244,2026-07-28 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000327,2026-07-28 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000035,2026-07-30 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000360,2026-07-31 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000220,2026-08-03 08:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000440,2026-08-03 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000440,2026-08-03 13:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000263,2026-08-05 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000300,2026-08-05 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000341,2026-08-05 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000089,2026-08-07 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000410,2026-08-07 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000060,2026-08-10 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000138,2026-08-10 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000162,2026-08-10 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000279,2026-08-10 08:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000432,2026-08-10 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000432,2026-08-10 13:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000221,2026-08-11 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000115,2026-08-12 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000372,2026-08-12 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000036,2026-08-14 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000319,2026-08-14 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000423,2026-08-14 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000423,2026-08-14 13:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000175,2026-08-17 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000185,2026-08-17 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000090,2026-08-19 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000361,2026-08-19 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000411,2026-08-19 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000222,2026-08-20 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000383,2026-08-21 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000139,2026-08-24 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000237,2026-08-24 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000301,2026-08-24 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000061,2026-08-25 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000163,2026-08-25 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000116,2026-08-26 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000037,2026-08-28 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000223,2026-08-31 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000264,2026-08-31 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000342,2026-08-31 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000091,2026-09-01 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000280,2026-09-01 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000412,2026-09-01 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000320,2026-09-04 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000224,2026-09-07 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000362,2026-09-07 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000302,2026-09-08 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000140,2026-09-09 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000062,2026-09-10 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000117,2026-09-10 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000164,2026-09-10 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000038,2026-09-11 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000092,2026-09-14 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000413,2026-09-14 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000225,2026-09-16 08:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000424,2026-09-22 13:00
+Issue Part,8200,Water pump - Skoda Octavia,FLSKRS,5000424,2026-09-22 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000433,2026-09-22 13:00
+Issue Part,8600,Control arm - Opel Astra,FLSKRS,5000433,2026-09-22 13:00
+Issue Part,2400,Cabin filter - VW Golf,FLSKRS,5000441,2026-09-22 13:00
+Issue Part,5000,Engine oil 5W-30,FLSKRS,5000441,2026-09-22 13:00
+Issue Part,1008614-00,Oil filter - Toyota Corolla,FLSKRS,5000448,2026-09-22 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000448,2026-09-22 13:00
+Issue Part,8100,Timing belt kit - Skoda Octavia,FLSKRS,5000454,2026-09-22 13:00
+Issue Part,8300,Serpentine belt - Skoda Octavia,FLSKRS,5000454,2026-09-22 13:00
+Issue Part,8400,Tie rod end - Opel Astra,FLSKRS,5000460,2026-09-22 13:00
+Issue Part,8500,Ball joint - Opel Astra,FLSKRS,5000460,2026-09-22 13:00
+Issue Part,9100,Lambda sensor - Nissan Qashqai,FLSKRS,5000466,2026-09-22 13:00
+Issue Part,9200,Exhaust gasket - Nissan Qashqai,FLSKRS,5000466,2026-09-22 13:00
+Issue Part,0600,"Brake disc, front - VW Golf",FLSKRS,5000471,2026-09-22 13:00
+Issue Part,2300,"Brake pad set, rear - VW Golf",FLSKRS,5000471,2026-09-22 13:00
+Issue Part,30400,"Shock absorber, front - Audi A4",FLSKRS,5000476,2026-09-22 13:00
+Issue Part,3050,Strut top mount - Audi A4,FLSKRS,5000476,2026-09-22 13:00
+Issue Part,6600,Headlight bulb H7 - Ford Focus,FLSKRS,5000481,2026-09-22 13:00
+Issue Part,7000,Headlight assembly - Ford Focus,FLSKRS,5000481,2026-09-22 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000485,2026-09-22 13:00
+Issue Part,6200,Fuel filter - BMW 320d,FLSKRS,5000485,2026-09-22 13:00
+Issue Part,6100,Glow plug - BMW 320d,FLSKRS,5000491,2026-09-22 13:00
+Issue Part,9999,Clutch kit - Mazda 3,FLSKRS,5000491,2026-09-22 13:00
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000006,2026-09-25 08:00
+Move to Repair,0600,"Brake disc, front - VW Golf",A-01-02-02,5000013,2026-09-25 08:00
+Move to Repair,1008614-00,Oil filter - Toyota Corolla,A-01-01-03,5000039,2026-09-25 08:00
+Move to Repair,10240,Air filter - VW Golf,B-01-01-03,5000063,2026-09-25 08:00
+Move to Repair,1100,"Brake pad set, front - VW Golf",C-01-01-01,5000093,2026-09-25 08:00
+Move to Repair,1200,Spark plug - Ford Focus,A-01-02-01,5000118,2026-09-25 08:00
+Move to Repair,2300,"Brake pad set, rear - VW Golf",C-01-01-03,5000141,2026-09-25 08:00
+Move to Repair,2400,Cabin filter - VW Golf,C-01-01-02,5000165,2026-09-25 08:00
+Move to Repair,30400,"Shock absorber, front - Audi A4",D-01-01-03,5000176,2026-09-25 08:00
+Move to Repair,3050,Strut top mount - Audi A4,B-01-02-03,5000186,2026-09-25 08:00
+Move to Repair,5000,Engine oil 5W-30,A-01-02-03,5000226,2026-09-25 08:00
+Move to Repair,6100,Glow plug - BMW 320d,B-01-03-01,5000238,2026-09-25 08:00
+Move to Repair,6200,Fuel filter - BMW 320d,D-01-02-01,5000245,2026-09-25 08:00
+Move to Repair,6600,Headlight bulb H7 - Ford Focus,C-01-02-03,5000250,2026-09-25 08:00
+Move to Repair,7000,Headlight assembly - Ford Focus,A-01-03-03,5000265,2026-09-25 08:00
+Move to Repair,8100,Timing belt kit - Skoda Octavia,B-01-02-01,5000281,2026-09-25 08:00
+Move to Repair,8200,Water pump - Skoda Octavia,C-01-02-01,5000303,2026-09-25 08:00
+Move to Repair,8300,Serpentine belt - Skoda Octavia,D-01-01-01,5000321,2026-09-25 08:00
+Move to Repair,8400,Tie rod end - Opel Astra,C-01-02-02,5000328,2026-09-25 08:00
+Move to Repair,8500,Ball joint - Opel Astra,B-01-02-02,5000343,2026-09-25 08:00
+Move to Repair,8600,Control arm - Opel Astra,D-01-01-02,5000363,2026-09-25 08:00
+Move to Repair,9100,Lambda sensor - Nissan Qashqai,D-01-02-02,5000373,2026-09-25 08:00
+Move to Repair,9200,Exhaust gasket - Nissan Qashqai,D-01-02-03,5000384,2026-09-25 08:00
+Move to Repair,9999,Clutch kit - Mazda 3,B-01-04-03,5000414,2026-09-25 08:00
+Move to Repair,0500,Fog light - Ford Focus,A-01-03-01,5000002,2026-09-30 08:00

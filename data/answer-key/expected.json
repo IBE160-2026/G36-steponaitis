@@ -1,0 +1,182 @@
+{
+  "about": "Hand-worked expected results for the answer-key test dataset (PRD §7.3). See README.md for the reasoning behind each value. Part numbers and location codes are text; 'order' lists are in the order the PRD requires.",
+  "settings": {
+    "period_months": 12,
+    "fast_min_picks": 24,
+    "medium_min_picks": 6,
+    "slow_min_picks": 1,
+    "pick_group_min_shared_jobs": 5
+  },
+  "data_as_of": "2026-09-30",
+  "period": { "first_day": "2025-10-01", "last_day": "2026-09-30" },
+
+  "parts": {
+    "0100":       { "picks": 1,  "class": "slow-moving",   "current_location": "A-01-01-01" },
+    "0500":       { "picks": 5,  "class": "slow-moving",   "current_location": "A-01-03-01" },
+    "0600":       { "picks": 6,  "class": "medium-moving", "current_location": "A-01-02-02" },
+    "1008614-00": { "picks": 26, "class": "fast-moving",   "current_location": null },
+    "10240":      { "picks": 24, "class": "fast-moving",   "current_location": "B-01-01-03" },
+    "1100":       { "picks": 30, "class": "fast-moving",   "current_location": "C-01-01-01" },
+    "1200":       { "picks": 25, "class": "fast-moving",   "current_location": "B-01-01-02" },
+    "2300":       { "picks": 23, "class": "medium-moving", "current_location": "C-01-01-03" },
+    "2400":       { "picks": 24, "class": "fast-moving",   "current_location": "C-01-01-02" },
+    "30400":      { "picks": 10, "class": "medium-moving", "current_location": "D-01-01-03" },
+    "3050":       { "picks": 10, "class": "medium-moving", "current_location": "B-01-02-03" },
+    "4400":       { "picks": 0,  "class": "dead stock",    "current_location": "A-01-03-02" },
+    "5000":       { "picks": 40, "class": "fast-moving",   "current_location": "A-01-02-03" },
+    "6100":       { "picks": 12, "class": "medium-moving", "current_location": "B-01-03-01" },
+    "6200":       { "picks": 7,  "class": "medium-moving", "current_location": "D-01-02-01" },
+    "6600":       { "picks": 5,  "class": "slow-moving",   "current_location": "C-01-02-03" },
+    "7000":       { "picks": 15, "class": "medium-moving", "current_location": "A-01-03-03" },
+    "8100":       { "picks": 16, "class": "medium-moving", "current_location": "B-01-02-01" },
+    "8200":       { "picks": 22, "class": "medium-moving", "current_location": "C-01-02-01" },
+    "8300":       { "picks": 18, "class": "medium-moving", "current_location": "D-01-01-01" },
+    "8400":       { "picks": 7,  "class": "medium-moving", "current_location": "C-01-02-02" },
+    "8500":       { "picks": 15, "class": "medium-moving", "current_location": "B-01-02-02" },
+    "8600":       { "picks": 20, "class": "medium-moving", "current_location": "D-01-01-02" },
+    "9000":       { "picks": 0,  "class": "dead stock",    "current_location": "A-01-01-02" },
+    "9100":       { "picks": 9,  "class": "medium-moving", "current_location": "D-01-02-02" },
+    "9200":       { "picks": 11, "class": "medium-moving", "current_location": "D-01-02-03" },
+    "9300":       { "picks": 0,  "class": "dead stock",    "current_location": "B-01-03-02" }
+  },
+  "not_classified": ["9999"],
+  "merged_inventory": [ { "part": "9300", "location": "B-01-03-02", "quantity": 5 } ],
+
+  "pick_groups_in_order": [
+    { "parts": ["8100", "8200"], "shared_jobs": 10 },
+    { "parts": ["8500", "8600"], "shared_jobs": 9 },
+    { "parts": ["2400", "5000"], "shared_jobs": 8 },
+    { "parts": ["1008614-00", "2300"], "shared_jobs": 7 },
+    { "parts": ["8100", "8300"], "shared_jobs": 6 },
+    { "parts": ["8400", "8500"], "shared_jobs": 6 },
+    { "parts": ["9100", "9200"], "shared_jobs": 6 },
+    { "parts": ["0600", "2300"], "shared_jobs": 5 },
+    { "parts": ["30400", "3050"], "shared_jobs": 5 },
+    { "parts": ["6600", "7000"], "shared_jobs": 5 }
+  ],
+  "not_pick_groups": [
+    { "parts": ["6100", "6200"], "shared_jobs": 4, "why": "4 jobs; the duplicate line, the code-0 lines and the job on 2025-09-30 must not count" },
+    { "parts": ["6100", "9999"], "why": "9999 is not in the Inventory file" }
+  ],
+
+  "occupancy_import": {
+    "A": { "locations": 9,  "occupied": 8, "empty": 1 },
+    "B": { "locations": 12, "occupied": 8, "empty": 4 },
+    "C": { "locations": 9,  "occupied": 6, "empty": 3 },
+    "D": { "locations": 9,  "occupied": 6, "empty": 3 },
+    "total": { "locations": 39, "occupied": 28, "empty": 11 }
+  },
+  "empty_with_zero_stock_row": ["A-01-01-03"],
+
+  "best_location_marks": [ { "aisle": "A" } ],
+
+  "steps": [
+    {
+      "step": 1, "action": "run", "round": 1,
+      "recommendations_in_order": [
+        { "part": "1100",  "from": "C-01-01-01", "to": "A-01-01-03", "rule": 1 },
+        { "part": "4400",  "from": "A-01-03-02", "to": "B-01-03-03", "rule": 2 },
+        { "part": "9000",  "from": "A-01-01-02", "to": "B-01-04-01", "rule": 2 },
+        { "part": "0100",  "from": "A-01-01-01", "to": "B-01-04-02", "rule": 2 },
+        { "part": "0500",  "from": "A-01-03-01", "to": "B-01-04-03", "rule": 2 },
+        { "part": "8100",  "from": "B-01-02-01", "to": "C-01-03-01", "rule": 3 },
+        { "part": "8500",  "from": "B-01-02-02", "to": "D-01-03-01", "rule": 3 },
+        { "part": "3050",  "from": "B-01-02-03", "to": "D-01-03-02", "rule": 3 }
+      ],
+      "no_space": [
+        { "part": "1200",  "rule": 1 },
+        { "part": "10240", "rule": 1 },
+        { "part": "2400",  "rule": 1 },
+        { "part": "6600",  "rule": 3 }
+      ],
+      "no_outcome": ["0600", "1008614-00", "2300", "5000", "7000", "8200", "8300", "8400", "8600", "9100", "9200", "30400", "6100", "6200", "9300"]
+    },
+    { "step": 2, "action": "apply", "part": "1100", "expect_move": { "from": "C-01-01-01", "to": "A-01-01-03", "rule": 1, "round": 1 } },
+    { "step": 3, "action": "manual_move", "part": "9300", "from": "B-01-03-02", "to": "C-01-01-01", "expect_move": { "rule": "Manual", "round": 1 } },
+    { "step": 4, "action": "manual_move", "part": "9100", "from": "D-01-02-02", "to": "D-01-02-03", "expect_move": { "rule": "Manual", "round": 1 }, "note": "into an occupied location" },
+    { "step": 5, "action": "manual_move", "part": "9200", "from": "D-01-02-03", "to": "D-01-02-02", "expect_move": { "rule": "Manual", "round": 1 }, "note": "completes the swap; 9100 stays in D-01-02-03" },
+    { "step": 6, "action": "keep_in_place", "part": "0500" },
+    { "step": 7, "action": "apply", "part": "8100", "expect_move": { "from": "B-01-02-01", "to": "C-01-03-01", "rule": 3, "round": 1 } },
+    { "step": 8, "action": "apply", "part": "8500", "expect_move": { "from": "B-01-02-02", "to": "D-01-03-01", "rule": 3, "round": 1 } },
+    { "step": 9, "action": "apply", "part": "3050", "expect_move": { "from": "B-01-02-03", "to": "D-01-03-02", "rule": 3, "round": 1 } },
+    { "step": 10, "action": "apply", "part": "4400", "expect_move": { "from": "A-01-03-02", "to": "B-01-03-03", "rule": 2, "round": 1 } },
+    { "step": 11, "action": "apply", "part": "9000", "expect_move": { "from": "A-01-01-02", "to": "B-01-04-01", "rule": 2, "round": 1 } },
+    { "step": 12, "action": "apply", "part": "0100", "expect_move": { "from": "A-01-01-01", "to": "B-01-04-02", "rule": 2, "round": 1 } },
+    {
+      "step": 13, "action": "run", "round": 2,
+      "recommendations_in_order": [
+        { "part": "1200",  "from": "B-01-01-02", "to": "A-01-01-01", "rule": 1 },
+        { "part": "10240", "from": "B-01-01-03", "to": "A-01-01-02", "rule": 1 },
+        { "part": "2400",  "from": "C-01-01-02", "to": "A-01-03-02", "rule": 1 },
+        { "part": "8400",  "from": "C-01-02-02", "to": "D-01-03-03", "rule": 3 }
+      ],
+      "no_space": [ { "part": "6600", "rule": 3 } ],
+      "note": "0500 is kept in place: no recommendation and no 'no space'. 8100-8300 is blocked by the rule 3 loop limit."
+    },
+    { "step": 14, "action": "apply", "part": "1200", "expect_move": { "from": "B-01-01-02", "to": "A-01-01-01", "rule": 1, "round": 2 } },
+    { "step": 15, "action": "undo", "expect": "1200 back in B-01-01-02; recommendations of run 2 for 1200, 10240, 2400 and 8400 are all outdated" },
+    { "step": 16, "action": "undo", "expect": "0100 back in A-01-01-01 (its round 1 move is gone); current round stays 2" },
+    { "step": 17, "action": "manual_move", "part": "0100", "from": "A-01-01-01", "to": "C-01-03-02", "expect_move": { "rule": "Manual", "round": 2 } },
+    { "step": 18, "action": "manual_move", "part": "0100", "from": "C-01-03-02", "to": "B-01-03-02", "expect_move": { "from": "A-01-01-01", "to": "B-01-03-02", "rule": "Manual", "round": 2 }, "note": "combined with step 17 (FR-34): one move, not two" },
+    {
+      "step": 19, "action": "run", "round": 3,
+      "recommendations_in_order": [
+        { "part": "1200",  "from": "B-01-01-02", "to": "A-01-01-01", "rule": 1 },
+        { "part": "10240", "from": "B-01-01-03", "to": "A-01-01-02", "rule": 1 },
+        { "part": "2400",  "from": "C-01-01-02", "to": "A-01-03-02", "rule": 1 },
+        { "part": "8400",  "from": "C-01-02-02", "to": "D-01-03-03", "rule": 3 }
+      ],
+      "no_space": [ { "part": "6600", "rule": 3 } ]
+    },
+    { "step": 20, "action": "apply_all", "expect": "four round 3 moves, one per recommendation of run 3" }
+  ],
+
+  "move_list": {
+    "rounds": 3,
+    "lines_in_order": [
+      { "round": 1, "part": "9000",  "from": "A-01-01-02", "to": "B-01-04-01", "rule": "2" },
+      { "round": 1, "part": "4400",  "from": "A-01-03-02", "to": "B-01-03-03", "rule": "2" },
+      { "round": 1, "part": "8100",  "from": "B-01-02-01", "to": "C-01-03-01", "rule": "3" },
+      { "round": 1, "part": "8500",  "from": "B-01-02-02", "to": "D-01-03-01", "rule": "3" },
+      { "round": 1, "part": "3050",  "from": "B-01-02-03", "to": "D-01-03-02", "rule": "3" },
+      { "round": 1, "part": "1100",  "from": "C-01-01-01", "to": "A-01-01-03", "rule": "1" },
+      { "round": 1, "part": "9300",  "from": "B-01-03-02", "to": "C-01-01-01", "rule": "Manual" },
+      { "round": 1, "part": "9100",  "from": "D-01-02-02", "to": "D-01-02-03", "rule": "Manual" },
+      { "round": 1, "part": "9200",  "from": "D-01-02-03", "to": "D-01-02-02", "rule": "Manual" },
+      { "round": 2, "part": "0100",  "from": "A-01-01-01", "to": "B-01-03-02", "rule": "Manual" },
+      { "round": 3, "part": "1200",  "from": "B-01-01-02", "to": "A-01-01-01", "rule": "1" },
+      { "round": 3, "part": "10240", "from": "B-01-01-03", "to": "A-01-01-02", "rule": "1" },
+      { "round": 3, "part": "2400",  "from": "C-01-01-02", "to": "A-01-03-02", "rule": "1" },
+      { "round": 3, "part": "8400",  "from": "C-01-02-02", "to": "D-01-03-03", "rule": "3" }
+    ]
+  },
+
+  "final_current_locations": {
+    "0100": "B-01-03-02", "1100": "A-01-01-03", "1200": "A-01-01-01", "10240": "A-01-01-02",
+    "2400": "A-01-03-02", "4400": "B-01-01-01", "9000": "B-01-04-01", "9300": "C-01-01-01",
+    "9100": "D-01-02-03", "9200": "D-01-02-02", "8100": "C-01-03-01", "8500": "D-01-03-01",
+    "3050": "D-01-03-02", "8400": "D-01-03-03", "0500": "A-01-03-01"
+  },
+
+  "before_after": {
+    "fast_in_best":   { "before": { "A": 1, "B": 0, "C": 0, "D": 0, "total": 1 },
+                        "after":  { "A": 5, "B": 0, "C": 0, "D": 0, "total": 5 } },
+    "pick_groups_together": { "before": { "A": 0, "B": 0, "C": 0, "D": 1, "total": 1 },
+                              "after":  { "A": 1, "B": 0, "C": 1, "D": 4, "total": 6 } },
+    "moved_in":  { "A": ["10240", "1100", "2400"], "B": ["0100", "9000"], "C": ["8100", "9300"], "D": ["3050", "8400", "8500"] },
+    "moved_out": { "A": ["0100", "4400", "9000"], "B": ["10240", "1200", "3050", "8100", "8500", "9300"], "C": ["1100", "2400", "8400"], "D": [] },
+    "occupancy_after": {
+      "A": { "occupied": 9, "empty": 0 },
+      "B": { "occupied": 5, "empty": 7 },
+      "C": { "occupied": 5, "empty": 4 },
+      "D": { "occupied": 9, "empty": 0 },
+      "total": { "occupied": 28, "empty": 11 }
+    }
+  },
+
+  "settled_check": {
+    "note": "Optional, after the move list has been checked: one more run on the final state gives no recommendations; only 6600 'no space' (rule 3).",
+    "recommendations": [],
+    "no_space": [ { "part": "6600", "rule": 3 } ]
+  }
+}
