@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="t d">
+<title id="t">Network map — feature menu</title>
+<desc id="d">The features menu drawn as a network map: the core flow is the blue line, look-up features sit on a loop, settings on a spur, and stage 2 features on a grey planned-extension line with locks.</desc>
+<defs>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap');
+text { font-family: 'Hanken Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; fill: #141414; }
+.caps { letter-spacing: 0.06em; }
+</style>
+<pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+<rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#6E6E69" stroke-width="1.2"/>
+</pattern>
+<filter id="lift" x="-10%" y="-10%" width="120%" height="130%">
+<feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="#000" flood-opacity="0.16"/>
+</filter>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1440" height="52" fill="#141414" />
+<circle cx="30" cy="26" r="11" fill="#FFFFFF" />
+<path d="M22 26 H38" fill="none" stroke="#141414" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="30" cy="26" r="3.2" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="50" y="31" font-size="15" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<line x1="248" y1="16" x2="248" y2="36" stroke="#4A4A46" stroke-width="1" />
+<g transform="translate(262,18) scale(1)" fill="none" stroke="#BDBDB6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 L5 8 L10 13"/></g>
+<text x="282" y="31" font-size="13" font-weight="500" style="fill:#CFCFC8" >Saved plans</text>
+<text x="366" y="31" font-size="13" font-weight="400" style="fill:#8A8A84" >/</text>
+<text x="380" y="31" font-size="15" font-weight="700" style="fill:#FFFFFF" >Spring re-slot 2026</text>
+<text x="530" y="31" font-size="12" font-weight="400" style="fill:#BDBDB6" >Saved 14:41 · last edited by planner</text>
+<rect x="800" y="12" width="300" height="28" fill="#262624" stroke="#55554F" stroke-width="1" rx="6" />
+<g transform="translate(810,18) scale(1)" fill="none" stroke="#BDBDB6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14"/></g>
+<text x="834" y="31" font-size="13" font-weight="400" style="fill:#A9A9A2" >Search parts or locations</text>
+<text x="1088" y="31" font-size="12" font-weight="600" text-anchor="end" style="fill:#8A8A84" >/</text>
+<rect x="1116" y="12" width="172" height="28" fill="#FFFFFF" rx="14" />
+<text x="1202" y="31" font-size="13" font-weight="700" text-anchor="middle" >Data as of 2026-09-30</text>
+<text x="1300" y="31" font-size="12" font-weight="400" style="fill:#BDBDB6" >Uploaded 2026-10-02</text>
+<rect x="0" y="52" width="1440" height="848" fill="#FFFFFF" />
+<text x="60" y="102" font-size="26" font-weight="800" >Network map</text>
+<text x="60" y="126" font-size="14" font-weight="400" style="fill:#4D4D49" >Every feature is a station. Follow the blue line for the flow; the loop and the spur can be visited at any time.</text>
+<rect x="950" y="82" width="110" height="34" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="6" />
+<g transform="translate(962,91) scale(1)" fill="none" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<text x="984" y="103.68" font-size="13" font-weight="600" >Close</text>
+<text x="1050" y="131" font-size="12" font-weight="600" text-anchor="end" style="fill:#6E6E69" >Esc</text>
+<rect x="40" y="150" width="1040" height="420" fill="#F3F3F0" />
+<text x="56" y="172" font-size="13" font-weight="800" >Core · milestones 1 and 2</text>
+<rect x="40" y="582" width="1040" height="230" fill="#E9E9E4" />
+<text x="56" y="604" font-size="13" font-weight="800" >Stage 2 · planned extension, after the milestone 2 gate</text>
+<path d="M100 272 H800" fill="none" stroke="#1C5BB8" stroke-width="7" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M800 272 H1036" fill="none" stroke="#1C5BB8" stroke-width="7" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M800 272 H1036" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="butt"/>
+<line x1="100" y1="261" x2="100" y2="283" stroke="#1C5BB8" stroke-width="5" />
+<line x1="1036" y1="261" x2="1036" y2="283" stroke="#1C5BB8" stroke-width="5" />
+<circle cx="100" cy="238" r="10" fill="#1C5BB8" />
+<text x="100" y="242.68" font-size="13" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >P</text>
+<path d="M372,272 L430.7,330.7 Q442,342 442.0,358.0 L442.0,434.0 Q442,450 458.0,450.0 L596.0,450.0 Q612,450 623.3,438.7 L638.7,423.3 Q650,412 650.0,396.0 L650,272" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M372 272 V206" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round" stroke-linecap="butt"/>
+<line x1="362" y1="206" x2="382" y2="206" stroke="#141414" stroke-width="4" />
+<path d="M100 700 H940" fill="none" stroke="#A3A39C" stroke-width="7" stroke-linejoin="round" stroke-linecap="butt"/>
+<path d="M100 700 H940" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round" stroke-linecap="butt" stroke-dasharray="8 6"/>
+<path d="M100 284 V688" fill="none" stroke="#A3A39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<path d="M442 462 V686" fill="none" stroke="#A3A39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<circle cx="100" cy="272" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="100" y="302" font-size="15" font-weight="800" text-anchor="middle" >Saved plans</text>
+<text x="100" y="320" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >start page · 3 plans</text>
+<rect x="86.4" y="329" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="100" y="342" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M2</text>
+<circle cx="236" cy="272" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="236" y="302" font-size="15" font-weight="800" text-anchor="middle" >New Plan</text>
+<text x="236" y="320" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >name + three files</text>
+<text x="236" y="337" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >or reuse an import</text>
+<rect x="205.9" y="346" width="60.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="236" y="359" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1 · M2</text>
+<circle cx="372" cy="272" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="372" y="302" font-size="15" font-weight="800" text-anchor="middle" ></text>
+<text x="358" y="232" font-size="15" font-weight="800" text-anchor="end" >Plan overview</text>
+<text x="358" y="250" font-size="12" font-weight="400" text-anchor="end" style="fill:#4D4D49" >data-as-of date, counts · M1</text>
+<circle cx="372" cy="206" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="390" y="211" font-size="15" font-weight="800" text-anchor="start" >Settings</text>
+<text x="390" y="229" font-size="12" font-weight="400" text-anchor="start" style="fill:#4D4D49" >period · class limits · pick-group minimum</text>
+<circle cx="442" cy="372" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="424" y="377" font-size="15" font-weight="800" text-anchor="end" >Parts</text>
+<text x="424" y="395" font-size="12" font-weight="400" text-anchor="end" style="fill:#4D4D49" >1,545 · movement class</text>
+<text x="424" y="412" font-size="12" font-weight="400" text-anchor="end" style="fill:#4D4D49" >picks · keep in place</text>
+<rect x="396.8" y="421" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="410.4" y="434" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1</text>
+<circle cx="442" cy="450" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="442" y="480" font-size="15" font-weight="800" text-anchor="middle" >Locations</text>
+<text x="442" y="498" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >2,000 · occupancy</text>
+<rect x="428.4" y="507" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="442" y="520" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1</text>
+<circle cx="560" cy="450" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="560" y="480" font-size="15" font-weight="800" text-anchor="middle" >Pick groups</text>
+<text x="560" y="498" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >212 pairs</text>
+<rect x="546.4" y="507" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="560" y="520" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1</text>
+<circle cx="650" cy="272" r="8" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="650" y="302" font-size="15" font-weight="800" text-anchor="middle" ></text>
+<text x="650" y="232" font-size="15" font-weight="800" text-anchor="middle" >Best locations</text>
+<text x="650" y="250" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >336 marked · 49 empty · M1</text>
+<circle cx="920" cy="272" r="8" fill="#FFFFFF" stroke="#1C5BB8" stroke-width="3" />
+<text x="920" y="302" font-size="15" font-weight="800" text-anchor="middle" >Before/after</text>
+<text x="920" y="320" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >per aisle</text>
+<rect x="906.4" y="329" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="920" y="342" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1</text>
+<circle cx="1036" cy="272" r="8" fill="#FFFFFF" stroke="#1C5BB8" stroke-width="3" />
+<text x="1036" y="302" font-size="15" font-weight="800" text-anchor="middle" >Move list</text>
+<text x="1036" y="320" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >print · 25 moves</text>
+<rect x="1022.4" y="329" width="27.2" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="1036" y="342" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M2</text>
+<circle cx="800" cy="272" r="14" fill="#FFFFFF" stroke="#141414" stroke-width="4" />
+<circle cx="800" cy="272" r="5.5" fill="#141414" />
+<text x="800" y="306" font-size="15" font-weight="800" text-anchor="middle" >Recommendations</text>
+<text x="800" y="324" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >round 2 · 7 open</text>
+<rect x="764" y="332" width="72" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="800" y="345" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1 · M2</text>
+<rect x="750" y="226" width="100" height="22" fill="#141414" rx="3" />
+<text x="800" y="241" font-size="12" font-weight="700" text-anchor="middle" style="fill:#FFFFFF" >You are here</text>
+<text x="800" y="376" font-size="12" font-weight="600" text-anchor="middle" style="fill:#4D4D49" >List · Warehouse map</text>
+<path d="M800 356 V364" fill="none" stroke="#6E6E69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="470" y="346" width="150" height="50" fill="#FFFFFF" stroke="#D6D6D0" stroke-width="1" rx="6" />
+<g transform="translate(482,354) scale(1)" fill="none" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14"/></g>
+<text x="504" y="367" font-size="13" font-weight="700" >Search</text>
+<text x="482" y="386" font-size="12" font-weight="400" style="fill:#4D4D49" >parts and locations</text>
+<circle cx="100" cy="700" r="11" fill="#FFFFFF" stroke="#A3A39C" stroke-width="2.5" />
+<g transform="translate(92,692) scale(1)" fill="none" stroke="#6E6E69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="9" height="7" rx="1"/><path d="M5.5 7 V5 a2.5 2.5 0 0 1 5 0 V7"/></g>
+<text x="100" y="736" font-size="15" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Account</text>
+<text x="100" y="754" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >create account · log in</text>
+<rect x="69.9" y="763" width="60.2" height="18" fill="#FFFFFF" stroke="#A3A39C" stroke-width="1" rx="9" />
+<text x="100" y="776" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Stage 2</text>
+<circle cx="442" cy="700" r="11" fill="#FFFFFF" stroke="#A3A39C" stroke-width="2.5" />
+<g transform="translate(434,692) scale(1)" fill="none" stroke="#6E6E69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="9" height="7" rx="1"/><path d="M5.5 7 V5 a2.5 2.5 0 0 1 5 0 V7"/></g>
+<text x="442" y="736" font-size="15" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Warehouse view</text>
+<text x="442" y="754" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >all aisles, occupancy,</text>
+<text x="442" y="771" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >tooltips per location</text>
+<rect x="411.9" y="780" width="60.2" height="18" fill="#FFFFFF" stroke="#A3A39C" stroke-width="1" rx="9" />
+<text x="442" y="793" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Stage 2</text>
+<circle cx="700" cy="700" r="11" fill="#FFFFFF" stroke="#A3A39C" stroke-width="2.5" />
+<g transform="translate(692,692) scale(1)" fill="none" stroke="#6E6E69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="9" height="7" rx="1"/><path d="M5.5 7 V5 a2.5 2.5 0 0 1 5 0 V7"/></g>
+<text x="700" y="736" font-size="15" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Category check</text>
+<text x="700" y="754" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >keyword rules,</text>
+<text x="700" y="771" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >aisle categories</text>
+<rect x="669.9" y="780" width="60.2" height="18" fill="#FFFFFF" stroke="#A3A39C" stroke-width="1" rx="9" />
+<text x="700" y="793" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Stage 2</text>
+<circle cx="940" cy="700" r="11" fill="#FFFFFF" stroke="#A3A39C" stroke-width="2.5" />
+<g transform="translate(932,692) scale(1)" fill="none" stroke="#6E6E69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="9" height="7" rx="1"/><path d="M5.5 7 V5 a2.5 2.5 0 0 1 5 0 V7"/></g>
+<text x="940" y="736" font-size="15" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Location labels</text>
+<text x="940" y="754" font-size="12" font-weight="400" text-anchor="middle" style="fill:#4D4D49" >print with QR code</text>
+<rect x="909.9" y="763" width="60.2" height="18" fill="#FFFFFF" stroke="#A3A39C" stroke-width="1" rx="9" />
+<text x="940" y="776" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >Stage 2</text>
+<text x="1064" y="802" font-size="12" font-weight="500" text-anchor="end" style="fill:#6E6E69" >Locked until the core passes its gates.</text>
+<line x1="1096" y1="52" x2="1096" y2="900" stroke="#D6D6D0" stroke-width="1" />
+<rect x="1112" y="82" width="300" height="36" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="6" />
+<g transform="translate(1124,92) scale(1)" fill="none" stroke="#4D4D49" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14"/></g>
+<text x="1148" y="105" font-size="13" font-weight="400" style="fill:#6E6E69" >Go to a feature or a plan</text>
+<text x="1398" y="105" font-size="12" font-weight="600" text-anchor="end" style="fill:#6E6E69" >⌘K</text>
+<text x="1112" y="160" font-size="15" font-weight="800" >Open plan</text>
+<rect x="1112" y="172" width="300" height="74" fill="#FFFFFF" stroke="#141414" stroke-width="1.5" rx="6" />
+<text x="1126" y="196" font-size="14" font-weight="800" >Spring re-slot 2026</text>
+<text x="1126" y="215" font-size="12" font-weight="400" style="fill:#4D4D49" >Data as of 2026-09-30 · round 2</text>
+<text x="1126" y="233" font-size="12" font-weight="400" style="fill:#4D4D49" >25 moves · edited 14:41 by planner</text>
+<text x="1112" y="282" font-size="15" font-weight="800" >Other saved plans</text>
+<text x="1112" y="306" font-size="13" font-weight="700" >Aisle A trial</text>
+<text x="1112" y="324" font-size="12" font-weight="400" style="fill:#4D4D49" >Data as of 2026-09-30 · edited 2026-11-04</text>
+<line x1="1112" y1="336" x2="1412" y2="336" stroke="#D6D6D0" stroke-width="1" />
+<text x="1112" y="352" font-size="13" font-weight="700" >Dead stock sweep</text>
+<text x="1112" y="370" font-size="12" font-weight="400" style="fill:#4D4D49" >Data as of 2026-08-31 · edited 2026-10-12</text>
+<line x1="1112" y1="382" x2="1412" y2="382" stroke="#D6D6D0" stroke-width="1" />
+<rect x="1112" y="398" width="120" height="32" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="6" />
+<g transform="translate(1124,406) scale(1)" fill="none" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 V13 M3 8 H13"/></g>
+<text x="1146" y="418.68" font-size="13" font-weight="600" >New Plan</text>
+<text x="1112" y="470" font-size="15" font-weight="800" >How to read the map</text>
+<line x1="1112" y1="492" x2="1146" y2="492" stroke="#1C5BB8" stroke-width="6" />
+<text x="1158" y="496" font-size="13" font-weight="500" >Core flow, in order (P line)</text>
+<line x1="1112" y1="516" x2="1146" y2="516" stroke="#1C5BB8" stroke-width="6" />
+<line x1="1112" y1="516" x2="1146" y2="516" stroke="#FFFFFF" stroke-width="2.4" />
+<text x="1158" y="520" font-size="13" font-weight="500" >Core flow still ahead of you</text>
+<line x1="1112" y1="540" x2="1146" y2="540" stroke="#141414" stroke-width="5" />
+<text x="1158" y="544" font-size="13" font-weight="500" >Look-up loop and settings spur</text>
+<line x1="1112" y1="564" x2="1146" y2="564" stroke="#A3A39C" stroke-width="6" />
+<line x1="1112" y1="564" x2="1146" y2="564" stroke="#FFFFFF" stroke-width="2.6" stroke-dasharray="6 4"/>
+<text x="1158" y="568" font-size="13" font-weight="500" >Stage 2, planned, locked</text>
+<circle cx="1129" cy="592" r="7" fill="#FFFFFF" stroke="#141414" stroke-width="3" />
+<text x="1158" y="596" font-size="13" font-weight="500" >Station: one feature, one page</text>
+<circle cx="1129" cy="620" r="11" fill="#FFFFFF" stroke="#141414" stroke-width="3.5" />
+<circle cx="1129" cy="620" r="4.5" fill="#141414" />
+<text x="1158" y="624" font-size="13" font-weight="500" >You are here</text>
+<rect x="1114" y="639" width="30" height="18" fill="#FFFFFF" stroke="#6E6E69" stroke-width="1" rx="9" />
+<text x="1129" y="652" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >M1</text>
+<text x="1158" y="652" font-size="13" font-weight="500" >Milestone that delivers it</text>
+<text x="1112" y="800" font-size="12" font-weight="400" style="fill:#4D4D49" >Keyboard: every station is a link;</text>
+<text x="1112" y="818" font-size="12" font-weight="400" style="fill:#4D4D49" >Tab moves along the line in flow order.</text>
+</svg>

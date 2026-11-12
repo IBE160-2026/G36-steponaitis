@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="t d">
+<title id="t">Screen map — Network Diagram</title>
+<desc id="d">Sketch sheet of the other key screens as labelled thumbnails in the Network Diagram style.</desc>
+<defs>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap');
+text { font-family: 'Hanken Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; fill: #141414; }
+.caps { letter-spacing: 0.06em; }
+</style>
+<pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+<rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#6E6E69" stroke-width="1.2"/>
+</pattern>
+<filter id="lift" x="-10%" y="-10%" width="120%" height="130%">
+<feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="#000" flood-opacity="0.16"/>
+</filter>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<text x="24" y="40" font-size="24" font-weight="800" >Screen map</text>
+<text x="176" y="40" font-size="14" font-weight="400" style="fill:#4D4D49" >Spring re-slot 2026 · the other key screens, in flow order</text>
+<path d="M640 34 H1416" fill="none" stroke="#1C5BB8" stroke-width="4" stroke-linejoin="round" stroke-linecap="butt"/>
+<circle cx="650" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="650" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >1</text>
+<circle cx="745" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="745" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >2</text>
+<circle cx="840" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="840" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >3</text>
+<circle cx="935" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="935" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >4</text>
+<circle cx="1030" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="1030" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >5</text>
+<circle cx="1125" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="1125" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >6</text>
+<circle cx="1220" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="1220" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >7</text>
+<circle cx="1315" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="1315" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >8</text>
+<circle cx="1410" cy="34" r="5" fill="#FFFFFF" stroke="#141414" stroke-width="2" />
+<text x="1410" y="22" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >9</text>
+<g transform="translate(24,66)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >1</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Saved-plans list</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >start page</text>
+<text x="12" y="66" font-size="15" font-weight="800" >Saved plans</text>
+<rect x="336" y="50" width="100" height="26" fill="#141414" stroke="#141414" stroke-width="1.25" rx="6" />
+<g transform="translate(348,55) scale(1)" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 V13 M3 8 H13"/></g>
+<text x="370" y="67.32" font-size="12" font-weight="600" style="fill:#FFFFFF" >New Plan</text>
+<text x="12" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Plan</text>
+<text x="148" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Data as of</text>
+<text x="230" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Created by</text>
+<text x="308" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Last edited</text>
+<line x1="12" y1="97" x2="418" y2="97" stroke="#141414" stroke-width="1" />
+<text x="12" y="114" font-size="11" font-weight="700" >Spring re-slot 2026</text>
+<text x="148" y="114" font-size="11" font-weight="400" >2026-09-30</text>
+<text x="230" y="114" font-size="11" font-weight="400" >planner</text>
+<text x="308" y="114" font-size="11" font-weight="400" >2026-11-11 14:41</text>
+<line x1="12" y1="119" x2="418" y2="119" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="136" font-size="11" font-weight="700" >Aisle A trial</text>
+<text x="148" y="136" font-size="11" font-weight="400" >2026-09-30</text>
+<text x="230" y="136" font-size="11" font-weight="400" >planner</text>
+<text x="308" y="136" font-size="11" font-weight="400" >2026-11-04 10:12</text>
+<line x1="12" y1="141" x2="418" y2="141" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="158" font-size="11" font-weight="700" >Dead stock sweep</text>
+<text x="148" y="158" font-size="11" font-weight="400" >2026-08-31</text>
+<text x="230" y="158" font-size="11" font-weight="400" >planner</text>
+<text x="308" y="158" font-size="11" font-weight="400" >2026-10-12 09:30</text>
+<line x1="12" y1="163" x2="418" y2="163" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="186" font-size="11" font-weight="400" style="fill:#4D4D49" >Most recently edited first. Plans are shared and saved</text>
+<text x="12" y="201" font-size="11" font-weight="400" style="fill:#4D4D49" >automatically; delete asks to confirm.</text>
+<g transform="translate(418,104) scale(0.75)" fill="none" stroke="#6E6E69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<g transform="translate(418,126) scale(0.75)" fill="none" stroke="#6E6E69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<g transform="translate(418,148) scale(0.75)" fill="none" stroke="#6E6E69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+</g>
+<g transform="translate(496,66)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >2</text>
+<text x="24" y="13" font-size="14" font-weight="800" >New Plan, import error</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >New Plan</text>
+<text x="12" y="64" font-size="15" font-weight="800" >New Plan</text>
+<text x="12" y="82" font-size="11" font-weight="700" >Plan name</text>
+<rect x="12" y="87" width="200" height="22" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="4" />
+<text x="20" y="102" font-size="11" font-weight="500" >Spring re-slot 2026</text>
+<g transform="translate(12,117) scale(0.8)" fill="none" stroke="#141414" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5 H9.5 L12.5 4.5 V14.5 H4 Z"/><path d="M9.5 1.5 V4.5 H12.5"/></g>
+<text x="30" y="128" font-size="11" font-weight="700" >Locations.xlsx</text>
+<g transform="translate(140,117) scale(0.8)" fill="none" stroke="#141414" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 L6.5 12 L13 4.5"/></g>
+<text x="156" y="128" font-size="11" font-weight="400" style="fill:#4D4D49" >2,000 rows</text>
+<g transform="translate(12,135) scale(0.8)" fill="none" stroke="#141414" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5 H9.5 L12.5 4.5 V14.5 H4 Z"/><path d="M9.5 1.5 V4.5 H12.5"/></g>
+<text x="30" y="146" font-size="11" font-weight="700" >Inventory.xlsx</text>
+<g transform="translate(140,135) scale(0.8)" fill="none" stroke="#141414" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 L6.5 12 L13 4.5"/></g>
+<text x="156" y="146" font-size="11" font-weight="400" style="fill:#4D4D49" >1,625 rows</text>
+<g transform="translate(12,153) scale(0.8)" fill="none" stroke="#141414" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5 H9.5 L12.5 4.5 V14.5 H4 Z"/><path d="M9.5 1.5 V4.5 H12.5"/></g>
+<text x="30" y="164" font-size="11" font-weight="700" >transactions.xlsx</text>
+<g transform="translate(140,153) scale(0.8)" fill="none" stroke="#D7261E" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2 L14.5 13.5 H1.5 Z"/><path d="M8 6.5 V9.5"/><circle cx="8" cy="11.5" r="0.5"/></g>
+<text x="156" y="164" font-size="11" font-weight="700" style="fill:#D7261E" >not imported</text>
+<rect x="224" y="80" width="212" height="100" fill="#FDECEA" stroke="#D7261E" stroke-width="1.25" rx="4" />
+<g transform="translate(232,88) scale(0.85)" fill="none" stroke="#D7261E" stroke-width="1.76471" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2 L14.5 13.5 H1.5 Z"/><path d="M8 6.5 V9.5"/><circle cx="8" cy="11.5" r="0.5"/></g>
+<text x="250" y="99" font-size="11" font-weight="800" >Import stopped, nothing saved.</text>
+<text x="234" y="117" font-size="11" font-weight="600" >transactions.xlsx, row 4,812,</text>
+<text x="234" y="132" font-size="11" font-weight="400" >column Date: “31.09.2026” is not</text>
+<text x="234" y="147" font-size="11" font-weight="400" >a valid date. Fix the file and</text>
+<text x="234" y="162" font-size="11" font-weight="400" >upload it again.</text>
+<text x="12" y="200" font-size="11" font-weight="600" style="fill:#4D4D49" >or reuse the import of a saved plan</text>
+<rect x="12" y="206" width="200" height="22" fill="#FFFFFF" stroke="#D6D6D0" stroke-width="1" rx="4" />
+<text x="20" y="221" font-size="11" font-weight="400" style="fill:#6E6E69" >Choose a plan</text>
+<rect x="336" y="204" width="100" height="26" fill="#F4F4F1" stroke="#D6D6D0" stroke-width="1.25" rx="6" />
+<text x="350" y="221.32" font-size="12" font-weight="600" style="fill:#8E8E88" >Create plan</text>
+</g>
+<g transform="translate(968,66)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >3</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Plan overview</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Overview</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Spring re-slot 2026</text>
+<rect x="268" y="50" width="170" height="20" fill="#141414" rx="10" />
+<text x="353" y="64" font-size="11" font-weight="700" text-anchor="middle" style="fill:#FFFFFF" >Data as of 2026-09-30</text>
+<text x="12" y="82" font-size="11" font-weight="400" style="fill:#4D4D49" >Uploaded 2026-10-02 · period 2025-10-01 – 2026-09-30</text>
+<text x="12" y="110" font-size="15" font-weight="800" >1,545</text>
+<text x="12" y="125" font-size="11" font-weight="400" style="fill:#4D4D49" >parts</text>
+<text x="98" y="110" font-size="15" font-weight="800" >2,000</text>
+<text x="98" y="125" font-size="11" font-weight="400" style="fill:#4D4D49" >locations</text>
+<text x="184" y="110" font-size="15" font-weight="800" >79.2%</text>
+<text x="184" y="125" font-size="11" font-weight="400" style="fill:#4D4D49" >occupied</text>
+<text x="270" y="110" font-size="15" font-weight="800" >416</text>
+<text x="270" y="125" font-size="11" font-weight="400" style="fill:#4D4D49" >empty</text>
+<text x="356" y="110" font-size="15" font-weight="800" >212</text>
+<text x="356" y="125" font-size="11" font-weight="400" style="fill:#4D4D49" >pick groups</text>
+<line x1="12" y1="136" x2="436" y2="136" stroke="#D6D6D0" stroke-width="1" />
+<circle cx="18" cy="150" r="5" fill="#141414" />
+<text x="30" y="154" font-size="11" font-weight="800" >F</text>
+<text x="44" y="154" font-size="11" font-weight="500" >fast-moving</text>
+<text x="150" y="154" font-size="11" font-weight="700" text-anchor="end" >139</text>
+<text x="158" y="154" font-size="11" font-weight="400" style="fill:#4D4D49" >24+ picks</text>
+<circle cx="18" cy="167" r="4.2" fill="#141414" />
+<text x="30" y="171" font-size="11" font-weight="800" >M</text>
+<text x="44" y="171" font-size="11" font-weight="500" >medium-moving</text>
+<text x="150" y="171" font-size="11" font-weight="700" text-anchor="end" >301</text>
+<text x="158" y="171" font-size="11" font-weight="400" style="fill:#4D4D49" >6–23 picks</text>
+<circle cx="18" cy="184" r="3.4" fill="#141414" />
+<text x="30" y="188" font-size="11" font-weight="800" >S</text>
+<text x="44" y="188" font-size="11" font-weight="500" >slow-moving</text>
+<text x="150" y="188" font-size="11" font-weight="700" text-anchor="end" >469</text>
+<text x="158" y="188" font-size="11" font-weight="400" style="fill:#4D4D49" >1–5 picks</text>
+<circle cx="18" cy="201" r="2.6" fill="#141414" />
+<text x="30" y="205" font-size="11" font-weight="800" >D</text>
+<text x="44" y="205" font-size="11" font-weight="500" >dead stock</text>
+<text x="150" y="205" font-size="11" font-weight="700" text-anchor="end" >636</text>
+<text x="158" y="205" font-size="11" font-weight="400" style="fill:#4D4D49" >0 picks</text>
+<text x="250" y="154" font-size="11" font-weight="600" >Best locations 336 · 49 empty</text>
+<text x="250" y="171" font-size="11" font-weight="600" >Kept in place 2</text>
+<text x="250" y="188" font-size="11" font-weight="600" >Rounds 2 · moves 25</text>
+<text x="250" y="214" font-size="11" font-weight="400" style="fill:#4D4D49" >Settings: 12 months · 24 / 6 / 1</text>
+<text x="250" y="229" font-size="11" font-weight="400" style="fill:#4D4D49" >pick-group minimum 5</text>
+</g>
+<g transform="translate(24,344)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >4</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Parts list</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Parts</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Parts</text>
+<text x="60" y="64" font-size="13" font-weight="500" style="fill:#4D4D49" >1,545</text>
+<rect x="200" y="50" width="36" height="20" fill="#141414" stroke="#141414" stroke-width="1" rx="10" />
+<text x="218" y="64" font-size="11" font-weight="700" text-anchor="middle" style="fill:#FFFFFF" >All</text>
+<rect x="242" y="50" width="30" height="20" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="10" />
+<text x="257" y="64" font-size="11" font-weight="700" text-anchor="middle" >F</text>
+<rect x="278" y="50" width="30" height="20" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="10" />
+<text x="293" y="64" font-size="11" font-weight="700" text-anchor="middle" >M</text>
+<rect x="314" y="50" width="30" height="20" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="10" />
+<text x="329" y="64" font-size="11" font-weight="700" text-anchor="middle" >S</text>
+<rect x="350" y="50" width="30" height="20" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="10" />
+<text x="365" y="64" font-size="11" font-weight="700" text-anchor="middle" >D</text>
+<text x="12" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Part</text>
+<text x="74" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Description</text>
+<text x="240" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Stock</text>
+<text x="280" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Location</text>
+<text x="358" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Class</text>
+<text x="396" y="92" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Picks</text>
+<line x1="12" y1="97" x2="436" y2="97" stroke="#141414" stroke-width="1" />
+<text x="12" y="111" font-size="11" font-weight="700" >4410281</text>
+<text x="74" y="111" font-size="11" font-weight="400" >Brake pads, front - VW Golf</text>
+<text x="240" y="111" font-size="11" font-weight="400" >24</text>
+<text x="280" y="111" font-size="11" font-weight="400" >G-14-04-02</text>
+<text x="358" y="111" font-size="11" font-weight="400" >F</text>
+<text x="396" y="111" font-size="11" font-weight="400" >61</text>
+<line x1="12" y1="116" x2="436" y2="116" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="130" font-size="11" font-weight="700" >9723950</text>
+<text x="74" y="130" font-size="11" font-weight="400" >Headlight bulb H7 - Peugeot</text>
+<text x="240" y="130" font-size="11" font-weight="400" >40</text>
+<text x="280" y="130" font-size="11" font-weight="400" >A-02-01-02</text>
+<text x="358" y="130" font-size="11" font-weight="400" >F</text>
+<text x="396" y="130" font-size="11" font-weight="400" >48</text>
+<line x1="12" y1="135" x2="436" y2="135" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="149" font-size="11" font-weight="700" >4410297</text>
+<text x="74" y="149" font-size="11" font-weight="400" >Brake disc, front - VW Golf</text>
+<text x="240" y="149" font-size="11" font-weight="400" >12</text>
+<text x="280" y="149" font-size="11" font-weight="400" >G-14-04-03</text>
+<text x="358" y="149" font-size="11" font-weight="400" >M</text>
+<text x="396" y="149" font-size="11" font-weight="400" >19</text>
+<line x1="12" y1="154" x2="436" y2="154" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="168" font-size="11" font-weight="700" >7181839</text>
+<text x="74" y="168" font-size="11" font-weight="400" >Alternator - Hyundai Tucson</text>
+<text x="240" y="168" font-size="11" font-weight="400" >3</text>
+<text x="280" y="168" font-size="11" font-weight="400" >E-05-02-01</text>
+<text x="358" y="168" font-size="11" font-weight="400" >M</text>
+<text x="396" y="168" font-size="11" font-weight="400" >9</text>
+<line x1="12" y1="173" x2="436" y2="173" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="187" font-size="11" font-weight="700" >2555849</text>
+<text x="74" y="187" font-size="11" font-weight="400" >Brake hose - Toyota Corolla</text>
+<text x="240" y="187" font-size="11" font-weight="400" >8</text>
+<text x="280" y="187" font-size="11" font-weight="400" >A-05-03-02</text>
+<text x="358" y="187" font-size="11" font-weight="400" >S</text>
+<text x="396" y="187" font-size="11" font-weight="400" >3</text>
+<line x1="12" y1="192" x2="436" y2="192" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="206" font-size="11" font-weight="700" >3632446</text>
+<text x="74" y="206" font-size="11" font-weight="400" >Catalytic converter - BMW</text>
+<text x="240" y="206" font-size="11" font-weight="400" >1</text>
+<text x="280" y="206" font-size="11" font-weight="400" >A-01-04-01</text>
+<text x="358" y="206" font-size="11" font-weight="400" >D</text>
+<text x="396" y="206" font-size="11" font-weight="400" >0</text>
+<line x1="12" y1="211" x2="436" y2="211" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="236" font-size="11" font-weight="400" style="fill:#4D4D49" >Sorted by picks · click a part for a manual move</text>
+</g>
+<g transform="translate(496,344)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >5</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Locations list</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Locations</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Locations</text>
+<text x="90" y="64" font-size="11" font-weight="500" style="fill:#4D4D49" >2,000 · 1,584 occupied · 416 empty</text>
+<circle cx="20" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="20" y="88" font-size="11" font-weight="800" text-anchor="middle" >A</text>
+<circle cx="44" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="44" y="88" font-size="11" font-weight="800" text-anchor="middle" >B</text>
+<circle cx="68" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="68" y="88" font-size="11" font-weight="800" text-anchor="middle" >C</text>
+<circle cx="92" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="92" y="88" font-size="11" font-weight="800" text-anchor="middle" >D</text>
+<circle cx="116" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="116" y="88" font-size="11" font-weight="800" text-anchor="middle" >E</text>
+<circle cx="140" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="140" y="88" font-size="11" font-weight="800" text-anchor="middle" >F</text>
+<circle cx="164" cy="84" r="9" fill="#141414" stroke="#141414" stroke-width="1.3" />
+<text x="164" y="88" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >G</text>
+<circle cx="188" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="188" y="88" font-size="11" font-weight="800" text-anchor="middle" >H</text>
+<circle cx="212" cy="84" r="9" fill="#FFFFFF" stroke="#141414" stroke-width="1.3" />
+<text x="212" y="88" font-size="11" font-weight="800" text-anchor="middle" >I</text>
+<text x="240" y="88" font-size="11" font-weight="700" >Aisle G · 75.2% · 167 of 222</text>
+<text x="12" y="112" font-size="11" font-weight="700" style="fill:#4D4D49" >LOCATION</text>
+<text x="96" y="112" font-size="11" font-weight="700" style="fill:#4D4D49" >LVL</text>
+<text x="126" y="112" font-size="11" font-weight="700" style="fill:#4D4D49" >WALK PATH</text>
+<text x="196" y="112" font-size="11" font-weight="700" style="fill:#4D4D49" >STATE</text>
+<text x="266" y="112" font-size="11" font-weight="700" style="fill:#4D4D49" >PARTS · STOCK</text>
+<line x1="12" y1="117" x2="436" y2="117" stroke="#141414" stroke-width="1" />
+<text x="12" y="134" font-size="11" font-weight="700" >G-14-04-01</text>
+<text x="96" y="134" font-size="11" font-weight="400" >4</text>
+<text x="126" y="134" font-size="11" font-weight="400" >14,970</text>
+<circle cx="200" cy="130" r="4" fill="#141414" />
+<text x="210" y="134" font-size="11" font-weight="400" >occupied</text>
+<text x="266" y="134" font-size="11" font-weight="400" >4410305 Brake caliper · 6</text>
+<line x1="12" y1="139" x2="436" y2="139" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="153" font-size="11" font-weight="700" >G-14-04-02</text>
+<text x="96" y="153" font-size="11" font-weight="400" >4</text>
+<text x="126" y="153" font-size="11" font-weight="400" >14,980</text>
+<circle cx="200" cy="149" r="4" fill="#141414" />
+<text x="210" y="153" font-size="11" font-weight="400" >occupied</text>
+<text x="266" y="153" font-size="11" font-weight="400" >4410281 Brake pads · 24</text>
+<line x1="12" y1="158" x2="436" y2="158" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="172" font-size="11" font-weight="700" >G-14-04-03</text>
+<text x="96" y="172" font-size="11" font-weight="400" >4</text>
+<text x="126" y="172" font-size="11" font-weight="400" >14,990</text>
+<circle cx="200" cy="168" r="4" fill="#141414" />
+<text x="210" y="172" font-size="11" font-weight="400" >occupied</text>
+<text x="266" y="172" font-size="11" font-weight="400" >4410297 Brake disc · 12</text>
+<line x1="12" y1="177" x2="436" y2="177" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="191" font-size="11" font-weight="700" >G-15-01-01</text>
+<text x="96" y="191" font-size="11" font-weight="400" >1</text>
+<text x="126" y="191" font-size="11" font-weight="400" >15,000</text>
+<circle cx="200" cy="187" r="3.6" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" />
+<text x="210" y="191" font-size="11" font-weight="400" >empty</text>
+<text x="266" y="191" font-size="11" font-weight="400" style="fill:#4D4D49" >—</text>
+<line x1="12" y1="196" x2="436" y2="196" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="210" font-size="11" font-weight="700" >G-15-01-02</text>
+<text x="96" y="210" font-size="11" font-weight="400" >1</text>
+<text x="126" y="210" font-size="11" font-weight="400" >15,010</text>
+<circle cx="200" cy="206" r="3.6" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" />
+<text x="210" y="210" font-size="11" font-weight="400" >empty</text>
+<text x="266" y="210" font-size="11" font-weight="400" >— (moved out, round 2)</text>
+<line x1="12" y1="215" x2="436" y2="215" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="236" font-size="11" font-weight="400" style="fill:#4D4D49" >Filter: aisle · occupied/empty · best location</text>
+</g>
+<g transform="translate(968,344)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >6</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Pick groups</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Pick groups</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Pick groups</text>
+<text x="110" y="64" font-size="11" font-weight="500" style="fill:#4D4D49" >212 · 5 or more shared jobs · 141 in the same aisle</text>
+<rect x="12" y="86" width="26" height="13" fill="none" stroke="#00875A" stroke-width="1.6" rx="6.5" />
+<circle cx="19" cy="92.5" r="3.2" fill="#141414" />
+<circle cx="31" cy="92.5" r="3.2" fill="#141414" />
+<text x="48" y="96" font-size="11" font-weight="800" >4410281 + 4410297</text>
+<text x="48" y="111" font-size="11" font-weight="400" style="fill:#4D4D49" >Brake pads + disc, VW Golf</text>
+<text x="290" y="96" font-size="11" font-weight="700" text-anchor="end" >14 shared jobs</text>
+<circle cx="320" cy="92" r="8" fill="#141414" />
+<text x="320" y="95.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >G</text>
+<path d="M330 92 H352" fill="none" stroke="#00875A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="362" cy="92" r="8" fill="#141414" />
+<text x="362" y="95.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >G</text>
+<text x="378" y="96" font-size="11" font-weight="600" style="fill:#4D4D49" >together</text>
+<rect x="12" y="122" width="26" height="13" fill="none" stroke="#00875A" stroke-width="1.6" rx="6.5" />
+<circle cx="19" cy="128.5" r="3.2" fill="#141414" />
+<circle cx="31" cy="128.5" r="3.2" fill="#141414" />
+<text x="48" y="132" font-size="11" font-weight="800" >2007060 + 2007078</text>
+<text x="48" y="147" font-size="11" font-weight="400" style="fill:#4D4D49" >Oil filter + drain plug, Ford</text>
+<text x="290" y="132" font-size="11" font-weight="700" text-anchor="end" >12 shared jobs</text>
+<circle cx="320" cy="128" r="8" fill="#141414" />
+<text x="320" y="131.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >B</text>
+<path d="M330 128 H352" fill="none" stroke="#00875A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="362" cy="128" r="8" fill="#141414" />
+<text x="362" y="131.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >B</text>
+<text x="378" y="132" font-size="11" font-weight="600" style="fill:#4D4D49" >together</text>
+<rect x="12" y="158" width="26" height="13" fill="none" stroke="#00875A" stroke-width="1.6" rx="6.5" stroke-dasharray="3 2"/>
+<circle cx="19" cy="164.5" r="3.2" fill="#141414" />
+<circle cx="31" cy="164.5" r="3.2" fill="#141414" />
+<text x="48" y="168" font-size="11" font-weight="800" >6900616 + 7181839</text>
+<text x="48" y="183" font-size="11" font-weight="400" style="fill:#4D4D49" >Timing belt kit + alternator</text>
+<text x="290" y="168" font-size="11" font-weight="700" text-anchor="end" >7 shared jobs</text>
+<circle cx="320" cy="164" r="8" fill="#141414" />
+<text x="320" y="167.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >C</text>
+<path d="M330 164 H352" fill="none" stroke="#6E6E69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2"/>
+<circle cx="362" cy="164" r="8" fill="#141414" />
+<text x="362" y="167.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >E</text>
+<text x="378" y="168" font-size="11" font-weight="700" >apart</text>
+<rect x="12" y="194" width="26" height="13" fill="none" stroke="#00875A" stroke-width="1.6" rx="6.5" stroke-dasharray="3 2"/>
+<circle cx="19" cy="200.5" r="3.2" fill="#141414" />
+<circle cx="31" cy="200.5" r="3.2" fill="#141414" />
+<text x="48" y="204" font-size="11" font-weight="800" >3298226 + 3298234</text>
+<text x="48" y="219" font-size="11" font-weight="400" style="fill:#4D4D49" >Tail light + bulb set, RAV4</text>
+<text x="290" y="204" font-size="11" font-weight="700" text-anchor="end" >6 shared jobs</text>
+<circle cx="320" cy="200" r="8" fill="#141414" />
+<text x="320" y="203.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >F</text>
+<path d="M330 200 H352" fill="none" stroke="#6E6E69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2"/>
+<circle cx="362" cy="200" r="8" fill="#141414" />
+<text x="362" y="203.96" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >A</text>
+<text x="378" y="204" font-size="11" font-weight="700" >apart</text>
+<text x="12" y="236" font-size="11" font-weight="400" style="fill:#4D4D49" >Sorted by shared jobs · apart pairs feed rule 3</text>
+</g>
+<g transform="translate(24,622)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >7</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Best locations, marking</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Best locations</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Best locations</text>
+<text x="126" y="64" font-size="11" font-weight="600" style="fill:#4D4D49" >336 · 49 empty</text>
+<rect x="232" y="50" width="204" height="22" fill="#FFFFFF" stroke="#141414" stroke-width="1" rx="4" />
+<rect x="232" y="50" width="68" height="22" fill="#141414" rx="4" />
+<text x="266" y="65" font-size="11" font-weight="700" text-anchor="middle" style="fill:#FFFFFF" >Aisle</text>
+<text x="334" y="65" font-size="11" font-weight="600" text-anchor="middle" >Level</text>
+<text x="400" y="65" font-size="11" font-weight="600" text-anchor="middle" >Location</text>
+<line x1="300" y1="50" x2="300" y2="72" stroke="#141414" stroke-width="1" />
+<line x1="368" y1="50" x2="368" y2="72" stroke="#141414" stroke-width="1" />
+<text x="12" y="98" font-size="11" font-weight="700" style="fill:#4D4D49" >Level</text>
+<text x="62" y="98" font-size="11" font-weight="800" text-anchor="middle" >A</text>
+<text x="84" y="98" font-size="11" font-weight="800" text-anchor="middle" >B</text>
+<text x="106" y="98" font-size="11" font-weight="800" text-anchor="middle" >C</text>
+<text x="128" y="98" font-size="11" font-weight="800" text-anchor="middle" >D</text>
+<text x="150" y="98" font-size="11" font-weight="800" text-anchor="middle" >E</text>
+<text x="172" y="98" font-size="11" font-weight="800" text-anchor="middle" >F</text>
+<text x="194" y="98" font-size="11" font-weight="800" text-anchor="middle" >G</text>
+<text x="216" y="98" font-size="11" font-weight="800" text-anchor="middle" >H</text>
+<text x="238" y="98" font-size="11" font-weight="800" text-anchor="middle" >I</text>
+<text x="24" y="120" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >4</text>
+<rect x="52" y="108" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="62" cy="116" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="62" cy="116" r="2.4" fill="#141414" />
+<rect x="74" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="96" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="118" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="140" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="162" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="184" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="206" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="228" y="108" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<text x="24" y="140" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >3</text>
+<rect x="52" y="128" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="62" cy="136" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="62" cy="136" r="2.4" fill="#141414" />
+<rect x="74" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="96" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="118" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="140" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="162" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="184" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="206" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="228" y="128" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<text x="24" y="160" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >2</text>
+<rect x="52" y="148" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="62" cy="156" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="62" cy="156" r="2.4" fill="#141414" />
+<rect x="74" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="96" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="118" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="140" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="162" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="184" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="206" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="228" y="148" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<text x="24" y="180" font-size="11" font-weight="700" text-anchor="middle" style="fill:#4D4D49" >1</text>
+<rect x="52" y="168" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="62" cy="176" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="62" cy="176" r="2.4" fill="#141414" />
+<rect x="74" y="168" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="84" cy="176" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="84" cy="176" r="2.4" fill="#141414" />
+<rect x="96" y="168" width="20" height="16" fill="#FFFFFF" stroke="#141414" stroke-width="1.2" rx="2" />
+<circle cx="106" cy="176" r="4.6" fill="none" stroke="#141414" stroke-width="1" />
+<circle cx="106" cy="176" r="2.4" fill="#141414" />
+<rect x="118" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="140" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="162" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="184" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="206" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<rect x="228" y="168" width="20" height="16" fill="#E9E9E4" stroke="#D6D6D0" stroke-width="0.75" rx="2" />
+<text x="260" y="98" font-size="11" font-weight="700" style="fill:#4D4D49" >Marks</text>
+<text x="260" y="118" font-size="11" font-weight="600" >Aisle A, whole aisle</text>
+<g transform="translate(420,108) scale(0.75)" fill="none" stroke="#4D4D49" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<line x1="260" y1="124" x2="436" y2="124" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="260" y="140" font-size="11" font-weight="600" >Level 1 in aisle B</text>
+<g transform="translate(420,130) scale(0.75)" fill="none" stroke="#4D4D49" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<line x1="260" y1="146" x2="436" y2="146" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="260" y="162" font-size="11" font-weight="600" >Level 1 in aisle C</text>
+<g transform="translate(420,152) scale(0.75)" fill="none" stroke="#4D4D49" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></g>
+<line x1="260" y1="168" x2="436" y2="168" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="214" font-size="11" font-weight="400" style="fill:#4D4D49" >Click an aisle, a level or one location to mark it.</text>
+<text x="12" y="229" font-size="11" font-weight="400" style="fill:#4D4D49" >Best comes only from marks, never from Walk Path.</text>
+</g>
+<g transform="translate(496,622)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >8</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Before/after table</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" rx="4" />
+<rect x="0" y="22" width="448" height="20" fill="#141414" rx="4" />
+<rect x="0" y="34" width="448" height="8" fill="#141414" />
+<text x="10" y="36" font-size="11" font-weight="700" style="fill:#FFFFFF" >Smart Warehouse Planner</text>
+<text x="438" y="36" font-size="11" font-weight="500" text-anchor="end" style="fill:#CFCFC8" >Before/after</text>
+<text x="12" y="64" font-size="15" font-weight="800" >Before/after</text>
+<text x="112" y="64" font-size="11" font-weight="500" style="fill:#4D4D49" >import → planning copy · 25 moves</text>
+<text x="12" y="90" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Aisle</text>
+<text x="64" y="90" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">In</text>
+<text x="114" y="90" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Out</text>
+<text x="164" y="90" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Fast in best</text>
+<text x="290" y="90" font-size="11" font-weight="700" style="fill:#4D4D49" class="caps">Pick groups together</text>
+<line x1="12" y1="95" x2="440" y2="95" stroke="#141414" stroke-width="1" />
+<text x="12" y="107" font-size="11" font-weight="700" >A</text>
+<text x="64" y="107" font-size="11" font-weight="400" >18</text>
+<text x="114" y="107" font-size="11" font-weight="400" >9</text>
+<text x="164" y="107" font-size="11" font-weight="400" >71 → 92</text>
+<text x="290" y="107" font-size="11" font-weight="400" >22 → 23</text>
+<line x1="12" y1="112" x2="440" y2="112" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="124" font-size="11" font-weight="700" >B</text>
+<text x="64" y="124" font-size="11" font-weight="400" >4</text>
+<text x="114" y="124" font-size="11" font-weight="400" >3</text>
+<text x="164" y="124" font-size="11" font-weight="400" >14 → 16</text>
+<text x="290" y="124" font-size="11" font-weight="400" >19 → 20</text>
+<line x1="12" y1="129" x2="440" y2="129" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="141" font-size="11" font-weight="700" >C</text>
+<text x="64" y="141" font-size="11" font-weight="400" >3</text>
+<text x="114" y="141" font-size="11" font-weight="400" >1</text>
+<text x="164" y="141" font-size="11" font-weight="400" >11 → 10</text>
+<text x="290" y="141" font-size="11" font-weight="400" >17 → 19</text>
+<line x1="12" y1="146" x2="440" y2="146" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="158" font-size="11" font-weight="700" >D</text>
+<text x="64" y="158" font-size="11" font-weight="400" >1</text>
+<text x="114" y="158" font-size="11" font-weight="400" >2</text>
+<text x="164" y="158" font-size="11" font-weight="400" >0 → 0</text>
+<text x="290" y="158" font-size="11" font-weight="400" >16 → 16</text>
+<line x1="12" y1="163" x2="440" y2="163" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="175" font-size="11" font-weight="700" >G</text>
+<text x="64" y="175" font-size="11" font-weight="400" >0</text>
+<text x="114" y="175" font-size="11" font-weight="400" >3</text>
+<text x="164" y="175" font-size="11" font-weight="400" >0 → 0</text>
+<text x="290" y="175" font-size="11" font-weight="400" >15 → 15</text>
+<line x1="12" y1="180" x2="440" y2="180" stroke="#D6D6D0" stroke-width="0.75" />
+<text x="12" y="192" font-size="11" font-weight="700" >H</text>
+<text x="64" y="192" font-size="11" font-weight="400" >8</text>
+<text x="114" y="192" font-size="11" font-weight="400" >0</text>
+<text x="164" y="192" font-size="11" font-weight="400" >0 → 0</text>
+<text x="290" y="192" font-size="11" font-weight="400" >14 → 14</text>
+<line x1="12" y1="197" x2="440" y2="197" stroke="#D6D6D0" stroke-width="0.75" />
+<rect x="12" y="196" width="428" height="19" fill="#141414" />
+<text x="18" y="210" font-size="11" font-weight="800" style="fill:#FFFFFF" >All</text>
+<text x="70" y="210" font-size="11" font-weight="800" style="fill:#FFFFFF" >34</text>
+<text x="120" y="210" font-size="11" font-weight="800" style="fill:#FFFFFF" >34</text>
+<text x="170" y="210" font-size="11" font-weight="800" style="fill:#FFFFFF" >96 → 118</text>
+<text x="296" y="210" font-size="11" font-weight="800" style="fill:#FFFFFF" >141 → 147</text>
+<text x="12" y="234" font-size="11" font-weight="400" style="fill:#4D4D49" >Aisles E, F, I unchanged · one text size, rank by weight</text>
+</g>
+<g transform="translate(968,622)">
+<circle cx="8" cy="8" r="8" fill="#141414" />
+<text x="8" y="12" font-size="11" font-weight="800" text-anchor="middle" style="fill:#FFFFFF" >9</text>
+<text x="24" y="13" font-size="14" font-weight="800" >Move list, print view (black and white)</text>
+<rect x="0" y="22" width="448" height="224" fill="#FFFFFF" stroke="#141414" stroke-width="1.25" />
+<text x="14" y="46" font-size="14" font-weight="800" >Move list · Spring re-slot 2026</text>
+<text x="14" y="62" font-size="11" font-weight="400" >Data as of 2026-09-30 · uploaded 2026-10-02 · 2 rounds · generated 2026-11-11 14:52</text>
+<line x1="14" y1="70" x2="434" y2="70" stroke="#141414" stroke-width="1.5" />
+<rect x="14" y="76" width="420" height="17" fill="#141414" />
+<text x="20" y="88.5" font-size="11" font-weight="800" style="fill:#FFFFFF" class="caps">Round 1 · 23 moves · one walk</text>
+<rect x="18" y="99" width="10" height="10" fill="#FFFFFF" stroke="#141414" stroke-width="1" />
+<text x="36" y="108" font-size="11" font-weight="700" >1</text>
+<text x="54" y="108" font-size="11" font-weight="400" >6611802 Clutch kit - Opel Astra</text>
+<text x="262" y="108" font-size="11" font-weight="700" >A-09-04-02</text>
+<text x="324" y="108" font-size="11" font-weight="400" >→</text>
+<text x="338" y="108" font-size="11" font-weight="700" >I-03-02-01</text>
+<text x="434" y="108" font-size="11" font-weight="600" text-anchor="end" >2</text>
+<line x1="14" y1="113" x2="434" y2="113" stroke="#BDBDB6" stroke-width="0.75" />
+<rect x="18" y="116" width="10" height="10" fill="#FFFFFF" stroke="#141414" stroke-width="1" />
+<text x="36" y="125" font-size="11" font-weight="700" >2</text>
+<text x="54" y="125" font-size="11" font-weight="400" >1187340 Wiper blade set - Ford</text>
+<text x="262" y="125" font-size="11" font-weight="700" >B-11-02-03</text>
+<text x="324" y="125" font-size="11" font-weight="400" >→</text>
+<text x="338" y="125" font-size="11" font-weight="700" >A-01-02-02</text>
+<text x="434" y="125" font-size="11" font-weight="600" text-anchor="end" >1</text>
+<line x1="14" y1="130" x2="434" y2="130" stroke="#BDBDB6" stroke-width="0.75" />
+<rect x="18" y="133" width="10" height="10" fill="#FFFFFF" stroke="#141414" stroke-width="1" />
+<text x="36" y="142" font-size="11" font-weight="700" >3</text>
+<text x="54" y="142" font-size="11" font-weight="400" >7300125 Oil filter - Volvo XC60</text>
+<text x="262" y="142" font-size="11" font-weight="700" >C-02-01-02</text>
+<text x="324" y="142" font-size="11" font-weight="400" >→</text>
+<text x="338" y="142" font-size="11" font-weight="700" >A-01-01-01</text>
+<text x="434" y="142" font-size="11" font-weight="600" text-anchor="end" >1</text>
+<line x1="14" y1="147" x2="434" y2="147" stroke="#BDBDB6" stroke-width="0.75" />
+<text x="54" y="158" font-size="11" font-weight="400" style="fill:#4D4D49" >… 20 more lines in Walk Path order</text>
+<rect x="14" y="166" width="420" height="17" fill="#141414" />
+<text x="20" y="178.5" font-size="11" font-weight="800" style="fill:#FFFFFF" class="caps">Round 2 · 2 moves · one walk</text>
+<rect x="18" y="189" width="10" height="10" fill="#FFFFFF" stroke="#141414" stroke-width="1" />
+<text x="36" y="198" font-size="11" font-weight="700" >24</text>
+<text x="54" y="198" font-size="11" font-weight="400" >9723950 Headlight bulb H7 - Peugeot</text>
+<text x="262" y="198" font-size="11" font-weight="700" >D-09-03-01</text>
+<text x="324" y="198" font-size="11" font-weight="400" >→</text>
+<text x="338" y="198" font-size="11" font-weight="700" >A-02-01-02</text>
+<text x="434" y="198" font-size="11" font-weight="600" text-anchor="end" >1</text>
+<line x1="14" y1="203" x2="434" y2="203" stroke="#BDBDB6" stroke-width="0.75" />
+<rect x="18" y="206" width="10" height="10" fill="#FFFFFF" stroke="#141414" stroke-width="1" />
+<text x="36" y="215" font-size="11" font-weight="700" >25</text>
+<text x="54" y="215" font-size="11" font-weight="400" >1290455 Spark plug set - Ford Focus</text>
+<text x="262" y="215" font-size="11" font-weight="700" >G-15-01-02</text>
+<text x="324" y="215" font-size="11" font-weight="400" >→</text>
+<text x="338" y="215" font-size="11" font-weight="700" >A-03-01-01</text>
+<text x="434" y="215" font-size="11" font-weight="600" text-anchor="end" >M</text>
+<line x1="14" y1="220" x2="434" y2="220" stroke="#BDBDB6" stroke-width="0.75" />
+<text x="14" y="238" font-size="11" font-weight="400" style="fill:#4D4D49" >Tick box per line · rule 1, 2, 3 or M (Manual), last column</text>
+</g>
+</svg>
