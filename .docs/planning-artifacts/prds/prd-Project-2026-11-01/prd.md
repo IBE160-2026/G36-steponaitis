@@ -91,6 +91,7 @@ Downstream documents use these terms exactly.
 - **Shared jobs** — the number of jobs on which two parts both appear.
 - **Pick group** — two parts with 5 or more shared jobs. Each part is the other's **partner**.
 - **Settings** — the period length, the class limits and the pick-group minimum, kept outside the rule logic so they can be tuned.
+- **Warehouse colours** — the display colours of the movement classes, best locations and selection in the warehouse view. Changed by the planner in the app (FR-49); not part of Settings.
 
 **Plans and recommendations**
 
@@ -128,7 +129,7 @@ Core features (4.1–4.10 and 4.12) are built, tested and stable before any stag
 
 ### 4.0 Key screens
 
-An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view. Stage 2: login and create account; category settings and category check; location label print view.
+An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view; **warehouse colours** (a settings page, FR-49); on the public deployment only, a **demo front page** in front of the app (NFR-5). Stage 2: login and create account; category settings and category check; location label print view.
 
 ### 4.1 New Plan and import
 
@@ -214,7 +215,7 @@ The planner can see all saved plans and start a New Plan from the list. Realizes
 **Consequences (testable):**
 - Each plan shows its name, data-as-of date, created by, created at, last edited by and last edited at.
 - Plans are listed with the most recently edited first.
-- The list is the start page (in stage 2: the page a user lands on after login).
+- The list is the start page of the app (on the public deployment it comes after the demo front page, NFR-5; in stage 2 it is the page a user lands on after login).
 
 #### FR-9: Reopen a plan with identical state
 
@@ -310,7 +311,7 @@ The thresholds are settings, separate from the rule logic.
 
 **Consequences (testable):**
 - The period length, class limits and pick-group minimum are read from settings; changing a setting changes the results without changing code.
-- Settings are changed in a configuration file, not in the app.
+- Settings are changed in a configuration file, not in the app. (The warehouse colours are a display choice, changed in the app: FR-49.)
 - Each plan stores the settings it was computed with and shows them (period start and end, class limits, pick-group minimum), so a saved plan reopens with identical results even if the settings change later.
 
 ### 4.5 Pick-together analysis
@@ -585,6 +586,18 @@ The planner can see all aisles with their locations, occupancy, movement classes
 - From a recommendation, the planner can see the part's current location and the suggested location in the warehouse view.
 - The view shows the plan's planning copy and updates after every move, undo and reset.
 
+#### FR-49: Change the warehouse colours
+
+The planner can change the colours used in the warehouse view from a settings page in the app (user decision 2026-11-13, UX step).
+
+**Consequences (testable):**
+- The planner can choose a colour for each movement class (fast-moving, medium-moving, slow-moving, dead stock), for best locations and for selection.
+- Symbols, the text BEST and all other text stay the same, so no information depends on the chosen colours (NFR-10).
+- The chosen colours are used wherever the warehouse colours appear: the warehouse view, the recommendation detail and the movement-class swatches in lists. The printed move list stays black and white.
+- When a chosen colour has less than 3:1 contrast against a background it is drawn on, a warning names the colour and the background; the planner can still keep it.
+- "Reset to defaults" restores the original colours.
+- The colours are kept in the browser and survive a reload. They are not part of Settings (FR-18), and they change no plan, no import and no analysis result.
+
 ### 4.13 Category check (stage 2)
 
 **Description:** Some parts are put away in aisles meant for other kinds of parts. The category check finds them from keywords in the part description. Categories never come from part numbers, because part numbers change over time. The check is applied without AI, so it gives the same result every time. Keyword rules and aisle categories are global: one set is shared by all plans. The starter keyword list for the demo data is drafted with AI (Claude Code) during development and checked by the author before it is committed.
@@ -648,7 +661,7 @@ The planner can print a label for every location in a chosen aisle.
 - **NFR-2 Runs locally for examiners.** The app installs and runs on a laptop with no paid accounts, API keys, external services or network calls at runtime. The README gives the install and start steps, a step-by-step import of the demo files in `data/sample/`, how to run the tests and, in stage 2, the demo account.
 - **NFR-3 No AI at runtime.** The app uses no language model or AI service. AI is used only during development.
 - **NFR-4 Confidentiality.** The repo is public. Only synthetic data is committed: the demo data made by `data/generate_demo_data.py` and the hand-made answer-key test dataset. The database, uploaded files and real exports (kept only in `data/private/`) are git-ignored and never committed. No real part numbers, files or screenshots go into test data, documentation or `.logs/`.
-- **NFR-5 Public deployment is a demo.** The public deployment (Vercel, linked from the README) holds synthetic demo data only; real company data is never uploaded to it (decision 2026-11-02). Real use would need a company-internal setup, outside the course. How the deployment is built is decided in architecture.
+- **NFR-5 Public deployment is a demo.** The public deployment (Vercel, linked from the README) holds synthetic demo data only; real company data is never uploaded to it (decision 2026-11-02). Real use would need a company-internal setup, outside the course. How the deployment is built is decided in architecture. The public deployment opens on a demo front page: it says what the tool does, shows the flow from import to the printed move list, states that the data is synthetic, and links into the app (the saved-plans list). It makes no claims about customers, savings or distances. A local install opens straight on the saved-plans list (user decision 2026-11-13, UX step).
 - **NFR-6 Secrets (stage 2).** Secrets such as the session key come from environment variables and are never committed; the README explains how to set them for a local run, with an example file that holds no real values.
 - **NFR-7 Scale.** Up to about 10 users in total and a few at the same time; no special scaling work.
 - **NFR-8 Responsiveness.** On a typical laptop, importing the demo data and computing classes and pick groups takes under 10 seconds, a run takes under 5 seconds, and other actions respond within 1 second.
@@ -674,7 +687,7 @@ The planner can print a label for every location in a chosen aisle.
 
 ### 7.1 In Scope: the core, in two milestones
 
-The core is FR-1–FR-38 and FR-42. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
+The core is FR-1–FR-38, FR-42 and FR-49. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
 
 **Milestone 1: the core flow on one stored plan.** Import, classify, find pick groups, get recommendations, try them in the planning copy.
 - FR-1, FR-3–FR-7 (New Plan from files, import checks), FR-10–FR-11 (autosave, created by / last edited by)
@@ -690,6 +703,7 @@ The core is FR-1–FR-38 and FR-42. It is built in two milestones so that the te
 - FR-31, FR-32, FR-34, FR-35 (apply with another suggested location, keep in place, combined moves, undo and reset)
 - FR-38 (move list)
 - FR-42 (warehouse view; moved from stage 2, decision 2026-11-13)
+- FR-49 (change the warehouse colours; added 2026-11-13)
 - **Gate:** SM-1 and SM-2 pass in full.
 
 ### 7.2 Stage 2 (after the milestone 2 gate)
@@ -773,6 +787,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Before/after table:** also shows pick groups in the same aisle.
 - **Answer-key details (user decision 2026-11-11):** the period counts transactions by date only; a slow-moving or dead-stock part whose partner's aisle has only best locations empty is "no space" under rule 3; a part that already has a recommendation is skipped silently in its other pick groups; a part that is "no space" under rule 1 gets no rule 3 entry; the answer-key test dataset lives in `data/answer-key/`.
 - **Warehouse view in the core, and FR-42 rewritten** (user decision 2026-11-13, UX step): the warehouse view moves from stage 2 into milestone 2 and draws each aisle shelf by shelf; it is also where a recommendation's current and suggested locations are shown. Occupancy is shown by shape and text instead of red and green, colour is reserved for movement class, and best locations get a green rail or frame with the text BEST. Milestone 1 is unchanged, so the small-core-first order still holds.
+- **Warehouse colours** (user decision 2026-11-13, UX step): new FR-49 in milestone 2. The planner can change the warehouse view's colours for movement classes, best locations and selection in the app; symbols and text never change, and a warning flags low contrast.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions
