@@ -1,0 +1,2409 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="t d">
+<title id="t">Warehouse view, floor marking</title>
+<desc id="d">Top-down floor plan of aisles A to I with every location as a beam-label cell, best-location tape, recommendation routes and sign shapes.</desc>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&amp;family=Saira+Stencil+One&amp;display=swap');
+.ui{font-family:'Overpass','Helvetica Neue',Arial,sans-serif}
+.num{font-family:'Overpass','Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums}
+.st{font-family:'Saira Stencil One','Arial Narrow',sans-serif}
+</style>
+<defs>
+<!-- concrete speckle -->
+<pattern id="concrete" width="23" height="19" patternUnits="userSpaceOnUse">
+  <rect width="23" height="19" fill="#B9B6AF"/>
+  <circle cx="3" cy="4" r="0.7" fill="#AEABA4"/><circle cx="14" cy="2" r="0.5" fill="#C3C0B9"/>
+  <circle cx="19" cy="11" r="0.8" fill="#AEABA4"/><circle cx="8" cy="14" r="0.6" fill="#C3C0B9"/>
+  <circle cx="12" cy="9" r="0.4" fill="#AEABA4"/><circle cx="21" cy="17" r="0.5" fill="#C3C0B9"/>
+</pattern>
+<!-- red/white keep-in-place tape -->
+<pattern id="rw" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="6" height="6" fill="#FFFFFF"/><rect width="3" height="6" fill="#C0302A"/>
+</pattern>
+<!-- hazard stripe (used once: Reset) -->
+<pattern id="haz" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="10" height="10" fill="#F2C200"/><rect width="5" height="10" fill="#16191C"/>
+</pattern>
+<pattern id="pillar" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="4" height="4" fill="#6E7378"/><rect width="1.4" height="4" fill="#3B4045"/>
+</pattern>
+
+<!-- location cells, 14 x 11 -->
+<symbol id="c-fast" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#1E2226" stroke="#0E1012" stroke-width="1"/><path d="M7 2.6 L10 8 L4 8 Z" fill="#F4F2EC"/></symbol>
+<symbol id="c-med" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#545A60" stroke="#2A2E32" stroke-width="1"/><rect x="3.5" y="4.6" width="7" height="1.8" fill="#F4F2EC"/></symbol>
+<symbol id="c-slow" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#969BA1" stroke="#3A3F44" stroke-width="1"/><circle cx="7" cy="5.5" r="1.7" fill="#16191C"/></symbol>
+<symbol id="c-dead" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#E6E2D9" stroke="#3A3F44" stroke-width="1"/><circle cx="7" cy="5.5" r="2.3" fill="none" stroke="#16191C" stroke-width="1.2"/></symbol>
+<symbol id="c-empty" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#CFCCC5" fill-opacity="0.35" stroke="#3A3F44" stroke-width="1"/><path d="M1 10 L13 1" stroke="#3A3F44" stroke-width="1"/></symbol>
+
+<!-- ISO 7010 shape grammar signs, 20 x 20 (linked squares 26 x 20) -->
+<symbol id="s-r1" viewBox="0 0 20 20"><rect x="1" y="1" width="18" height="18" rx="2" fill="#1D5DB0" stroke="#FFFFFF" stroke-width="1.2"/><text x="10" y="14.6" text-anchor="middle" class="ui" font-size="12.5" font-weight="800" fill="#FFFFFF">1</text></symbol>
+<symbol id="s-r2" viewBox="0 0 20 20"><path d="M10 1.2 L19.2 18.2 L0.8 18.2 Z" fill="#F2C200" stroke="#16191C" stroke-width="1.6" stroke-linejoin="round"/><text x="10" y="16.4" text-anchor="middle" class="ui" font-size="10.5" font-weight="800" fill="#16191C">2</text></symbol>
+<symbol id="s-r3" viewBox="0 0 26 20"><rect x="1" y="4" width="11" height="11" rx="1.6" fill="#1D5DB0" stroke="#FFFFFF" stroke-width="1"/><rect x="11.5" y="8.4" width="4" height="2.4" fill="#1D5DB0"/><rect x="14.5" y="4.5" width="10" height="10" rx="1.6" fill="#FFFFFF" stroke="#1D5DB0" stroke-width="2"/><text x="6.5" y="13.4" text-anchor="middle" class="ui" font-size="9" font-weight="800" fill="#FFFFFF">3</text></symbol>
+<symbol id="s-keep" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.2" fill="#FFFFFF" stroke="#C0302A" stroke-width="2.6"/><path d="M4.4 4.4 L15.6 15.6" stroke="#C0302A" stroke-width="2.6"/></symbol>
+<symbol id="s-nospace" viewBox="0 0 20 20"><path d="M6.3 1 H13.7 L19 6.3 V13.7 L13.7 19 H6.3 L1 13.7 V6.3 Z" fill="#C0302A" stroke="#FFFFFF" stroke-width="1"/><rect x="4.5" y="8.6" width="11" height="2.8" fill="#FFFFFF"/></symbol>
+<symbol id="s-out" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="2" fill="#E2E0DA" stroke="#6B7076" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M1 19 L19 1" stroke="#16191C" stroke-width="2.2"/></symbol>
+<symbol id="s-manual" viewBox="0 0 20 20"><rect x="1.5" y="1.5" width="17" height="17" rx="2" fill="#FFFFFF" stroke="#16191C" stroke-width="1.6"/><text x="10" y="14.4" text-anchor="middle" class="ui" font-size="11" font-weight="800" fill="#16191C">M</text></symbol>
+<symbol id="s-uc" viewBox="0 0 20 20"><path d="M10 2 L18.6 17.6 L1.4 17.6 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 7.4 V12.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14.7" r="1.1" fill="currentColor"/></symbol>
+
+<!-- icons, 16 x 16, stroke 1.5 -->
+<g id="icons">
+<symbol id="i-overview" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="1.75" width="5.5" height="5.5"/><rect x="8.75" y="1.75" width="5.5" height="5.5"/><rect x="1.75" y="8.75" width="5.5" height="5.5"/><rect x="8.75" y="8.75" width="5.5" height="5.5"/></g></symbol>
+<symbol id="i-parts" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 1.5 L14.25 4.5 V11.5 L8 14.5 L1.75 11.5 V4.5 Z"/><path d="M1.75 4.5 L8 7.5 L14.25 4.5 M8 7.5 V14.5"/></g></symbol>
+<symbol id="i-locations" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 1.5 V14.5 M14 1.5 V14.5 M2 5.5 H14 M2 10 H14"/><path d="M5 3.5 H7 M9 8 H11 M5 12.5 H7"/></g></symbol>
+<symbol id="i-pick" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="5" width="5" height="6"/><rect x="9.25" y="5" width="5" height="6"/><path d="M6.75 8 H9.25"/></g></symbol>
+<symbol id="i-best" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M1.75 5.5 V1.75 H5.5 M10.5 1.75 H14.25 V5.5 M14.25 10.5 V14.25 H10.5 M5.5 14.25 H1.75 V10.5"/><rect x="5.5" y="5.5" width="5" height="5"/></g></symbol>
+<symbol id="i-rec" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M2.5 13.5 V8.5 H12"/><path d="M9.5 5.5 L12.5 8.5 L9.5 11.5"/><path d="M2.5 2.5 H6"/></g></symbol>
+<symbol id="i-ba" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="2.5" width="5" height="11"/><rect x="9.25" y="2.5" width="5" height="11"/><path d="M3.25 9.5 H5.25 M10.75 6 H12.75"/></g></symbol>
+<symbol id="i-list" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.5" y="2" width="11" height="12.5"/><path d="M5.5 1 H10.5 V3 H5.5 Z"/><rect x="4.75" y="6" width="2" height="2"/><path d="M8.5 7 H11.5 M4.75 11 H6.75 M8.5 11 H11.5"/></g></symbol>
+<symbol id="i-settings" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4 H14 M2 8 H14 M2 12 H14"/><circle cx="5" cy="4" r="1.6" fill="#1A1E22"/><circle cx="11" cy="8" r="1.6" fill="#1A1E22"/><circle cx="7" cy="12" r="1.6" fill="#1A1E22"/></g></symbol>
+<symbol id="i-plans" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2 4.5 H14 V13.5 H2 Z"/><path d="M3.5 2.5 H12.5"/></g></symbol>
+<symbol id="i-floor" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="1.75" width="12.5" height="12.5"/><path d="M4.5 4.5 H11.5 M4.5 8 H11.5 M4.5 11.5 H11.5"/></g></symbol>
+<symbol id="i-tag" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.75 1.75 H8 L14.25 8 L8 14.25 L1.75 8 Z"/><circle cx="5" cy="5" r="1.1"/></g></symbol>
+<symbol id="i-label" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="3.5" width="12.5" height="9"/><rect x="3.75" y="5.5" width="4" height="4"/><path d="M9.5 6 H12 M9.5 9 H12"/></g></symbol>
+<symbol id="i-user" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 14.5 C3 11 5.2 9.75 8 9.75 C10.8 9.75 13 11 13.5 14.5"/></g></symbol>
+<symbol id="i-back" viewBox="0 0 16 16"><path d="M10 3 L5 8 L10 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-next" viewBox="0 0 16 16"><path d="M6 3 L11 8 L6 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-down" viewBox="0 0 16 16"><path d="M3.5 6 L8 10.5 L12.5 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.75"/><path d="M10.5 10.5 L14 14"/></g></symbol>
+<symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-undo" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 L2 6 L5 9"/><path d="M2 6 H10 A4 4 0 0 1 10 14 H6"/></g></symbol>
+<symbol id="i-run" viewBox="0 0 16 16"><path d="M4.5 2.5 L13 8 L4.5 13.5 Z" fill="currentColor"/></symbol>
+<symbol id="i-print" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 6 V1.75 H12 V6"/><rect x="1.75" y="6" width="12.5" height="6"/><path d="M4 10 H12 V14.25 H4 Z"/></g></symbol>
+<symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 2.5 V13.5 M2.5 8 H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-dir" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="1.75" width="12.5" height="12.5"/><path d="M4.5 5 H8.5 M4.5 8 H9.5 M4.5 11 H7.5"/><path d="M10.5 9.5 L12.5 11 L10.5 12.5"/></g></symbol>
+<symbol id="i-cal" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="3" width="12.5" height="11.25"/><path d="M1.75 6.5 H14.25 M5 1.5 V4.5 M11 1.5 V4.5"/></g></symbol>
+<symbol id="i-upload" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5 V2 M4.5 5.5 L8 2 L11.5 5.5"/><path d="M2 10 V14 H14 V10"/></g></symbol>
+<symbol id="i-info" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25 V11.25"/></g><circle cx="8" cy="4.9" r="0.95" fill="currentColor"/></symbol>
+<symbol id="i-zoomin" viewBox="0 0 16 16"><path d="M8 3 V13 M3 8 H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-zoomout" viewBox="0 0 16 16"><path d="M3 8 H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-fit" viewBox="0 0 16 16"><path d="M2 6 V2 H6 M10 2 H14 V6 M14 10 V14 H10 M6 14 H2 V10" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-lock" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7.25"/><path d="M5.25 7 V4.75 A2.75 2.75 0 0 1 10.75 4.75 V7"/></g></symbol>
+<symbol id="i-arrowr" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8 H13.5"/><path d="M9.5 4 L13.5 8 L9.5 12"/></g></symbol>
+<symbol id="i-arrowu" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 V2.5"/><path d="M4 6.5 L8 2.5 L12 6.5"/></g></symbol>
+<symbol id="i-arrowd" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2 V13.5"/><path d="M4 9.5 L8 13.5 L12 9.5"/></g></symbol>
+<symbol id="i-arrowl" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8 H2.5"/><path d="M6.5 4 L2.5 8 L6.5 12"/></g></symbol>
+<symbol id="i-file" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 1.75 H10 L13 4.75 V14.25 H3 Z"/><path d="M10 1.75 V4.75 H13"/></g></symbol>
+</g>
+
+<!-- logo mark: a floor spot marker with taped corners -->
+<symbol id="logo" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" rx="3" fill="#16191C"/><path d="M3 9 V3 H9 M15 3 H21 V9 M21 15 V21 H15 M9 21 H3 V15" fill="none" stroke="#F2C200" stroke-width="2.6"/><rect x="8.5" y="8.5" width="7" height="7" fill="#ECEAE4"/></symbol>
+<marker id="ahb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#1D5DB0"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#E9E7E2"/>
+<rect x="0" y="0" width="208" height="900" fill="#1A1E22"/>
+<rect x="207" y="0" width="1" height="900" fill="#343A41"/>
+<use href="#logo" x="16" y="16" width="26" height="26"/>
+<text x="52" y="27" class="ui" font-size="13" font-weight="700" fill="#ECEAE4">Smart Warehouse</text>
+<text x="52" y="42" class="ui" font-size="13" font-weight="700" fill="#ECEAE4">Planner</text>
+<use href="#i-back" x="14" y="64" width="14" height="14" color="#A9AFB5" style="color:#A9AFB5"/>
+<text x="32" y="75" class="ui" font-size="12" font-weight="600" fill="#A9AFB5">All saved plans</text>
+<rect x="12" y="88" width="184" height="72" rx="6" fill="#23282D" stroke="#343A41"/>
+<text x="24" y="110" class="ui" font-size="14" font-weight="700" fill="#ECEAE4">Spring re-slot 2026</text>
+<use href="#i-down" x="174" y="99" width="14" height="14" color="#A9AFB5" style="color:#A9AFB5"/>
+<use href="#i-cal" x="24" y="120" width="13" height="13" color="#F2C200" style="color:#F2C200"/>
+<text x="42" y="131" class="num" font-size="12" font-weight="600" fill="#ECEAE4">Data as of 2026-09-30</text>
+<text x="24" y="149" class="num" font-size="11" font-weight="400" fill="#A9AFB5">Uploaded 2026-10-02 · Justas</text>
+<text x="24" y="186" class="ui" font-size="11" font-weight="700" fill="#A9AFB5" letter-spacing="0.06em">Plan</text>
+<use href="#i-overview" x="22" y="204" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="217" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Plan overview</text>
+<use href="#i-parts" x="22" y="236" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="249" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Parts</text>
+<text x="188" y="249" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">1,545</text>
+<use href="#i-locations" x="22" y="268" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="281" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Locations</text>
+<text x="188" y="281" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">2,000</text>
+<use href="#i-pick" x="22" y="300" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="313" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Pick groups</text>
+<text x="188" y="313" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">212</text>
+<use href="#i-best" x="22" y="332" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="345" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Best locations</text>
+<text x="188" y="345" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">334</text>
+<use href="#i-rec" x="22" y="364" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="377" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Recommendations</text>
+<text x="188" y="377" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">23</text>
+<use href="#i-ba" x="22" y="396" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="409" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Before/after</text>
+<use href="#i-list" x="22" y="428" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="441" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Move list</text>
+<text x="188" y="441" class="num" font-size="11" font-weight="600" fill="#A9AFB5" text-anchor="end">2</text>
+<text x="24" y="470" class="ui" font-size="11" font-weight="700" fill="#A9AFB5" letter-spacing="0.03em">Stage 2 · under construction</text>
+<rect x="8" y="480" width="192" height="32" rx="5" fill="#2C3238"/>
+<rect x="8" y="488" width="3" height="16" rx="1.5" fill="#F2C200"/>
+<use href="#i-floor" x="22" y="488" width="16" height="16" color="#F2C200" style="color:#F2C200"/>
+<text x="46" y="501" class="ui" font-size="13" font-weight="700" fill="#ECEAE4">Warehouse view</text>
+<use href="#i-tag" x="22" y="520" width="16" height="16" color="#8A9096" style="color:#8A9096"/>
+<text x="46" y="533" class="ui" font-size="13" font-weight="500" fill="#9AA0A6">Category check</text>
+<use href="#s-uc" x="174" y="520" width="15" height="15" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-label" x="22" y="552" width="16" height="16" color="#8A9096" style="color:#8A9096"/>
+<text x="46" y="565" class="ui" font-size="13" font-weight="500" fill="#9AA0A6">Location labels</text>
+<use href="#s-uc" x="174" y="552" width="15" height="15" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-user" x="22" y="584" width="16" height="16" color="#8A9096" style="color:#8A9096"/>
+<text x="46" y="597" class="ui" font-size="13" font-weight="500" fill="#9AA0A6">Account</text>
+<use href="#s-uc" x="174" y="584" width="15" height="15" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="16" y="790" width="176" height="1" fill="#343A41"/>
+<use href="#i-dir" x="22" y="806" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="819" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Directory</text>
+<rect x="166" y="805" width="22" height="18" rx="3" fill="none" stroke="#343A41"/>
+<text x="177" y="818" class="ui" font-size="11" font-weight="700" fill="#A9AFB5" text-anchor="middle">G</text>
+<use href="#i-settings" x="22" y="838" width="16" height="16" color="#C9CDD1" style="color:#C9CDD1"/>
+<text x="46" y="851" class="ui" font-size="13" font-weight="500" fill="#C9CDD1">Settings</text>
+<text x="24" y="884" class="num" font-size="11" font-weight="400" fill="#A9AFB5">Saved automatically · 09:58</text>
+<rect x="208" y="0" width="1232" height="56" fill="#20252A"/>
+<rect x="208" y="55" width="1232" height="1" fill="#343A41"/>
+<path d="M252 18 H606" stroke="#F2C200" stroke-width="4"/>
+<path d="M606 18 H862" stroke="#6B7177" stroke-width="2" stroke-dasharray="6 5"/>
+<rect x="245" y="11" width="14" height="14" fill="#F2C200" stroke="#20252A" stroke-width="2"/>
+<use href="#i-check" x="247" y="13" width="10" height="10" color="#16191C" style="color:#16191C"/>
+<text x="252" y="44" class="ui" font-size="12" font-weight="500" fill="#C9CDD1" text-anchor="middle">Import</text>
+<rect x="345" y="11" width="14" height="14" fill="#F2C200" stroke="#20252A" stroke-width="2"/>
+<use href="#i-check" x="347" y="13" width="10" height="10" color="#16191C" style="color:#16191C"/>
+<text x="352" y="44" class="ui" font-size="12" font-weight="500" fill="#C9CDD1" text-anchor="middle">Classify</text>
+<rect x="459" y="11" width="14" height="14" fill="#F2C200" stroke="#20252A" stroke-width="2"/>
+<use href="#i-check" x="461" y="13" width="10" height="10" color="#16191C" style="color:#16191C"/>
+<text x="466" y="44" class="ui" font-size="12" font-weight="500" fill="#C9CDD1" text-anchor="middle">Best locations</text>
+<rect x="596" y="8" width="20" height="20" fill="#20252A" stroke="#F2C200" stroke-width="2.5"/>
+<rect x="602" y="14" width="8" height="8" fill="#F2C200"/>
+<text x="606" y="44" class="ui" font-size="12" font-weight="700" fill="#ECEAE4" text-anchor="middle">Recommendations · round 1</text>
+<rect x="746" y="12" width="12" height="12" fill="#20252A" stroke="#8A9096" stroke-width="1.5"/>
+<text x="752" y="44" class="ui" font-size="12" font-weight="500" fill="#A9AFB5" text-anchor="middle">Before/after</text>
+<rect x="856" y="12" width="12" height="12" fill="#20252A" stroke="#8A9096" stroke-width="1.5"/>
+<text x="862" y="44" class="ui" font-size="12" font-weight="500" fill="#A9AFB5" text-anchor="middle">Move list</text>
+<rect x="960" y="12" width="1" height="32" fill="#343A41"/>
+<text x="976" y="25" class="ui" font-size="11" font-weight="600" fill="#A9AFB5">Warehouse occupancy</text>
+<text x="976" y="45" class="num" font-size="18" font-weight="800" fill="#ECEAE4">79%</text>
+<text x="1018" y="44" class="num" font-size="12" font-weight="400" fill="#C9CDD1">1,584 of 2,000 occupied · 416 empty</text>
+<rect x="1250" y="12" width="1" height="32" fill="#343A41"/>
+<text x="1266" y="25" class="ui" font-size="11" font-weight="600" fill="#A9AFB5">Planning copy</text>
+<text x="1266" y="44" class="num" font-size="12" font-weight="600" fill="#ECEAE4">2 moves · round 1</text>
+<circle cx="1414" cy="28" r="14" fill="#2C3238" stroke="#343A41"/>
+<text x="1414" y="33" class="ui" font-size="13" font-weight="700" fill="#ECEAE4" text-anchor="middle">J</text>
+<text x="232" y="84" class="ui" font-size="22" font-weight="800" fill="#1A1D20">Warehouse view</text>
+<rect x="410" y="69" width="122" height="20" rx="10" fill="#FFF3C4" stroke="#B89300"/>
+<use href="#s-uc" x="417" y="71" width="15" height="15" color="#16191C" style="color:#16191C"/>
+<text x="437" y="83" class="ui" font-size="11" font-weight="700" fill="#16191C">Stage 2 preview</text>
+<text x="232" y="105" class="num" font-size="12" font-weight="400" fill="#575C63">Planning copy of Spring re-slot 2026 · data as of 2026-09-30 · round 1 · 23 recommendations, 2 no space</text>
+<rect x="588" y="66" width="196" height="30" rx="5" fill="#FFFFFF" stroke="#B9B5AD"/>
+<rect x="590" y="68" width="110" height="26" rx="4" fill="#16191C"/>
+<text x="645" y="86" class="ui" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">Planning copy</text>
+<text x="742" y="86" class="ui" font-size="12" font-weight="600" fill="#1A1D20" text-anchor="middle">Import</text>
+<rect x="806" y="74" width="15" height="15" rx="3" fill="#16191C" stroke="#16191C"/>
+<use href="#i-check" x="808" y="76" width="11" height="11" color="#FFFFFF" style="color:#FFFFFF"/>
+<text x="827" y="86" class="ui" font-size="12" font-weight="600" fill="#1A1D20">Movement class</text>
+<rect x="945.8" y="74" width="15" height="15" rx="3" fill="#16191C" stroke="#16191C"/>
+<use href="#i-check" x="947.8" y="76" width="11" height="11" color="#FFFFFF" style="color:#FFFFFF"/>
+<text x="966.8" y="86" class="ui" font-size="12" font-weight="600" fill="#1A1D20">Best locations</text>
+<rect x="1085.6" y="74" width="15" height="15" rx="3" fill="#16191C" stroke="#16191C"/>
+<use href="#i-check" x="1087.6" y="76" width="11" height="11" color="#FFFFFF" style="color:#FFFFFF"/>
+<text x="1106.6" y="86" class="ui" font-size="12" font-weight="600" fill="#1A1D20">Recommendations</text>
+<rect x="1250" y="66" width="174" height="30" rx="5" fill="#FFFFFF" stroke="#B9B5AD"/>
+<use href="#i-search" x="1260" y="74" width="14" height="14" color="#575C63" style="color:#575C63"/>
+<text x="1280" y="86" class="ui" font-size="12" font-weight="400" fill="#6A6F75">Find location or part</text>
+<rect x="224" y="116" width="1200" height="722" rx="4" fill="url(#concrete)"/>
+<path d="M298 118 H1422 V836 H226 V118 H238" fill="none" stroke="#3B4045" stroke-width="4"/>
+<text x="268" y="133" class="ui" font-size="11" font-weight="700" fill="#16191C" text-anchor="middle">Entrance</text>
+<path d="M240 138 V828" stroke="#F2C200" stroke-width="4"/>
+<path d="M296 138 V196 M296 222 V270 M296 296 V344 M296 370 V418 M296 444 V492 M296 518 V566 M296 592 V640 M296 666 V714 M296 740 V788 M296 814 V828" stroke="#F2C200" stroke-width="4"/>
+<path d="M256 790 L268 800 L280 790" fill="none" stroke="#2F3438" stroke-width="3" stroke-linejoin="miter"/>
+<path d="M256 806 L268 816 L280 806" fill="none" stroke="#2F3438" stroke-width="3" stroke-linejoin="miter"/>
+<text x="268" y="830" class="ui" font-size="11" font-weight="700" fill="#16191C" text-anchor="middle">A to I</text>
+<text x="422" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">01</text>
+<text x="473" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">02</text>
+<text x="524" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">03</text>
+<text x="575" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">04</text>
+<text x="626" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">05</text>
+<text x="677" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">06</text>
+<text x="728" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">07</text>
+<text x="779" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">08</text>
+<text x="830" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">09</text>
+<text x="881" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">10</text>
+<text x="932" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">11</text>
+<text x="983" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">12</text>
+<text x="1034" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">13</text>
+<text x="1085" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">14</text>
+<text x="1136" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">15</text>
+<text x="1187" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">16</text>
+<text x="1238" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">17</text>
+<text x="1289" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">18</text>
+<text x="1340" y="141" class="num" font-size="11" font-weight="600" fill="#33383D" text-anchor="middle">19</text>
+<text x="1372" y="194" class="num" font-size="11" font-weight="600" fill="#33383D">L1</text>
+<text x="1372" y="182" class="num" font-size="11" font-weight="600" fill="#33383D">L2</text>
+<text x="1372" y="170" class="num" font-size="11" font-weight="600" fill="#33383D">L3</text>
+<text x="1372" y="158" class="num" font-size="11" font-weight="600" fill="#33383D">L4</text>
+<text x="304" y="198" class="st" font-size="52" fill="#262A2E">A</text>
+<text x="346" y="169" class="num" font-size="18" font-weight="800" fill="#16191C">87%</text>
+<text x="346" y="185" class="num" font-size="11" font-weight="600" fill="#2C3135">194/222</text>
+<path d="M1316 204 L1324 209 L1316 214" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 204 L1344 209 L1336 214" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="148" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 145.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-dead" x="400" y="184"/>
+<use href="#c-fast" x="415" y="184"/>
+<use href="#c-fast" x="430" y="184"/>
+<use href="#c-med" x="400" y="172"/>
+<use href="#c-med" x="415" y="172"/>
+<use href="#c-slow" x="430" y="172"/>
+<use href="#c-med" x="400" y="160"/>
+<use href="#c-fast" x="415" y="160"/>
+<use href="#c-fast" x="430" y="160"/>
+<use href="#c-dead" x="400" y="148"/>
+<use href="#c-empty" x="415" y="148"/>
+<use href="#c-fast" x="430" y="148"/>
+<use href="#c-empty" x="451" y="184"/>
+<use href="#c-empty" x="466" y="184"/>
+<use href="#c-empty" x="481" y="184"/>
+<use href="#c-fast" x="451" y="172"/>
+<use href="#c-slow" x="466" y="172"/>
+<use href="#c-slow" x="481" y="172"/>
+<use href="#c-med" x="451" y="160"/>
+<use href="#c-empty" x="466" y="160"/>
+<use href="#c-med" x="481" y="160"/>
+<use href="#c-fast" x="451" y="148"/>
+<use href="#c-slow" x="466" y="148"/>
+<use href="#c-empty" x="481" y="148"/>
+<use href="#c-med" x="502" y="184"/>
+<use href="#c-med" x="517" y="184"/>
+<use href="#c-fast" x="532" y="184"/>
+<use href="#c-slow" x="502" y="172"/>
+<use href="#c-med" x="517" y="172"/>
+<use href="#c-fast" x="532" y="172"/>
+<use href="#c-med" x="502" y="160"/>
+<use href="#c-fast" x="517" y="160"/>
+<use href="#c-fast" x="532" y="160"/>
+<use href="#c-fast" x="502" y="148"/>
+<use href="#c-med" x="517" y="148"/>
+<use href="#c-slow" x="532" y="148"/>
+<use href="#c-fast" x="553" y="184"/>
+<use href="#c-fast" x="568" y="184"/>
+<use href="#c-fast" x="583" y="184"/>
+<use href="#c-med" x="553" y="172"/>
+<use href="#c-fast" x="568" y="172"/>
+<use href="#c-slow" x="583" y="172"/>
+<use href="#c-med" x="553" y="160"/>
+<use href="#c-med" x="568" y="160"/>
+<use href="#c-fast" x="583" y="160"/>
+<use href="#c-med" x="553" y="148"/>
+<use href="#c-fast" x="568" y="148"/>
+<use href="#c-fast" x="583" y="148"/>
+<use href="#c-med" x="604" y="184"/>
+<use href="#c-slow" x="619" y="184"/>
+<use href="#c-fast" x="634" y="184"/>
+<use href="#c-med" x="604" y="172"/>
+<use href="#c-med" x="619" y="172"/>
+<use href="#c-slow" x="634" y="172"/>
+<use href="#c-empty" x="604" y="160"/>
+<use href="#c-med" x="619" y="160"/>
+<use href="#c-fast" x="634" y="160"/>
+<use href="#c-med" x="604" y="148"/>
+<use href="#c-empty" x="619" y="148"/>
+<use href="#c-fast" x="634" y="148"/>
+<use href="#c-empty" x="655" y="184"/>
+<use href="#c-fast" x="670" y="184"/>
+<use href="#c-fast" x="685" y="184"/>
+<use href="#c-med" x="655" y="172"/>
+<use href="#c-med" x="670" y="172"/>
+<use href="#c-slow" x="685" y="172"/>
+<use href="#c-fast" x="655" y="160"/>
+<use href="#c-dead" x="670" y="160"/>
+<use href="#c-fast" x="685" y="160"/>
+<use href="#c-fast" x="655" y="148"/>
+<use href="#c-slow" x="670" y="148"/>
+<use href="#c-fast" x="685" y="148"/>
+<use href="#c-slow" x="706" y="184"/>
+<use href="#c-empty" x="721" y="184"/>
+<use href="#c-fast" x="736" y="184"/>
+<use href="#c-fast" x="706" y="172"/>
+<use href="#c-med" x="721" y="172"/>
+<use href="#c-slow" x="736" y="172"/>
+<use href="#c-med" x="706" y="160"/>
+<use href="#c-med" x="721" y="160"/>
+<use href="#c-dead" x="736" y="160"/>
+<use href="#c-fast" x="706" y="148"/>
+<use href="#c-dead" x="721" y="148"/>
+<use href="#c-slow" x="736" y="148"/>
+<use href="#c-fast" x="757" y="184"/>
+<use href="#c-fast" x="772" y="184"/>
+<use href="#c-empty" x="787" y="184"/>
+<use href="#c-dead" x="757" y="172"/>
+<use href="#c-slow" x="772" y="172"/>
+<use href="#c-med" x="787" y="172"/>
+<use href="#c-med" x="757" y="160"/>
+<use href="#c-fast" x="772" y="160"/>
+<use href="#c-slow" x="787" y="160"/>
+<use href="#c-fast" x="757" y="148"/>
+<use href="#c-fast" x="772" y="148"/>
+<use href="#c-fast" x="787" y="148"/>
+<use href="#c-med" x="808" y="184"/>
+<use href="#c-med" x="823" y="184"/>
+<use href="#c-empty" x="838" y="184"/>
+<use href="#c-empty" x="808" y="172"/>
+<use href="#c-fast" x="823" y="172"/>
+<use href="#c-fast" x="838" y="172"/>
+<use href="#c-med" x="808" y="160"/>
+<use href="#c-fast" x="823" y="160"/>
+<use href="#c-empty" x="838" y="160"/>
+<use href="#c-med" x="808" y="148"/>
+<use href="#c-fast" x="823" y="148"/>
+<use href="#c-fast" x="838" y="148"/>
+<use href="#c-fast" x="859" y="184"/>
+<use href="#c-dead" x="889" y="184"/>
+<use href="#c-empty" x="859" y="172"/>
+<use href="#c-med" x="889" y="172"/>
+<use href="#c-fast" x="859" y="160"/>
+<use href="#c-med" x="889" y="160"/>
+<use href="#c-med" x="859" y="148"/>
+<use href="#c-fast" x="889" y="148"/>
+<use href="#c-med" x="910" y="184"/>
+<use href="#c-med" x="925" y="184"/>
+<use href="#c-fast" x="940" y="184"/>
+<use href="#c-fast" x="910" y="172"/>
+<use href="#c-dead" x="925" y="172"/>
+<use href="#c-med" x="940" y="172"/>
+<use href="#c-med" x="910" y="160"/>
+<use href="#c-dead" x="925" y="160"/>
+<use href="#c-med" x="940" y="160"/>
+<use href="#c-fast" x="910" y="148"/>
+<use href="#c-med" x="925" y="148"/>
+<use href="#c-slow" x="940" y="148"/>
+<use href="#c-slow" x="961" y="184"/>
+<use href="#c-fast" x="976" y="184"/>
+<use href="#c-slow" x="991" y="184"/>
+<use href="#c-empty" x="961" y="172"/>
+<use href="#c-fast" x="976" y="172"/>
+<use href="#c-med" x="991" y="172"/>
+<use href="#c-dead" x="961" y="160"/>
+<use href="#c-med" x="976" y="160"/>
+<use href="#c-fast" x="991" y="160"/>
+<use href="#c-med" x="961" y="148"/>
+<use href="#c-fast" x="976" y="148"/>
+<use href="#c-empty" x="991" y="148"/>
+<use href="#c-fast" x="1012" y="184"/>
+<use href="#c-med" x="1027" y="184"/>
+<use href="#c-fast" x="1042" y="184"/>
+<use href="#c-fast" x="1012" y="172"/>
+<use href="#c-empty" x="1027" y="172"/>
+<use href="#c-med" x="1042" y="172"/>
+<use href="#c-med" x="1012" y="160"/>
+<use href="#c-fast" x="1027" y="160"/>
+<use href="#c-med" x="1042" y="160"/>
+<use href="#c-fast" x="1012" y="148"/>
+<use href="#c-slow" x="1027" y="148"/>
+<use href="#c-fast" x="1042" y="148"/>
+<use href="#c-fast" x="1063" y="184"/>
+<use href="#c-med" x="1078" y="184"/>
+<use href="#c-fast" x="1093" y="184"/>
+<use href="#c-empty" x="1063" y="172"/>
+<use href="#c-fast" x="1078" y="172"/>
+<use href="#c-slow" x="1093" y="172"/>
+<use href="#c-empty" x="1063" y="160"/>
+<use href="#c-fast" x="1078" y="160"/>
+<use href="#c-dead" x="1093" y="160"/>
+<use href="#c-empty" x="1063" y="148"/>
+<use href="#c-fast" x="1078" y="148"/>
+<use href="#c-med" x="1093" y="148"/>
+<use href="#c-med" x="1114" y="184"/>
+<use href="#c-slow" x="1129" y="184"/>
+<use href="#c-fast" x="1144" y="184"/>
+<use href="#c-dead" x="1114" y="172"/>
+<use href="#c-fast" x="1129" y="172"/>
+<use href="#c-fast" x="1144" y="172"/>
+<use href="#c-fast" x="1114" y="160"/>
+<use href="#c-empty" x="1129" y="160"/>
+<use href="#c-med" x="1144" y="160"/>
+<use href="#c-fast" x="1114" y="148"/>
+<use href="#c-fast" x="1129" y="148"/>
+<use href="#c-dead" x="1144" y="148"/>
+<use href="#c-fast" x="1165" y="184"/>
+<use href="#c-fast" x="1180" y="184"/>
+<use href="#c-empty" x="1195" y="184"/>
+<use href="#c-fast" x="1165" y="172"/>
+<use href="#c-dead" x="1180" y="172"/>
+<use href="#c-fast" x="1195" y="172"/>
+<use href="#c-empty" x="1165" y="160"/>
+<use href="#c-fast" x="1180" y="160"/>
+<use href="#c-med" x="1195" y="160"/>
+<use href="#c-slow" x="1165" y="148"/>
+<use href="#c-dead" x="1180" y="148"/>
+<use href="#c-slow" x="1195" y="148"/>
+<use href="#c-med" x="1216" y="184"/>
+<use href="#c-fast" x="1231" y="184"/>
+<use href="#c-fast" x="1246" y="184"/>
+<use href="#c-slow" x="1216" y="172"/>
+<use href="#c-med" x="1231" y="172"/>
+<use href="#c-fast" x="1246" y="172"/>
+<use href="#c-med" x="1216" y="160"/>
+<use href="#c-slow" x="1231" y="160"/>
+<use href="#c-med" x="1246" y="160"/>
+<use href="#c-empty" x="1216" y="148"/>
+<use href="#c-med" x="1231" y="148"/>
+<use href="#c-fast" x="1246" y="148"/>
+<use href="#c-med" x="1267" y="184"/>
+<use href="#c-fast" x="1282" y="184"/>
+<use href="#c-fast" x="1297" y="184"/>
+<use href="#c-fast" x="1267" y="172"/>
+<use href="#c-empty" x="1282" y="172"/>
+<use href="#c-dead" x="1297" y="172"/>
+<use href="#c-fast" x="1267" y="160"/>
+<use href="#c-slow" x="1282" y="160"/>
+<use href="#c-dead" x="1297" y="160"/>
+<use href="#c-med" x="1267" y="148"/>
+<use href="#c-dead" x="1282" y="148"/>
+<use href="#c-fast" x="1297" y="148"/>
+<use href="#c-empty" x="1318" y="184"/>
+<use href="#c-fast" x="1333" y="184"/>
+<use href="#c-slow" x="1348" y="184"/>
+<use href="#c-fast" x="1318" y="172"/>
+<use href="#c-slow" x="1333" y="172"/>
+<use href="#c-fast" x="1348" y="172"/>
+<use href="#c-empty" x="1318" y="160"/>
+<use href="#c-slow" x="1333" y="160"/>
+<use href="#c-fast" x="1348" y="160"/>
+<use href="#c-med" x="1318" y="148"/>
+<text x="304" y="272" class="st" font-size="52" fill="#262A2E">B</text>
+<text x="346" y="243" class="num" font-size="18" font-weight="800" fill="#16191C">82%</text>
+<text x="346" y="259" class="num" font-size="11" font-weight="600" fill="#2C3135">181/222</text>
+<path d="M1316 278 L1324 283 L1316 288" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 278 L1344 283 L1336 288" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="222" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 219.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-fast" x="400" y="258"/>
+<use href="#c-dead" x="415" y="258"/>
+<use href="#c-dead" x="430" y="258"/>
+<use href="#c-dead" x="400" y="246"/>
+<use href="#c-fast" x="415" y="246"/>
+<use href="#c-fast" x="430" y="246"/>
+<use href="#c-med" x="400" y="234"/>
+<use href="#c-med" x="415" y="234"/>
+<use href="#c-fast" x="430" y="234"/>
+<use href="#c-dead" x="400" y="222"/>
+<use href="#c-med" x="415" y="222"/>
+<use href="#c-empty" x="430" y="222"/>
+<use href="#c-dead" x="451" y="258"/>
+<use href="#c-empty" x="466" y="258"/>
+<use href="#c-empty" x="481" y="258"/>
+<use href="#c-med" x="451" y="246"/>
+<use href="#c-fast" x="466" y="246"/>
+<use href="#c-fast" x="481" y="246"/>
+<use href="#c-med" x="451" y="234"/>
+<use href="#c-med" x="466" y="234"/>
+<use href="#c-fast" x="481" y="234"/>
+<use href="#c-med" x="451" y="222"/>
+<use href="#c-med" x="466" y="222"/>
+<use href="#c-slow" x="481" y="222"/>
+<use href="#c-empty" x="502" y="258"/>
+<use href="#c-fast" x="517" y="258"/>
+<use href="#c-dead" x="532" y="258"/>
+<use href="#c-med" x="502" y="246"/>
+<use href="#c-empty" x="517" y="246"/>
+<use href="#c-slow" x="532" y="246"/>
+<use href="#c-dead" x="502" y="234"/>
+<use href="#c-dead" x="517" y="234"/>
+<use href="#c-fast" x="532" y="234"/>
+<use href="#c-dead" x="502" y="222"/>
+<use href="#c-med" x="517" y="222"/>
+<use href="#c-slow" x="532" y="222"/>
+<use href="#c-fast" x="553" y="258"/>
+<use href="#c-slow" x="568" y="258"/>
+<use href="#c-med" x="583" y="258"/>
+<use href="#c-slow" x="553" y="246"/>
+<use href="#c-med" x="568" y="246"/>
+<use href="#c-slow" x="583" y="246"/>
+<use href="#c-med" x="553" y="234"/>
+<use href="#c-empty" x="568" y="234"/>
+<use href="#c-slow" x="583" y="234"/>
+<use href="#c-fast" x="553" y="222"/>
+<use href="#c-fast" x="568" y="222"/>
+<use href="#c-med" x="583" y="222"/>
+<use href="#c-dead" x="604" y="258"/>
+<use href="#c-slow" x="619" y="258"/>
+<use href="#c-med" x="634" y="258"/>
+<use href="#c-slow" x="604" y="246"/>
+<use href="#c-empty" x="619" y="246"/>
+<use href="#c-slow" x="634" y="246"/>
+<use href="#c-fast" x="604" y="234"/>
+<use href="#c-fast" x="619" y="234"/>
+<use href="#c-med" x="634" y="234"/>
+<use href="#c-slow" x="604" y="222"/>
+<use href="#c-med" x="619" y="222"/>
+<use href="#c-empty" x="634" y="222"/>
+<use href="#c-fast" x="655" y="258"/>
+<use href="#c-med" x="670" y="258"/>
+<use href="#c-fast" x="685" y="258"/>
+<use href="#c-slow" x="655" y="246"/>
+<use href="#c-fast" x="670" y="246"/>
+<use href="#c-med" x="685" y="246"/>
+<use href="#c-fast" x="655" y="234"/>
+<use href="#c-fast" x="670" y="234"/>
+<use href="#c-fast" x="685" y="234"/>
+<use href="#c-empty" x="655" y="222"/>
+<use href="#c-med" x="670" y="222"/>
+<use href="#c-dead" x="685" y="222"/>
+<use href="#c-empty" x="706" y="258"/>
+<use href="#c-dead" x="721" y="258"/>
+<use href="#c-med" x="736" y="258"/>
+<use href="#c-med" x="706" y="246"/>
+<use href="#c-fast" x="721" y="246"/>
+<use href="#c-dead" x="736" y="246"/>
+<use href="#c-empty" x="706" y="234"/>
+<use href="#c-fast" x="721" y="234"/>
+<use href="#c-slow" x="736" y="234"/>
+<use href="#c-dead" x="706" y="222"/>
+<use href="#c-med" x="721" y="222"/>
+<use href="#c-med" x="736" y="222"/>
+<use href="#c-slow" x="757" y="258"/>
+<use href="#c-med" x="772" y="258"/>
+<use href="#c-slow" x="787" y="258"/>
+<use href="#c-med" x="757" y="246"/>
+<use href="#c-med" x="772" y="246"/>
+<use href="#c-med" x="787" y="246"/>
+<use href="#c-med" x="757" y="234"/>
+<use href="#c-slow" x="772" y="234"/>
+<use href="#c-med" x="787" y="234"/>
+<use href="#c-slow" x="757" y="222"/>
+<use href="#c-slow" x="772" y="222"/>
+<use href="#c-empty" x="787" y="222"/>
+<use href="#c-fast" x="808" y="258"/>
+<use href="#c-dead" x="823" y="258"/>
+<use href="#c-slow" x="838" y="258"/>
+<use href="#c-slow" x="808" y="246"/>
+<use href="#c-fast" x="823" y="246"/>
+<use href="#c-empty" x="838" y="246"/>
+<use href="#c-slow" x="808" y="234"/>
+<use href="#c-slow" x="823" y="234"/>
+<use href="#c-slow" x="838" y="234"/>
+<use href="#c-fast" x="808" y="222"/>
+<use href="#c-med" x="823" y="222"/>
+<use href="#c-empty" x="838" y="222"/>
+<use href="#c-dead" x="859" y="258"/>
+<use href="#c-med" x="889" y="258"/>
+<use href="#c-fast" x="859" y="246"/>
+<use href="#c-fast" x="889" y="246"/>
+<use href="#c-fast" x="859" y="234"/>
+<use href="#c-empty" x="889" y="234"/>
+<use href="#c-empty" x="859" y="222"/>
+<use href="#c-slow" x="889" y="222"/>
+<use href="#c-slow" x="910" y="258"/>
+<use href="#c-fast" x="925" y="258"/>
+<use href="#c-dead" x="940" y="258"/>
+<use href="#c-fast" x="910" y="246"/>
+<use href="#c-med" x="925" y="246"/>
+<use href="#c-empty" x="940" y="246"/>
+<use href="#c-fast" x="910" y="234"/>
+<use href="#c-slow" x="925" y="234"/>
+<use href="#c-dead" x="940" y="234"/>
+<use href="#c-med" x="910" y="222"/>
+<use href="#c-fast" x="925" y="222"/>
+<use href="#c-med" x="940" y="222"/>
+<use href="#c-dead" x="961" y="258"/>
+<use href="#c-empty" x="976" y="258"/>
+<use href="#c-dead" x="991" y="258"/>
+<use href="#c-slow" x="961" y="246"/>
+<use href="#c-empty" x="976" y="246"/>
+<use href="#c-fast" x="991" y="246"/>
+<use href="#c-dead" x="961" y="234"/>
+<use href="#c-med" x="976" y="234"/>
+<use href="#c-fast" x="991" y="234"/>
+<use href="#c-dead" x="961" y="222"/>
+<use href="#c-fast" x="976" y="222"/>
+<use href="#c-med" x="991" y="222"/>
+<use href="#c-fast" x="1012" y="258"/>
+<use href="#c-dead" x="1027" y="258"/>
+<use href="#c-slow" x="1042" y="258"/>
+<use href="#c-empty" x="1012" y="246"/>
+<use href="#c-dead" x="1027" y="246"/>
+<use href="#c-slow" x="1042" y="246"/>
+<use href="#c-med" x="1012" y="234"/>
+<use href="#c-fast" x="1027" y="234"/>
+<use href="#c-fast" x="1042" y="234"/>
+<use href="#c-empty" x="1012" y="222"/>
+<use href="#c-empty" x="1027" y="222"/>
+<use href="#c-empty" x="1042" y="222"/>
+<use href="#c-fast" x="1063" y="258"/>
+<use href="#c-med" x="1078" y="258"/>
+<use href="#c-med" x="1093" y="258"/>
+<use href="#c-slow" x="1063" y="246"/>
+<use href="#c-empty" x="1078" y="246"/>
+<use href="#c-slow" x="1093" y="246"/>
+<use href="#c-dead" x="1063" y="234"/>
+<use href="#c-empty" x="1078" y="234"/>
+<use href="#c-dead" x="1093" y="234"/>
+<use href="#c-dead" x="1063" y="222"/>
+<use href="#c-med" x="1078" y="222"/>
+<use href="#c-empty" x="1093" y="222"/>
+<use href="#c-dead" x="1114" y="258"/>
+<use href="#c-fast" x="1129" y="258"/>
+<use href="#c-dead" x="1144" y="258"/>
+<use href="#c-empty" x="1114" y="246"/>
+<use href="#c-dead" x="1129" y="246"/>
+<use href="#c-med" x="1144" y="246"/>
+<use href="#c-dead" x="1114" y="234"/>
+<use href="#c-empty" x="1129" y="234"/>
+<use href="#c-dead" x="1144" y="234"/>
+<use href="#c-fast" x="1114" y="222"/>
+<use href="#c-slow" x="1129" y="222"/>
+<use href="#c-empty" x="1144" y="222"/>
+<use href="#c-fast" x="1165" y="258"/>
+<use href="#c-med" x="1180" y="258"/>
+<use href="#c-dead" x="1195" y="258"/>
+<use href="#c-med" x="1165" y="246"/>
+<use href="#c-fast" x="1180" y="246"/>
+<use href="#c-dead" x="1195" y="246"/>
+<use href="#c-med" x="1165" y="234"/>
+<use href="#c-dead" x="1180" y="234"/>
+<use href="#c-empty" x="1195" y="234"/>
+<use href="#c-empty" x="1165" y="222"/>
+<use href="#c-med" x="1180" y="222"/>
+<use href="#c-slow" x="1195" y="222"/>
+<use href="#c-dead" x="1216" y="258"/>
+<use href="#c-fast" x="1231" y="258"/>
+<use href="#c-empty" x="1246" y="258"/>
+<use href="#c-empty" x="1216" y="246"/>
+<use href="#c-dead" x="1231" y="246"/>
+<use href="#c-dead" x="1246" y="246"/>
+<use href="#c-med" x="1216" y="234"/>
+<use href="#c-empty" x="1231" y="234"/>
+<use href="#c-dead" x="1246" y="234"/>
+<use href="#c-dead" x="1216" y="222"/>
+<use href="#c-med" x="1231" y="222"/>
+<use href="#c-empty" x="1246" y="222"/>
+<use href="#c-med" x="1267" y="258"/>
+<use href="#c-empty" x="1282" y="258"/>
+<use href="#c-fast" x="1297" y="258"/>
+<use href="#c-slow" x="1267" y="246"/>
+<use href="#c-fast" x="1282" y="246"/>
+<use href="#c-dead" x="1297" y="246"/>
+<use href="#c-fast" x="1267" y="234"/>
+<use href="#c-med" x="1282" y="234"/>
+<use href="#c-med" x="1297" y="234"/>
+<use href="#c-slow" x="1267" y="222"/>
+<use href="#c-fast" x="1282" y="222"/>
+<use href="#c-fast" x="1297" y="222"/>
+<use href="#c-empty" x="1318" y="258"/>
+<use href="#c-med" x="1333" y="258"/>
+<use href="#c-empty" x="1348" y="258"/>
+<use href="#c-empty" x="1318" y="246"/>
+<use href="#c-empty" x="1333" y="246"/>
+<use href="#c-dead" x="1348" y="246"/>
+<use href="#c-empty" x="1318" y="234"/>
+<use href="#c-fast" x="1333" y="234"/>
+<use href="#c-fast" x="1348" y="234"/>
+<use href="#c-dead" x="1318" y="222"/>
+<text x="304" y="346" class="st" font-size="52" fill="#262A2E">C</text>
+<text x="346" y="317" class="num" font-size="18" font-weight="800" fill="#16191C">85%</text>
+<text x="346" y="333" class="num" font-size="11" font-weight="600" fill="#2C3135">188/222</text>
+<path d="M1316 352 L1324 357 L1316 362" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 352 L1344 357 L1336 362" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="296" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 293.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-dead" x="400" y="332"/>
+<use href="#c-slow" x="415" y="332"/>
+<use href="#c-slow" x="430" y="332"/>
+<use href="#c-slow" x="400" y="320"/>
+<use href="#c-dead" x="415" y="320"/>
+<use href="#c-empty" x="430" y="320"/>
+<use href="#c-dead" x="400" y="308"/>
+<use href="#c-dead" x="415" y="308"/>
+<use href="#c-fast" x="430" y="308"/>
+<use href="#c-dead" x="400" y="296"/>
+<use href="#c-slow" x="415" y="296"/>
+<use href="#c-dead" x="430" y="296"/>
+<use href="#c-med" x="451" y="332"/>
+<use href="#c-dead" x="466" y="332"/>
+<use href="#c-dead" x="481" y="332"/>
+<use href="#c-dead" x="451" y="320"/>
+<use href="#c-med" x="466" y="320"/>
+<use href="#c-empty" x="481" y="320"/>
+<use href="#c-dead" x="451" y="308"/>
+<use href="#c-dead" x="466" y="308"/>
+<use href="#c-dead" x="481" y="308"/>
+<use href="#c-dead" x="451" y="296"/>
+<use href="#c-dead" x="466" y="296"/>
+<use href="#c-slow" x="481" y="296"/>
+<use href="#c-empty" x="502" y="332"/>
+<use href="#c-dead" x="517" y="332"/>
+<use href="#c-slow" x="532" y="332"/>
+<use href="#c-dead" x="502" y="320"/>
+<use href="#c-slow" x="517" y="320"/>
+<use href="#c-dead" x="532" y="320"/>
+<use href="#c-med" x="502" y="308"/>
+<use href="#c-dead" x="517" y="308"/>
+<use href="#c-med" x="532" y="308"/>
+<use href="#c-med" x="502" y="296"/>
+<use href="#c-fast" x="517" y="296"/>
+<use href="#c-dead" x="532" y="296"/>
+<use href="#c-slow" x="553" y="332"/>
+<use href="#c-fast" x="568" y="332"/>
+<use href="#c-dead" x="583" y="332"/>
+<use href="#c-slow" x="553" y="320"/>
+<use href="#c-slow" x="568" y="320"/>
+<use href="#c-fast" x="583" y="320"/>
+<use href="#c-dead" x="553" y="308"/>
+<use href="#c-dead" x="568" y="308"/>
+<use href="#c-med" x="583" y="308"/>
+<use href="#c-dead" x="553" y="296"/>
+<use href="#c-med" x="568" y="296"/>
+<use href="#c-med" x="583" y="296"/>
+<use href="#c-dead" x="604" y="332"/>
+<use href="#c-med" x="619" y="332"/>
+<use href="#c-dead" x="634" y="332"/>
+<use href="#c-dead" x="604" y="320"/>
+<use href="#c-med" x="619" y="320"/>
+<use href="#c-dead" x="634" y="320"/>
+<use href="#c-fast" x="604" y="308"/>
+<use href="#c-fast" x="619" y="308"/>
+<use href="#c-slow" x="634" y="308"/>
+<use href="#c-slow" x="604" y="296"/>
+<use href="#c-empty" x="619" y="296"/>
+<use href="#c-med" x="634" y="296"/>
+<use href="#c-med" x="655" y="332"/>
+<use href="#c-dead" x="670" y="332"/>
+<use href="#c-slow" x="685" y="332"/>
+<use href="#c-slow" x="655" y="320"/>
+<use href="#c-dead" x="670" y="320"/>
+<use href="#c-slow" x="685" y="320"/>
+<use href="#c-empty" x="655" y="308"/>
+<use href="#c-med" x="670" y="308"/>
+<use href="#c-med" x="685" y="308"/>
+<use href="#c-med" x="655" y="296"/>
+<use href="#c-slow" x="670" y="296"/>
+<use href="#c-med" x="685" y="296"/>
+<use href="#c-empty" x="706" y="332"/>
+<use href="#c-fast" x="721" y="332"/>
+<use href="#c-med" x="736" y="332"/>
+<use href="#c-slow" x="706" y="320"/>
+<use href="#c-fast" x="721" y="320"/>
+<use href="#c-empty" x="736" y="320"/>
+<use href="#c-slow" x="706" y="308"/>
+<use href="#c-slow" x="721" y="308"/>
+<use href="#c-slow" x="736" y="308"/>
+<use href="#c-dead" x="706" y="296"/>
+<use href="#c-slow" x="721" y="296"/>
+<use href="#c-slow" x="736" y="296"/>
+<use href="#c-fast" x="757" y="332"/>
+<use href="#c-dead" x="772" y="332"/>
+<use href="#c-dead" x="787" y="332"/>
+<use href="#c-slow" x="757" y="320"/>
+<use href="#c-empty" x="772" y="320"/>
+<use href="#c-empty" x="787" y="320"/>
+<use href="#c-dead" x="757" y="308"/>
+<use href="#c-slow" x="772" y="308"/>
+<use href="#c-dead" x="787" y="308"/>
+<use href="#c-dead" x="757" y="296"/>
+<use href="#c-empty" x="772" y="296"/>
+<use href="#c-empty" x="787" y="296"/>
+<use href="#c-empty" x="808" y="332"/>
+<use href="#c-empty" x="823" y="332"/>
+<use href="#c-dead" x="838" y="332"/>
+<use href="#c-med" x="808" y="320"/>
+<use href="#c-dead" x="823" y="320"/>
+<use href="#c-dead" x="838" y="320"/>
+<use href="#c-med" x="808" y="308"/>
+<use href="#c-fast" x="823" y="308"/>
+<use href="#c-fast" x="838" y="308"/>
+<use href="#c-dead" x="808" y="296"/>
+<use href="#c-dead" x="823" y="296"/>
+<use href="#c-fast" x="838" y="296"/>
+<use href="#c-med" x="859" y="332"/>
+<use href="#c-slow" x="889" y="332"/>
+<use href="#c-dead" x="859" y="320"/>
+<use href="#c-dead" x="889" y="320"/>
+<use href="#c-dead" x="859" y="308"/>
+<use href="#c-empty" x="889" y="308"/>
+<use href="#c-slow" x="859" y="296"/>
+<use href="#c-slow" x="889" y="296"/>
+<use href="#c-dead" x="910" y="332"/>
+<use href="#c-dead" x="925" y="332"/>
+<use href="#c-dead" x="940" y="332"/>
+<use href="#c-fast" x="910" y="320"/>
+<use href="#c-slow" x="925" y="320"/>
+<use href="#c-dead" x="940" y="320"/>
+<use href="#c-slow" x="910" y="308"/>
+<use href="#c-empty" x="925" y="308"/>
+<use href="#c-slow" x="940" y="308"/>
+<use href="#c-empty" x="910" y="296"/>
+<use href="#c-fast" x="925" y="296"/>
+<use href="#c-slow" x="940" y="296"/>
+<use href="#c-empty" x="961" y="332"/>
+<use href="#c-slow" x="976" y="332"/>
+<use href="#c-dead" x="991" y="332"/>
+<use href="#c-fast" x="961" y="320"/>
+<use href="#c-slow" x="976" y="320"/>
+<use href="#c-fast" x="991" y="320"/>
+<use href="#c-slow" x="961" y="308"/>
+<use href="#c-med" x="976" y="308"/>
+<use href="#c-dead" x="991" y="308"/>
+<use href="#c-empty" x="961" y="296"/>
+<use href="#c-med" x="976" y="296"/>
+<use href="#c-empty" x="991" y="296"/>
+<use href="#c-slow" x="1012" y="332"/>
+<use href="#c-dead" x="1027" y="332"/>
+<use href="#c-dead" x="1042" y="332"/>
+<use href="#c-fast" x="1012" y="320"/>
+<use href="#c-med" x="1027" y="320"/>
+<use href="#c-slow" x="1042" y="320"/>
+<use href="#c-dead" x="1012" y="308"/>
+<use href="#c-med" x="1027" y="308"/>
+<use href="#c-med" x="1042" y="308"/>
+<use href="#c-med" x="1012" y="296"/>
+<use href="#c-med" x="1027" y="296"/>
+<use href="#c-empty" x="1042" y="296"/>
+<use href="#c-slow" x="1063" y="332"/>
+<use href="#c-med" x="1078" y="332"/>
+<use href="#c-med" x="1093" y="332"/>
+<use href="#c-dead" x="1063" y="320"/>
+<use href="#c-dead" x="1078" y="320"/>
+<use href="#c-fast" x="1093" y="320"/>
+<use href="#c-med" x="1063" y="308"/>
+<use href="#c-med" x="1078" y="308"/>
+<use href="#c-slow" x="1093" y="308"/>
+<use href="#c-dead" x="1063" y="296"/>
+<use href="#c-slow" x="1078" y="296"/>
+<use href="#c-slow" x="1093" y="296"/>
+<use href="#c-dead" x="1114" y="332"/>
+<use href="#c-med" x="1129" y="332"/>
+<use href="#c-med" x="1144" y="332"/>
+<use href="#c-empty" x="1114" y="320"/>
+<use href="#c-med" x="1129" y="320"/>
+<use href="#c-med" x="1144" y="320"/>
+<use href="#c-empty" x="1114" y="308"/>
+<use href="#c-dead" x="1129" y="308"/>
+<use href="#c-med" x="1144" y="308"/>
+<use href="#c-fast" x="1114" y="296"/>
+<use href="#c-empty" x="1129" y="296"/>
+<use href="#c-dead" x="1144" y="296"/>
+<use href="#c-dead" x="1165" y="332"/>
+<use href="#c-empty" x="1180" y="332"/>
+<use href="#c-slow" x="1195" y="332"/>
+<use href="#c-empty" x="1165" y="320"/>
+<use href="#c-dead" x="1180" y="320"/>
+<use href="#c-slow" x="1195" y="320"/>
+<use href="#c-slow" x="1165" y="308"/>
+<use href="#c-dead" x="1180" y="308"/>
+<use href="#c-empty" x="1195" y="308"/>
+<use href="#c-empty" x="1165" y="296"/>
+<use href="#c-slow" x="1180" y="296"/>
+<use href="#c-slow" x="1195" y="296"/>
+<use href="#c-fast" x="1216" y="332"/>
+<use href="#c-fast" x="1231" y="332"/>
+<use href="#c-fast" x="1246" y="332"/>
+<use href="#c-slow" x="1216" y="320"/>
+<use href="#c-med" x="1231" y="320"/>
+<use href="#c-dead" x="1246" y="320"/>
+<use href="#c-fast" x="1216" y="308"/>
+<use href="#c-empty" x="1231" y="308"/>
+<use href="#c-med" x="1246" y="308"/>
+<use href="#c-dead" x="1216" y="296"/>
+<use href="#c-slow" x="1231" y="296"/>
+<use href="#c-slow" x="1246" y="296"/>
+<use href="#c-dead" x="1267" y="332"/>
+<use href="#c-med" x="1282" y="332"/>
+<use href="#c-med" x="1297" y="332"/>
+<use href="#c-dead" x="1267" y="320"/>
+<use href="#c-med" x="1282" y="320"/>
+<use href="#c-dead" x="1297" y="320"/>
+<use href="#c-dead" x="1267" y="308"/>
+<use href="#c-empty" x="1282" y="308"/>
+<use href="#c-slow" x="1297" y="308"/>
+<use href="#c-med" x="1267" y="296"/>
+<use href="#c-fast" x="1282" y="296"/>
+<use href="#c-empty" x="1297" y="296"/>
+<use href="#c-slow" x="1318" y="332"/>
+<use href="#c-empty" x="1333" y="332"/>
+<use href="#c-dead" x="1348" y="332"/>
+<use href="#c-slow" x="1318" y="320"/>
+<use href="#c-dead" x="1333" y="320"/>
+<use href="#c-dead" x="1348" y="320"/>
+<use href="#c-empty" x="1318" y="308"/>
+<use href="#c-empty" x="1333" y="308"/>
+<use href="#c-dead" x="1348" y="308"/>
+<use href="#c-empty" x="1318" y="296"/>
+<text x="304" y="420" class="st" font-size="52" fill="#262A2E">D</text>
+<text x="346" y="391" class="num" font-size="18" font-weight="800" fill="#16191C">77%</text>
+<text x="346" y="407" class="num" font-size="11" font-weight="600" fill="#2C3135">170/222</text>
+<path d="M1316 426 L1324 431 L1316 436" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 426 L1344 431 L1336 436" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="370" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 367.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-med" x="400" y="406"/>
+<use href="#c-dead" x="415" y="406"/>
+<use href="#c-empty" x="430" y="406"/>
+<use href="#c-slow" x="400" y="394"/>
+<use href="#c-dead" x="415" y="394"/>
+<use href="#c-med" x="430" y="394"/>
+<use href="#c-dead" x="400" y="382"/>
+<use href="#c-fast" x="415" y="382"/>
+<use href="#c-empty" x="430" y="382"/>
+<use href="#c-dead" x="400" y="370"/>
+<use href="#c-med" x="415" y="370"/>
+<use href="#c-dead" x="430" y="370"/>
+<use href="#c-slow" x="451" y="406"/>
+<use href="#c-slow" x="466" y="406"/>
+<use href="#c-fast" x="481" y="406"/>
+<use href="#c-empty" x="451" y="394"/>
+<use href="#c-dead" x="466" y="394"/>
+<use href="#c-slow" x="481" y="394"/>
+<use href="#c-slow" x="451" y="382"/>
+<use href="#c-med" x="466" y="382"/>
+<use href="#c-med" x="481" y="382"/>
+<use href="#c-empty" x="451" y="370"/>
+<use href="#c-dead" x="466" y="370"/>
+<use href="#c-slow" x="481" y="370"/>
+<use href="#c-slow" x="502" y="406"/>
+<use href="#c-med" x="517" y="406"/>
+<use href="#c-med" x="532" y="406"/>
+<use href="#c-med" x="502" y="394"/>
+<use href="#c-dead" x="517" y="394"/>
+<use href="#c-fast" x="532" y="394"/>
+<use href="#c-fast" x="502" y="382"/>
+<use href="#c-med" x="517" y="382"/>
+<use href="#c-fast" x="532" y="382"/>
+<use href="#c-slow" x="502" y="370"/>
+<use href="#c-fast" x="517" y="370"/>
+<use href="#c-med" x="532" y="370"/>
+<use href="#c-dead" x="553" y="406"/>
+<use href="#c-dead" x="568" y="406"/>
+<use href="#c-fast" x="583" y="406"/>
+<use href="#c-slow" x="553" y="394"/>
+<use href="#c-empty" x="568" y="394"/>
+<use href="#c-empty" x="583" y="394"/>
+<use href="#c-empty" x="553" y="382"/>
+<use href="#c-dead" x="568" y="382"/>
+<use href="#c-dead" x="583" y="382"/>
+<use href="#c-dead" x="553" y="370"/>
+<use href="#c-slow" x="568" y="370"/>
+<use href="#c-empty" x="583" y="370"/>
+<use href="#c-fast" x="604" y="406"/>
+<use href="#c-dead" x="619" y="406"/>
+<use href="#c-fast" x="634" y="406"/>
+<use href="#c-dead" x="604" y="394"/>
+<use href="#c-slow" x="619" y="394"/>
+<use href="#c-dead" x="634" y="394"/>
+<use href="#c-empty" x="604" y="382"/>
+<use href="#c-empty" x="619" y="382"/>
+<use href="#c-med" x="634" y="382"/>
+<use href="#c-dead" x="604" y="370"/>
+<use href="#c-dead" x="619" y="370"/>
+<use href="#c-dead" x="634" y="370"/>
+<use href="#c-fast" x="655" y="406"/>
+<use href="#c-slow" x="670" y="406"/>
+<use href="#c-fast" x="685" y="406"/>
+<use href="#c-fast" x="655" y="394"/>
+<use href="#c-slow" x="670" y="394"/>
+<use href="#c-empty" x="685" y="394"/>
+<use href="#c-med" x="655" y="382"/>
+<use href="#c-dead" x="670" y="382"/>
+<use href="#c-empty" x="685" y="382"/>
+<use href="#c-empty" x="655" y="370"/>
+<use href="#c-med" x="670" y="370"/>
+<use href="#c-slow" x="685" y="370"/>
+<use href="#c-slow" x="706" y="406"/>
+<use href="#c-dead" x="721" y="406"/>
+<use href="#c-dead" x="736" y="406"/>
+<use href="#c-med" x="706" y="394"/>
+<use href="#c-dead" x="721" y="394"/>
+<use href="#c-med" x="736" y="394"/>
+<use href="#c-slow" x="706" y="382"/>
+<use href="#c-med" x="721" y="382"/>
+<use href="#c-slow" x="736" y="382"/>
+<use href="#c-fast" x="706" y="370"/>
+<use href="#c-dead" x="721" y="370"/>
+<use href="#c-med" x="736" y="370"/>
+<use href="#c-med" x="757" y="406"/>
+<use href="#c-dead" x="772" y="406"/>
+<use href="#c-slow" x="787" y="406"/>
+<use href="#c-empty" x="757" y="394"/>
+<use href="#c-empty" x="772" y="394"/>
+<use href="#c-dead" x="787" y="394"/>
+<use href="#c-med" x="757" y="382"/>
+<use href="#c-dead" x="772" y="382"/>
+<use href="#c-empty" x="787" y="382"/>
+<use href="#c-dead" x="757" y="370"/>
+<use href="#c-empty" x="772" y="370"/>
+<use href="#c-med" x="787" y="370"/>
+<use href="#c-empty" x="808" y="406"/>
+<use href="#c-med" x="823" y="406"/>
+<use href="#c-empty" x="838" y="406"/>
+<use href="#c-empty" x="808" y="394"/>
+<use href="#c-dead" x="823" y="394"/>
+<use href="#c-dead" x="838" y="394"/>
+<use href="#c-med" x="808" y="382"/>
+<use href="#c-dead" x="823" y="382"/>
+<use href="#c-dead" x="838" y="382"/>
+<use href="#c-empty" x="808" y="370"/>
+<use href="#c-empty" x="823" y="370"/>
+<use href="#c-fast" x="838" y="370"/>
+<use href="#c-slow" x="859" y="406"/>
+<use href="#c-med" x="889" y="406"/>
+<use href="#c-fast" x="859" y="394"/>
+<use href="#c-med" x="889" y="394"/>
+<use href="#c-med" x="859" y="382"/>
+<use href="#c-med" x="889" y="382"/>
+<use href="#c-med" x="859" y="370"/>
+<use href="#c-dead" x="889" y="370"/>
+<use href="#c-fast" x="910" y="406"/>
+<use href="#c-fast" x="925" y="406"/>
+<use href="#c-med" x="940" y="406"/>
+<use href="#c-fast" x="910" y="394"/>
+<use href="#c-slow" x="925" y="394"/>
+<use href="#c-empty" x="940" y="394"/>
+<use href="#c-empty" x="910" y="382"/>
+<use href="#c-fast" x="925" y="382"/>
+<use href="#c-empty" x="940" y="382"/>
+<use href="#c-dead" x="910" y="370"/>
+<use href="#c-empty" x="925" y="370"/>
+<use href="#c-med" x="940" y="370"/>
+<use href="#c-empty" x="961" y="406"/>
+<use href="#c-dead" x="976" y="406"/>
+<use href="#c-med" x="991" y="406"/>
+<use href="#c-fast" x="961" y="394"/>
+<use href="#c-empty" x="976" y="394"/>
+<use href="#c-dead" x="991" y="394"/>
+<use href="#c-dead" x="961" y="382"/>
+<use href="#c-dead" x="976" y="382"/>
+<use href="#c-slow" x="991" y="382"/>
+<use href="#c-slow" x="961" y="370"/>
+<use href="#c-slow" x="976" y="370"/>
+<use href="#c-dead" x="991" y="370"/>
+<use href="#c-empty" x="1012" y="406"/>
+<use href="#c-empty" x="1027" y="406"/>
+<use href="#c-med" x="1042" y="406"/>
+<use href="#c-slow" x="1012" y="394"/>
+<use href="#c-dead" x="1027" y="394"/>
+<use href="#c-fast" x="1042" y="394"/>
+<use href="#c-slow" x="1012" y="382"/>
+<use href="#c-slow" x="1027" y="382"/>
+<use href="#c-empty" x="1042" y="382"/>
+<use href="#c-med" x="1012" y="370"/>
+<use href="#c-slow" x="1027" y="370"/>
+<use href="#c-slow" x="1042" y="370"/>
+<use href="#c-med" x="1063" y="406"/>
+<use href="#c-dead" x="1078" y="406"/>
+<use href="#c-slow" x="1093" y="406"/>
+<use href="#c-dead" x="1063" y="394"/>
+<use href="#c-slow" x="1078" y="394"/>
+<use href="#c-dead" x="1093" y="394"/>
+<use href="#c-empty" x="1063" y="382"/>
+<use href="#c-dead" x="1078" y="382"/>
+<use href="#c-slow" x="1093" y="382"/>
+<use href="#c-dead" x="1063" y="370"/>
+<use href="#c-empty" x="1078" y="370"/>
+<use href="#c-med" x="1093" y="370"/>
+<use href="#c-slow" x="1114" y="406"/>
+<use href="#c-fast" x="1129" y="406"/>
+<use href="#c-empty" x="1144" y="406"/>
+<use href="#c-empty" x="1114" y="394"/>
+<use href="#c-dead" x="1129" y="394"/>
+<use href="#c-fast" x="1144" y="394"/>
+<use href="#c-fast" x="1114" y="382"/>
+<use href="#c-dead" x="1129" y="382"/>
+<use href="#c-slow" x="1144" y="382"/>
+<use href="#c-empty" x="1114" y="370"/>
+<use href="#c-med" x="1129" y="370"/>
+<use href="#c-empty" x="1144" y="370"/>
+<use href="#c-slow" x="1165" y="406"/>
+<use href="#c-slow" x="1180" y="406"/>
+<use href="#c-slow" x="1195" y="406"/>
+<use href="#c-slow" x="1165" y="394"/>
+<use href="#c-med" x="1180" y="394"/>
+<use href="#c-dead" x="1195" y="394"/>
+<use href="#c-empty" x="1165" y="382"/>
+<use href="#c-med" x="1180" y="382"/>
+<use href="#c-fast" x="1195" y="382"/>
+<use href="#c-empty" x="1165" y="370"/>
+<use href="#c-empty" x="1180" y="370"/>
+<use href="#c-fast" x="1195" y="370"/>
+<use href="#c-slow" x="1216" y="406"/>
+<use href="#c-fast" x="1231" y="406"/>
+<use href="#c-slow" x="1246" y="406"/>
+<use href="#c-dead" x="1216" y="394"/>
+<use href="#c-empty" x="1231" y="394"/>
+<use href="#c-med" x="1246" y="394"/>
+<use href="#c-dead" x="1216" y="382"/>
+<use href="#c-dead" x="1231" y="382"/>
+<use href="#c-slow" x="1246" y="382"/>
+<use href="#c-med" x="1216" y="370"/>
+<use href="#c-empty" x="1231" y="370"/>
+<use href="#c-empty" x="1246" y="370"/>
+<use href="#c-slow" x="1267" y="406"/>
+<use href="#c-med" x="1282" y="406"/>
+<use href="#c-dead" x="1297" y="406"/>
+<use href="#c-fast" x="1267" y="394"/>
+<use href="#c-fast" x="1282" y="394"/>
+<use href="#c-empty" x="1297" y="394"/>
+<use href="#c-empty" x="1267" y="382"/>
+<use href="#c-empty" x="1282" y="382"/>
+<use href="#c-empty" x="1297" y="382"/>
+<use href="#c-dead" x="1267" y="370"/>
+<use href="#c-slow" x="1282" y="370"/>
+<use href="#c-empty" x="1297" y="370"/>
+<use href="#c-empty" x="1318" y="406"/>
+<use href="#c-empty" x="1333" y="406"/>
+<use href="#c-fast" x="1348" y="406"/>
+<use href="#c-med" x="1318" y="394"/>
+<use href="#c-empty" x="1333" y="394"/>
+<use href="#c-fast" x="1348" y="394"/>
+<use href="#c-dead" x="1318" y="382"/>
+<use href="#c-med" x="1333" y="382"/>
+<use href="#c-slow" x="1348" y="382"/>
+<use href="#c-empty" x="1318" y="370"/>
+<text x="304" y="494" class="st" font-size="52" fill="#262A2E">E</text>
+<text x="346" y="465" class="num" font-size="18" font-weight="800" fill="#16191C">79%</text>
+<text x="346" y="481" class="num" font-size="11" font-weight="600" fill="#2C3135">175/222</text>
+<path d="M1316 500 L1324 505 L1316 510" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 500 L1344 505 L1336 510" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="444" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 441.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-dead" x="400" y="480"/>
+<use href="#c-slow" x="415" y="480"/>
+<use href="#c-dead" x="430" y="480"/>
+<use href="#c-dead" x="400" y="468"/>
+<use href="#c-empty" x="415" y="468"/>
+<use href="#c-empty" x="430" y="468"/>
+<use href="#c-empty" x="400" y="456"/>
+<use href="#c-med" x="415" y="456"/>
+<use href="#c-slow" x="430" y="456"/>
+<use href="#c-dead" x="400" y="444"/>
+<use href="#c-med" x="415" y="444"/>
+<use href="#c-empty" x="430" y="444"/>
+<use href="#c-slow" x="451" y="480"/>
+<use href="#c-dead" x="466" y="480"/>
+<use href="#c-dead" x="481" y="480"/>
+<use href="#c-empty" x="451" y="468"/>
+<use href="#c-dead" x="466" y="468"/>
+<use href="#c-dead" x="481" y="468"/>
+<use href="#c-slow" x="451" y="456"/>
+<use href="#c-empty" x="466" y="456"/>
+<use href="#c-empty" x="481" y="456"/>
+<use href="#c-empty" x="451" y="444"/>
+<use href="#c-slow" x="466" y="444"/>
+<use href="#c-dead" x="481" y="444"/>
+<use href="#c-slow" x="502" y="480"/>
+<use href="#c-slow" x="517" y="480"/>
+<use href="#c-med" x="532" y="480"/>
+<use href="#c-empty" x="502" y="468"/>
+<use href="#c-empty" x="517" y="468"/>
+<use href="#c-med" x="532" y="468"/>
+<use href="#c-empty" x="502" y="456"/>
+<use href="#c-empty" x="517" y="456"/>
+<use href="#c-dead" x="532" y="456"/>
+<use href="#c-slow" x="502" y="444"/>
+<use href="#c-slow" x="517" y="444"/>
+<use href="#c-slow" x="532" y="444"/>
+<use href="#c-empty" x="553" y="480"/>
+<use href="#c-dead" x="568" y="480"/>
+<use href="#c-empty" x="583" y="480"/>
+<use href="#c-dead" x="553" y="468"/>
+<use href="#c-fast" x="568" y="468"/>
+<use href="#c-fast" x="583" y="468"/>
+<use href="#c-dead" x="553" y="456"/>
+<use href="#c-med" x="568" y="456"/>
+<use href="#c-fast" x="583" y="456"/>
+<use href="#c-fast" x="553" y="444"/>
+<use href="#c-dead" x="568" y="444"/>
+<use href="#c-med" x="583" y="444"/>
+<use href="#c-med" x="604" y="480"/>
+<use href="#c-fast" x="619" y="480"/>
+<use href="#c-dead" x="634" y="480"/>
+<use href="#c-empty" x="604" y="468"/>
+<use href="#c-empty" x="619" y="468"/>
+<use href="#c-slow" x="634" y="468"/>
+<use href="#c-slow" x="604" y="456"/>
+<use href="#c-slow" x="619" y="456"/>
+<use href="#c-fast" x="634" y="456"/>
+<use href="#c-dead" x="604" y="444"/>
+<use href="#c-med" x="619" y="444"/>
+<use href="#c-slow" x="634" y="444"/>
+<use href="#c-slow" x="655" y="480"/>
+<use href="#c-slow" x="670" y="480"/>
+<use href="#c-slow" x="685" y="480"/>
+<use href="#c-slow" x="655" y="468"/>
+<use href="#c-dead" x="670" y="468"/>
+<use href="#c-dead" x="685" y="468"/>
+<use href="#c-fast" x="655" y="456"/>
+<use href="#c-dead" x="670" y="456"/>
+<use href="#c-slow" x="685" y="456"/>
+<use href="#c-empty" x="655" y="444"/>
+<use href="#c-med" x="670" y="444"/>
+<use href="#c-dead" x="685" y="444"/>
+<use href="#c-dead" x="706" y="480"/>
+<use href="#c-slow" x="721" y="480"/>
+<use href="#c-fast" x="736" y="480"/>
+<use href="#c-dead" x="706" y="468"/>
+<use href="#c-dead" x="721" y="468"/>
+<use href="#c-med" x="736" y="468"/>
+<use href="#c-med" x="706" y="456"/>
+<use href="#c-empty" x="721" y="456"/>
+<use href="#c-med" x="736" y="456"/>
+<use href="#c-empty" x="706" y="444"/>
+<use href="#c-dead" x="721" y="444"/>
+<use href="#c-med" x="736" y="444"/>
+<use href="#c-dead" x="757" y="480"/>
+<use href="#c-slow" x="772" y="480"/>
+<use href="#c-dead" x="787" y="480"/>
+<use href="#c-med" x="757" y="468"/>
+<use href="#c-empty" x="772" y="468"/>
+<use href="#c-slow" x="787" y="468"/>
+<use href="#c-slow" x="757" y="456"/>
+<use href="#c-slow" x="772" y="456"/>
+<use href="#c-med" x="787" y="456"/>
+<use href="#c-dead" x="757" y="444"/>
+<use href="#c-dead" x="772" y="444"/>
+<use href="#c-empty" x="787" y="444"/>
+<use href="#c-dead" x="808" y="480"/>
+<use href="#c-slow" x="823" y="480"/>
+<use href="#c-med" x="838" y="480"/>
+<use href="#c-slow" x="808" y="468"/>
+<use href="#c-empty" x="823" y="468"/>
+<use href="#c-slow" x="838" y="468"/>
+<use href="#c-fast" x="808" y="456"/>
+<use href="#c-slow" x="823" y="456"/>
+<use href="#c-fast" x="838" y="456"/>
+<use href="#c-empty" x="808" y="444"/>
+<use href="#c-fast" x="823" y="444"/>
+<use href="#c-dead" x="838" y="444"/>
+<use href="#c-empty" x="859" y="480"/>
+<use href="#c-dead" x="889" y="480"/>
+<use href="#c-empty" x="859" y="468"/>
+<use href="#c-dead" x="889" y="468"/>
+<use href="#c-empty" x="859" y="456"/>
+<use href="#c-dead" x="889" y="456"/>
+<use href="#c-med" x="859" y="444"/>
+<use href="#c-slow" x="889" y="444"/>
+<use href="#c-slow" x="910" y="480"/>
+<use href="#c-dead" x="925" y="480"/>
+<use href="#c-slow" x="940" y="480"/>
+<use href="#c-empty" x="910" y="468"/>
+<use href="#c-med" x="925" y="468"/>
+<use href="#c-dead" x="940" y="468"/>
+<use href="#c-dead" x="910" y="456"/>
+<use href="#c-dead" x="925" y="456"/>
+<use href="#c-dead" x="940" y="456"/>
+<use href="#c-med" x="910" y="444"/>
+<use href="#c-slow" x="925" y="444"/>
+<use href="#c-dead" x="940" y="444"/>
+<use href="#c-slow" x="961" y="480"/>
+<use href="#c-slow" x="976" y="480"/>
+<use href="#c-slow" x="991" y="480"/>
+<use href="#c-fast" x="961" y="468"/>
+<use href="#c-dead" x="976" y="468"/>
+<use href="#c-empty" x="991" y="468"/>
+<use href="#c-empty" x="961" y="456"/>
+<use href="#c-dead" x="976" y="456"/>
+<use href="#c-dead" x="991" y="456"/>
+<use href="#c-med" x="961" y="444"/>
+<use href="#c-med" x="976" y="444"/>
+<use href="#c-dead" x="991" y="444"/>
+<use href="#c-empty" x="1012" y="480"/>
+<use href="#c-slow" x="1027" y="480"/>
+<use href="#c-med" x="1042" y="480"/>
+<use href="#c-med" x="1012" y="468"/>
+<use href="#c-slow" x="1027" y="468"/>
+<use href="#c-med" x="1042" y="468"/>
+<use href="#c-fast" x="1012" y="456"/>
+<use href="#c-dead" x="1027" y="456"/>
+<use href="#c-slow" x="1042" y="456"/>
+<use href="#c-med" x="1012" y="444"/>
+<use href="#c-dead" x="1027" y="444"/>
+<use href="#c-fast" x="1042" y="444"/>
+<use href="#c-dead" x="1063" y="480"/>
+<use href="#c-dead" x="1078" y="480"/>
+<use href="#c-slow" x="1093" y="480"/>
+<use href="#c-empty" x="1063" y="468"/>
+<use href="#c-empty" x="1078" y="468"/>
+<use href="#c-dead" x="1093" y="468"/>
+<use href="#c-empty" x="1063" y="456"/>
+<use href="#c-slow" x="1078" y="456"/>
+<use href="#c-dead" x="1093" y="456"/>
+<use href="#c-med" x="1063" y="444"/>
+<use href="#c-dead" x="1078" y="444"/>
+<use href="#c-dead" x="1093" y="444"/>
+<use href="#c-dead" x="1114" y="480"/>
+<use href="#c-med" x="1129" y="480"/>
+<use href="#c-slow" x="1144" y="480"/>
+<use href="#c-dead" x="1114" y="468"/>
+<use href="#c-slow" x="1129" y="468"/>
+<use href="#c-empty" x="1144" y="468"/>
+<use href="#c-dead" x="1114" y="456"/>
+<use href="#c-empty" x="1129" y="456"/>
+<use href="#c-empty" x="1144" y="456"/>
+<use href="#c-med" x="1114" y="444"/>
+<use href="#c-empty" x="1129" y="444"/>
+<use href="#c-dead" x="1144" y="444"/>
+<use href="#c-empty" x="1165" y="480"/>
+<use href="#c-dead" x="1180" y="480"/>
+<use href="#c-empty" x="1195" y="480"/>
+<use href="#c-empty" x="1165" y="468"/>
+<use href="#c-med" x="1180" y="468"/>
+<use href="#c-fast" x="1195" y="468"/>
+<use href="#c-dead" x="1165" y="456"/>
+<use href="#c-med" x="1180" y="456"/>
+<use href="#c-dead" x="1195" y="456"/>
+<use href="#c-med" x="1165" y="444"/>
+<use href="#c-empty" x="1180" y="444"/>
+<use href="#c-dead" x="1195" y="444"/>
+<use href="#c-empty" x="1216" y="480"/>
+<use href="#c-slow" x="1231" y="480"/>
+<use href="#c-slow" x="1246" y="480"/>
+<use href="#c-dead" x="1216" y="468"/>
+<use href="#c-slow" x="1231" y="468"/>
+<use href="#c-dead" x="1246" y="468"/>
+<use href="#c-dead" x="1216" y="456"/>
+<use href="#c-empty" x="1231" y="456"/>
+<use href="#c-slow" x="1246" y="456"/>
+<use href="#c-fast" x="1216" y="444"/>
+<use href="#c-empty" x="1231" y="444"/>
+<use href="#c-slow" x="1246" y="444"/>
+<use href="#c-fast" x="1267" y="480"/>
+<use href="#c-dead" x="1282" y="480"/>
+<use href="#c-fast" x="1297" y="480"/>
+<use href="#c-empty" x="1267" y="468"/>
+<use href="#c-med" x="1282" y="468"/>
+<use href="#c-slow" x="1297" y="468"/>
+<use href="#c-med" x="1267" y="456"/>
+<use href="#c-med" x="1282" y="456"/>
+<use href="#c-empty" x="1297" y="456"/>
+<use href="#c-empty" x="1267" y="444"/>
+<use href="#c-slow" x="1282" y="444"/>
+<use href="#c-med" x="1297" y="444"/>
+<use href="#c-dead" x="1318" y="480"/>
+<use href="#c-fast" x="1333" y="480"/>
+<use href="#c-slow" x="1348" y="480"/>
+<use href="#c-fast" x="1318" y="468"/>
+<use href="#c-dead" x="1333" y="468"/>
+<use href="#c-slow" x="1348" y="468"/>
+<use href="#c-dead" x="1318" y="456"/>
+<use href="#c-dead" x="1333" y="456"/>
+<use href="#c-dead" x="1348" y="456"/>
+<use href="#c-med" x="1318" y="444"/>
+<text x="304" y="568" class="st" font-size="52" fill="#262A2E">F</text>
+<text x="346" y="539" class="num" font-size="18" font-weight="800" fill="#16191C">73%</text>
+<text x="346" y="555" class="num" font-size="11" font-weight="600" fill="#2C3135">163/222</text>
+<path d="M1316 574 L1324 579 L1316 584" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 574 L1344 579 L1336 584" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="518" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 515.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-slow" x="400" y="554"/>
+<use href="#c-dead" x="415" y="554"/>
+<use href="#c-dead" x="430" y="554"/>
+<use href="#c-slow" x="400" y="542"/>
+<use href="#c-slow" x="415" y="542"/>
+<use href="#c-dead" x="430" y="542"/>
+<use href="#c-dead" x="400" y="530"/>
+<use href="#c-dead" x="415" y="530"/>
+<use href="#c-dead" x="430" y="530"/>
+<use href="#c-dead" x="400" y="518"/>
+<use href="#c-fast" x="415" y="518"/>
+<use href="#c-dead" x="430" y="518"/>
+<use href="#c-dead" x="451" y="554"/>
+<use href="#c-slow" x="466" y="554"/>
+<use href="#c-empty" x="481" y="554"/>
+<use href="#c-dead" x="451" y="542"/>
+<use href="#c-empty" x="466" y="542"/>
+<use href="#c-med" x="481" y="542"/>
+<use href="#c-empty" x="451" y="530"/>
+<use href="#c-dead" x="466" y="530"/>
+<use href="#c-dead" x="481" y="530"/>
+<use href="#c-dead" x="451" y="518"/>
+<use href="#c-fast" x="466" y="518"/>
+<use href="#c-empty" x="481" y="518"/>
+<use href="#c-dead" x="502" y="554"/>
+<use href="#c-dead" x="517" y="554"/>
+<use href="#c-dead" x="532" y="554"/>
+<use href="#c-med" x="502" y="542"/>
+<use href="#c-dead" x="517" y="542"/>
+<use href="#c-fast" x="532" y="542"/>
+<use href="#c-slow" x="502" y="530"/>
+<use href="#c-slow" x="517" y="530"/>
+<use href="#c-empty" x="532" y="530"/>
+<use href="#c-empty" x="502" y="518"/>
+<use href="#c-dead" x="517" y="518"/>
+<use href="#c-empty" x="532" y="518"/>
+<use href="#c-empty" x="553" y="554"/>
+<use href="#c-med" x="568" y="554"/>
+<use href="#c-med" x="583" y="554"/>
+<use href="#c-dead" x="553" y="542"/>
+<use href="#c-dead" x="568" y="542"/>
+<use href="#c-empty" x="583" y="542"/>
+<use href="#c-slow" x="553" y="530"/>
+<use href="#c-med" x="568" y="530"/>
+<use href="#c-empty" x="583" y="530"/>
+<use href="#c-dead" x="553" y="518"/>
+<use href="#c-med" x="568" y="518"/>
+<use href="#c-slow" x="583" y="518"/>
+<use href="#c-dead" x="604" y="554"/>
+<use href="#c-dead" x="619" y="554"/>
+<use href="#c-empty" x="634" y="554"/>
+<use href="#c-slow" x="604" y="542"/>
+<use href="#c-empty" x="619" y="542"/>
+<use href="#c-med" x="634" y="542"/>
+<use href="#c-dead" x="604" y="530"/>
+<use href="#c-slow" x="619" y="530"/>
+<use href="#c-slow" x="634" y="530"/>
+<use href="#c-empty" x="604" y="518"/>
+<use href="#c-dead" x="619" y="518"/>
+<use href="#c-dead" x="634" y="518"/>
+<use href="#c-dead" x="655" y="554"/>
+<use href="#c-dead" x="670" y="554"/>
+<use href="#c-med" x="685" y="554"/>
+<use href="#c-slow" x="655" y="542"/>
+<use href="#c-dead" x="670" y="542"/>
+<use href="#c-empty" x="685" y="542"/>
+<use href="#c-slow" x="655" y="530"/>
+<use href="#c-empty" x="670" y="530"/>
+<use href="#c-slow" x="685" y="530"/>
+<use href="#c-dead" x="655" y="518"/>
+<use href="#c-dead" x="670" y="518"/>
+<use href="#c-empty" x="685" y="518"/>
+<use href="#c-fast" x="706" y="554"/>
+<use href="#c-dead" x="721" y="554"/>
+<use href="#c-dead" x="736" y="554"/>
+<use href="#c-dead" x="706" y="542"/>
+<use href="#c-dead" x="721" y="542"/>
+<use href="#c-slow" x="736" y="542"/>
+<use href="#c-slow" x="706" y="530"/>
+<use href="#c-empty" x="721" y="530"/>
+<use href="#c-dead" x="736" y="530"/>
+<use href="#c-empty" x="706" y="518"/>
+<use href="#c-fast" x="721" y="518"/>
+<use href="#c-dead" x="736" y="518"/>
+<use href="#c-empty" x="757" y="554"/>
+<use href="#c-dead" x="772" y="554"/>
+<use href="#c-empty" x="787" y="554"/>
+<use href="#c-slow" x="757" y="542"/>
+<use href="#c-empty" x="772" y="542"/>
+<use href="#c-fast" x="787" y="542"/>
+<use href="#c-dead" x="757" y="530"/>
+<use href="#c-dead" x="772" y="530"/>
+<use href="#c-dead" x="787" y="530"/>
+<use href="#c-dead" x="757" y="518"/>
+<use href="#c-dead" x="772" y="518"/>
+<use href="#c-empty" x="787" y="518"/>
+<use href="#c-dead" x="808" y="554"/>
+<use href="#c-slow" x="823" y="554"/>
+<use href="#c-slow" x="838" y="554"/>
+<use href="#c-fast" x="808" y="542"/>
+<use href="#c-empty" x="823" y="542"/>
+<use href="#c-slow" x="838" y="542"/>
+<use href="#c-empty" x="808" y="530"/>
+<use href="#c-empty" x="823" y="530"/>
+<use href="#c-slow" x="838" y="530"/>
+<use href="#c-empty" x="808" y="518"/>
+<use href="#c-dead" x="823" y="518"/>
+<use href="#c-empty" x="838" y="518"/>
+<use href="#c-dead" x="859" y="554"/>
+<use href="#c-med" x="889" y="554"/>
+<use href="#c-dead" x="859" y="542"/>
+<use href="#c-slow" x="889" y="542"/>
+<use href="#c-dead" x="859" y="530"/>
+<use href="#c-fast" x="889" y="530"/>
+<use href="#c-empty" x="859" y="518"/>
+<use href="#c-dead" x="889" y="518"/>
+<use href="#c-slow" x="910" y="554"/>
+<use href="#c-dead" x="925" y="554"/>
+<use href="#c-slow" x="940" y="554"/>
+<use href="#c-med" x="910" y="542"/>
+<use href="#c-empty" x="925" y="542"/>
+<use href="#c-empty" x="940" y="542"/>
+<use href="#c-empty" x="910" y="530"/>
+<use href="#c-slow" x="925" y="530"/>
+<use href="#c-empty" x="940" y="530"/>
+<use href="#c-empty" x="910" y="518"/>
+<use href="#c-empty" x="925" y="518"/>
+<use href="#c-dead" x="940" y="518"/>
+<use href="#c-med" x="961" y="554"/>
+<use href="#c-slow" x="976" y="554"/>
+<use href="#c-slow" x="991" y="554"/>
+<use href="#c-dead" x="961" y="542"/>
+<use href="#c-dead" x="976" y="542"/>
+<use href="#c-slow" x="991" y="542"/>
+<use href="#c-dead" x="961" y="530"/>
+<use href="#c-slow" x="976" y="530"/>
+<use href="#c-empty" x="991" y="530"/>
+<use href="#c-slow" x="961" y="518"/>
+<use href="#c-med" x="976" y="518"/>
+<use href="#c-med" x="991" y="518"/>
+<use href="#c-dead" x="1012" y="554"/>
+<use href="#c-dead" x="1027" y="554"/>
+<use href="#c-fast" x="1042" y="554"/>
+<use href="#c-dead" x="1012" y="542"/>
+<use href="#c-med" x="1027" y="542"/>
+<use href="#c-slow" x="1042" y="542"/>
+<use href="#c-dead" x="1012" y="530"/>
+<use href="#c-empty" x="1027" y="530"/>
+<use href="#c-empty" x="1042" y="530"/>
+<use href="#c-empty" x="1012" y="518"/>
+<use href="#c-slow" x="1027" y="518"/>
+<use href="#c-dead" x="1042" y="518"/>
+<use href="#c-dead" x="1063" y="554"/>
+<use href="#c-med" x="1078" y="554"/>
+<use href="#c-slow" x="1093" y="554"/>
+<use href="#c-dead" x="1063" y="542"/>
+<use href="#c-dead" x="1078" y="542"/>
+<use href="#c-dead" x="1093" y="542"/>
+<use href="#c-slow" x="1063" y="530"/>
+<use href="#c-empty" x="1078" y="530"/>
+<use href="#c-dead" x="1093" y="530"/>
+<use href="#c-dead" x="1063" y="518"/>
+<use href="#c-empty" x="1078" y="518"/>
+<use href="#c-dead" x="1093" y="518"/>
+<use href="#c-empty" x="1114" y="554"/>
+<use href="#c-dead" x="1129" y="554"/>
+<use href="#c-empty" x="1144" y="554"/>
+<use href="#c-dead" x="1114" y="542"/>
+<use href="#c-empty" x="1129" y="542"/>
+<use href="#c-slow" x="1144" y="542"/>
+<use href="#c-empty" x="1114" y="530"/>
+<use href="#c-dead" x="1129" y="530"/>
+<use href="#c-empty" x="1144" y="530"/>
+<use href="#c-dead" x="1114" y="518"/>
+<use href="#c-dead" x="1129" y="518"/>
+<use href="#c-dead" x="1144" y="518"/>
+<use href="#c-empty" x="1165" y="554"/>
+<use href="#c-med" x="1180" y="554"/>
+<use href="#c-med" x="1195" y="554"/>
+<use href="#c-empty" x="1165" y="542"/>
+<use href="#c-dead" x="1180" y="542"/>
+<use href="#c-med" x="1195" y="542"/>
+<use href="#c-dead" x="1165" y="530"/>
+<use href="#c-empty" x="1180" y="530"/>
+<use href="#c-fast" x="1195" y="530"/>
+<use href="#c-empty" x="1165" y="518"/>
+<use href="#c-empty" x="1180" y="518"/>
+<use href="#c-dead" x="1195" y="518"/>
+<use href="#c-med" x="1216" y="554"/>
+<use href="#c-empty" x="1231" y="554"/>
+<use href="#c-slow" x="1246" y="554"/>
+<use href="#c-dead" x="1216" y="542"/>
+<use href="#c-dead" x="1231" y="542"/>
+<use href="#c-slow" x="1246" y="542"/>
+<use href="#c-dead" x="1216" y="530"/>
+<use href="#c-slow" x="1231" y="530"/>
+<use href="#c-empty" x="1246" y="530"/>
+<use href="#c-empty" x="1216" y="518"/>
+<use href="#c-empty" x="1231" y="518"/>
+<use href="#c-slow" x="1246" y="518"/>
+<use href="#c-slow" x="1267" y="554"/>
+<use href="#c-med" x="1282" y="554"/>
+<use href="#c-med" x="1297" y="554"/>
+<use href="#c-empty" x="1267" y="542"/>
+<use href="#c-dead" x="1282" y="542"/>
+<use href="#c-dead" x="1297" y="542"/>
+<use href="#c-empty" x="1267" y="530"/>
+<use href="#c-dead" x="1282" y="530"/>
+<use href="#c-empty" x="1297" y="530"/>
+<use href="#c-dead" x="1267" y="518"/>
+<use href="#c-dead" x="1282" y="518"/>
+<use href="#c-slow" x="1297" y="518"/>
+<use href="#c-med" x="1318" y="554"/>
+<use href="#c-dead" x="1333" y="554"/>
+<use href="#c-med" x="1348" y="554"/>
+<use href="#c-empty" x="1318" y="542"/>
+<use href="#c-slow" x="1333" y="542"/>
+<use href="#c-empty" x="1348" y="542"/>
+<use href="#c-dead" x="1318" y="530"/>
+<use href="#c-dead" x="1333" y="530"/>
+<use href="#c-dead" x="1348" y="530"/>
+<use href="#c-dead" x="1318" y="518"/>
+<text x="304" y="642" class="st" font-size="52" fill="#262A2E">G</text>
+<text x="346" y="613" class="num" font-size="18" font-weight="800" fill="#16191C">83%</text>
+<text x="346" y="629" class="num" font-size="11" font-weight="600" fill="#2C3135">184/222</text>
+<path d="M1316 648 L1324 653 L1316 658" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 648 L1344 653 L1336 658" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="592" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 589.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-med" x="400" y="628"/>
+<use href="#c-fast" x="415" y="628"/>
+<use href="#c-med" x="430" y="628"/>
+<use href="#c-slow" x="400" y="616"/>
+<use href="#c-slow" x="415" y="616"/>
+<use href="#c-dead" x="430" y="616"/>
+<use href="#c-dead" x="400" y="604"/>
+<use href="#c-dead" x="415" y="604"/>
+<use href="#c-fast" x="430" y="604"/>
+<use href="#c-dead" x="400" y="592"/>
+<use href="#c-dead" x="415" y="592"/>
+<use href="#c-slow" x="430" y="592"/>
+<use href="#c-slow" x="451" y="628"/>
+<use href="#c-dead" x="466" y="628"/>
+<use href="#c-dead" x="481" y="628"/>
+<use href="#c-empty" x="451" y="616"/>
+<use href="#c-med" x="466" y="616"/>
+<use href="#c-empty" x="481" y="616"/>
+<use href="#c-dead" x="451" y="604"/>
+<use href="#c-dead" x="466" y="604"/>
+<use href="#c-dead" x="481" y="604"/>
+<use href="#c-empty" x="451" y="592"/>
+<use href="#c-dead" x="466" y="592"/>
+<use href="#c-dead" x="481" y="592"/>
+<use href="#c-empty" x="502" y="628"/>
+<use href="#c-dead" x="517" y="628"/>
+<use href="#c-med" x="532" y="628"/>
+<use href="#c-dead" x="502" y="616"/>
+<use href="#c-empty" x="517" y="616"/>
+<use href="#c-med" x="532" y="616"/>
+<use href="#c-dead" x="502" y="604"/>
+<use href="#c-dead" x="517" y="604"/>
+<use href="#c-empty" x="532" y="604"/>
+<use href="#c-slow" x="502" y="592"/>
+<use href="#c-empty" x="517" y="592"/>
+<use href="#c-empty" x="532" y="592"/>
+<use href="#c-slow" x="553" y="628"/>
+<use href="#c-fast" x="568" y="628"/>
+<use href="#c-med" x="583" y="628"/>
+<use href="#c-empty" x="553" y="616"/>
+<use href="#c-fast" x="568" y="616"/>
+<use href="#c-slow" x="583" y="616"/>
+<use href="#c-dead" x="553" y="604"/>
+<use href="#c-slow" x="568" y="604"/>
+<use href="#c-med" x="583" y="604"/>
+<use href="#c-dead" x="553" y="592"/>
+<use href="#c-slow" x="568" y="592"/>
+<use href="#c-med" x="583" y="592"/>
+<use href="#c-dead" x="604" y="628"/>
+<use href="#c-fast" x="619" y="628"/>
+<use href="#c-empty" x="634" y="628"/>
+<use href="#c-dead" x="604" y="616"/>
+<use href="#c-dead" x="619" y="616"/>
+<use href="#c-slow" x="634" y="616"/>
+<use href="#c-dead" x="604" y="604"/>
+<use href="#c-slow" x="619" y="604"/>
+<use href="#c-med" x="634" y="604"/>
+<use href="#c-dead" x="604" y="592"/>
+<use href="#c-slow" x="619" y="592"/>
+<use href="#c-slow" x="634" y="592"/>
+<use href="#c-med" x="655" y="628"/>
+<use href="#c-dead" x="670" y="628"/>
+<use href="#c-slow" x="685" y="628"/>
+<use href="#c-empty" x="655" y="616"/>
+<use href="#c-dead" x="670" y="616"/>
+<use href="#c-dead" x="685" y="616"/>
+<use href="#c-slow" x="655" y="604"/>
+<use href="#c-dead" x="670" y="604"/>
+<use href="#c-dead" x="685" y="604"/>
+<use href="#c-slow" x="655" y="592"/>
+<use href="#c-dead" x="670" y="592"/>
+<use href="#c-med" x="685" y="592"/>
+<use href="#c-slow" x="706" y="628"/>
+<use href="#c-slow" x="721" y="628"/>
+<use href="#c-dead" x="736" y="628"/>
+<use href="#c-med" x="706" y="616"/>
+<use href="#c-dead" x="721" y="616"/>
+<use href="#c-slow" x="736" y="616"/>
+<use href="#c-dead" x="706" y="604"/>
+<use href="#c-med" x="721" y="604"/>
+<use href="#c-slow" x="736" y="604"/>
+<use href="#c-dead" x="706" y="592"/>
+<use href="#c-empty" x="721" y="592"/>
+<use href="#c-med" x="736" y="592"/>
+<use href="#c-empty" x="757" y="628"/>
+<use href="#c-med" x="772" y="628"/>
+<use href="#c-med" x="787" y="628"/>
+<use href="#c-slow" x="757" y="616"/>
+<use href="#c-fast" x="772" y="616"/>
+<use href="#c-slow" x="787" y="616"/>
+<use href="#c-dead" x="757" y="604"/>
+<use href="#c-dead" x="772" y="604"/>
+<use href="#c-dead" x="787" y="604"/>
+<use href="#c-empty" x="757" y="592"/>
+<use href="#c-empty" x="772" y="592"/>
+<use href="#c-slow" x="787" y="592"/>
+<use href="#c-fast" x="808" y="628"/>
+<use href="#c-dead" x="823" y="628"/>
+<use href="#c-med" x="838" y="628"/>
+<use href="#c-dead" x="808" y="616"/>
+<use href="#c-med" x="823" y="616"/>
+<use href="#c-dead" x="838" y="616"/>
+<use href="#c-slow" x="808" y="604"/>
+<use href="#c-dead" x="823" y="604"/>
+<use href="#c-dead" x="838" y="604"/>
+<use href="#c-dead" x="808" y="592"/>
+<use href="#c-empty" x="823" y="592"/>
+<use href="#c-empty" x="838" y="592"/>
+<use href="#c-dead" x="859" y="628"/>
+<use href="#c-dead" x="889" y="628"/>
+<use href="#c-empty" x="859" y="616"/>
+<use href="#c-med" x="889" y="616"/>
+<use href="#c-dead" x="859" y="604"/>
+<use href="#c-slow" x="889" y="604"/>
+<use href="#c-slow" x="859" y="592"/>
+<use href="#c-slow" x="889" y="592"/>
+<use href="#c-dead" x="910" y="628"/>
+<use href="#c-dead" x="925" y="628"/>
+<use href="#c-empty" x="940" y="628"/>
+<use href="#c-dead" x="910" y="616"/>
+<use href="#c-empty" x="925" y="616"/>
+<use href="#c-dead" x="940" y="616"/>
+<use href="#c-slow" x="910" y="604"/>
+<use href="#c-slow" x="925" y="604"/>
+<use href="#c-dead" x="940" y="604"/>
+<use href="#c-slow" x="910" y="592"/>
+<use href="#c-empty" x="925" y="592"/>
+<use href="#c-slow" x="940" y="592"/>
+<use href="#c-slow" x="961" y="628"/>
+<use href="#c-dead" x="976" y="628"/>
+<use href="#c-empty" x="991" y="628"/>
+<use href="#c-med" x="961" y="616"/>
+<use href="#c-dead" x="976" y="616"/>
+<use href="#c-med" x="991" y="616"/>
+<use href="#c-fast" x="961" y="604"/>
+<use href="#c-dead" x="976" y="604"/>
+<use href="#c-med" x="991" y="604"/>
+<use href="#c-dead" x="961" y="592"/>
+<use href="#c-dead" x="976" y="592"/>
+<use href="#c-slow" x="991" y="592"/>
+<use href="#c-med" x="1012" y="628"/>
+<use href="#c-dead" x="1027" y="628"/>
+<use href="#c-dead" x="1042" y="628"/>
+<use href="#c-med" x="1012" y="616"/>
+<use href="#c-empty" x="1027" y="616"/>
+<use href="#c-slow" x="1042" y="616"/>
+<use href="#c-empty" x="1012" y="604"/>
+<use href="#c-fast" x="1027" y="604"/>
+<use href="#c-dead" x="1042" y="604"/>
+<use href="#c-empty" x="1012" y="592"/>
+<use href="#c-empty" x="1027" y="592"/>
+<use href="#c-dead" x="1042" y="592"/>
+<use href="#c-fast" x="1063" y="628"/>
+<use href="#c-fast" x="1078" y="628"/>
+<use href="#c-dead" x="1093" y="628"/>
+<use href="#c-slow" x="1063" y="616"/>
+<use href="#c-med" x="1078" y="616"/>
+<use href="#c-dead" x="1093" y="616"/>
+<use href="#c-fast" x="1063" y="604"/>
+<use href="#c-slow" x="1078" y="604"/>
+<use href="#c-empty" x="1093" y="604"/>
+<use href="#c-slow" x="1063" y="592"/>
+<use href="#c-fast" x="1078" y="592"/>
+<use href="#c-dead" x="1093" y="592"/>
+<use href="#c-empty" x="1114" y="628"/>
+<use href="#c-med" x="1129" y="628"/>
+<use href="#c-dead" x="1144" y="628"/>
+<use href="#c-dead" x="1114" y="616"/>
+<use href="#c-dead" x="1129" y="616"/>
+<use href="#c-slow" x="1144" y="616"/>
+<use href="#c-slow" x="1114" y="604"/>
+<use href="#c-dead" x="1129" y="604"/>
+<use href="#c-empty" x="1144" y="604"/>
+<use href="#c-dead" x="1114" y="592"/>
+<use href="#c-fast" x="1129" y="592"/>
+<use href="#c-slow" x="1144" y="592"/>
+<use href="#c-slow" x="1165" y="628"/>
+<use href="#c-empty" x="1180" y="628"/>
+<use href="#c-dead" x="1195" y="628"/>
+<use href="#c-slow" x="1165" y="616"/>
+<use href="#c-dead" x="1180" y="616"/>
+<use href="#c-slow" x="1195" y="616"/>
+<use href="#c-empty" x="1165" y="604"/>
+<use href="#c-dead" x="1180" y="604"/>
+<use href="#c-dead" x="1195" y="604"/>
+<use href="#c-empty" x="1165" y="592"/>
+<use href="#c-med" x="1180" y="592"/>
+<use href="#c-dead" x="1195" y="592"/>
+<use href="#c-med" x="1216" y="628"/>
+<use href="#c-slow" x="1231" y="628"/>
+<use href="#c-med" x="1246" y="628"/>
+<use href="#c-slow" x="1216" y="616"/>
+<use href="#c-slow" x="1231" y="616"/>
+<use href="#c-slow" x="1246" y="616"/>
+<use href="#c-med" x="1216" y="604"/>
+<use href="#c-fast" x="1231" y="604"/>
+<use href="#c-slow" x="1246" y="604"/>
+<use href="#c-empty" x="1216" y="592"/>
+<use href="#c-empty" x="1231" y="592"/>
+<use href="#c-dead" x="1246" y="592"/>
+<use href="#c-dead" x="1267" y="628"/>
+<use href="#c-dead" x="1282" y="628"/>
+<use href="#c-med" x="1297" y="628"/>
+<use href="#c-slow" x="1267" y="616"/>
+<use href="#c-slow" x="1282" y="616"/>
+<use href="#c-med" x="1297" y="616"/>
+<use href="#c-dead" x="1267" y="604"/>
+<use href="#c-dead" x="1282" y="604"/>
+<use href="#c-fast" x="1297" y="604"/>
+<use href="#c-empty" x="1267" y="592"/>
+<use href="#c-dead" x="1282" y="592"/>
+<use href="#c-empty" x="1297" y="592"/>
+<use href="#c-dead" x="1318" y="628"/>
+<use href="#c-dead" x="1333" y="628"/>
+<use href="#c-dead" x="1348" y="628"/>
+<use href="#c-empty" x="1318" y="616"/>
+<use href="#c-dead" x="1333" y="616"/>
+<use href="#c-dead" x="1348" y="616"/>
+<use href="#c-dead" x="1318" y="604"/>
+<use href="#c-med" x="1333" y="604"/>
+<use href="#c-med" x="1348" y="604"/>
+<use href="#c-empty" x="1318" y="592"/>
+<text x="304" y="716" class="st" font-size="52" fill="#262A2E">H</text>
+<text x="346" y="687" class="num" font-size="18" font-weight="800" fill="#16191C">65%</text>
+<text x="346" y="703" class="num" font-size="11" font-weight="600" fill="#2C3135">145/223</text>
+<path d="M1316 722 L1324 727 L1316 732" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 722 L1344 727 L1336 732" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="666" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 663.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-dead" x="400" y="702"/>
+<use href="#c-empty" x="415" y="702"/>
+<use href="#c-dead" x="430" y="702"/>
+<use href="#c-slow" x="400" y="690"/>
+<use href="#c-med" x="415" y="690"/>
+<use href="#c-dead" x="430" y="690"/>
+<use href="#c-dead" x="400" y="678"/>
+<use href="#c-empty" x="415" y="678"/>
+<use href="#c-slow" x="430" y="678"/>
+<use href="#c-empty" x="400" y="666"/>
+<use href="#c-slow" x="415" y="666"/>
+<use href="#c-empty" x="430" y="666"/>
+<use href="#c-empty" x="451" y="702"/>
+<use href="#c-slow" x="466" y="702"/>
+<use href="#c-med" x="481" y="702"/>
+<use href="#c-empty" x="451" y="690"/>
+<use href="#c-dead" x="466" y="690"/>
+<use href="#c-empty" x="481" y="690"/>
+<use href="#c-slow" x="451" y="678"/>
+<use href="#c-slow" x="466" y="678"/>
+<use href="#c-empty" x="481" y="678"/>
+<use href="#c-slow" x="451" y="666"/>
+<use href="#c-dead" x="466" y="666"/>
+<use href="#c-dead" x="481" y="666"/>
+<use href="#c-dead" x="502" y="702"/>
+<use href="#c-dead" x="517" y="702"/>
+<use href="#c-empty" x="532" y="702"/>
+<use href="#c-slow" x="502" y="690"/>
+<use href="#c-dead" x="517" y="690"/>
+<use href="#c-empty" x="532" y="690"/>
+<use href="#c-dead" x="502" y="678"/>
+<use href="#c-dead" x="517" y="678"/>
+<use href="#c-empty" x="532" y="678"/>
+<use href="#c-dead" x="502" y="666"/>
+<use href="#c-empty" x="517" y="666"/>
+<use href="#c-slow" x="532" y="666"/>
+<use href="#c-dead" x="553" y="702"/>
+<use href="#c-dead" x="568" y="702"/>
+<use href="#c-dead" x="583" y="702"/>
+<use href="#c-empty" x="553" y="690"/>
+<use href="#c-med" x="568" y="690"/>
+<use href="#c-dead" x="583" y="690"/>
+<use href="#c-empty" x="553" y="678"/>
+<use href="#c-empty" x="568" y="678"/>
+<use href="#c-slow" x="583" y="678"/>
+<use href="#c-med" x="553" y="666"/>
+<use href="#c-slow" x="568" y="666"/>
+<use href="#c-empty" x="583" y="666"/>
+<use href="#c-slow" x="604" y="702"/>
+<use href="#c-dead" x="619" y="702"/>
+<use href="#c-fast" x="634" y="702"/>
+<use href="#c-empty" x="604" y="690"/>
+<use href="#c-dead" x="619" y="690"/>
+<use href="#c-dead" x="634" y="690"/>
+<use href="#c-dead" x="604" y="678"/>
+<use href="#c-empty" x="619" y="678"/>
+<use href="#c-empty" x="634" y="678"/>
+<use href="#c-med" x="604" y="666"/>
+<use href="#c-dead" x="619" y="666"/>
+<use href="#c-slow" x="634" y="666"/>
+<use href="#c-dead" x="655" y="702"/>
+<use href="#c-fast" x="670" y="702"/>
+<use href="#c-med" x="685" y="702"/>
+<use href="#c-dead" x="655" y="690"/>
+<use href="#c-slow" x="670" y="690"/>
+<use href="#c-empty" x="685" y="690"/>
+<use href="#c-empty" x="655" y="678"/>
+<use href="#c-slow" x="670" y="678"/>
+<use href="#c-dead" x="685" y="678"/>
+<use href="#c-dead" x="655" y="666"/>
+<use href="#c-empty" x="670" y="666"/>
+<use href="#c-slow" x="685" y="666"/>
+<use href="#c-empty" x="706" y="702"/>
+<use href="#c-dead" x="721" y="702"/>
+<use href="#c-dead" x="736" y="702"/>
+<use href="#c-empty" x="706" y="690"/>
+<use href="#c-dead" x="721" y="690"/>
+<use href="#c-empty" x="736" y="690"/>
+<use href="#c-empty" x="706" y="678"/>
+<use href="#c-dead" x="721" y="678"/>
+<use href="#c-empty" x="736" y="678"/>
+<use href="#c-dead" x="706" y="666"/>
+<use href="#c-slow" x="721" y="666"/>
+<use href="#c-dead" x="736" y="666"/>
+<use href="#c-med" x="757" y="702"/>
+<use href="#c-med" x="772" y="702"/>
+<use href="#c-empty" x="787" y="702"/>
+<use href="#c-empty" x="757" y="690"/>
+<use href="#c-empty" x="772" y="690"/>
+<use href="#c-dead" x="787" y="690"/>
+<use href="#c-dead" x="757" y="678"/>
+<use href="#c-empty" x="772" y="678"/>
+<use href="#c-dead" x="787" y="678"/>
+<use href="#c-empty" x="757" y="666"/>
+<use href="#c-dead" x="772" y="666"/>
+<use href="#c-slow" x="787" y="666"/>
+<use href="#c-dead" x="808" y="702"/>
+<use href="#c-dead" x="823" y="702"/>
+<use href="#c-slow" x="838" y="702"/>
+<use href="#c-empty" x="808" y="690"/>
+<use href="#c-dead" x="823" y="690"/>
+<use href="#c-med" x="838" y="690"/>
+<use href="#c-dead" x="808" y="678"/>
+<use href="#c-empty" x="823" y="678"/>
+<use href="#c-slow" x="838" y="678"/>
+<use href="#c-empty" x="808" y="666"/>
+<use href="#c-empty" x="823" y="666"/>
+<use href="#c-dead" x="838" y="666"/>
+<use href="#c-empty" x="859" y="702"/>
+<use href="#c-dead" x="889" y="702"/>
+<use href="#c-dead" x="859" y="690"/>
+<use href="#c-dead" x="889" y="690"/>
+<use href="#c-med" x="859" y="678"/>
+<use href="#c-empty" x="889" y="678"/>
+<use href="#c-empty" x="859" y="666"/>
+<use href="#c-dead" x="889" y="666"/>
+<use href="#c-slow" x="910" y="702"/>
+<use href="#c-slow" x="925" y="702"/>
+<use href="#c-dead" x="940" y="702"/>
+<use href="#c-empty" x="910" y="690"/>
+<use href="#c-med" x="925" y="690"/>
+<use href="#c-empty" x="940" y="690"/>
+<use href="#c-dead" x="910" y="678"/>
+<use href="#c-empty" x="925" y="678"/>
+<use href="#c-slow" x="940" y="678"/>
+<use href="#c-dead" x="910" y="666"/>
+<use href="#c-empty" x="925" y="666"/>
+<use href="#c-empty" x="940" y="666"/>
+<use href="#c-dead" x="961" y="702"/>
+<use href="#c-dead" x="976" y="702"/>
+<use href="#c-dead" x="991" y="702"/>
+<use href="#c-empty" x="961" y="690"/>
+<use href="#c-empty" x="976" y="690"/>
+<use href="#c-dead" x="991" y="690"/>
+<use href="#c-dead" x="961" y="678"/>
+<use href="#c-slow" x="976" y="678"/>
+<use href="#c-slow" x="991" y="678"/>
+<use href="#c-dead" x="961" y="666"/>
+<use href="#c-empty" x="976" y="666"/>
+<use href="#c-empty" x="991" y="666"/>
+<use href="#c-med" x="1012" y="702"/>
+<use href="#c-dead" x="1027" y="702"/>
+<use href="#c-dead" x="1042" y="702"/>
+<use href="#c-slow" x="1012" y="690"/>
+<use href="#c-dead" x="1027" y="690"/>
+<use href="#c-med" x="1042" y="690"/>
+<use href="#c-empty" x="1012" y="678"/>
+<use href="#c-dead" x="1027" y="678"/>
+<use href="#c-dead" x="1042" y="678"/>
+<use href="#c-empty" x="1012" y="666"/>
+<use href="#c-dead" x="1027" y="666"/>
+<use href="#c-empty" x="1042" y="666"/>
+<use href="#c-dead" x="1063" y="702"/>
+<use href="#c-empty" x="1078" y="702"/>
+<use href="#c-dead" x="1093" y="702"/>
+<use href="#c-slow" x="1063" y="690"/>
+<use href="#c-dead" x="1078" y="690"/>
+<use href="#c-dead" x="1093" y="690"/>
+<use href="#c-empty" x="1063" y="678"/>
+<use href="#c-dead" x="1078" y="678"/>
+<use href="#c-dead" x="1093" y="678"/>
+<use href="#c-dead" x="1063" y="666"/>
+<use href="#c-dead" x="1078" y="666"/>
+<use href="#c-dead" x="1093" y="666"/>
+<use href="#c-empty" x="1114" y="702"/>
+<use href="#c-empty" x="1129" y="702"/>
+<use href="#c-med" x="1144" y="702"/>
+<use href="#c-empty" x="1114" y="690"/>
+<use href="#c-med" x="1129" y="690"/>
+<use href="#c-med" x="1144" y="690"/>
+<use href="#c-empty" x="1114" y="678"/>
+<use href="#c-slow" x="1129" y="678"/>
+<use href="#c-slow" x="1144" y="678"/>
+<use href="#c-dead" x="1114" y="666"/>
+<use href="#c-med" x="1129" y="666"/>
+<use href="#c-empty" x="1144" y="666"/>
+<use href="#c-slow" x="1165" y="702"/>
+<use href="#c-empty" x="1180" y="702"/>
+<use href="#c-dead" x="1195" y="702"/>
+<use href="#c-slow" x="1165" y="690"/>
+<use href="#c-empty" x="1180" y="690"/>
+<use href="#c-empty" x="1195" y="690"/>
+<use href="#c-med" x="1165" y="678"/>
+<use href="#c-empty" x="1180" y="678"/>
+<use href="#c-empty" x="1195" y="678"/>
+<use href="#c-empty" x="1165" y="666"/>
+<use href="#c-empty" x="1180" y="666"/>
+<use href="#c-empty" x="1195" y="666"/>
+<use href="#c-med" x="1216" y="702"/>
+<use href="#c-slow" x="1231" y="702"/>
+<use href="#c-dead" x="1246" y="702"/>
+<use href="#c-dead" x="1216" y="690"/>
+<use href="#c-empty" x="1231" y="690"/>
+<use href="#c-empty" x="1246" y="690"/>
+<use href="#c-med" x="1216" y="678"/>
+<use href="#c-dead" x="1231" y="678"/>
+<use href="#c-dead" x="1246" y="678"/>
+<use href="#c-slow" x="1216" y="666"/>
+<use href="#c-med" x="1231" y="666"/>
+<use href="#c-dead" x="1246" y="666"/>
+<use href="#c-dead" x="1267" y="702"/>
+<use href="#c-dead" x="1282" y="702"/>
+<use href="#c-dead" x="1297" y="702"/>
+<use href="#c-dead" x="1267" y="690"/>
+<use href="#c-dead" x="1282" y="690"/>
+<use href="#c-empty" x="1297" y="690"/>
+<use href="#c-empty" x="1267" y="678"/>
+<use href="#c-empty" x="1282" y="678"/>
+<use href="#c-dead" x="1297" y="678"/>
+<use href="#c-med" x="1267" y="666"/>
+<use href="#c-empty" x="1282" y="666"/>
+<use href="#c-dead" x="1297" y="666"/>
+<use href="#c-dead" x="1318" y="702"/>
+<use href="#c-empty" x="1333" y="702"/>
+<use href="#c-dead" x="1348" y="702"/>
+<use href="#c-empty" x="1318" y="690"/>
+<use href="#c-empty" x="1333" y="690"/>
+<use href="#c-dead" x="1348" y="690"/>
+<use href="#c-empty" x="1318" y="678"/>
+<use href="#c-empty" x="1333" y="678"/>
+<use href="#c-med" x="1348" y="678"/>
+<use href="#c-dead" x="1318" y="666"/>
+<use href="#c-empty" x="1333" y="666"/>
+<text x="304" y="790" class="st" font-size="52" fill="#262A2E">I</text>
+<text x="346" y="761" class="num" font-size="18" font-weight="800" fill="#16191C">83%</text>
+<text x="346" y="777" class="num" font-size="11" font-weight="600" fill="#2C3135">184/223</text>
+<path d="M1316 796 L1324 801 L1316 806" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<path d="M1336 796 L1344 801 L1336 806" fill="none" stroke="#2F3438" stroke-width="2.4"/>
+<rect x="874" y="740" width="14" height="47" fill="url(#pillar)" stroke="#2A2E32"/>
+<path d="M398 737.5 H1365" stroke="#7C8186" stroke-width="1"/>
+<use href="#c-dead" x="400" y="776"/>
+<use href="#c-dead" x="415" y="776"/>
+<use href="#c-dead" x="430" y="776"/>
+<use href="#c-dead" x="400" y="764"/>
+<use href="#c-dead" x="415" y="764"/>
+<use href="#c-dead" x="430" y="764"/>
+<use href="#c-med" x="400" y="752"/>
+<use href="#c-slow" x="415" y="752"/>
+<use href="#c-dead" x="430" y="752"/>
+<use href="#c-dead" x="400" y="740"/>
+<use href="#c-med" x="415" y="740"/>
+<use href="#c-dead" x="430" y="740"/>
+<use href="#c-dead" x="451" y="776"/>
+<use href="#c-dead" x="466" y="776"/>
+<use href="#c-med" x="481" y="776"/>
+<use href="#c-empty" x="451" y="764"/>
+<use href="#c-slow" x="466" y="764"/>
+<use href="#c-dead" x="481" y="764"/>
+<use href="#c-dead" x="451" y="752"/>
+<use href="#c-dead" x="466" y="752"/>
+<use href="#c-empty" x="481" y="752"/>
+<use href="#c-empty" x="451" y="740"/>
+<use href="#c-empty" x="466" y="740"/>
+<use href="#c-dead" x="481" y="740"/>
+<use href="#c-slow" x="502" y="776"/>
+<use href="#c-dead" x="517" y="776"/>
+<use href="#c-dead" x="532" y="776"/>
+<use href="#c-slow" x="502" y="764"/>
+<use href="#c-empty" x="517" y="764"/>
+<use href="#c-slow" x="532" y="764"/>
+<use href="#c-dead" x="502" y="752"/>
+<use href="#c-slow" x="517" y="752"/>
+<use href="#c-slow" x="532" y="752"/>
+<use href="#c-dead" x="502" y="740"/>
+<use href="#c-dead" x="517" y="740"/>
+<use href="#c-med" x="532" y="740"/>
+<use href="#c-empty" x="553" y="776"/>
+<use href="#c-dead" x="568" y="776"/>
+<use href="#c-dead" x="583" y="776"/>
+<use href="#c-med" x="553" y="764"/>
+<use href="#c-dead" x="568" y="764"/>
+<use href="#c-med" x="583" y="764"/>
+<use href="#c-dead" x="553" y="752"/>
+<use href="#c-slow" x="568" y="752"/>
+<use href="#c-med" x="583" y="752"/>
+<use href="#c-dead" x="553" y="740"/>
+<use href="#c-dead" x="568" y="740"/>
+<use href="#c-dead" x="583" y="740"/>
+<use href="#c-med" x="604" y="776"/>
+<use href="#c-med" x="619" y="776"/>
+<use href="#c-dead" x="634" y="776"/>
+<use href="#c-dead" x="604" y="764"/>
+<use href="#c-slow" x="619" y="764"/>
+<use href="#c-empty" x="634" y="764"/>
+<use href="#c-dead" x="604" y="752"/>
+<use href="#c-dead" x="619" y="752"/>
+<use href="#c-dead" x="634" y="752"/>
+<use href="#c-empty" x="604" y="740"/>
+<use href="#c-med" x="619" y="740"/>
+<use href="#c-empty" x="634" y="740"/>
+<use href="#c-slow" x="655" y="776"/>
+<use href="#c-dead" x="670" y="776"/>
+<use href="#c-dead" x="685" y="776"/>
+<use href="#c-slow" x="655" y="764"/>
+<use href="#c-empty" x="670" y="764"/>
+<use href="#c-dead" x="685" y="764"/>
+<use href="#c-slow" x="655" y="752"/>
+<use href="#c-empty" x="670" y="752"/>
+<use href="#c-slow" x="685" y="752"/>
+<use href="#c-dead" x="655" y="740"/>
+<use href="#c-empty" x="670" y="740"/>
+<use href="#c-med" x="685" y="740"/>
+<use href="#c-med" x="706" y="776"/>
+<use href="#c-dead" x="721" y="776"/>
+<use href="#c-slow" x="736" y="776"/>
+<use href="#c-dead" x="706" y="764"/>
+<use href="#c-med" x="721" y="764"/>
+<use href="#c-dead" x="736" y="764"/>
+<use href="#c-dead" x="706" y="752"/>
+<use href="#c-dead" x="721" y="752"/>
+<use href="#c-slow" x="736" y="752"/>
+<use href="#c-dead" x="706" y="740"/>
+<use href="#c-dead" x="721" y="740"/>
+<use href="#c-dead" x="736" y="740"/>
+<use href="#c-empty" x="757" y="776"/>
+<use href="#c-dead" x="772" y="776"/>
+<use href="#c-dead" x="787" y="776"/>
+<use href="#c-dead" x="757" y="764"/>
+<use href="#c-dead" x="772" y="764"/>
+<use href="#c-empty" x="787" y="764"/>
+<use href="#c-empty" x="757" y="752"/>
+<use href="#c-med" x="772" y="752"/>
+<use href="#c-empty" x="787" y="752"/>
+<use href="#c-dead" x="757" y="740"/>
+<use href="#c-slow" x="772" y="740"/>
+<use href="#c-empty" x="787" y="740"/>
+<use href="#c-dead" x="808" y="776"/>
+<use href="#c-dead" x="823" y="776"/>
+<use href="#c-dead" x="838" y="776"/>
+<use href="#c-dead" x="808" y="764"/>
+<use href="#c-empty" x="823" y="764"/>
+<use href="#c-med" x="838" y="764"/>
+<use href="#c-empty" x="808" y="752"/>
+<use href="#c-slow" x="823" y="752"/>
+<use href="#c-empty" x="838" y="752"/>
+<use href="#c-dead" x="808" y="740"/>
+<use href="#c-slow" x="823" y="740"/>
+<use href="#c-med" x="838" y="740"/>
+<use href="#c-dead" x="859" y="776"/>
+<use href="#c-slow" x="889" y="776"/>
+<use href="#c-empty" x="859" y="764"/>
+<use href="#c-dead" x="889" y="764"/>
+<use href="#c-dead" x="859" y="752"/>
+<use href="#c-dead" x="889" y="752"/>
+<use href="#c-dead" x="859" y="740"/>
+<use href="#c-dead" x="889" y="740"/>
+<use href="#c-med" x="910" y="776"/>
+<use href="#c-dead" x="925" y="776"/>
+<use href="#c-slow" x="940" y="776"/>
+<use href="#c-slow" x="910" y="764"/>
+<use href="#c-dead" x="925" y="764"/>
+<use href="#c-slow" x="940" y="764"/>
+<use href="#c-dead" x="910" y="752"/>
+<use href="#c-slow" x="925" y="752"/>
+<use href="#c-slow" x="940" y="752"/>
+<use href="#c-empty" x="910" y="740"/>
+<use href="#c-empty" x="925" y="740"/>
+<use href="#c-dead" x="940" y="740"/>
+<use href="#c-slow" x="961" y="776"/>
+<use href="#c-dead" x="976" y="776"/>
+<use href="#c-dead" x="991" y="776"/>
+<use href="#c-dead" x="961" y="764"/>
+<use href="#c-dead" x="976" y="764"/>
+<use href="#c-med" x="991" y="764"/>
+<use href="#c-med" x="961" y="752"/>
+<use href="#c-fast" x="976" y="752"/>
+<use href="#c-dead" x="991" y="752"/>
+<use href="#c-empty" x="961" y="740"/>
+<use href="#c-empty" x="976" y="740"/>
+<use href="#c-dead" x="991" y="740"/>
+<use href="#c-empty" x="1012" y="776"/>
+<use href="#c-dead" x="1027" y="776"/>
+<use href="#c-fast" x="1042" y="776"/>
+<use href="#c-med" x="1012" y="764"/>
+<use href="#c-dead" x="1027" y="764"/>
+<use href="#c-med" x="1042" y="764"/>
+<use href="#c-dead" x="1012" y="752"/>
+<use href="#c-empty" x="1027" y="752"/>
+<use href="#c-dead" x="1042" y="752"/>
+<use href="#c-dead" x="1012" y="740"/>
+<use href="#c-slow" x="1027" y="740"/>
+<use href="#c-slow" x="1042" y="740"/>
+<use href="#c-med" x="1063" y="776"/>
+<use href="#c-med" x="1078" y="776"/>
+<use href="#c-dead" x="1093" y="776"/>
+<use href="#c-med" x="1063" y="764"/>
+<use href="#c-slow" x="1078" y="764"/>
+<use href="#c-dead" x="1093" y="764"/>
+<use href="#c-dead" x="1063" y="752"/>
+<use href="#c-slow" x="1078" y="752"/>
+<use href="#c-med" x="1093" y="752"/>
+<use href="#c-empty" x="1063" y="740"/>
+<use href="#c-slow" x="1078" y="740"/>
+<use href="#c-empty" x="1093" y="740"/>
+<use href="#c-empty" x="1114" y="776"/>
+<use href="#c-med" x="1129" y="776"/>
+<use href="#c-med" x="1144" y="776"/>
+<use href="#c-empty" x="1114" y="764"/>
+<use href="#c-empty" x="1129" y="764"/>
+<use href="#c-empty" x="1144" y="764"/>
+<use href="#c-slow" x="1114" y="752"/>
+<use href="#c-slow" x="1129" y="752"/>
+<use href="#c-slow" x="1144" y="752"/>
+<use href="#c-med" x="1114" y="740"/>
+<use href="#c-empty" x="1129" y="740"/>
+<use href="#c-slow" x="1144" y="740"/>
+<use href="#c-slow" x="1165" y="776"/>
+<use href="#c-dead" x="1180" y="776"/>
+<use href="#c-dead" x="1195" y="776"/>
+<use href="#c-slow" x="1165" y="764"/>
+<use href="#c-slow" x="1180" y="764"/>
+<use href="#c-dead" x="1195" y="764"/>
+<use href="#c-med" x="1165" y="752"/>
+<use href="#c-dead" x="1180" y="752"/>
+<use href="#c-dead" x="1195" y="752"/>
+<use href="#c-dead" x="1165" y="740"/>
+<use href="#c-dead" x="1180" y="740"/>
+<use href="#c-dead" x="1195" y="740"/>
+<use href="#c-slow" x="1216" y="776"/>
+<use href="#c-slow" x="1231" y="776"/>
+<use href="#c-dead" x="1246" y="776"/>
+<use href="#c-dead" x="1216" y="764"/>
+<use href="#c-empty" x="1231" y="764"/>
+<use href="#c-dead" x="1246" y="764"/>
+<use href="#c-med" x="1216" y="752"/>
+<use href="#c-fast" x="1231" y="752"/>
+<use href="#c-empty" x="1246" y="752"/>
+<use href="#c-dead" x="1216" y="740"/>
+<use href="#c-dead" x="1231" y="740"/>
+<use href="#c-empty" x="1246" y="740"/>
+<use href="#c-slow" x="1267" y="776"/>
+<use href="#c-dead" x="1282" y="776"/>
+<use href="#c-dead" x="1297" y="776"/>
+<use href="#c-dead" x="1267" y="764"/>
+<use href="#c-dead" x="1282" y="764"/>
+<use href="#c-dead" x="1297" y="764"/>
+<use href="#c-dead" x="1267" y="752"/>
+<use href="#c-empty" x="1282" y="752"/>
+<use href="#c-slow" x="1297" y="752"/>
+<use href="#c-empty" x="1267" y="740"/>
+<use href="#c-slow" x="1282" y="740"/>
+<use href="#c-slow" x="1297" y="740"/>
+<use href="#c-dead" x="1318" y="776"/>
+<use href="#c-med" x="1333" y="776"/>
+<use href="#c-dead" x="1348" y="776"/>
+<use href="#c-dead" x="1318" y="764"/>
+<use href="#c-med" x="1333" y="764"/>
+<use href="#c-dead" x="1348" y="764"/>
+<use href="#c-med" x="1318" y="752"/>
+<use href="#c-dead" x="1333" y="752"/>
+<use href="#c-med" x="1348" y="752"/>
+<use href="#c-slow" x="1318" y="740"/>
+<use href="#c-dead" x="1333" y="740"/>
+<text x="510" y="218" class="num" font-size="11" font-weight="600" fill="#2C3135">Walk Path 0 starts at A-01-01-01</text>
+<text x="1300" y="806" class="num" font-size="11" font-weight="600" fill="#2C3135" text-anchor="end">Walk Path ends at I-19-04-02 · 19,990</text>
+<rect x="395" y="143" width="973" height="57" fill="none" stroke="#23743F" stroke-width="3"/>
+<rect x="398.5" y="146.5" width="966" height="50" fill="none" stroke="#23743F" stroke-width="1"/>
+<path d="M395 245.5 V274 H1368 V245.5 Z" fill="none" stroke="#23743F" stroke-width="3" stroke-linejoin="miter"/>
+<path d="M398.5 245.5 V270.5 H1364.5 V245.5" fill="none" stroke="#23743F" stroke-width="1"/>
+<rect x="1125" y="200" width="186" height="18" rx="2" fill="#23743F"/>
+<path d="M1132 205 H1140 V213 H1132 Z M1134.5 207.5 H1137.5 V210.5 H1134.5 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+<text x="1146" y="213" class="ui" font-size="11" font-weight="700" fill="#FFFFFF">Best location · mark: aisle A</text>
+<rect x="1025" y="274" width="286" height="18" rx="2" fill="#23743F"/>
+<path d="M1032 279 H1040 V287 H1032 Z M1034.5 281.5 H1037.5 V284.5 H1034.5 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+<text x="1046" y="287" class="ui" font-size="11" font-weight="700" fill="#FFFFFF">Best location · marks: aisle B levels 1 and 2</text>
+<rect x="464.5" y="182.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<rect x="479.5" y="182.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<rect x="653.5" y="182.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<rect x="719.5" y="182.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<rect x="785.5" y="182.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<rect x="806.5" y="170.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<use href="#s-r1" x="807.5" y="454.0" width="15.0" height="15"/>
+<use href="#s-r1" x="1128.5" y="404.0" width="15.0" height="15"/>
+<use href="#s-r1" x="807.5" y="540.0" width="15.0" height="15"/>
+<use href="#s-r1" x="633.5" y="700.0" width="15.0" height="15"/>
+<use href="#s-r1" x="975.5" y="750.0" width="15.0" height="15"/>
+<use href="#s-r1" x="1215.5" y="330.0" width="15.0" height="15"/>
+<use href="#s-r2" x="924.5" y="158.0" width="15.0" height="15"/>
+<use href="#s-r2" x="1164.5" y="146.0" width="15.0" height="15"/>
+<use href="#s-r2" x="1296.5" y="170.0" width="15.0" height="15"/>
+<use href="#s-r2" x="720.5" y="256.0" width="15.0" height="15"/>
+<use href="#s-r2" x="960.5" y="244.0" width="15.0" height="15"/>
+<use href="#s-r2" x="1143.5" y="256.0" width="15.0" height="15"/>
+<use href="#s-r2" x="1230.5" y="244.0" width="15.0" height="15"/>
+<use href="#s-r3" x="1024.2" y="540.0" width="19.5" height="15"/>
+<use href="#s-r3" x="1162.2" y="676.0" width="19.5" height="15"/>
+<use href="#s-r3" x="580.2" y="762.0" width="19.5" height="15"/>
+<rect x="631.5" y="169.5" width="19" height="16" fill="none" stroke="url(#rw)" stroke-width="3"/>
+<use href="#s-keep" x="644" y="159" width="15.0" height="15"/>
+<use href="#s-nospace" x="756" y="317.5" width="16.0" height="16"/>
+<use href="#s-out" x="516" y="181.5" width="16.0" height="16"/>
+<use href="#s-out" x="991" y="318.5" width="14.0" height="14"/>
+<path d="M662 393.5 V439" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="1.6 2"/>
+<path d="M662 439 H524 V442" fill="none" stroke="#1D5DB0" stroke-width="2.6" stroke-dasharray="7 3" marker-end="url(#ahb)"/>
+<path d="M524 444 V467.5" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="1.6 2"/>
+<rect x="515.5" y="466.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="2"/>
+<use href="#s-r3" x="531" y="420" width="20.8" height="16"/>
+<rect x="653.5" y="380.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<path d="M407 159.5 V210" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="1.6 2"/>
+<path d="M407 210 H268 V654 H947 V664" fill="none" stroke="#1D5DB0" stroke-width="2.6" stroke-dasharray="7 3" marker-end="url(#ahb)"/>
+<rect x="938.5" y="664.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="2"/>
+<use href="#s-r2" x="954" y="642" width="16.0" height="16"/>
+<rect x="398.5" y="146.5" width="17" height="14" fill="none" stroke="#1D5DB0" stroke-width="1.6" stroke-dasharray="3 1.6"/>
+<path d="M1085 589 V573 H254 V203 H458 V197" fill="none" stroke="#FFFFFF" stroke-width="8.5" stroke-linejoin="miter"/>
+<path d="M1085 589 V573 H254 V203 H458 V197" fill="none" stroke="#1D5DB0" stroke-width="5" stroke-linejoin="miter" marker-end="url(#ahb)"/>
+<rect x="449" y="182" width="18" height="15" fill="none" stroke="#1D5DB0" stroke-width="2.4"/>
+<use href="#s-r1" x="467" y="199" width="18.0" height="18"/>
+<rect x="1075.5" y="589.5" width="19" height="16" fill="none" stroke="#1D5DB0" stroke-width="2.6"/>
+<g>
+<rect x="1101" y="521" width="318" height="196" rx="6" fill="#000000" fill-opacity="0.18" filter="none"/>
+<rect x="1101" y="518" width="318" height="196" rx="6" fill="#FFFFFF" stroke="#9C988F"/>
+<path d="M1093 597.5 L1102 588.5 V606.5 Z" fill="#FFFFFF" stroke="#9C988F"/>
+<rect x="1100" y="589" width="4" height="17" fill="#FFFFFF"/>
+<text x="1117" y="545" class="num" font-size="17" font-weight="800" fill="#1A1D20">G-14-04-02</text>
+<use href="#c-fast" x="1323" y="533"/>
+<text x="1343" y="543" class="ui" font-size="12" font-weight="700" fill="#1A1D20">Occupied</text>
+<text x="1117" y="564" class="num" font-size="12" font-weight="400" fill="#575C63">Aisle G · level 4 · position 2 · Walk Path 14,940</text>
+<rect x="1117" y="574" width="286" height="1" fill="#DEDBD5"/>
+<text x="1117" y="593" class="ui" font-size="11" font-weight="700" fill="#575C63">Parts stored (1)</text>
+<text x="1117" y="611" class="num" font-size="13" font-weight="700" fill="#1A1D20">4410281</text>
+<text x="1177" y="611" class="ui" font-size="13" font-weight="400" fill="#1A1D20">Brake pads, front - VW Golf</text>
+<use href="#c-fast" x="1117" y="619"/>
+<text x="1137" y="629" class="num" font-size="12" font-weight="400" fill="#1A1D20">fast-moving · 61 picks in the period · stock 12</text>
+<rect x="1117" y="640" width="286" height="1" fill="#DEDBD5"/>
+<use href="#s-r1" x="1117" y="649" width="18.0" height="18"/>
+<text x="1143" y="663" class="num" font-size="13" font-weight="700" fill="#1A1D20">Rule 1, round 1: to A-02-01-01</text>
+<text x="1143" y="680" class="ui" font-size="12" font-weight="400" fill="#575C63">best location (mark: aisle A), first empty one</text>
+
+<text x="1143" y="700" class="ui" font-size="12" font-weight="700" fill="#1D5DB0" text-decoration="underline">Open in Recommendations</text>
+<use href="#i-next" x="1301" y="689" width="13" height="13" color="#1D5DB0" style="color:#1D5DB0"/>
+</g>
+<rect x="224" y="846" width="1200" height="48" rx="4" fill="#F7F6F3" stroke="#CFCCC5"/>
+<text x="240" y="866" class="ui" font-size="11" font-weight="700" fill="#575C63">Locations</text>
+<use href="#c-fast" x="318" y="856"/>
+<text x="338" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Fast-moving (24+)</text>
+<use href="#c-med" x="473.3" y="856"/>
+<text x="493.3" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Medium-moving (6–23)</text>
+<use href="#c-slow" x="649.3" y="856"/>
+<text x="669.3" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Slow-moving (1–5)</text>
+<use href="#c-dead" x="804.5999999999999" y="856"/>
+<text x="824.5999999999999" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Dead stock (0)</text>
+<use href="#c-empty" x="939.1999999999999" y="856"/>
+<text x="959.1999999999999" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Empty</text>
+<rect x="1011.6999999999999" y="854" width="12" height="15" fill="url(#pillar)" stroke="#2A2E32"/>
+<text x="1029.6999999999998" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Pillar, no location</text>
+<path d="M1165.6999999999998 861 H1181.6999999999998 M1177.6999999999998 857 L1182.6999999999998 861 L1177.6999999999998 865" fill="none" stroke="#2F3438" stroke-width="2"/>
+<text x="1189.6999999999998" y="866" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Walk Path order (not a distance)</text>
+<text x="240" y="887" class="ui" font-size="11" font-weight="700" fill="#575C63">Tape, signs</text>
+<rect x="318" y="876" width="18" height="12" fill="none" stroke="#23743F" stroke-width="2.4"/><rect x="321" y="879" width="12" height="6" fill="none" stroke="#23743F" stroke-width="1"/>
+<text x="342" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Best location</text>
+<rect x="442" y="876" width="18" height="12" fill="none" stroke="url(#rw)" stroke-width="3"/>
+<use href="#s-keep" x="464" y="874" width="14.0" height="14"/>
+<text x="484" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Keep in place</text>
+<path d="M582 882 H602" stroke="#1D5DB0" stroke-width="4" marker-end="url(#ahb)"/>
+<text x="612" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Selected route</text>
+<path d="M714 882 H734" stroke="#1D5DB0" stroke-width="2.4" stroke-dasharray="6 3"/>
+<text x="742" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Other route</text>
+<use href="#s-r1" x="830" y="875" width="15.0" height="15"/>
+<text x="850" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Rule 1</text>
+<use href="#s-r2" x="912" y="875" width="15.0" height="15"/>
+<text x="932" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Rule 2</text>
+<use href="#s-r3" x="994" y="875" width="19.5" height="15"/>
+<text x="1019" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Rule 3</text>
+<use href="#s-out" x="1081" y="875" width="15.0" height="15"/>
+<text x="1101" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">Outdated</text>
+<use href="#s-nospace" x="1175" y="875" width="15.0" height="15"/>
+<text x="1195" y="887" class="ui" font-size="12" font-weight="500" fill="#1A1D20">No space</text>
+<text x="1408" y="887" class="ui" font-size="11" font-weight="500" fill="#575C63" text-anchor="end">Small sign marks a from-location</text>
+</svg>

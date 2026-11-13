@@ -1,0 +1,595 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Smart Warehouse Planner: recommendations workspace, round 1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap');
+text{font-family:'Public Sans','Helvetica Neue',Helvetica,Arial,sans-serif;fill:#15181C;font-size:13px;font-variant-numeric:tabular-nums;}
+.c{font-family:'Barlow Condensed','Avenir Next Condensed','Arial Narrow',sans-serif;}
+.b{font-weight:600}.bb{font-weight:700}.m{font-weight:500}
+.i2{fill:#454C55}.i3{fill:#646B74}.bl{fill:#0066B0}.am{fill:#A3470B}.wh{fill:#FFFFFF}
+.s11{font-size:11px}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s15{font-size:15px}.s16{font-size:16px}.s18{font-size:18px}.s20{font-size:20px}.s22{font-size:22px}.s24{font-size:24px}.s28{font-size:28px}.s32{font-size:32px}
+.up{letter-spacing:0.06em}
+.ic{fill:none;stroke:#15181C;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icb{fill:none;stroke:#0066B0;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ici{fill:none;stroke:#454C55;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icw{fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ica{fill:none;stroke:#A3470B;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hl{stroke:#BEC4CB;stroke-width:1;fill:none}
+.hl2{stroke:#E1E4E8;stroke-width:1;fill:none}
+.ink{stroke:#15181C;stroke-width:1;fill:none}
+</style>
+<defs>
+<pattern id="pMed" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="2.6" stroke="#15181C" stroke-width="1.05"/></pattern>
+<pattern id="pSlow" width="4.6" height="4.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4.6" height="4.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4.6" stroke="#15181C" stroke-width="0.8"/></pattern>
+<pattern id="pDead" width="3.2" height="3.2" patternUnits="userSpaceOnUse"><rect width="3.2" height="3.2" fill="#FFFFFF"/><circle cx="1.6" cy="1.6" r="0.62" fill="#3A4048"/></pattern>
+<pattern id="pNone" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="3" height="3" fill="#EEF0F2"/></pattern>
+<pattern id="pMedL" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#15181C" stroke-width="1.5"/></pattern>
+<pattern id="pSlowL" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="7" stroke="#15181C" stroke-width="1.1"/></pattern>
+<pattern id="pDeadL" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#FFFFFF"/><circle cx="2.5" cy="2.5" r="0.95" fill="#3A4048"/></pattern>
+<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1 L10,5 L0,9 Z" fill="#0066B0"/></marker>
+<marker id="arwK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 Z" fill="#15181C"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1440" height="48" fill="#FFFFFF"/>
+<line x1="0" y1="47.5" x2="1440" y2="47.5" stroke="#15181C" stroke-width="1"/>
+<path d="M20.0,27.0 L30.0,22.0 L40.0,27.0 L30.0,32.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,27.0 L20.0,30.0 L30.0,35.0 L40.0,30.0 L40.0,27.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,17.0 L30.0,12.0 L40.0,17.0 L30.0,22.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,17.0 L20.0,20.0 L30.0,25.0 L40.0,20.0 L40.0,17.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M30.0,22.0 L30.0,25.0" stroke="#0066B0" stroke-width="1.2" stroke-dasharray="1.5 1.5"/>
+<text x="50" y="30" class="c s20 bb">Smart Warehouse Planner</text>
+<line x1="232.5" y1="12" x2="232.5" y2="36" stroke="#BEC4CB" stroke-width="1"/>
+<text x="248" y="29" class="s13 i2">Saved plans</text>
+<g transform="translate(327,17) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M10 7l5 5-5 5"/></g>
+<text x="346" y="29" class="s13 b">Spring re-slot 2026</text>
+<text x="482" y="29" class="s12 i3">created by Justas · round 1</text>
+<g transform="translate(846,16) scale(0.6667)" class="ic" style="stroke-width:2.250"><rect x="4" y="5.5" width="16" height="14"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></g>
+<text x="868" y="29" class="s12 i2">Data as of</text>
+<text x="936" y="29" class="s13 b">2026-09-30</text>
+<text x="1032" y="29" class="s12 i3">uploaded 2026-10-02</text>
+<line x1="1170.5" y1="12" x2="1170.5" y2="36" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(1182,16) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="1202" y="29" class="s12 i2">Saved 09:44</text>
+<rect x="1290.5" y="12.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="1302" y="28.5" class="c s14 bb" text-anchor="middle">J</text>
+<text x="1322" y="29" class="s13">Justas</text>
+<g transform="translate(1370,17) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<rect x="0" y="48" width="224" height="852" fill="#FFFFFF"/>
+<line x1="223.5" y1="48" x2="223.5" y2="900" stroke="#15181C" stroke-width="1"/>
+<text x="20" y="74" class="c s16 b">Contents</text>
+<text x="204" y="74" class="s11 i3" text-anchor="end">Steps 1–6</text>
+<text x="20" y="110" class="c s13 b i2 up">Plan</text>
+<line x1="78" y1="106.5" x2="204" y2="106.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,126) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 10v10h12V10"/></g>
+<text x="44" y="139" class="s13">Saved plans</text>
+<rect x="20.5" y="158.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="170" class="c s12 bb" text-anchor="middle">1</text>
+<text x="44" y="171" class="s13">Plan overview</text>
+<g transform="translate(190,159) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="20" y="204" class="c s13 b i2 up">Analysis</text>
+<line x1="78" y1="200.5" x2="204" y2="200.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="220.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="232" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="233" class="s13">Parts</text>
+<g transform="translate(190,221) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="233" class="s12 i3" text-anchor="end">1,545</text>
+<rect x="20.5" y="252.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="264" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="265" class="s13">Locations</text>
+<g transform="translate(190,253) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="265" class="s12 i3" text-anchor="end">2,000</text>
+<rect x="20.5" y="284.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="296" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="297" class="s13">Pick groups</text>
+<g transform="translate(190,285) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="297" class="s12 i3" text-anchor="end">212</text>
+<text x="20" y="330" class="c s13 b i2 up">Recommend</text>
+<line x1="78" y1="326.5" x2="204" y2="326.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="346.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="358" class="c s12 bb" text-anchor="middle">3</text>
+<text x="44" y="359" class="s13">Best locations</text>
+<g transform="translate(190,347) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="359" class="s12 i3" text-anchor="end">279</text>
+<rect x="12" y="370" width="200" height="32" fill="#E7F0F9"/>
+<rect x="12" y="370" width="2" height="32" fill="#0066B0"/>
+<rect x="20.5" y="378.5" width="15" height="15" fill="#0066B0" stroke="#0066B0" stroke-width="1"/>
+<text x="28" y="390" class="c s12 bb wh" text-anchor="middle">4</text>
+<text x="44" y="391" class="s13 b bl">Recommendations</text>
+<text x="204" y="391" class="s12 bl b" text-anchor="end">101</text>
+<g transform="translate(20,410) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M4 20V5l4-2v15M20 20V5l-4-2"/><path d="M4 9.5h16M4 14.5h16M4 20h16"/></g>
+<text x="44" y="423" class="s13">Warehouse layout</text>
+<text x="204" y="423" class="s12 i3" text-anchor="end">Fig. 12</text>
+<text x="20" y="456" class="c s13 b i2 up">Output</text>
+<line x1="78" y1="452.5" x2="204" y2="452.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="472.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="484" class="c s12 bb" text-anchor="middle">5</text>
+<text x="44" y="485" class="s13">Before/after</text>
+<rect x="20.5" y="504.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="516" class="c s12 bb" text-anchor="middle">6</text>
+<text x="44" y="517" class="s13">Move list</text>
+<text x="204" y="517" class="s12 i3" text-anchor="end">3</text>
+<text x="20" y="552" class="c s13 b i2 up">Later edition</text>
+<line x1="106" y1="548.5" x2="204" y2="548.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,568) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="579" class="s12 i3">Category check</text>
+<g transform="translate(20,592) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="603" class="s12 i3">Location labels</text>
+<g transform="translate(20,616) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="627" class="s12 i3">Account</text>
+<line x1="0" y1="852.5" x2="223" y2="852.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,866) scale(0.6667)" class="ici" style="stroke-width:2.250"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2.6M12 17.9v2.6M3.5 12h2.6M17.9 12h2.6M6 6l1.8 1.8M16.2 16.2L18 18M6 18l1.8-1.8M16.2 7.8L18 6"/></g>
+<text x="44" y="879" class="s13 i2">Settings</text>
+<text x="204" y="879" class="s11 i3" text-anchor="end">24 · 6 · 5</text>
+<text x="248" y="88" class="c s32 bb">Recommendations</text>
+<rect x="470.5" y="70.5" width="70" height="21" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="505" y="85" class="s12 b" text-anchor="middle">Round 1</text>
+<text x="550" y="85" class="s12 i3">Step 4 of 6</text>
+<rect x="1256" y="66" width="168" height="32" fill="#0066B0"/>
+<g transform="translate(1291.05,74.0) scale(0.6667)" class="icw" style="stroke-width:2.250"><path d="M7 5l12 7-12 7z"/></g>
+<text x="1313.0" y="86.5" class="s13 m wh">Run round 2</text>
+<rect x="1116.5" y="66.5" width="131" height="31" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1122.7,74.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="1144.7" y="86.5" class="s13 m">Apply all (96)</text>
+<rect x="1024.5" y="66.5" width="83" height="31" fill="#FFFFFF" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(1037.75,74.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></g>
+<text x="1059.8" y="86.5" class="s13 m">Reset</text>
+<rect x="932.5" y="66.5" width="83" height="31" fill="#FFFFFF" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(949.2,74.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M9 7L5 11l4 4"/><path d="M5 11h9a5 5 0 0 1 0 10h-3"/></g>
+<text x="971.2" y="86.5" class="s13 m">Undo</text>
+<text x="248" y="116" class="s13 i2">Run 2026-11-11 09:42 by Justas on the planning copy · 101 recommendations · 3 moves applied · 2 outdated · 4 no space · 3 kept in place</text>
+<text x="248" y="134" class="s12 i3">A run suggests empty locations only. A best location that a rule 2 move frees is offered to rule 1 in the next round.</text>
+<text x="250" y="170" class="s13 b">All</text>
+<rect x="280.1" y="157.5" width="30" height="17" fill="#E7F0F9"/>
+<text x="284.6" y="170" class="s11 b bl">105</text>
+<rect x="248" y="181" width="72.6" height="2" fill="#0066B0"/>
+<text x="336.6" y="170" class="s13 i2">Rule 1</text>
+<rect x="388.3" y="157.5" width="23" height="17" fill="#F4F5F7"/>
+<text x="392.8" y="170" class="s11 b i2">38</text>
+<text x="437.8" y="170" class="s13 i2">Rule 2</text>
+<rect x="489.5" y="157.5" width="23" height="17" fill="#F4F5F7"/>
+<text x="494.0" y="170" class="s11 b i2">51</text>
+<text x="539.0" y="170" class="s13 i2">Rule 3</text>
+<rect x="590.7" y="157.5" width="23" height="17" fill="#F4F5F7"/>
+<text x="595.2" y="170" class="s11 b i2">12</text>
+<text x="640.2" y="170" class="s13 i2">No space</text>
+<rect x="706.3000000000001" y="157.5" width="16" height="17" fill="#F4F5F7"/>
+<text x="710.8000000000001" y="170" class="s11 b i2">4</text>
+<text x="748.8000000000001" y="170" class="s13 i2">Kept in place</text>
+<rect x="850.9000000000001" y="157.5" width="16" height="17" fill="#F4F5F7"/>
+<text x="855.4000000000001" y="170" class="s11 b i2">3</text>
+<line x1="248" y1="183.5" x2="1040" y2="183.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="880.5" y="151.5" width="159" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(888,157) scale(0.6250)" class="ici" style="stroke-width:2.400"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></g>
+<text x="910" y="169" class="s12 i3">Part or location</text>
+<text x="248" y="206" class="c s13 b i2">Ref</text>
+<text x="284" y="206" class="c s13 b i2">Part and reason</text>
+<text x="610" y="206" class="c s13 b i2">From → to</text>
+<text x="730" y="206" class="c s13 b i2">Class</text>
+<text x="820" y="206" class="c s13 b i2">Actions</text>
+<g transform="translate(378,195) scale(0.5417)" class="ici" style="stroke-width:2.769"><path d="M7 10l5 5 5-5"/></g>
+<line x1="248" y1="213.5" x2="1040" y2="213.5" stroke="#15181C" stroke-width="1"/>
+<rect x="248" y="214" width="792" height="30" fill="#F4F5F7"/>
+<line x1="248" y1="214.5" x2="1040" y2="214.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="254.5" y="221.5" width="26" height="16" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="267.5" y="234" class="c s12 bb bl" text-anchor="middle">R1</text>
+<text x="288" y="234" class="c s16 bb">Rule 1 · fast-moving part into a best location</text>
+<text x="1030" y="234" class="s12 i2" text-anchor="end">38 recommendations · 1 applied · 1 outdated</text>
+<circle cx="261" cy="266" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="266" x2="272" y2="266" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="263.5" class="c s12 bb bl" text-anchor="middle">1</text>
+<text x="261" y="276.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="284" y="264" class="s13 b">9723950</text>
+<text x="354" y="264" class="s13">Headlight bulb H7 - Peugeot 308</text>
+<text x="284" y="281" class="s12 i2">fast-moving: 88 picks in the period (24 or more)</text>
+<text x="284" y="297" class="s12 i3">A-01-01-02 is a best location (mark: aisle A)</text>
+<text x="610" y="264" class="s13">E-03-01-02</text>
+<text x="610" y="281" class="s13 b bl">→ A-01-01-02</text>
+<rect x="706.5" y="270.5" width="13" height="13" fill="#15181C"/>
+<text x="713" y="281" class="c s12 bb wh" text-anchor="middle">B</text>
+<polygon points="730.00,255.00 746.00,253.00 746.00,264.00 730.00,266.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="264" class="s12 b">Fast</text>
+<text x="752" y="280" class="s12 i2">88 picks</text>
+<g transform="translate(820,253) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="842" y="266" class="s13 b">Applied as move 1</text>
+<text x="842" y="283" class="s12 i2">round 1 · rule 1</text>
+<line x1="248" y1="306.5" x2="1040" y2="306.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="248.5" y="306.5" width="791" height="61" fill="#E7F0F9" stroke="#0066B0" stroke-width="1"/>
+<circle cx="261" cy="328" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="328" x2="272" y2="328" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="325.5" class="c s12 bb bl" text-anchor="middle">2</text>
+<text x="261" y="338.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="284" y="326" class="s13 b">4410281</text>
+<text x="354" y="326" class="s13">Brake pads, front - VW Golf</text>
+<text x="284" y="343" class="s12 i2">fast-moving: 61 picks in the period (24 or more)</text>
+<text x="284" y="359" class="s12 i3">A-02-01-01 is a best location (mark: aisle A)</text>
+<text x="610" y="326" class="s13">G-14-04-02</text>
+<text x="610" y="343" class="s13 b bl">→ A-02-01-01</text>
+<rect x="706.5" y="332.5" width="13" height="13" fill="#15181C"/>
+<text x="713" y="343" class="c s12 bb wh" text-anchor="middle">B</text>
+<polygon points="730.00,317.00 746.00,315.00 746.00,326.00 730.00,328.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="326" class="s12 b">Fast</text>
+<text x="752" y="342" class="s12 i2">61 picks</text>
+<rect x="820.5" y="313.5" width="63" height="27" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="852.0" y="331.5" class="s13 m bl" text-anchor="middle">Apply</text>
+<rect x="890.5" y="313.5" width="127" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="954.0" y="331.5" class="s13 m" text-anchor="middle">Other location</text>
+<g transform="translate(998,320) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<g transform="translate(821,347) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5" y="5" width="14" height="14"/><path d="M9 12h6"/></g>
+<text x="840" y="358" class="s12 i2">Keep in place</text>
+<line x1="840" y1="360.5" x2="919" y2="360.5" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="248" y1="368.5" x2="1040" y2="368.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="261" cy="390" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="390" x2="272" y2="390" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="387.5" class="c s12 bb bl" text-anchor="middle">3</text>
+<text x="261" y="400.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="284" y="388" class="s13 b">7181839</text>
+<text x="354" y="388" class="s13">Alternator - Hyundai Tucson</text>
+<text x="284" y="405" class="s12 i2">fast-moving: 31 picks in the period (24 or more)</text>
+<text x="284" y="421" class="s12 i3">Outdated: A-02-02-01 is no longer empty (move 3)</text>
+<text x="610" y="388" class="s13">F-02-03-01</text>
+<text x="610" y="405" class="s13 i3">→ A-02-02-01</text>
+<line x1="626" y1="401" x2="702" y2="401" stroke="#646B74" stroke-width="1"/>
+<rect x="706.5" y="394.5" width="13" height="13" fill="#15181C"/>
+<text x="713" y="405" class="c s12 bb wh" text-anchor="middle">B</text>
+<polygon points="730.00,379.00 746.00,377.00 746.00,388.00 730.00,390.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="388" class="s12 b">Fast</text>
+<text x="752" y="404" class="s12 i2">31 picks</text>
+<rect x="820.5" y="375.5" width="63" height="27" fill="#F4F5F7" stroke="#E1E4E8" stroke-width="1"/>
+<text x="852.0" y="393.5" class="s13 m i3" text-anchor="middle">Apply</text>
+<g transform="translate(892,381) scale(0.6250)" class="ica" style="stroke-width:2.400"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></g>
+<text x="912" y="393" class="s13 b am">Outdated</text>
+<text x="820" y="420" class="s12 i3">Cannot be applied until the next run</text>
+<line x1="248" y1="430.5" x2="1040" y2="430.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="261" cy="452" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="452" x2="272" y2="452" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="449.5" class="c s12 bb bl" text-anchor="middle">4</text>
+<text x="261" y="462.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="284" y="450" class="s13 b">6900616</text>
+<text x="354" y="450" class="s13">Timing belt kit - Hyundai Tucson</text>
+<text x="284" y="467" class="s12 i2">fast-moving: 27 picks in the period (24 or more)</text>
+<text x="284" y="483" class="s12 i3">A-02-02-02 is a best location (mark: aisle A)</text>
+<text x="610" y="450" class="s13">D-08-03-01</text>
+<text x="610" y="467" class="s13 b bl">→ A-02-02-02</text>
+<rect x="706.5" y="456.5" width="13" height="13" fill="#15181C"/>
+<text x="713" y="467" class="c s12 bb wh" text-anchor="middle">B</text>
+<polygon points="730.00,441.00 746.00,439.00 746.00,450.00 730.00,452.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="450" class="s12 b">Fast</text>
+<text x="752" y="466" class="s12 i2">27 picks</text>
+<rect x="820.5" y="437.5" width="63" height="27" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="852.0" y="455.5" class="s13 m bl" text-anchor="middle">Apply</text>
+<rect x="890.5" y="437.5" width="127" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="954.0" y="455.5" class="s13 m" text-anchor="middle">Other location</text>
+<g transform="translate(998,444) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<g transform="translate(821,471) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5" y="5" width="14" height="14"/><path d="M9 12h6"/></g>
+<text x="840" y="482" class="s12 i2">Keep in place</text>
+<line x1="840" y1="484.5" x2="919" y2="484.5" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="248" y1="492.5" x2="1040" y2="492.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="284" y="511" class="s12 bl b">Show 34 more rule 1 recommendations</text>
+<g transform="translate(520,499) scale(0.5833)" class="icb" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<rect x="248" y="520" width="792" height="30" fill="#F4F5F7"/>
+<line x1="248" y1="520.5" x2="1040" y2="520.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="254.5" y="527.5" width="26" height="16" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="267.5" y="540" class="c s12 bb bl" text-anchor="middle">R2</text>
+<text x="288" y="540" class="c s16 bb">Rule 2 · slow-moving or dead stock out of a best location</text>
+<text x="1030" y="540" class="s12 i2" text-anchor="end">51 recommendations · 1 kept in place</text>
+<circle cx="261" cy="572" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="572" x2="272" y2="572" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="569.5" class="c s12 bb bl" text-anchor="middle">5</text>
+<text x="261" y="582.5" class="c s11 bb bl" text-anchor="middle">R2</text>
+<text x="284" y="570" class="s13 b">3632446</text>
+<text x="354" y="570" class="s13">Catalytic converter - BMW 320d</text>
+<text x="284" y="587" class="s12 i2">dead stock: 0 picks in the period (0)</text>
+<text x="284" y="603" class="s12 i3">A-01-04-01 is a best location; H-11-04-03 is not</text>
+<text x="610" y="570" class="s13">A-01-04-01</text>
+<text x="610" y="587" class="s13 b bl">→ H-11-04-03</text>
+<polygon points="730.00,561.00 746.00,559.00 746.00,570.00 730.00,572.00" fill="url(#pDeadL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="570" class="s12 b">Dead stock</text>
+<text x="752" y="586" class="s12 i2">0 picks</text>
+<rect x="820.5" y="557.5" width="63" height="27" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="852.0" y="575.5" class="s13 m bl" text-anchor="middle">Apply</text>
+<rect x="890.5" y="557.5" width="127" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="954.0" y="575.5" class="s13 m" text-anchor="middle">Other location</text>
+<g transform="translate(998,564) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<g transform="translate(821,591) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5" y="5" width="14" height="14"/><path d="M9 12h6"/></g>
+<text x="840" y="602" class="s12 i2">Keep in place</text>
+<line x1="840" y1="604.5" x2="919" y2="604.5" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="248" y1="612.5" x2="1040" y2="612.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="261" cy="634" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="634" x2="272" y2="634" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="631.5" class="c s12 bb bl" text-anchor="middle">6</text>
+<text x="261" y="644.5" class="c s11 bb bl" text-anchor="middle">R2</text>
+<text x="284" y="632" class="s13 b i3">3298226</text>
+<text x="354" y="632" class="s13 i3">Tail light assembly - Toyota RAV4</text>
+<text x="284" y="649" class="s12 i2">slow-moving: 2 picks in the period (1–5)</text>
+<text x="284" y="665" class="s12 i3">Planner note: does not fit level 1 shelves</text>
+<text x="610" y="632" class="s13 i3">A-01-04-02</text>
+<text x="610" y="649" class="s13 b i3">→ H-12-01-01</text>
+<polygon points="730.00,623.00 746.00,621.00 746.00,632.00 730.00,634.00" fill="url(#pSlowL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="632" class="s12 b">Slow</text>
+<text x="752" y="648" class="s12 i2">2 picks</text>
+<g transform="translate(820,622) scale(0.6250)" class="ic" style="stroke-width:2.400"><rect x="5" y="5" width="14" height="14"/><path d="M9 12h6"/></g>
+<text x="842" y="634" class="s13 b">Kept in place</text>
+<text x="842" y="651" class="s12 bl">Remove mark</text>
+<line x1="842" y1="653.5" x2="918" y2="653.5" stroke="#8DB5DB" stroke-width="1"/>
+<line x1="248" y1="674.5" x2="1040" y2="674.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="248" y="674" width="792" height="30" fill="#F4F5F7"/>
+<line x1="248" y1="674.5" x2="1040" y2="674.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="254.5" y="681.5" width="26" height="16" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="267.5" y="694" class="c s12 bb bl" text-anchor="middle">R3</text>
+<text x="288" y="694" class="c s16 bb">Rule 3 · part moved into its partner's aisle</text>
+<text x="1030" y="694" class="s12 i2" text-anchor="end">12 recommendations</text>
+<circle cx="261" cy="726" r="12" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="250" y1="726" x2="272" y2="726" stroke="#0066B0" stroke-width="1"/>
+<text x="261" y="723.5" class="c s12 bb bl" text-anchor="middle">7</text>
+<text x="261" y="736.5" class="c s11 bb bl" text-anchor="middle">R3</text>
+<text x="284" y="724" class="s13 b">5315766</text>
+<text x="354" y="724" class="s13">Air filter - Audi A4</text>
+<text x="284" y="741" class="s12 i2">pick group with 5315790: 7 shared jobs (5 or more)</text>
+<text x="284" y="757" class="s12 i3">partner Oil filter - Audi A4 is in aisle F; 4 vs 14 picks</text>
+<text x="610" y="724" class="s13">C-07-02-03</text>
+<text x="610" y="741" class="s13 b bl">→ F-09-02-03</text>
+<polygon points="730.00,715.00 746.00,713.00 746.00,724.00 730.00,726.00" fill="url(#pSlowL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="724" class="s12 b">Slow</text>
+<text x="752" y="740" class="s12 i2">4 picks</text>
+<rect x="820.5" y="711.5" width="63" height="27" fill="#FFFFFF" stroke="#0066B0" stroke-width="1"/>
+<text x="852.0" y="729.5" class="s13 m bl" text-anchor="middle">Apply</text>
+<rect x="890.5" y="711.5" width="127" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="954.0" y="729.5" class="s13 m" text-anchor="middle">Other location</text>
+<g transform="translate(998,718) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<g transform="translate(821,745) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5" y="5" width="14" height="14"/><path d="M9 12h6"/></g>
+<text x="840" y="756" class="s12 i2">Keep in place</text>
+<line x1="840" y1="758.5" x2="919" y2="758.5" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="248" y1="766.5" x2="1040" y2="766.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="248" y="766" width="792" height="30" fill="#F4F5F7"/>
+<line x1="248" y1="766.5" x2="1040" y2="766.5" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(259,773) scale(0.6667)" class="ica" style="stroke-width:2.250"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></g>
+<text x="288" y="786" class="c s16 bb">No space · a rule applies but no empty location fits</text>
+<text x="1030" y="786" class="s12 i2" text-anchor="end">4 parts · not recommendations</text>
+<circle cx="261" cy="818" r="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="261" y="823" class="c s14 b" text-anchor="middle">8</text>
+<text x="284" y="816" class="s13 b">2555849</text>
+<text x="354" y="816" class="s13">Brake hose - Toyota Corolla</text>
+<text x="284" y="833" class="s12 i2">rule 1 · fast-moving: 24 picks in the period (24 or more)</text>
+<text x="284" y="849" class="s12 i3">no empty best location left in this run (39 offered)</text>
+<text x="610" y="816" class="s13">B-17-03-02</text>
+<text x="610" y="833" class="s13 am b">→ no empty</text>
+<text x="610" y="849" class="s12 am">location fits</text>
+<polygon points="730.00,807.00 746.00,805.00 746.00,816.00 730.00,818.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="752" y="816" class="s12 b">Fast</text>
+<text x="752" y="832" class="s12 i2">24 picks</text>
+<rect x="820.5" y="803.5" width="115" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="878.0" y="821.5" class="s13 m" text-anchor="middle">Keep in place</text>
+<text x="820" y="848" class="s12 bl">Mark more best locations</text>
+<line x1="820" y1="850.5" x2="970" y2="850.5" stroke="#8DB5DB" stroke-width="1"/>
+<line x1="248" y1="858.5" x2="1040" y2="858.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="778.5" y="343.5" width="261" height="188" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="790" y="365" class="s12 b">Empty best locations that fit rule 1</text>
+<line x1="779" y1="374.5" x2="1039" y2="374.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="779" y="375" width="260" height="30" fill="#E7F0F9"/>
+<text x="790" y="395" class="s13 b bl">A-02-01-02</text>
+<rect x="876.5" y="383.5" width="13" height="13" fill="#15181C"/>
+<text x="883" y="394" class="c s12 bb wh" text-anchor="middle">B</text>
+<text x="898" y="395" class="s12 i2">aisle A · level 1</text>
+<text x="1028" y="395" class="s11 i3" text-anchor="end">empty</text>
+<text x="790" y="425" class="s13 b">A-02-01-03</text>
+<rect x="876.5" y="413.5" width="13" height="13" fill="#15181C"/>
+<text x="883" y="424" class="c s12 bb wh" text-anchor="middle">B</text>
+<text x="898" y="425" class="s12 i2">aisle A · level 1</text>
+<text x="1028" y="425" class="s11 i3" text-anchor="end">empty</text>
+<text x="790" y="455" class="s13 b">A-03-01-01</text>
+<rect x="876.5" y="443.5" width="13" height="13" fill="#15181C"/>
+<text x="883" y="454" class="c s12 bb wh" text-anchor="middle">B</text>
+<text x="898" y="455" class="s12 i2">aisle A · level 1</text>
+<text x="1028" y="455" class="s11 i3" text-anchor="end">empty</text>
+<text x="790" y="485" class="s13 b">A-03-02-02</text>
+<rect x="876.5" y="473.5" width="13" height="13" fill="#15181C"/>
+<text x="883" y="484" class="c s12 bb wh" text-anchor="middle">B</text>
+<text x="898" y="485" class="s12 i2">aisle A · level 2</text>
+<text x="1028" y="485" class="s11 i3" text-anchor="end">empty</text>
+<line x1="779" y1="495.5" x2="1039" y2="495.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="790" y="510" class="s11 i3">Empty now and when round 1 was run.</text>
+<text x="790" y="524" class="s11 i3">Keeps rule 1 and round 1.</text>
+<line x1="1051.5" y1="48" x2="1051.5" y2="900" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1064" y="196" class="c s18 bb">Fig. 8-2</text>
+<text x="1122" y="196" class="s14 b">Recommendation 2, detail</text>
+<rect x="1064.5" y="210.5" width="359" height="261" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1055.5" y1="210.5" x2="1073.5" y2="210.5"/><line x1="1064.5" y1="201.5" x2="1064.5" y2="219.5"/><circle cx="1064.5" cy="210.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1415.5" y1="210.5" x2="1433.5" y2="210.5"/><line x1="1424.5" y1="201.5" x2="1424.5" y2="219.5"/><circle cx="1424.5" cy="210.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1055.5" y1="472.5" x2="1073.5" y2="472.5"/><line x1="1064.5" y1="463.5" x2="1064.5" y2="481.5"/><circle cx="1064.5" cy="472.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1415.5" y1="472.5" x2="1433.5" y2="472.5"/><line x1="1424.5" y1="463.5" x2="1424.5" y2="481.5"/><circle cx="1424.5" cy="472.5" r="4.0"/></g>
+<polygon points="1114.00,270.00 1346.26,241.48 1341.05,236.80 1108.80,265.32" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M1114.00,270.00L1108.80,265.32M1152.71,265.25L1147.51,260.56M1191.42,260.49L1186.22,255.81M1230.13,255.74L1224.93,251.06M1268.84,250.99L1263.64,246.30M1307.55,246.24L1302.34,241.55M1346.26,241.48L1341.05,236.80" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="1114.00,270.00 1108.80,265.32 1108.80,317.32 1114.00,322.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="1108.80" y1="265.32" x2="1114.00" y2="322.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,1114.00,270.00)">
+<rect x="0" y="0" width="234" height="52" fill="#FFFFFF"/>
+<rect x="0" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="0" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="0" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="0" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="13" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="13" y="13" width="13" height="13" fill="#2A2F35"/>
+<rect x="13" y="39" width="13" height="13" fill="#2A2F35"/>
+<rect x="26" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="26" y="13" width="13" height="13" fill="#2A2F35"/>
+<rect x="26" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="39" y="0" width="13" height="13" fill="#2A2F35"/>
+<rect x="39" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="39" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="52" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="52" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="65" y="0" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="65" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="65" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="78" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="78" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="78" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="91" y="0" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="91" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="104" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="104" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="104" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="104" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="117" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="117" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="117" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="130" y="0" width="13" height="13" fill="#2A2F35"/>
+<rect x="130" y="13" width="13" height="13" fill="#2A2F35"/>
+<rect x="130" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="130" y="39" width="13" height="13" fill="#2A2F35"/>
+<rect x="143" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="143" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="143" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="143" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="156" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="156" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="156" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="156" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="169" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="169" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="169" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="182" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="182" y="13" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="182" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="182" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="195" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="195" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="195" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="208" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="208" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="208" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="208" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="221" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="221" y="13" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="221" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="221" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<path d="M13,0V52M26,0V52M52,0V52M65,0V52M91,0V52M104,0V52M130,0V52M143,0V52M169,0V52M182,0V52M208,0V52M221,0V52" stroke="#7E868F" stroke-width="0.6" fill="none"/>
+<path d="M0,0V52M39,0V52M78,0V52M117,0V52M156,0V52M195,0V52M234,0V52M0,0H234M0,13H234M0,26H234M0,39H234M0,52H234" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,1.4h10.2v10.2h-10.2zM1.4,14.4h10.2v10.2h-10.2zM1.4,27.4h10.2v10.2h-10.2zM1.4,40.4h10.2v10.2h-10.2zM14.4,1.4h10.2v10.2h-10.2zM14.4,14.4h10.2v10.2h-10.2zM14.4,27.4h10.2v10.2h-10.2zM14.4,40.4h10.2v10.2h-10.2zM27.4,1.4h10.2v10.2h-10.2zM27.4,14.4h10.2v10.2h-10.2zM27.4,27.4h10.2v10.2h-10.2zM27.4,40.4h10.2v10.2h-10.2zM40.4,1.4h10.2v10.2h-10.2zM40.4,14.4h10.2v10.2h-10.2zM40.4,27.4h10.2v10.2h-10.2zM40.4,40.4h10.2v10.2h-10.2zM53.4,1.4h10.2v10.2h-10.2zM53.4,14.4h10.2v10.2h-10.2zM53.4,27.4h10.2v10.2h-10.2zM53.4,40.4h10.2v10.2h-10.2zM66.4,1.4h10.2v10.2h-10.2zM66.4,14.4h10.2v10.2h-10.2zM66.4,27.4h10.2v10.2h-10.2zM66.4,40.4h10.2v10.2h-10.2zM79.4,1.4h10.2v10.2h-10.2zM79.4,14.4h10.2v10.2h-10.2zM79.4,27.4h10.2v10.2h-10.2zM79.4,40.4h10.2v10.2h-10.2zM92.4,1.4h10.2v10.2h-10.2zM92.4,14.4h10.2v10.2h-10.2zM92.4,27.4h10.2v10.2h-10.2zM92.4,40.4h10.2v10.2h-10.2zM105.4,1.4h10.2v10.2h-10.2zM105.4,14.4h10.2v10.2h-10.2zM105.4,27.4h10.2v10.2h-10.2zM105.4,40.4h10.2v10.2h-10.2zM118.4,1.4h10.2v10.2h-10.2zM118.4,14.4h10.2v10.2h-10.2zM118.4,27.4h10.2v10.2h-10.2zM118.4,40.4h10.2v10.2h-10.2zM131.4,1.4h10.2v10.2h-10.2zM131.4,14.4h10.2v10.2h-10.2zM131.4,27.4h10.2v10.2h-10.2zM131.4,40.4h10.2v10.2h-10.2zM144.4,1.4h10.2v10.2h-10.2zM144.4,14.4h10.2v10.2h-10.2zM144.4,27.4h10.2v10.2h-10.2zM144.4,40.4h10.2v10.2h-10.2zM157.4,1.4h10.2v10.2h-10.2zM157.4,14.4h10.2v10.2h-10.2zM157.4,27.4h10.2v10.2h-10.2zM157.4,40.4h10.2v10.2h-10.2zM170.4,1.4h10.2v10.2h-10.2zM170.4,14.4h10.2v10.2h-10.2zM170.4,27.4h10.2v10.2h-10.2zM170.4,40.4h10.2v10.2h-10.2zM183.4,1.4h10.2v10.2h-10.2zM183.4,14.4h10.2v10.2h-10.2zM183.4,27.4h10.2v10.2h-10.2zM183.4,40.4h10.2v10.2h-10.2zM196.4,1.4h10.2v10.2h-10.2zM196.4,14.4h10.2v10.2h-10.2zM196.4,27.4h10.2v10.2h-10.2zM196.4,40.4h10.2v10.2h-10.2zM209.4,1.4h10.2v10.2h-10.2zM209.4,14.4h10.2v10.2h-10.2zM209.4,27.4h10.2v10.2h-10.2zM209.4,40.4h10.2v10.2h-10.2zM222.4,1.4h10.2v10.2h-10.2zM222.4,14.4h10.2v10.2h-10.2zM222.4,27.4h10.2v10.2h-10.2zM222.4,40.4h10.2v10.2h-10.2z" stroke="#15181C" stroke-width="1.3" fill="none"/>
+<rect x="0" y="0" width="234" height="52" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="1114.00,392.00 1346.26,363.48 1341.05,358.80 1108.80,387.32" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M1114.00,392.00L1108.80,387.32M1152.71,387.25L1147.51,382.56M1191.42,382.49L1186.22,377.81M1230.13,377.74L1224.93,373.06M1268.84,372.99L1263.64,368.30M1307.55,368.24L1302.34,363.55M1346.26,363.48L1341.05,358.80" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<g transform="matrix(0.99255,-0.12187,0,1,1114.00,392.00)">
+<rect x="0" y="0" width="234" height="52" fill="#FFFFFF"/>
+<rect x="0" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="0" y="13" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="0" y="26" width="13" height="13" fill="#2A2F35"/>
+<rect x="0" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="13" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="13" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="13" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="26" y="0" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="26" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="26" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="26" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="39" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="39" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="39" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="52" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="52" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="65" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="65" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="65" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="65" y="39" width="13" height="13" fill="#2A2F35"/>
+<rect x="78" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="78" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="78" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="91" y="0" width="13" height="13" fill="#2A2F35"/>
+<rect x="91" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="91" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="104" y="0" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="104" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="104" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="104" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="117" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="117" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="130" y="0" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="130" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="130" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="130" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="143" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="143" y="13" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="143" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="156" y="13" width="13" height="13" fill="#2A2F35"/>
+<rect x="169" y="26" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="182" y="0" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="182" y="13" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="182" y="26" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="182" y="39" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="195" y="13" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="195" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="195" y="39" width="13" height="13" fill="url(#pSlowL)"/>
+<rect x="208" y="0" width="13" height="13" fill="#2A2F35"/>
+<rect x="208" y="26" width="13" height="13" fill="url(#pMedL)"/>
+<rect x="208" y="39" width="13" height="13" fill="url(#pDeadL)"/>
+<rect x="221" y="0" width="13" height="13" fill="url(#pSlowL)"/>
+<path d="M13,0V52M26,0V52M52,0V52M65,0V52M91,0V52M104,0V52M130,0V52M143,0V52M169,0V52M182,0V52M208,0V52M221,0V52" stroke="#7E868F" stroke-width="0.6" fill="none"/>
+<path d="M0,0V52M39,0V52M78,0V52M117,0V52M156,0V52M195,0V52M234,0V52M0,0H234M0,13H234M0,26H234M0,39H234M0,52H234" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="234" height="52" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<path d="M1346.3,236.5 L1350.2,259.2 L1342.3,275.8 L1346.3,298.5" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<path d="M1114.0,387.0 L1118.0,409.7 L1110.0,426.3 L1114.0,449.0" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<path d="M1346.3,358.5 L1350.2,381.2 L1342.3,397.8 L1346.3,420.5" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<line x1="1114.0" y1="325.0" x2="1114.0" y2="384.0" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="1346.3" y1="296.5" x2="1346.3" y2="355.5" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<text x="1283" y="335" class="s11 i3" text-anchor="middle">aisles B–F not shown</text>
+<rect x="1076.5" y="282.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="1088" y="300" class="c s18 bb" text-anchor="middle">A</text>
+<text x="1356.2557994840693" y="263.48257364319545" class="s11 i3">01–06</text>
+<text x="1356.2557994840693" y="249.48257364319548" class="s11 i3">sect.</text>
+<rect x="1076.5" y="404.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="1088" y="422" class="c s18 bb" text-anchor="middle">G</text>
+<text x="1356.2557994840693" y="385.4825736431955" class="s11 i3">12–17</text>
+<text x="1356.2557994840693" y="371.4825736431955" class="s11 i3">sect.</text>
+<polygon points="1204.32,380.91 1217.22,379.33 1217.22,392.33 1204.32,393.91" fill="none" stroke="#0066B0" stroke-width="2"/>
+<polygon points="1152.71,304.25 1165.61,302.66 1165.61,315.66 1152.71,317.25" fill="none" stroke="#0066B0" stroke-width="2"/>
+<path d="M1210.8,386.6 L1210.8,340.1 L1159.2,346.5 L1159.2,318.0" stroke="#FFFFFF" stroke-width="5" fill="none"/>
+<path d="M1210.8,386.6 L1210.8,340.1 L1159.2,346.5 L1159.2,318.0" stroke="#0066B0" stroke-width="1.7" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)"/>
+<circle cx="1210.8" cy="386.6" r="3.2" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.6"/>
+<circle cx="1185.0" cy="343.3" r="13" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="1173.0" y1="343.3" x2="1197.0" y2="343.3" stroke="#0066B0" stroke-width="1"/>
+<text x="1185.0" y="340.8" class="c s12 bb bl" text-anchor="middle">2</text>
+<text x="1185.0" y="353.8" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="1211" y="450" class="s11 b" text-anchor="middle">from G-14-04-02</text>
+<text x="1151" y="350" class="s11 b bl" text-anchor="end">to A-02-01-01</text>
+<text x="1064" y="494" class="s12 bl b">Show in warehouse layout, Fig. 12</text>
+<g transform="translate(1266,482) scale(0.5833)" class="icb" style="stroke-width:2.571"><path d="M13 4h7v7M20 4l-9 9"/><path d="M17 14v6H4V7h6"/></g>
+<text x="1064" y="528" class="c s18 bb">Why this move</text>
+<line x1="1064" y1="536.5" x2="1424" y2="536.5" stroke="#15181C" stroke-width="1"/>
+<text x="1064" y="556" class="s12 i2">Rule</text>
+<text x="1114" y="556" class="s12">1 · fast-moving part into a best location</text>
+<text x="1064" y="575" class="s12 i2">Picks</text>
+<text x="1114" y="575" class="s12">61 in 2025-10-01 – 2026-09-30 (24 or more)</text>
+<text x="1064" y="594" class="s12 i2">From</text>
+<text x="1114" y="594" class="s12">G-14-04-02 · not a best location · stock 18</text>
+<text x="1064" y="613" class="s12 i2">To</text>
+<text x="1114" y="613" class="s12">A-02-01-01 · empty · best (mark: aisle A)</text>
+<text x="1064" y="648" class="c s18 bb">Effect if applied</text>
+<text x="1424" y="648" class="s12 i3" text-anchor="end">before/after</text>
+<line x1="1064" y1="656.5" x2="1424" y2="656.5" stroke="#15181C" stroke-width="1"/>
+<text x="1260" y="676" class="c s13 b i2" text-anchor="end">Import</text>
+<text x="1326" y="676" class="c s13 b i2" text-anchor="end">Now</text>
+<text x="1424" y="676" class="c s13 b i2" text-anchor="end">If applied</text>
+<line x1="1064" y1="683.5" x2="1424" y2="683.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1064" y="702" class="s12">Fast-moving in best, aisle A</text>
+<text x="1260" y="702" class="s13 i2" text-anchor="end">40</text>
+<text x="1326" y="702" class="s13 i2" text-anchor="end">41</text>
+<text x="1424" y="702" class="s13 b" text-anchor="end">42</text>
+<line x1="1064" y1="709.5" x2="1424" y2="709.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1064" y="726" class="s12">Fast-moving in best, all aisles</text>
+<text x="1260" y="726" class="s13 i2" text-anchor="end">112</text>
+<text x="1326" y="726" class="s13 i2" text-anchor="end">113</text>
+<text x="1424" y="726" class="s13 b" text-anchor="end">114</text>
+<line x1="1064" y1="733.5" x2="1424" y2="733.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1064" y="750" class="s12">Pick groups in the same aisle</text>
+<text x="1260" y="750" class="s13 i2" text-anchor="end">64</text>
+<text x="1326" y="750" class="s13 i2" text-anchor="end">64</text>
+<text x="1424" y="750" class="s13 b" text-anchor="end">63</text>
+<line x1="1064" y1="757.5" x2="1424" y2="757.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(1064,776) scale(0.6667)" class="ic" style="stroke-width:2.250"><rect x="3.5" y="6" width="7" height="12"/><rect x="13.5" y="6" width="7" height="12"/><path d="M10.5 12h3"/></g>
+<text x="1088" y="788" class="s12 b">Partner 4410297 Brake disc, front - VW Golf</text>
+<text x="1088" y="804" class="s12 i2">(14 shared jobs) stays in aisle G. A later round</text>
+<text x="1088" y="820" class="s12 i2">may suggest it under rule 3.</text>
+<rect x="1064.5" y="834.5" width="169" height="29" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1075.9,841.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><rect x="4" y="5" width="16" height="14"/><path d="M4 10h16M12 10v9"/></g>
+<text x="1097.9" y="853.5" class="s13 m">Before/after table</text>
+<rect x="1242.5" y="834.5" width="181" height="29" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1256.45,841.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7.5"/><path d="M7 14h10v6H7z"/></g>
+<text x="1278.5" y="853.5" class="s13 m">Move list (3 moves)</text>
+</svg>

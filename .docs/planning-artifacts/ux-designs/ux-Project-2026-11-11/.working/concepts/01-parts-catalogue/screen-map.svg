@@ -1,0 +1,608 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Smart Warehouse Planner: screen map plate, all key screens as catalogue figures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap');
+text{font-family:'Public Sans','Helvetica Neue',Helvetica,Arial,sans-serif;fill:#15181C;font-size:13px;font-variant-numeric:tabular-nums;}
+.c{font-family:'Barlow Condensed','Avenir Next Condensed','Arial Narrow',sans-serif;}
+.b{font-weight:600}.bb{font-weight:700}.m{font-weight:500}
+.i2{fill:#454C55}.i3{fill:#646B74}.bl{fill:#0066B0}.am{fill:#A3470B}.wh{fill:#FFFFFF}
+.s11{font-size:11px}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s15{font-size:15px}.s16{font-size:16px}.s18{font-size:18px}.s20{font-size:20px}.s22{font-size:22px}.s24{font-size:24px}.s28{font-size:28px}.s32{font-size:32px}
+.up{letter-spacing:0.06em}
+.ic{fill:none;stroke:#15181C;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icb{fill:none;stroke:#0066B0;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ici{fill:none;stroke:#454C55;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icw{fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ica{fill:none;stroke:#A3470B;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hl{stroke:#BEC4CB;stroke-width:1;fill:none}
+.hl2{stroke:#E1E4E8;stroke-width:1;fill:none}
+.ink{stroke:#15181C;stroke-width:1;fill:none}
+</style>
+<defs>
+<pattern id="pMed" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="2.6" stroke="#15181C" stroke-width="1.05"/></pattern>
+<pattern id="pSlow" width="4.6" height="4.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4.6" height="4.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4.6" stroke="#15181C" stroke-width="0.8"/></pattern>
+<pattern id="pDead" width="3.2" height="3.2" patternUnits="userSpaceOnUse"><rect width="3.2" height="3.2" fill="#FFFFFF"/><circle cx="1.6" cy="1.6" r="0.62" fill="#3A4048"/></pattern>
+<pattern id="pNone" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="3" height="3" fill="#EEF0F2"/></pattern>
+<pattern id="pMedL" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#15181C" stroke-width="1.5"/></pattern>
+<pattern id="pSlowL" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="7" stroke="#15181C" stroke-width="1.1"/></pattern>
+<pattern id="pDeadL" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#FFFFFF"/><circle cx="2.5" cy="2.5" r="0.95" fill="#3A4048"/></pattern>
+<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1 L10,5 L0,9 Z" fill="#0066B0"/></marker>
+<marker id="arwK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 Z" fill="#15181C"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<path d="M32.0,38.0 L42.0,33.0 L52.0,38.0 L42.0,43.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M32.0,38.0 L32.0,41.0 L42.0,46.0 L52.0,41.0 L52.0,38.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M32.0,28.0 L42.0,23.0 L52.0,28.0 L42.0,33.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M32.0,28.0 L32.0,31.0 L42.0,36.0 L52.0,31.0 L52.0,28.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M42.0,33.0 L42.0,36.0" stroke="#0066B0" stroke-width="1.2" stroke-dasharray="1.5 1.5"/>
+<text x="62" y="41" class="c s28 bb">Screen map</text>
+<text x="196" y="41" class="s13 i2">Smart Warehouse Planner · plan Spring re-slot 2026 · data as of 2026-09-30 · Fig. 8 and Fig. 12 drawn full size</text>
+<line x1="32" y1="58.5" x2="1408" y2="58.5" stroke="#15181C" stroke-width="1"/>
+<rect x="32.5" y="76.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="76.5" x2="41.5" y2="76.5"/><line x1="32.5" y1="67.5" x2="32.5" y2="85.5"/><circle cx="32.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="76.5" x2="481.5" y2="76.5"/><line x1="472.5" y1="67.5" x2="472.5" y2="85.5"/><circle cx="472.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="334.5" x2="41.5" y2="334.5"/><line x1="32.5" y1="325.5" x2="32.5" y2="343.5"/><circle cx="32.5" cy="334.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="334.5" x2="481.5" y2="334.5"/><line x1="472.5" y1="325.5" x2="472.5" y2="343.5"/><circle cx="472.5" cy="334.5" r="4.0"/></g>
+<text x="46" y="100" class="c s16 bb">Fig. 1</text>
+<text x="102" y="100" class="s13 b">Saved plans</text>
+<text x="458" y="100" class="s11 i3" text-anchor="end">start page</text>
+<line x1="46" y1="109.5" x2="458" y2="109.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="358" y="114" width="100" height="26" fill="#0066B0"/>
+<text x="408.0" y="131.5" class="s12 b wh" text-anchor="middle">New Plan</text>
+<rect x="46.5" y="114.5" width="200" height="25" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(53,119) scale(0.5833)" class="ici" style="stroke-width:2.571"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></g>
+<text x="72" y="131" class="s11 i3">Search plans</text>
+<text x="46" y="160" class="c s12 b i2">Plan</text>
+<text x="196" y="160" class="c s12 b i2">Data as of</text>
+<text x="268" y="160" class="c s12 b i2">Created by</text>
+<text x="458" y="160" class="c s12 b i2" text-anchor="end">Last edited</text>
+<line x1="46" y1="166.5" x2="458" y2="166.5" stroke="#15181C" stroke-width="1"/>
+<text x="46" y="181" class="s11 b">Spring re-slot 2026</text>
+<text x="196" y="181" class="s11">2026-09-30</text>
+<text x="268" y="181" class="s11">Justas</text>
+<text x="458" y="181" class="s11" text-anchor="end">2026-11-11 09:44</text>
+<line x1="46" y1="192.5" x2="458" y2="192.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="205" class="s11 b">Answer-key check</text>
+<text x="196" y="205" class="s11">2026-09-30</text>
+<text x="268" y="205" class="s11">Justas</text>
+<text x="458" y="205" class="s11" text-anchor="end">2026-11-10 15:02</text>
+<line x1="46" y1="216.5" x2="458" y2="216.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="229" class="s11 b">Aisle A trial</text>
+<text x="196" y="229" class="s11">2026-09-30</text>
+<text x="268" y="229" class="s11">Justas</text>
+<text x="458" y="229" class="s11" text-anchor="end">2026-11-08 11:20</text>
+<line x1="46" y1="240.5" x2="458" y2="240.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="253" class="s11 b">Autumn baseline</text>
+<text x="196" y="253" class="s11">2026-08-31</text>
+<text x="268" y="253" class="s11">Justas</text>
+<text x="458" y="253" class="s11" text-anchor="end">2026-10-03 08:47</text>
+<line x1="46" y1="264.5" x2="458" y2="264.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="320" class="s11 i3">Plans save automatically and reopen exactly as they were left.</text>
+<rect x="498.5" y="76.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="76.5" x2="507.5" y2="76.5"/><line x1="498.5" y1="67.5" x2="498.5" y2="85.5"/><circle cx="498.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="76.5" x2="947.5" y2="76.5"/><line x1="938.5" y1="67.5" x2="938.5" y2="85.5"/><circle cx="938.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="334.5" x2="507.5" y2="334.5"/><line x1="498.5" y1="325.5" x2="498.5" y2="343.5"/><circle cx="498.5" cy="334.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="334.5" x2="947.5" y2="334.5"/><line x1="938.5" y1="325.5" x2="938.5" y2="343.5"/><circle cx="938.5" cy="334.5" r="4.0"/></g>
+<text x="512" y="100" class="c s16 bb">Fig. 2</text>
+<text x="568" y="100" class="s13 b">New Plan</text>
+<text x="924" y="100" class="s11 i3" text-anchor="end">step 1</text>
+<line x1="512" y1="109.5" x2="924" y2="109.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="128" class="s11 b">Plan name</text>
+<rect x="512.5" y="133.5" width="230" height="24" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="520" y="150" class="s12">Spring re-slot 2026</text>
+<rect x="758.5" y="137.5" width="13" height="13" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<circle cx="765" cy="144" r="3" fill="#0066B0"/><text x="778" y="149" class="s11">Upload three files</text>
+<g transform="translate(512,170) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4"/></g>
+<text x="534" y="183" class="s12 b">Locations.xlsx</text>
+<g transform="translate(662,170) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="680" y="182" class="s11 i2">2,000 locations</text>
+<g transform="translate(512,194) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4"/></g>
+<text x="534" y="207" class="s12 b">Inventory.xlsx</text>
+<g transform="translate(662,194) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="680" y="206" class="s11 i2">1,625 rows</text>
+<g transform="translate(512,218) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4"/></g>
+<text x="534" y="231" class="s12 b">transactions.xlsx</text>
+<g transform="translate(662,218) scale(0.5833)" class="ica" style="stroke-width:2.571"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></g>
+<text x="680" y="230" class="s11 b am">Not imported</text>
+<rect x="512.5" y="240.5" width="411" height="50" fill="#FBF0E5" stroke="#A3470B" stroke-width="1"/>
+<text x="522" y="259" class="s12 b am">transactions.xlsx, row 1,214, column Quantity:</text>
+<text x="522" y="277" class="s11">“twelve” is not a number. Fix the file and upload it again.</text>
+<rect x="804" y="294" width="120" height="26" fill="#0066B0"/>
+<text x="864.0" y="311.5" class="s12 b wh" text-anchor="middle">Check import</text>
+<text x="512" y="312" class="s11 i3">Nothing is saved until all three files pass.</text>
+<rect x="964.5" y="76.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="76.5" x2="973.5" y2="76.5"/><line x1="964.5" y1="67.5" x2="964.5" y2="85.5"/><circle cx="964.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="76.5" x2="1413.5" y2="76.5"/><line x1="1404.5" y1="67.5" x2="1404.5" y2="85.5"/><circle cx="1404.5" cy="76.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="334.5" x2="973.5" y2="334.5"/><line x1="964.5" y1="325.5" x2="964.5" y2="343.5"/><circle cx="964.5" cy="334.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="334.5" x2="1413.5" y2="334.5"/><line x1="1404.5" y1="325.5" x2="1404.5" y2="343.5"/><circle cx="1404.5" cy="334.5" r="4.0"/></g>
+<text x="978" y="100" class="c s16 bb">Fig. 3</text>
+<text x="1034" y="100" class="s13 b">Plan overview</text>
+<text x="1390" y="100" class="s11 i3" text-anchor="end">step 1</text>
+<line x1="978" y1="109.5" x2="1390" y2="109.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="130" class="s12 b">Data as of 2026-09-30 · uploaded 2026-10-02</text>
+<text x="978" y="146" class="s11 i2">Period 2025-10-01 – 2026-09-30 · settings 24 · 6 · 5</text>
+<line x1="978" y1="161.5" x2="1072" y2="161.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="978" y="182" class="c s20 bb">1,545</text>
+<text x="978" y="198" class="s11 i2">parts</text>
+<line x1="1082" y1="161.5" x2="1176" y2="161.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1082" y="182" class="c s20 bb">2,000</text>
+<text x="1082" y="198" class="s11 i2">locations</text>
+<line x1="1186" y1="161.5" x2="1280" y2="161.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1186" y="182" class="c s20 bb">416</text>
+<text x="1186" y="198" class="s11 i2">empty</text>
+<line x1="1290" y1="161.5" x2="1384" y2="161.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1290" y="182" class="c s20 bb">636</text>
+<text x="1290" y="198" class="s11 i2">dead stock</text>
+<line x1="978" y1="211.5" x2="1072" y2="211.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="978" y="232" class="c s20 bb">212</text>
+<text x="978" y="248" class="s11 i2">pick groups</text>
+<line x1="1082" y1="211.5" x2="1176" y2="211.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1082" y="232" class="c s20 bb">279</text>
+<text x="1082" y="248" class="s11 i2">best, 39 empty</text>
+<line x1="1186" y1="211.5" x2="1280" y2="211.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1186" y="232" class="c s20 bb">3</text>
+<text x="1186" y="248" class="s11 i2">kept in place</text>
+<line x1="1290" y1="211.5" x2="1384" y2="211.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="1290" y="232" class="c s20 bb">80</text>
+<text x="1290" y="248" class="s11 i2">parts in 2 locations</text>
+<rect x="978.5" y="290.5" width="195" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1006.35,296.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M4 12h15M14 7l5 5-5 5"/></g>
+<text x="1028.3" y="308.5" class="s12 b">Continue to parts</text>
+<rect x="32.5" y="354.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="354.5" x2="41.5" y2="354.5"/><line x1="32.5" y1="345.5" x2="32.5" y2="363.5"/><circle cx="32.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="354.5" x2="481.5" y2="354.5"/><line x1="472.5" y1="345.5" x2="472.5" y2="363.5"/><circle cx="472.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="612.5" x2="41.5" y2="612.5"/><line x1="32.5" y1="603.5" x2="32.5" y2="621.5"/><circle cx="32.5" cy="612.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="612.5" x2="481.5" y2="612.5"/><line x1="472.5" y1="603.5" x2="472.5" y2="621.5"/><circle cx="472.5" cy="612.5" r="4.0"/></g>
+<text x="46" y="378" class="c s16 bb">Fig. 4</text>
+<text x="102" y="378" class="s13 b">Parts</text>
+<text x="458" y="378" class="s11 i3" text-anchor="end">1,545</text>
+<line x1="46" y1="387.5" x2="458" y2="387.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="46.5" y="392.5" width="230" height="25" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(53,397) scale(0.5833)" class="ici" style="stroke-width:2.571"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></g>
+<text x="72" y="409" class="s11">golf</text>
+<rect x="286.5" y="392.5" width="172" height="25" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="296" y="409" class="s11">Class: all</text>
+<g transform="translate(438,398) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<text x="46" y="436" class="c s12 b i2">Part no.</text>
+<text x="104" y="436" class="c s12 b i2">Description</text>
+<text x="268" y="436" class="c s12 b i2">Class</text>
+<text x="382" y="436" class="c s12 b i2" text-anchor="end">Picks</text>
+<text x="458" y="436" class="c s12 b i2" text-anchor="end">Current location</text>
+<line x1="46" y1="442.5" x2="458" y2="442.5" stroke="#15181C" stroke-width="1"/>
+<text x="46" y="457" class="s11 b">4410281</text>
+<text x="104" y="457" class="s11">Brake pads, front - VW Golf</text>
+<text x="268" y="457" class="s11">fast-moving</text>
+<text x="382" y="457" class="s11" text-anchor="end">61</text>
+<text x="458" y="457" class="s11" text-anchor="end">G-14-04-02</text>
+<line x1="46" y1="466.5" x2="458" y2="466.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="479" class="s11 b">4410297</text>
+<text x="104" y="479" class="s11">Brake disc, front - VW Golf</text>
+<text x="268" y="479" class="s11">medium-moving</text>
+<text x="382" y="479" class="s11" text-anchor="end">22</text>
+<text x="458" y="479" class="s11" text-anchor="end">G-14-04-03</text>
+<line x1="46" y1="488.5" x2="458" y2="488.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="501" class="s11 b">4410355</text>
+<text x="104" y="501" class="s11">Wiper blade set - VW Golf</text>
+<text x="268" y="501" class="s11">slow-moving</text>
+<text x="382" y="501" class="s11" text-anchor="end">3</text>
+<text x="458" y="501" class="s11" text-anchor="end">D-02-02-01</text>
+<line x1="46" y1="510.5" x2="458" y2="510.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="523" class="s11 b">4410912</text>
+<text x="104" y="523" class="s11">Door seal, rear - VW Golf</text>
+<text x="268" y="523" class="s11">dead stock</text>
+<text x="382" y="523" class="s11" text-anchor="end">0</text>
+<text x="458" y="523" class="s11" text-anchor="end">A-05-03-02</text>
+<line x1="46" y1="532.5" x2="458" y2="532.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="545" class="s11 b">4410288</text>
+<text x="104" y="545" class="s11">Brake pads, rear - VW Golf</text>
+<text x="268" y="545" class="s11">medium-moving</text>
+<text x="382" y="545" class="s11" text-anchor="end">14</text>
+<text x="458" y="545" class="s11" text-anchor="end">G-15-01-01</text>
+<line x1="46" y1="554.5" x2="458" y2="554.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="598" class="s11 i3">Select a part to see its locations, or make a manual move.</text>
+<rect x="498.5" y="354.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="354.5" x2="507.5" y2="354.5"/><line x1="498.5" y1="345.5" x2="498.5" y2="363.5"/><circle cx="498.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="354.5" x2="947.5" y2="354.5"/><line x1="938.5" y1="345.5" x2="938.5" y2="363.5"/><circle cx="938.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="612.5" x2="507.5" y2="612.5"/><line x1="498.5" y1="603.5" x2="498.5" y2="621.5"/><circle cx="498.5" cy="612.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="612.5" x2="947.5" y2="612.5"/><line x1="938.5" y1="603.5" x2="938.5" y2="621.5"/><circle cx="938.5" cy="612.5" r="4.0"/></g>
+<text x="512" y="378" class="c s16 bb">Fig. 5</text>
+<text x="568" y="378" class="s13 b">Locations</text>
+<text x="924" y="378" class="s11 i3" text-anchor="end">2,000</text>
+<line x1="512" y1="387.5" x2="924" y2="387.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="406" class="c s12 b i2">Location</text>
+<text x="622" y="406" class="c s12 b i2" text-anchor="end">Level</text>
+<text x="692" y="406" class="c s12 b i2" text-anchor="end">Walk Path</text>
+<text x="712" y="406" class="c s12 b i2">Best</text>
+<text x="756" y="406" class="c s12 b i2">Status</text>
+<text x="832" y="406" class="c s12 b i2">Part</text>
+<line x1="512" y1="412.5" x2="924" y2="412.5" stroke="#15181C" stroke-width="1"/>
+<text x="512" y="427" class="s11 b">A-02-01-01</text>
+<text x="622" y="427" class="s11" text-anchor="end">1</text>
+<text x="692" y="427" class="s11" text-anchor="end">30</text>
+<text x="712" y="427" class="s11">B</text>
+<text x="756" y="427" class="s11">empty</text>
+<text x="832" y="427" class="s11">–</text>
+<line x1="512" y1="438.5" x2="924" y2="438.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="451" class="s11 b">A-01-04-01</text>
+<text x="622" y="451" class="s11" text-anchor="end">4</text>
+<text x="692" y="451" class="s11" text-anchor="end">90</text>
+<text x="712" y="451" class="s11">B</text>
+<text x="756" y="451" class="s11">occupied</text>
+<text x="832" y="451" class="s11">3632446</text>
+<line x1="512" y1="462.5" x2="924" y2="462.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="475" class="s11 b">C-07-02-03</text>
+<text x="622" y="475" class="s11" text-anchor="end">2</text>
+<text x="692" y="475" class="s11" text-anchor="end">5,210</text>
+<text x="712" y="475" class="s11"></text>
+<text x="756" y="475" class="s11">occupied</text>
+<text x="832" y="475" class="s11">5315766</text>
+<line x1="512" y1="486.5" x2="924" y2="486.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="499" class="s11 b">F-09-02-03</text>
+<text x="622" y="499" class="s11" text-anchor="end">2</text>
+<text x="692" y="499" class="s11" text-anchor="end">12,060</text>
+<text x="712" y="499" class="s11"></text>
+<text x="756" y="499" class="s11">empty</text>
+<text x="832" y="499" class="s11">–</text>
+<line x1="512" y1="510.5" x2="924" y2="510.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="523" class="s11 b">G-14-04-02</text>
+<text x="622" y="523" class="s11" text-anchor="end">4</text>
+<text x="692" y="523" class="s11" text-anchor="end">14,050</text>
+<text x="712" y="523" class="s11"></text>
+<text x="756" y="523" class="s11">occupied</text>
+<text x="832" y="523" class="s11">4410281</text>
+<line x1="512" y1="534.5" x2="924" y2="534.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="547" class="s11 b">H-11-04-03</text>
+<text x="622" y="547" class="s11" text-anchor="end">4</text>
+<text x="692" y="547" class="s11" text-anchor="end">15,950</text>
+<text x="712" y="547" class="s11"></text>
+<text x="756" y="547" class="s11">empty</text>
+<text x="832" y="547" class="s11">–</text>
+<line x1="512" y1="558.5" x2="924" y2="558.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="598" class="s11 i3">Walk Path is an ordering only, not a distance.</text>
+<rect x="964.5" y="354.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="354.5" x2="973.5" y2="354.5"/><line x1="964.5" y1="345.5" x2="964.5" y2="363.5"/><circle cx="964.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="354.5" x2="1413.5" y2="354.5"/><line x1="1404.5" y1="345.5" x2="1404.5" y2="363.5"/><circle cx="1404.5" cy="354.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="612.5" x2="973.5" y2="612.5"/><line x1="964.5" y1="603.5" x2="964.5" y2="621.5"/><circle cx="964.5" cy="612.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="612.5" x2="1413.5" y2="612.5"/><line x1="1404.5" y1="603.5" x2="1404.5" y2="621.5"/><circle cx="1404.5" cy="612.5" r="4.0"/></g>
+<text x="978" y="378" class="c s16 bb">Fig. 6</text>
+<text x="1034" y="378" class="s13 b">Pick groups</text>
+<text x="1390" y="378" class="s11 i3" text-anchor="end">212</text>
+<line x1="978" y1="387.5" x2="1390" y2="387.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="406" class="c s12 b i2">Part</text>
+<text x="1104" y="406" class="c s12 b i2">Partner</text>
+<text x="1268" y="406" class="c s12 b i2" text-anchor="end">Shared jobs</text>
+<text x="1278" y="406" class="c s12 b i2">Aisles</text>
+<line x1="978" y1="412.5" x2="1390" y2="412.5" stroke="#15181C" stroke-width="1"/>
+<text x="978" y="427" class="s11 b">4410281 Brake pads</text>
+<text x="1104" y="427" class="s11">4410297 Brake disc</text>
+<text x="1268" y="427" class="s11" text-anchor="end">14</text>
+<text x="1278" y="427" class="s11">G · G  same aisle</text>
+<line x1="978" y1="440.5" x2="1390" y2="440.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="453" class="s11 b">5315766 Air filter</text>
+<text x="1104" y="453" class="s11">5315790 Oil filter</text>
+<text x="1268" y="453" class="s11" text-anchor="end">7</text>
+<text x="1278" y="453" class="s11">C · F  apart</text>
+<line x1="978" y1="466.5" x2="1390" y2="466.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="479" class="s11 b">6900616 Timing belt</text>
+<text x="1104" y="479" class="s11">6900633 Water pump</text>
+<text x="1268" y="479" class="s11" text-anchor="end">9</text>
+<text x="1278" y="479" class="s11">D · D  same aisle</text>
+<line x1="978" y1="492.5" x2="1390" y2="492.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="505" class="s11 b">2555849 Brake hose</text>
+<text x="1104" y="505" class="s11">2555861 Brake line</text>
+<text x="1268" y="505" class="s11" text-anchor="end">6</text>
+<text x="1278" y="505" class="s11">B · E  apart</text>
+<line x1="978" y1="518.5" x2="1390" y2="518.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="531" class="s11 b">7181839 Alternator</text>
+<text x="1104" y="531" class="s11">7181902 V-belt</text>
+<text x="1268" y="531" class="s11" text-anchor="end">5</text>
+<text x="1278" y="531" class="s11">F · F  same aisle</text>
+<line x1="978" y1="544.5" x2="1390" y2="544.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="598" class="s11 i3">Two parts with 5 or more shared jobs; each is the other's partner.</text>
+<rect x="32.5" y="632.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="632.5" x2="41.5" y2="632.5"/><line x1="32.5" y1="623.5" x2="32.5" y2="641.5"/><circle cx="32.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="632.5" x2="481.5" y2="632.5"/><line x1="472.5" y1="623.5" x2="472.5" y2="641.5"/><circle cx="472.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="23.5" y1="890.5" x2="41.5" y2="890.5"/><line x1="32.5" y1="881.5" x2="32.5" y2="899.5"/><circle cx="32.5" cy="890.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="463.5" y1="890.5" x2="481.5" y2="890.5"/><line x1="472.5" y1="881.5" x2="472.5" y2="899.5"/><circle cx="472.5" cy="890.5" r="4.0"/></g>
+<text x="46" y="656" class="c s16 bb">Fig. 7</text>
+<text x="102" y="656" class="s13 b">Best locations</text>
+<text x="458" y="656" class="s11 i3" text-anchor="end">step 3</text>
+<line x1="46" y1="665.5" x2="458" y2="665.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="686" class="s12 b">279 best locations · 39 empty</text>
+<rect x="260.5" y="672.5" width="61" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="291.0" y="688.5" class="s11 b" text-anchor="middle">Aisle</text>
+<rect x="328.5" y="672.5" width="57" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="357.0" y="688.5" class="s11 b" text-anchor="middle">Level</text>
+<rect x="392.5" y="672.5" width="65" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="425.0" y="688.5" class="s11 b" text-anchor="middle">Location</text>
+<text x="46" y="718" class="c s12 b i2">Mark</text>
+<text x="296" y="718" class="c s12 b i2" text-anchor="end">Locations</text>
+<text x="458" y="718" class="c s12 b i2" text-anchor="end"></text>
+<line x1="46" y1="724.5" x2="458" y2="724.5" stroke="#15181C" stroke-width="1"/>
+<text x="46" y="739" class="s11 b">Aisle A (whole aisle)</text>
+<text x="296" y="739" class="s11" text-anchor="end">222</text>
+<text x="458" y="739" class="s11" text-anchor="end">Remove</text>
+<line x1="46" y1="750.5" x2="458" y2="750.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="46" y="763" class="s11 b">Level 1 in aisle B</text>
+<text x="296" y="763" class="s11" text-anchor="end">57</text>
+<text x="458" y="763" class="s11" text-anchor="end">Remove</text>
+<line x1="46" y1="774.5" x2="458" y2="774.5" stroke="#E1E4E8" stroke-width="1"/>
+<polygon points="92.00,824.00 425.50,783.05 421.78,779.71 88.28,820.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M92.00,824.00L88.28,820.65M112.84,821.44L109.13,818.10M133.69,818.88L129.97,815.54M154.53,816.32L150.81,812.98M175.37,813.76L171.66,810.42M196.22,811.20L192.50,807.86M217.06,808.64L213.35,805.30M237.90,806.09L234.19,802.74M258.75,803.53L255.03,800.18M279.59,800.97L275.88,797.62M300.43,798.41L296.72,795.06M321.28,795.85L317.56,792.50M342.12,793.29L338.41,789.94M362.97,790.73L359.25,787.38M383.81,788.17L380.09,784.82M404.65,785.61L400.94,782.27M425.50,783.05L421.78,779.71" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="92.00,824.00 88.28,820.65 88.28,848.65 92.00,852.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="88.28" y1="820.65" x2="92.00" y2="852.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,92.00,824.00)">
+<rect x="0" y="0" width="336" height="28" fill="#FFFFFF"/>
+<rect x="0" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="0" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="0" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="7" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="7" y="7" width="7" height="7" fill="url(#pMed)"/>
+<rect x="7" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="14" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="14" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="14" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="21" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="21" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="21" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="28" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="28" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="28" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="35" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="35" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="35" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="42" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="42" y="7" width="7" height="7" fill="#2A2F35"/>
+<rect x="42" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="42" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="49" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="49" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="56" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="56" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="56" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="63" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="63" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="63" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="63" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="70" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="70" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="70" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="70" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="77" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="77" y="14" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="84" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="84" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="84" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="84" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="91" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="91" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="91" y="14" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="91" y="21" width="7" height="7" fill="#2A2F35"/>
+<rect x="98" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="98" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="98" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="105" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="105" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="105" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="112" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="112" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="119" y="7" width="7" height="7" fill="#2A2F35"/>
+<rect x="119" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="119" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="126" y="7" width="7" height="7" fill="url(#pMed)"/>
+<rect x="126" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="126" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="133" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="133" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="133" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="133" y="21" width="7" height="7" fill="#2A2F35"/>
+<rect x="140" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="140" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="140" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="140" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="147" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="147" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="147" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="147" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="154" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="154" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="154" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="161" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="161" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="161" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="161" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="168" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="168" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="168" y="14" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="168" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="175" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="175" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="175" y="21" width="7" height="7" fill="#2A2F35"/>
+<rect x="182" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="182" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="182" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="189" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="189" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="196" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="196" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="196" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="196" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="203" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="203" y="7" width="7" height="7" fill="url(#pMed)"/>
+<rect x="203" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="203" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="210" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="210" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="210" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="217" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="217" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="217" y="14" width="7" height="7" fill="url(#pMed)"/>
+<rect x="217" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="224" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="224" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="231" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="231" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="231" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="238" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="238" y="7" width="7" height="7" fill="url(#pMed)"/>
+<rect x="238" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="238" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="245" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="245" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="252" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="252" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="252" y="21" width="7" height="7" fill="#2A2F35"/>
+<rect x="259" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="259" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="259" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="259" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="266" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="266" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="266" y="14" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="266" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="273" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="273" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="273" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="273" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="280" y="0" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="280" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="280" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="280" y="21" width="7" height="7" fill="url(#pDead)"/>
+<rect x="287" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="287" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="287" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="294" y="0" width="7" height="7" fill="#2A2F35"/>
+<rect x="294" y="7" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="294" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="301" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="301" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="301" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="308" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="308" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="308" y="14" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="308" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<rect x="315" y="0" width="7" height="7" fill="url(#pMed)"/>
+<rect x="315" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="315" y="14" width="7" height="7" fill="url(#pMed)"/>
+<rect x="315" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="322" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="322" y="7" width="7" height="7" fill="url(#pDead)"/>
+<rect x="322" y="14" width="7" height="7" fill="url(#pMed)"/>
+<rect x="322" y="21" width="7" height="7" fill="url(#pMed)"/>
+<rect x="329" y="0" width="7" height="7" fill="url(#pDead)"/>
+<rect x="329" y="7" width="7" height="7" fill="url(#pMed)"/>
+<rect x="329" y="14" width="7" height="7" fill="url(#pDead)"/>
+<rect x="329" y="21" width="7" height="7" fill="url(#pSlow)"/>
+<path d="M7,0V28M14,0V28M28,0V28M35,0V28M49,0V28M56,0V28M70,0V28M77,0V28M91,0V28M98,0V28M112,0V28M119,0V28M133,0V28M140,0V28M154,0V28M161,0V28M175,0V28M182,0V28M196,0V28M203,0V28M217,0V28M224,0V28M238,0V28M245,0V28M259,0V28M266,0V28M280,0V28M287,0V28M301,0V28M308,0V28M322,0V28M329,0V28" stroke="#7E868F" stroke-width="0.4" fill="none"/>
+<path d="M0,0V28M21,0V28M42,0V28M63,0V28M84,0V28M105,0V28M126,0V28M147,0V28M168,0V28M189,0V28M210,0V28M231,0V28M252,0V28M273,0V28M294,0V28M315,0V28M336,0V28M0,0H336M0,7H336M0,14H336M0,21H336M0,28H336" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,22.4h4.2v4.2h-4.2zM8.4,22.4h4.2v4.2h-4.2zM15.4,22.4h4.2v4.2h-4.2zM22.4,22.4h4.2v4.2h-4.2zM29.4,22.4h4.2v4.2h-4.2zM36.4,22.4h4.2v4.2h-4.2zM43.4,22.4h4.2v4.2h-4.2zM50.4,22.4h4.2v4.2h-4.2zM57.4,22.4h4.2v4.2h-4.2zM64.4,22.4h4.2v4.2h-4.2zM71.4,22.4h4.2v4.2h-4.2zM78.4,22.4h4.2v4.2h-4.2zM85.4,22.4h4.2v4.2h-4.2zM92.4,22.4h4.2v4.2h-4.2zM99.4,22.4h4.2v4.2h-4.2zM106.4,22.4h4.2v4.2h-4.2zM113.4,22.4h4.2v4.2h-4.2zM120.4,22.4h4.2v4.2h-4.2zM127.4,22.4h4.2v4.2h-4.2zM134.4,22.4h4.2v4.2h-4.2zM141.4,22.4h4.2v4.2h-4.2zM148.4,22.4h4.2v4.2h-4.2zM155.4,22.4h4.2v4.2h-4.2zM162.4,22.4h4.2v4.2h-4.2zM169.4,22.4h4.2v4.2h-4.2zM176.4,22.4h4.2v4.2h-4.2zM183.4,22.4h4.2v4.2h-4.2zM190.4,22.4h4.2v4.2h-4.2zM197.4,22.4h4.2v4.2h-4.2zM204.4,22.4h4.2v4.2h-4.2zM211.4,22.4h4.2v4.2h-4.2zM218.4,22.4h4.2v4.2h-4.2zM225.4,22.4h4.2v4.2h-4.2zM232.4,22.4h4.2v4.2h-4.2zM239.4,22.4h4.2v4.2h-4.2zM246.4,22.4h4.2v4.2h-4.2zM253.4,22.4h4.2v4.2h-4.2zM260.4,22.4h4.2v4.2h-4.2zM267.4,22.4h4.2v4.2h-4.2zM274.4,22.4h4.2v4.2h-4.2zM281.4,22.4h4.2v4.2h-4.2zM288.4,22.4h4.2v4.2h-4.2zM295.4,22.4h4.2v4.2h-4.2zM302.4,22.4h4.2v4.2h-4.2zM309.4,22.4h4.2v4.2h-4.2zM316.4,22.4h4.2v4.2h-4.2zM323.4,22.4h4.2v4.2h-4.2zM330.4,22.4h4.2v4.2h-4.2z" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<rect x="0" y="0" width="336" height="28" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<rect x="46.5" y="826.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="58" y="844" class="c s16 bb" text-anchor="middle">B</text>
+<text x="86" y="876" class="s11 i3">Aisle B: level 1 marked (heavy frame). Click a cell to mark one location.</text>
+<rect x="498.5" y="632.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="632.5" x2="507.5" y2="632.5"/><line x1="498.5" y1="623.5" x2="498.5" y2="641.5"/><circle cx="498.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="632.5" x2="947.5" y2="632.5"/><line x1="938.5" y1="623.5" x2="938.5" y2="641.5"/><circle cx="938.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="489.5" y1="890.5" x2="507.5" y2="890.5"/><line x1="498.5" y1="881.5" x2="498.5" y2="899.5"/><circle cx="498.5" cy="890.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="929.5" y1="890.5" x2="947.5" y2="890.5"/><line x1="938.5" y1="881.5" x2="938.5" y2="899.5"/><circle cx="938.5" cy="890.5" r="4.0"/></g>
+<text x="512" y="656" class="c s16 bb">Fig. 9</text>
+<text x="568" y="656" class="s13 b">Before/after table</text>
+<text x="924" y="656" class="s11 i3" text-anchor="end">step 5</text>
+<line x1="512" y1="665.5" x2="924" y2="665.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="684" class="c s12 b i2">Aisle</text>
+<text x="622" y="684" class="c s12 b i2" text-anchor="end">In</text>
+<text x="672" y="684" class="c s12 b i2" text-anchor="end">Out</text>
+<text x="802" y="684" class="c s12 b i2" text-anchor="end">Fast-moving in best</text>
+<text x="924" y="684" class="c s12 b i2" text-anchor="end">Pick groups together</text>
+<line x1="512" y1="690.5" x2="924" y2="690.5" stroke="#15181C" stroke-width="1"/>
+<text x="512" y="705" class="s11 b">A</text>
+<text x="622" y="705" class="s11" text-anchor="end">3</text>
+<text x="672" y="705" class="s11" text-anchor="end">2</text>
+<text x="802" y="705" class="s11" text-anchor="end">40 → 42</text>
+<text x="924" y="705" class="s11" text-anchor="end">9 → 9</text>
+<line x1="512" y1="713.5" x2="924" y2="713.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="726" class="s11 b">C</text>
+<text x="622" y="726" class="s11" text-anchor="end">0</text>
+<text x="672" y="726" class="s11" text-anchor="end">1</text>
+<text x="802" y="726" class="s11" text-anchor="end">–</text>
+<text x="924" y="726" class="s11" text-anchor="end">7 → 6</text>
+<line x1="512" y1="734.5" x2="924" y2="734.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="747" class="s11 b">E</text>
+<text x="622" y="747" class="s11" text-anchor="end">0</text>
+<text x="672" y="747" class="s11" text-anchor="end">1</text>
+<text x="802" y="747" class="s11" text-anchor="end">–</text>
+<text x="924" y="747" class="s11" text-anchor="end">8 → 8</text>
+<line x1="512" y1="755.5" x2="924" y2="755.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="768" class="s11 b">F</text>
+<text x="622" y="768" class="s11" text-anchor="end">1</text>
+<text x="672" y="768" class="s11" text-anchor="end">0</text>
+<text x="802" y="768" class="s11" text-anchor="end">–</text>
+<text x="924" y="768" class="s11" text-anchor="end">6 → 7</text>
+<line x1="512" y1="776.5" x2="924" y2="776.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="789" class="s11 b">G</text>
+<text x="622" y="789" class="s11" text-anchor="end">0</text>
+<text x="672" y="789" class="s11" text-anchor="end">1</text>
+<text x="802" y="789" class="s11" text-anchor="end">–</text>
+<text x="924" y="789" class="s11" text-anchor="end">5 → 5</text>
+<line x1="512" y1="797.5" x2="924" y2="797.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="810" class="s11 b">H</text>
+<text x="622" y="810" class="s11" text-anchor="end">1</text>
+<text x="672" y="810" class="s11" text-anchor="end">0</text>
+<text x="802" y="810" class="s11" text-anchor="end">–</text>
+<text x="924" y="810" class="s11" text-anchor="end">4 → 4</text>
+<line x1="512" y1="818.5" x2="924" y2="818.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="831" class="s11 b">Whole warehouse</text>
+<text x="622" y="831" class="s11" text-anchor="end">5</text>
+<text x="672" y="831" class="s11" text-anchor="end">5</text>
+<text x="802" y="831" class="s11 b" text-anchor="end">112 → 114</text>
+<text x="924" y="831" class="s11 b" text-anchor="end">64 → 65</text>
+<line x1="512" y1="839.5" x2="924" y2="839.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="512" y="876" class="s11 i3">Before = the import. After = the planning copy. Current best marks.</text>
+<rect x="964.5" y="632.5" width="439" height="257" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="632.5" x2="973.5" y2="632.5"/><line x1="964.5" y1="623.5" x2="964.5" y2="641.5"/><circle cx="964.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="632.5" x2="1413.5" y2="632.5"/><line x1="1404.5" y1="623.5" x2="1404.5" y2="641.5"/><circle cx="1404.5" cy="632.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="955.5" y1="890.5" x2="973.5" y2="890.5"/><line x1="964.5" y1="881.5" x2="964.5" y2="899.5"/><circle cx="964.5" cy="890.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1395.5" y1="890.5" x2="1413.5" y2="890.5"/><line x1="1404.5" y1="881.5" x2="1404.5" y2="899.5"/><circle cx="1404.5" cy="890.5" r="4.0"/></g>
+<text x="978" y="656" class="c s16 bb">Fig. 10</text>
+<text x="1042" y="656" class="s13 b">Move list, print view</text>
+<text x="1390" y="656" class="s11 i3" text-anchor="end">black and white</text>
+<line x1="978" y1="665.5" x2="1390" y2="665.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="978" y="685" class="s12 bb">Move list · Spring re-slot 2026</text>
+<text x="978" y="700" class="s11">Data as of 2026-09-30 · uploaded 2026-10-02</text>
+<text x="978" y="715" class="s11">2 rounds · generated 2026-11-11 10:05</text>
+<rect x="978" y="724" width="412" height="18" fill="#15181C"/>
+<text x="984" y="737" class="s11 bb wh">Round 1</text>
+<text x="1384" y="737" class="s11 wh" text-anchor="end">one walk</text>
+<rect x="978.5" y="746.5" width="11" height="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="996" y="756" class="s11 b">4410281</text>
+<text x="1054" y="756" class="s11">Brake pads, front</text>
+<text x="1174" y="756" class="s11">G-14-04-02</text>
+<text x="1248" y="756" class="s11">→</text>
+<text x="1264" y="756" class="s11 b">A-02-01-01</text>
+<text x="1390" y="756" class="s11" text-anchor="end">rule 1</text>
+<line x1="978" y1="761.5" x2="1390" y2="761.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="978.5" y="765.5" width="11" height="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="996" y="775" class="s11 b">3632446</text>
+<text x="1054" y="775" class="s11">Catalytic converter</text>
+<text x="1174" y="775" class="s11">A-01-04-01</text>
+<text x="1248" y="775" class="s11">→</text>
+<text x="1264" y="775" class="s11 b">H-11-04-03</text>
+<text x="1390" y="775" class="s11" text-anchor="end">rule 2</text>
+<line x1="978" y1="780.5" x2="1390" y2="780.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="978.5" y="784.5" width="11" height="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="996" y="794" class="s11 b">5315766</text>
+<text x="1054" y="794" class="s11">Air filter</text>
+<text x="1174" y="794" class="s11">C-07-02-03</text>
+<text x="1248" y="794" class="s11">→</text>
+<text x="1264" y="794" class="s11 b">F-09-02-03</text>
+<text x="1390" y="794" class="s11" text-anchor="end">rule 3</text>
+<line x1="978" y1="799.5" x2="1390" y2="799.5" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="978" y="799" width="412" height="18" fill="#15181C"/>
+<text x="984" y="812" class="s11 bb wh">Round 2</text>
+<text x="1384" y="812" class="s11 wh" text-anchor="end">one walk</text>
+<rect x="978.5" y="821.5" width="11" height="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="996" y="831" class="s11 b">4410297</text>
+<text x="1054" y="831" class="s11">Brake disc, front</text>
+<text x="1174" y="831" class="s11">G-14-04-03</text>
+<text x="1248" y="831" class="s11">→</text>
+<text x="1264" y="831" class="s11 b">A-01-04-01</text>
+<text x="1390" y="831" class="s11" text-anchor="end">rule 3</text>
+<line x1="978" y1="836.5" x2="1390" y2="836.5" stroke="#BEC4CB" stroke-width="1"/>
+<text x="978" y="876" class="s11 i3">From-location before to-location; a tick box per line.</text>
+</svg>

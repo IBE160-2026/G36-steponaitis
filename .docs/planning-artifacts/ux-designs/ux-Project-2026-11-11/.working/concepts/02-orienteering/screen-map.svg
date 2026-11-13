@@ -1,0 +1,532 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Screen map</title>
+<desc>Concept 02 Orienteering Course: thumbnails of the other key screens.</desc>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700;800&amp;family=Atkinson+Hyperlegible+Mono:wght@400;500;700&amp;display=swap');
+text{font-family:'Atkinson Hyperlegible Next','Source Sans 3','Segoe UI',Helvetica,Arial,sans-serif;fill:#161616;font-size:13px}
+.m{font-family:'Atkinson Hyperlegible Mono','SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.tn{font-variant-numeric:tabular-nums}
+.t11{font-size:11px}.t12{font-size:12px}.t13{font-size:13px}.t14{font-size:14px}.t15{font-size:15px}
+.t16{font-size:16px}.t18{font-size:18px}.t20{font-size:20px}.t22{font-size:22px}.t26{font-size:26px}
+.t32{font-size:32px}.t44{font-size:44px}.t56{font-size:56px}
+.b{font-weight:700}.x{font-weight:800}.md{font-weight:500}
+.ink2{fill:#45443F}.mut{fill:#66655D}.mag{fill:#A626A4}.brn{fill:#9A4E12}.wht{fill:#FFFFFF}.grn{fill:#2E6420}.red{fill:#B42318}
+.end{text-anchor:end}.mid{text-anchor:middle}
+.halo{paint-order:stroke;stroke:#FFFFFF;stroke-width:3.5px;stroke-linejoin:round}
+.caps{letter-spacing:0.06em}
+</style>
+<defs>
+  <filter id="shadow" x="-10%" y="-10%" width="130%" height="140%">
+    <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#161616" flood-opacity="0.16"/>
+  </filter>
+  <filter id="shadow-s" x="-10%" y="-10%" width="130%" height="140%">
+    <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#161616" flood-opacity="0.12"/>
+  </filter>
+  <pattern id="hatch-g" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="5" height="5" fill="#D3ECC6"/><line x1="0" y1="0" x2="0" y2="5" stroke="#4E9A3A" stroke-width="2"/>
+  </pattern>
+  <pattern id="hatch-grey" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="6" height="6" fill="#F1EFE8"/><line x1="0" y1="0" x2="0" y2="6" stroke="#C9C5B6" stroke-width="1.2"/>
+  </pattern>
+  <pattern id="hatch-out" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+    <rect width="5" height="5" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="5" stroke="#9C9889" stroke-width="1"/>
+  </pattern>
+  <pattern id="yel-dots" width="4" height="4" patternUnits="userSpaceOnUse">
+    <rect width="4" height="4" fill="#FBE3A0"/>
+  </pattern>
+
+  <!-- location cell symbols, 12x12: darker = more picks -->
+  <symbol id="c-fast" viewBox="0 0 12 12"><rect x="0.5" y="0.5" width="11" height="11" fill="#161616" stroke="#161616"/></symbol>
+  <symbol id="c-med" viewBox="0 0 12 12"><rect x="0.5" y="0.5" width="11" height="11" fill="#161616" stroke="#161616"/><rect x="4" y="4" width="4" height="4" fill="#FFFFFF"/></symbol>
+  <symbol id="c-slow" viewBox="0 0 12 12"><rect x="0.9" y="0.9" width="10.2" height="10.2" fill="#FFFFFF" stroke="#161616" stroke-width="1.6"/><path d="M0.9 11.1 L11.1 0.9 L11.1 11.1 Z" fill="#161616"/></symbol>
+  <symbol id="c-dead" viewBox="0 0 12 12"><rect x="0.9" y="0.9" width="10.2" height="10.2" fill="#FFFFFF" stroke="#161616" stroke-width="1.6"/><path d="M3 9 L9 3" stroke="#161616" stroke-width="1.6"/></symbol>
+  <symbol id="c-empty" viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" fill="#FFFFFF" stroke="#8C8A80" stroke-width="1"/></symbol>
+
+  <!-- course overprint symbols (magenta) -->
+  <symbol id="k-start" viewBox="-14 -14 28 28"><path d="M0 -11 L10.4 7 L-10.4 7 Z" fill="none" stroke="#A626A4" stroke-width="2.4" stroke-linejoin="round"/></symbol>
+  <symbol id="k-ctrl" viewBox="-14 -14 28 28"><circle r="10.5" fill="none" stroke="#A626A4" stroke-width="2.4"/></symbol>
+  <symbol id="k-drop" viewBox="-14 -14 28 28"><circle r="10.5" fill="none" stroke="#A626A4" stroke-width="2.4"/><circle r="2.6" fill="#A626A4"/></symbol>
+  <symbol id="k-finish" viewBox="-14 -14 28 28"><circle r="11.5" fill="none" stroke="#A626A4" stroke-width="2.2"/><circle r="7.5" fill="none" stroke="#A626A4" stroke-width="2.2"/></symbol>
+  <marker id="k-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+    <path d="M0 0 L10 5 L0 10 Z" fill="#A626A4"/>
+  </marker>
+  <marker id="ink-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0 L10 5 L0 10 Z" fill="#161616"/>
+  </marker>
+
+  <!-- rule pictograms, 16x16, stroke 1.5 -->
+  <symbol id="r1" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="8.5" y="2.75" width="6.5" height="10.5"/><path d="M10.5 13.25 L15 8.75 M8.5 9.75 L13.5 4.75"/><path d="M1 8 H9.5 M6.5 5 L9.5 8 L6.5 11"/></g></symbol>
+  <symbol id="r2" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="1" y="2.75" width="6.5" height="10.5"/><path d="M3 13.25 L7.5 8.75 M1 9.75 L6 4.75"/><path d="M6 8 H15 M12 5 L15 8 L12 11"/></g></symbol>
+  <symbol id="r3" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="4" cy="8" r="2.75"/><circle cx="12" cy="8" r="2.75"/><path d="M6.75 8 H9.25"/><path d="M2 3 H14" stroke-dasharray="1.5 2"/></g></symbol>
+  <symbol id="rm" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 13 L3.6 10.2 L10.8 3 L13 5.2 L5.8 12.4 Z"/><path d="M9.4 4.4 L11.6 6.6"/></g></symbol>
+
+  <!-- ui icons, 16x16, stroke 1.5 -->
+  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4 6 L8 10 L12 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevr" viewBox="0 0 16 16"><path d="M6 4 L10 8 L6 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 L14 14"/></g></symbol>
+  <symbol id="i-cal" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M2 6.5 H14 M5.5 1.5 V4.5 M10.5 1.5 V4.5"/></g></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 3.5 L2.5 6.5 L5.5 9.5"/><path d="M2.5 6.5 H10 A3.5 3.5 0 0 1 10 13.5 H7"/></g></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M4.5 3 L13 8 L4.5 13 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-print" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 6 V2 H12 V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4 9.5 H12 V14 H4 Z"/></g></symbol>
+  <symbol id="i-lock" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1"/><path d="M5.5 7 V5 A2.5 2.5 0 0 1 10.5 5 V7"/></g></symbol>
+  <symbol id="i-pin" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14.5 V9"/><path d="M5 2 H11 L10 6 L12.5 9 H3.5 L6 6 Z"/></g></symbol>
+  <symbol id="i-alert" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 L15 14 H1 Z"/><path d="M8 6.5 V9.5"/><circle cx="8" cy="11.8" r="0.4"/></g></symbol>
+  <symbol id="i-clock" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.5 V8 L10.5 9.5"/></g></symbol>
+  <symbol id="i-nospace" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12"/><path d="M2 2 L14 14"/></g></symbol>
+  <symbol id="i-upload" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11 V2.5 M4.5 6 L8 2.5 L11.5 6"/><path d="M2.5 10.5 V13.5 H13.5 V10.5"/></g></symbol>
+  <symbol id="i-file" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3.5 1.5 H9.5 L12.5 4.5 V14.5 H3.5 Z"/><path d="M9.5 1.5 V4.5 H12.5"/></g></symbol>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3 V13 M3 8 H13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 16 16"><path d="M3 8 H13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 16 16"><path d="M2 6 V2 H6 M10 2 H14 V6 M14 10 V14 H10 M6 14 H2 V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4 H14 M2 8 H14 M2 12 H14"/><circle cx="5" cy="4" r="1.6" fill="#FFFFFF"/><circle cx="11" cy="8" r="1.6" fill="#FFFFFF"/><circle cx="7" cy="12" r="1.6" fill="#FFFFFF"/></g></symbol>
+  <symbol id="i-sheet" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12"/><path d="M2 6 H14 M2 10 H14 M6 2 V14"/></g></symbol>
+  <symbol id="i-map" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.5 3.5 L5.5 2 L10.5 3.5 L14.5 2 V12.5 L10.5 14 L5.5 12.5 L1.5 14 Z"/><path d="M5.5 2 V12.5 M10.5 3.5 V14"/></g></symbol>
+  <symbol id="i-cols" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.5" y="2.5" width="5" height="11"/><rect x="9.5" y="2.5" width="5" height="11"/></g></symbol>
+  <symbol id="i-folder" viewBox="0 0 16 16"><path d="M1.5 3 H6 L7.5 4.5 H14.5 V13 H1.5 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-user" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 14.5 A5.5 5.5 0 0 1 13.5 14.5"/></g></symbol>
+  <symbol id="i-tag" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.5 1.5 H8 L14.5 8 L8 14.5 L1.5 8 Z"/><circle cx="5" cy="5" r="1"/></g></symbol>
+  <symbol id="i-qr" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/><rect x="2" y="9" width="5" height="5"/><path d="M9 9 H11 V11 M14 9 V14 H11 M9 13 V14"/></g></symbol>
+  <symbol id="i-arrowr" viewBox="0 0 16 16"><path d="M2 8 H13.5 M9.5 4 L13.5 8 L9.5 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4 L12 12 M12 4 L4 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 16 16"><g fill="currentColor"><circle cx="3.5" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12.5" cy="8" r="1.2"/></g></symbol>
+  <symbol id="i-brand" viewBox="0 0 28 28"><g fill="none" stroke="#161616" stroke-width="2.2" stroke-linejoin="round"><path d="M7 4 L13 14.5 L1 14.5 Z"/><circle cx="19.5" cy="18.5" r="7"/><circle cx="19.5" cy="18.5" r="3.6"/></g></symbol>
+</defs>
+
+<rect width="1440" height="900" fill="#F6F4EC"/>
+<use href="#i-brand" xlink:href="#i-brand" x="24" y="20" width="28" height="28"/>
+<text x="62" y="41" class="b t20">Smart Warehouse Planner · screen map</text>
+<text x="1416" y="41" class="t13 mut end">Concept 02 · Orienteering Course · in flow order, start to finish</text>
+<text x="24" y="84" class="b t14">Saved plans</text>
+<text x="472" y="84" class="t12 mut end">start page</text>
+<rect x="24" y="92" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="24.5" y="92.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="24" y1="114.5" x2="472" y2="114.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="32" y="96" width="14" height="14"/>
+<text x="52" y="107" class="b t11">Spring re-slot 2026</text>
+<text x="464" y="107" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="36" y="138" class="b t15">Saved plans</text>
+<rect x="360" y="122" width="100" height="26" rx="4" fill="#161616" stroke="#161616"/>
+<use href="#i-plus" xlink:href="#i-plus" x="372" y="127.0" width="16" height="16" style="color:#FFFFFF"/>
+<text x="394" y="139.32" class="b t12 wht">New Plan</text>
+<text x="36" y="170" class="b t11 ink2">Plan</text>
+<text x="186" y="170" class="b t11 ink2">Data as of</text>
+<text x="286" y="170" class="b t11 ink2 end">Moves</text>
+<text x="306" y="170" class="b t11 ink2">Last edited</text>
+<line x1="36" y1="175.5" x2="460" y2="175.5" stroke="#161616"/>
+<text x="36" y="190" class="t11 b">Spring re-slot 2026</text>
+<text x="186" y="190" class="t11 m">2026-09-30</text>
+<text x="286" y="190" class="t11 tn end">10</text>
+<text x="306" y="190" class="t11">Justas · today 14:32</text>
+<line x1="36" y1="199.5" x2="460" y2="199.5" stroke="#D9D5C7"/>
+<text x="36" y="214" class="t11">Aisle A trial</text>
+<text x="186" y="214" class="t11 m">2026-06-30</text>
+<text x="286" y="214" class="t11 tn end">14</text>
+<text x="306" y="214" class="t11">Justas · 2026-08-12</text>
+<line x1="36" y1="223.5" x2="460" y2="223.5" stroke="#D9D5C7"/>
+<text x="36" y="238" class="t11">Pick group test</text>
+<text x="186" y="238" class="t11 m">2026-06-30</text>
+<text x="286" y="238" class="t11 tn end">3</text>
+<text x="306" y="238" class="t11">Justas · 2026-07-20</text>
+<line x1="36" y1="247.5" x2="460" y2="247.5" stroke="#D9D5C7"/>
+<text x="36" y="262" class="t11">Autumn check</text>
+<text x="186" y="262" class="t11 m">2026-09-30</text>
+<text x="286" y="262" class="t11 tn end">0</text>
+<text x="306" y="262" class="t11">Justas · 2026-10-02</text>
+<line x1="36" y1="271.5" x2="460" y2="271.5" stroke="#D9D5C7"/>
+<text x="36" y="316" class="t11 mut">Plans are shared and saved automatically.</text>
+<text x="496" y="84" class="b t14">New Plan</text>
+<text x="944" y="84" class="t12 mut end">import, with an error</text>
+<rect x="496" y="92" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="496.5" y="92.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="496" y1="114.5" x2="944" y2="114.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="504" y="96" width="14" height="14"/>
+<text x="524" y="107" class="b t11">Spring re-slot 2026</text>
+<text x="936" y="107" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="508" y="138" class="b t15">New Plan</text>
+<text x="508" y="158" class="t11 ink2">Plan name</text>
+<rect x="576" y="145" width="200" height="20" rx="3" fill="#FFFFFF" stroke="#BDB8A6"/>
+<text x="584" y="159" class="t11">Summer check 2026</text>
+<use href="#i-file" xlink:href="#i-file" x="508" y="179" width="14" height="14" style="color:#161616"/>
+<text x="528" y="190" class="b t11">Locations file</text>
+<text x="636" y="190" class="t11 m">Locations.xlsx · 2,000 rows</text>
+<use href="#i-check" xlink:href="#i-check" x="914" y="179" width="14" height="14" style="color:#2E6420"/>
+<use href="#i-file" xlink:href="#i-file" x="508" y="205" width="14" height="14" style="color:#161616"/>
+<text x="528" y="216" class="b t11">Inventory file</text>
+<text x="636" y="216" class="t11 m">Inventory.xlsx · 1,625 rows</text>
+<use href="#i-check" xlink:href="#i-check" x="914" y="205" width="14" height="14" style="color:#2E6420"/>
+<use href="#i-file" xlink:href="#i-file" x="508" y="231" width="14" height="14" style="color:#161616"/>
+<text x="528" y="242" class="b t11">Transactions file</text>
+<text x="636" y="242" class="t11 m red">transactions.xlsx</text>
+<use href="#i-alert" xlink:href="#i-alert" x="914" y="231" width="14" height="14" style="color:#B42318"/>
+<rect x="508" y="256" width="424" height="44" rx="3" fill="#FCE9E7" stroke="#B42318"/>
+<text x="518" y="273" class="b t11 red">transactions.xlsx, row 1,284, column Date:</text>
+<text x="518" y="290" class="t11 red">“2026-09-31” is not a valid date. Fix it and upload again.</text>
+<text x="508" y="318" class="t11 mut">Nothing is saved until all three files pass.</text>
+<text x="968" y="84" class="b t14">Plan overview</text>
+<text x="1416" y="84" class="t12 mut end">flow control 1</text>
+<rect x="968" y="92" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="968.5" y="92.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="968" y1="114.5" x2="1416" y2="114.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="976" y="96" width="14" height="14"/>
+<text x="996" y="107" class="b t11">Spring re-slot 2026</text>
+<text x="1408" y="107" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="980" y="138" class="b t15">Plan overview</text>
+<text x="980" y="156" class="t11 mut">Period 2025-10-01 – 2026-09-30 · uploaded 2026-10-02</text>
+<text x="980" y="184" class="x t16 tn">1,545</text>
+<text x="980" y="199" class="t11 mut">parts</text>
+<text x="1122" y="184" class="x t16 tn">2,000</text>
+<text x="1122" y="199" class="t11 mut">locations</text>
+<text x="1264" y="184" class="x t16 tn">416</text>
+<text x="1264" y="199" class="t11 mut">empty</text>
+<text x="980" y="224" class="x t16 tn">336</text>
+<text x="980" y="239" class="t11 mut">best (38 empty)</text>
+<text x="1122" y="224" class="x t16 tn">212</text>
+<text x="1122" y="239" class="t11 mut">pick groups</text>
+<text x="1264" y="224" class="x t16 tn">80</text>
+<text x="1264" y="239" class="t11 mut">in two locations</text>
+<use href="#c-fast" xlink:href="#c-fast" x="980" y="260" width="11" height="11"/>
+<text x="998" y="270" class="t11">fast-moving (24+)</text>
+<text x="1176" y="270" class="b t11 tn end">204</text>
+<use href="#c-med" xlink:href="#c-med" x="1192" y="260" width="11" height="11"/>
+<text x="1210" y="270" class="t11">medium-moving (6–23)</text>
+<text x="1388" y="270" class="b t11 tn end">358</text>
+<use href="#c-slow" xlink:href="#c-slow" x="980" y="282" width="11" height="11"/>
+<text x="998" y="292" class="t11">slow-moving (1–5)</text>
+<text x="1176" y="292" class="b t11 tn end">408</text>
+<use href="#c-dead" xlink:href="#c-dead" x="1192" y="282" width="11" height="11"/>
+<text x="1210" y="292" class="t11">dead stock (0)</text>
+<text x="1388" y="292" class="b t11 tn end">614</text>
+<text x="980" y="320" class="t11 mut">Counts of locations by class of stored part</text>
+<text x="24" y="354" class="b t14">Parts</text>
+<text x="472" y="354" class="t12 mut end">flow control 2</text>
+<rect x="24" y="362" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="24.5" y="362.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="24" y1="384.5" x2="472" y2="384.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="32" y="366" width="14" height="14"/>
+<text x="52" y="377" class="b t11">Spring re-slot 2026</text>
+<text x="464" y="377" class="t11 mut end">Data as of 2026-09-30</text>
+<rect x="36" y="394" width="220" height="22" rx="3" fill="#FFFFFF" stroke="#BDB8A6"/>
+<use href="#i-search" xlink:href="#i-search" x="42" y="398" width="14" height="14" style="color:#66655D"/>
+<text x="62" y="409" class="t11">brake</text>
+<text x="460" y="409" class="t11 mut end">14 of 1,545 parts</text>
+<text x="36" y="436" class="b t11 ink2"></text>
+<text x="52" y="436" class="b t11 ink2">Part</text>
+<text x="110" y="436" class="b t11 ink2">Description</text>
+<text x="298" y="436" class="b t11 ink2 end">Picks</text>
+<text x="312" y="436" class="b t11 ink2">Current location</text>
+<line x1="36" y1="441.5" x2="460" y2="441.5" stroke="#161616"/>
+<use href="#c-fast" xlink:href="#c-fast" x="36" y="446" width="11" height="11"/>
+<text x="52" y="456" class="t11 m b">4410281</text>
+<text x="110" y="456" class="t11">Brake pads, front - VW Golf</text>
+<text x="298" y="456" class="t11 tn end">61</text>
+<text x="312" y="456" class="t11 m">A-02-01-01</text>
+<line x1="36" y1="465.5" x2="460" y2="465.5" stroke="#D9D5C7"/>
+<use href="#c-fast" xlink:href="#c-fast" x="36" y="470" width="11" height="11"/>
+<text x="52" y="480" class="t11 m b">2555849</text>
+<text x="110" y="480" class="t11">Brake hose - Toyota Corolla</text>
+<text x="298" y="480" class="t11 tn end">29</text>
+<text x="312" y="480" class="t11 m">A-03-01-02</text>
+<line x1="36" y1="489.5" x2="460" y2="489.5" stroke="#D9D5C7"/>
+<use href="#c-med" xlink:href="#c-med" x="36" y="494" width="11" height="11"/>
+<text x="52" y="504" class="t11 m b">4410297</text>
+<text x="110" y="504" class="t11">Brake disc, front - VW Golf</text>
+<text x="298" y="504" class="t11 tn end">19</text>
+<text x="312" y="504" class="t11 m">H-06-01-03</text>
+<line x1="36" y1="513.5" x2="460" y2="513.5" stroke="#D9D5C7"/>
+<use href="#c-slow" xlink:href="#c-slow" x="36" y="518" width="11" height="11"/>
+<text x="52" y="528" class="t11 m b">4410322</text>
+<text x="110" y="528" class="t11">Brake caliper - VW Golf</text>
+<text x="298" y="528" class="t11 tn end">3</text>
+<text x="312" y="528" class="t11 m">D-12-02-01</text>
+<line x1="36" y1="537.5" x2="460" y2="537.5" stroke="#D9D5C7"/>
+<use href="#c-dead" xlink:href="#c-dead" x="36" y="542" width="11" height="11"/>
+<text x="52" y="552" class="t11 m b">6021455</text>
+<text x="110" y="552" class="t11">Brake drum - Opel Corsa</text>
+<text x="298" y="552" class="t11 tn end">0</text>
+<text x="312" y="552" class="t11 m">I-04-04-02</text>
+<line x1="36" y1="561.5" x2="460" y2="561.5" stroke="#D9D5C7"/>
+<use href="#c-dead" xlink:href="#c-dead" x="36" y="566" width="11" height="11"/>
+<text x="52" y="576" class="t11 m b">6021460</text>
+<text x="110" y="576" class="t11">Brake shoe set - Opel Corsa</text>
+<text x="298" y="576" class="t11 tn end">0</text>
+<text x="312" y="576" class="t11 m">I-04-04-03</text>
+<line x1="36" y1="585.5" x2="460" y2="585.5" stroke="#D9D5C7"/>
+<text x="496" y="354" class="b t14">Locations</text>
+<text x="944" y="354" class="t12 mut end">flow control 2</text>
+<rect x="496" y="362" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="496.5" y="362.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="496" y1="384.5" x2="944" y2="384.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="504" y="366" width="14" height="14"/>
+<text x="524" y="377" class="b t11">Spring re-slot 2026</text>
+<text x="936" y="377" class="t11 mut end">Data as of 2026-09-30</text>
+<rect x="508" y="394" width="96" height="22" rx="11" fill="#FDF0C6" stroke="#161616"/>
+<text x="556" y="409" class="b t11 mid">Empty only</text>
+<rect x="610" y="394" width="80" height="22" rx="11" fill="#FFFFFF" stroke="#BDB8A6"/>
+<text x="650" y="409" class="t11 mid">Aisle A</text>
+<text x="932" y="409" class="t11 mut end">29 of 2,000</text>
+<text x="508" y="436" class="b t11 ink2"></text>
+<text x="524" y="436" class="b t11 ink2">Location</text>
+<text x="618" y="436" class="b t11 ink2 end">Level</text>
+<text x="678" y="436" class="b t11 ink2 end">Walk Path</text>
+<text x="692" y="436" class="b t11 ink2">Best</text>
+<text x="748" y="436" class="b t11 ink2">Parts</text>
+<line x1="508" y1="441.5" x2="932" y2="441.5" stroke="#161616"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="446" width="11" height="11"/>
+<text x="524" y="456" class="t11 m b">A-01-04-01</text>
+<text x="618" y="456" class="t11 tn end">4</text>
+<text x="678" y="456" class="t11 tn end">90</text>
+<text x="692" y="456" class="t11 grn b">best</text>
+<text x="748" y="456" class="t11 mut">empty · freed in round 1</text>
+<line x1="508" y1="465.5" x2="932" y2="465.5" stroke="#D9D5C7"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="470" width="11" height="11"/>
+<text x="524" y="480" class="t11 m b">A-09-02-01</text>
+<text x="618" y="480" class="t11 tn end">2</text>
+<text x="678" y="480" class="t11 tn end">990</text>
+<text x="692" y="480" class="t11 grn b">best</text>
+<text x="748" y="480" class="t11 mut">empty</text>
+<line x1="508" y1="489.5" x2="932" y2="489.5" stroke="#D9D5C7"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="494" width="11" height="11"/>
+<text x="524" y="504" class="t11 m b">A-12-01-01</text>
+<text x="618" y="504" class="t11 tn end">1</text>
+<text x="678" y="504" class="t11 tn end">1,320</text>
+<text x="692" y="504" class="t11 grn b">best</text>
+<text x="748" y="504" class="t11 mut">empty</text>
+<line x1="508" y1="513.5" x2="932" y2="513.5" stroke="#D9D5C7"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="518" width="11" height="11"/>
+<text x="524" y="528" class="t11 m b">A-12-01-02</text>
+<text x="618" y="528" class="t11 tn end">1</text>
+<text x="678" y="528" class="t11 tn end">1,330</text>
+<text x="692" y="528" class="t11 grn b">best</text>
+<text x="748" y="528" class="t11 mut">empty</text>
+<line x1="508" y1="537.5" x2="932" y2="537.5" stroke="#D9D5C7"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="542" width="11" height="11"/>
+<text x="524" y="552" class="t11 m b">A-17-02-03</text>
+<text x="618" y="552" class="t11 tn end">2</text>
+<text x="678" y="552" class="t11 tn end">1,970</text>
+<text x="692" y="552" class="t11 grn b">best</text>
+<text x="748" y="552" class="t11 mut">empty</text>
+<line x1="508" y1="561.5" x2="932" y2="561.5" stroke="#D9D5C7"/>
+<use href="#c-empty" xlink:href="#c-empty" x="508" y="566" width="11" height="11"/>
+<text x="524" y="576" class="t11 m b">A-18-04-01</text>
+<text x="618" y="576" class="t11 tn end">4</text>
+<text x="678" y="576" class="t11 tn end">2,130</text>
+<text x="692" y="576" class="t11 grn b">best</text>
+<text x="748" y="576" class="t11 mut">empty</text>
+<line x1="508" y1="585.5" x2="932" y2="585.5" stroke="#D9D5C7"/>
+<text x="968" y="354" class="b t14">Pick groups</text>
+<text x="1416" y="354" class="t12 mut end">flow control 2</text>
+<rect x="968" y="362" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="968.5" y="362.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="968" y1="384.5" x2="1416" y2="384.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="976" y="366" width="14" height="14"/>
+<text x="996" y="377" class="b t11">Spring re-slot 2026</text>
+<text x="1408" y="377" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="980" y="408" class="b t13">212 pick groups (5 or more shared jobs)</text>
+<text x="980" y="432" class="b t11 ink2">Part</text>
+<text x="1130" y="432" class="b t11 ink2">Partner</text>
+<text x="1298" y="432" class="b t11 ink2 end">Shared jobs</text>
+<text x="1310" y="432" class="b t11 ink2">Aisles</text>
+<line x1="980" y1="437.5" x2="1404" y2="437.5" stroke="#161616"/>
+<text x="980" y="452" class="t11 b">4410281 Brake pads</text>
+<text x="1130" y="452" class="t11">4410297 Brake disc</text>
+<text x="1298" y="452" class="t11 tn b end">14</text>
+<text x="1310" y="452" class="t11 m">A · H</text>
+<line x1="980" y1="461.5" x2="1404" y2="461.5" stroke="#D9D5C7"/>
+<text x="980" y="476" class="t11 b">1182734 Oil filter</text>
+<text x="1130" y="476" class="t11">1182790 Oil drain plug</text>
+<text x="1298" y="476" class="t11 tn b end">11</text>
+<text x="1310" y="476" class="t11 m">E · E</text>
+<line x1="980" y1="485.5" x2="1404" y2="485.5" stroke="#D9D5C7"/>
+<text x="980" y="500" class="t11 b">7181839 Alternator</text>
+<text x="1130" y="500" class="t11">6900616 Timing belt kit</text>
+<text x="1298" y="500" class="t11 tn b end">7</text>
+<text x="1310" y="500" class="t11 m">E · E</text>
+<line x1="980" y1="509.5" x2="1404" y2="509.5" stroke="#D9D5C7"/>
+<text x="980" y="524" class="t11 b">5315766 Air filter</text>
+<text x="1130" y="524" class="t11">5315801 Pollen filter</text>
+<text x="1298" y="524" class="t11 tn b end">6</text>
+<text x="1310" y="524" class="t11 m">A · C</text>
+<line x1="980" y1="533.5" x2="1404" y2="533.5" stroke="#D9D5C7"/>
+<text x="980" y="548" class="t11 b">2555849 Brake hose</text>
+<text x="1130" y="548" class="t11">2555862 Brake fluid</text>
+<text x="1298" y="548" class="t11 tn b end">5</text>
+<text x="1310" y="548" class="t11 m">A · F</text>
+<line x1="980" y1="557.5" x2="1404" y2="557.5" stroke="#D9D5C7"/>
+<use href="#r3" xlink:href="#r3" x="980" y="572" width="14" height="14" style="color:#161616"/>
+<text x="1000" y="583" class="t11 mut">Different aisles: rule 3 can move the part with fewer picks</text>
+<text x="24" y="624" class="b t14">Best locations</text>
+<text x="472" y="624" class="t12 mut end">flow control 3</text>
+<rect x="24" y="632" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="24.5" y="632.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="24" y1="654.5" x2="472" y2="654.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="32" y="636" width="14" height="14"/>
+<text x="52" y="647" class="b t11">Spring re-slot 2026</text>
+<text x="464" y="647" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="36" y="678" class="b t11">Mark</text>
+<rect x="72" y="665" width="70" height="20" rx="3" fill="#FFFFFF" stroke="#BDB8A6"/>
+<text x="80" y="679" class="t11">Level</text>
+<use href="#i-chev" xlink:href="#i-chev" x="126" y="669" width="12" height="12" style="color:#161616"/>
+<rect x="148" y="665" width="44" height="20" rx="3" fill="#FFFFFF" stroke="#BDB8A6"/>
+<text x="156" y="679" class="t11">1</text>
+<use href="#i-chev" xlink:href="#i-chev" x="176" y="669" width="12" height="12" style="color:#161616"/>
+<rect x="198" y="665" width="92" height="20" rx="3" fill="#FFFFFF" stroke="#BDB8A6"/>
+<text x="206" y="679" class="t11">in aisle B</text>
+<use href="#i-chev" xlink:href="#i-chev" x="274" y="669" width="12" height="12" style="color:#161616"/>
+<rect x="302" y="665" width="76" height="20" rx="4" fill="#161616" stroke="#161616"/>
+<text x="316" y="678.96" class="b t11 wht">Add mark</text>
+<rect x="36" y="697" width="12" height="11" fill="#D3ECC6" stroke="url(#hatch-g)" stroke-width="3"/>
+<text x="56" y="707" class="t11">Whole aisle A</text>
+<text x="224" y="707" class="t11 mut tn">222 locations</text>
+<text x="324" y="707" class="t11 b" text-decoration="underline">Remove</text>
+<rect x="36" y="719" width="12" height="11" fill="#D3ECC6" stroke="url(#hatch-g)" stroke-width="3"/>
+<text x="56" y="729" class="t11">Level 1 in aisle B</text>
+<text x="224" y="729" class="t11 mut tn">57 locations</text>
+<text x="324" y="729" class="t11 b" text-decoration="underline">Remove</text>
+<rect x="36" y="741" width="12" height="11" fill="#D3ECC6" stroke="url(#hatch-g)" stroke-width="3"/>
+<text x="56" y="751" class="t11">Level 1 in aisle C</text>
+<text x="224" y="751" class="t11 mut tn">57 locations</text>
+<text x="324" y="751" class="t11 b" text-decoration="underline">Remove</text>
+<text x="42" y="776" class="t11 mid b">A</text>
+<rect x="54" y="768" width="300" height="8" fill="#D3ECC6" stroke="#161616" stroke-width="0.6"/>
+
+<rect x="54" y="778" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<rect x="54" y="783" width="300" height="3" fill="url(#hatch-g)"/>
+<text x="42" y="796" class="t11 mid b">C</text>
+<rect x="54" y="788" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<rect x="54" y="793" width="300" height="3" fill="url(#hatch-g)"/>
+
+<rect x="54" y="798" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<text x="42" y="816" class="t11 mid b">E</text>
+<rect x="54" y="808" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+
+<rect x="54" y="818" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<text x="42" y="836" class="t11 mid b">G</text>
+<rect x="54" y="828" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+
+<rect x="54" y="838" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<text x="42" y="856" class="t11 mid b">I</text>
+<rect x="54" y="848" width="300" height="8" fill="#FFFFFF" stroke="#161616" stroke-width="0.6"/>
+<text x="366" y="782" class="b t11">336 best</text>
+<text x="366" y="798" class="t11 mut">38 empty</text>
+<text x="496" y="624" class="b t14">Before/after table</text>
+<text x="944" y="624" class="t12 mut end">flow control 5</text>
+<rect x="496" y="632" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<rect x="496.5" y="632.5" width="447" height="22" fill="#F6F4EC"/>
+<line x1="496" y1="654.5" x2="944" y2="654.5" stroke="#BDB8A6"/>
+<use href="#i-brand" xlink:href="#i-brand" x="504" y="636" width="14" height="14"/>
+<text x="524" y="647" class="b t11">Spring re-slot 2026</text>
+<text x="936" y="647" class="t11 mut end">Data as of 2026-09-30</text>
+<text x="508" y="676" class="b t11 ink2">Aisle</text>
+<text x="568" y="676" class="b t11 ink2 end">In</text>
+<text x="608" y="676" class="b t11 ink2 end">Out</text>
+<text x="738" y="676" class="b t11 ink2 end">Fast in best</text>
+<text x="888" y="676" class="b t11 ink2 end">Pick groups together</text>
+<line x1="508" y1="681.5" x2="932" y2="681.5" stroke="#161616"/>
+<text x="508" y="696" class="t11 b">A</text>
+<text x="568" y="696" class="t11 tn end">6</text>
+<text x="608" y="696" class="t11 tn end">2</text>
+<text x="738" y="696" class="t11 tn end">92 → 98</text>
+<text x="888" y="696" class="t11 tn end">21 → 22</text>
+<line x1="508" y1="705.5" x2="932" y2="705.5" stroke="#D9D5C7"/>
+<text x="508" y="720" class="t11 b">B</text>
+<text x="568" y="720" class="t11 tn end">0</text>
+<text x="608" y="720" class="t11 tn end">1</text>
+<text x="738" y="720" class="t11 tn end">6 → 5</text>
+<text x="888" y="720" class="t11 tn end">5 → 5</text>
+<line x1="508" y1="729.5" x2="932" y2="729.5" stroke="#D9D5C7"/>
+<text x="508" y="744" class="t11 b">C</text>
+<text x="568" y="744" class="t11 tn end">0</text>
+<text x="608" y="744" class="t11 tn end">2</text>
+<text x="738" y="744" class="t11 tn end">6 → 6</text>
+<text x="888" y="744" class="t11 tn end">4 → 4</text>
+<line x1="508" y1="753.5" x2="932" y2="753.5" stroke="#D9D5C7"/>
+<text x="508" y="768" class="t11 b">E</text>
+<text x="568" y="768" class="t11 tn end">1</text>
+<text x="608" y="768" class="t11 tn end">0</text>
+<text x="738" y="768" class="t11 tn end">0 → 0</text>
+<text x="888" y="768" class="t11 tn end">6 → 7</text>
+<line x1="508" y1="777.5" x2="932" y2="777.5" stroke="#D9D5C7"/>
+<text x="508" y="792" class="t11 b">G</text>
+<text x="568" y="792" class="t11 tn end">1</text>
+<text x="608" y="792" class="t11 tn end">1</text>
+<text x="738" y="792" class="t11 tn end">0 → 0</text>
+<text x="888" y="792" class="t11 tn end">3 → 3</text>
+<line x1="508" y1="801.5" x2="932" y2="801.5" stroke="#D9D5C7"/>
+<text x="508" y="816" class="t11 b">All</text>
+<text x="568" y="816" class="t11 tn b end">10</text>
+<text x="608" y="816" class="t11 tn b end">10</text>
+<text x="738" y="816" class="t11 tn b end">104 → 109</text>
+<text x="888" y="816" class="t11 tn b end">46 → 47</text>
+<line x1="508" y1="825.5" x2="932" y2="825.5" stroke="#D9D5C7"/>
+<text x="508" y="860" class="t11 mut">Both columns use the current best-location marks.</text>
+<text x="968" y="624" class="b t14">Move list print view</text>
+<text x="1416" y="624" class="t12 mut end">finish · black and white</text>
+<rect x="968" y="632" width="448" height="238" fill="#FFFFFF" stroke="#161616"/>
+<text x="980" y="654" class="b t13">Move list · Spring re-slot 2026</text>
+<text x="1404" y="654" class="t11 end">2 rounds · 10 moves</text>
+<text x="980" y="669" class="t11">Data as of 2026-09-30 · uploaded 2026-10-02 · generated 2026-11-11 14:40</text>
+<line x1="980" y1="676.5" x2="1404" y2="676.5" stroke="#000" stroke-width="1.2"/>
+<path d="M987 683 L993 694 L981 694 Z" fill="none" stroke="#000" stroke-width="1.4"/>
+<text x="1000" y="694" class="b t12">Round 1 · one walk · 8 moves</text>
+<text x="980" y="712" class="b t11">No.</text>
+<text x="1004" y="712" class="b t11">Part</text>
+<text x="1064" y="712" class="b t11">From</text>
+<text x="1140" y="712" class="b t11">To</text>
+<text x="1216" y="712" class="b t11">Rule</text>
+<text x="1256" y="712" class="b t11">Description</text>
+<text x="1388" y="712" class="b t11 end">Done</text>
+<line x1="980" y1="716.5" x2="1404" y2="716.5" stroke="#000"/>
+<text x="982" y="730" class="b t11">1</text>
+<text x="1004" y="730" class="t11 m">3632446</text>
+<text x="1064" y="730" class="t11 m">A-01-04-01</text>
+<text x="1140" y="730" class="t11 m">H-11-04-03</text>
+<use href="#r2" xlink:href="#r2" x="1216" y="720" width="12" height="12" style="color:#000000"/>
+<text x="1231" y="730" class="t11 b">2</text>
+<text x="1256" y="730" class="t11">Catalytic converter…</text>
+<rect x="1391" y="720" width="11" height="11" fill="#FFFFFF" stroke="#000" stroke-width="1.1"/>
+<line x1="980" y1="734.5" x2="1404" y2="734.5" stroke="#000" stroke-width="0.5"/>
+<text x="982" y="748" class="b t11">2</text>
+<text x="1004" y="748" class="t11 m">5515020</text>
+<text x="1064" y="748" class="t11 m">A-05-03-02</text>
+<text x="1140" y="748" class="t11 m">F-08-02-01</text>
+<use href="#r2" xlink:href="#r2" x="1216" y="738" width="12" height="12" style="color:#000000"/>
+<text x="1231" y="748" class="t11 b">2</text>
+<text x="1256" y="748" class="t11">Tow bar - Volvo XC60</text>
+<rect x="1391" y="738" width="11" height="11" fill="#FFFFFF" stroke="#000" stroke-width="1.1"/>
+<line x1="980" y1="752.5" x2="1404" y2="752.5" stroke="#000" stroke-width="0.5"/>
+<text x="982" y="766" class="b t11">3</text>
+<text x="1004" y="766" class="t11 m">9723950</text>
+<text x="1064" y="766" class="t11 m">B-12-03-01</text>
+<text x="1140" y="766" class="t11 m">A-06-02-03</text>
+<use href="#r1" xlink:href="#r1" x="1216" y="756" width="12" height="12" style="color:#000000"/>
+<text x="1231" y="766" class="t11 b">1</text>
+<text x="1256" y="766" class="t11">Headlight bulb H7 -…</text>
+<rect x="1391" y="756" width="11" height="11" fill="#FFFFFF" stroke="#000" stroke-width="1.1"/>
+<line x1="980" y1="770.5" x2="1404" y2="770.5" stroke="#000" stroke-width="0.5"/>
+<text x="982" y="784" class="b t11">4</text>
+<text x="1004" y="784" class="t11 m">5315766</text>
+<text x="1064" y="784" class="t11 m">C-07-02-03</text>
+<text x="1140" y="784" class="t11 m">A-08-01-02</text>
+<use href="#r1" xlink:href="#r1" x="1216" y="774" width="12" height="12" style="color:#000000"/>
+<text x="1231" y="784" class="t11 b">1</text>
+<text x="1256" y="784" class="t11">Air filter - Audi A4</text>
+<rect x="1391" y="774" width="11" height="11" fill="#FFFFFF" stroke="#000" stroke-width="1.1"/>
+<line x1="980" y1="788.5" x2="1404" y2="788.5" stroke="#000" stroke-width="0.5"/>
+<text x="982" y="802" class="b t11">5</text>
+<text x="1004" y="802" class="t11 m">7181839</text>
+<text x="1064" y="802" class="t11 m">D-03-01-02</text>
+<text x="1140" y="802" class="t11 m">E-15-01-03</text>
+<use href="#r3" xlink:href="#r3" x="1216" y="792" width="12" height="12" style="color:#000000"/>
+<text x="1231" y="802" class="t11 b">3</text>
+<text x="1256" y="802" class="t11">Alternator - Hyunda…</text>
+<rect x="1391" y="792" width="11" height="11" fill="#FFFFFF" stroke="#000" stroke-width="1.1"/>
+<line x1="980" y1="806.5" x2="1404" y2="806.5" stroke="#000" stroke-width="0.5"/>
+<text x="982" y="819" class="t11">… moves 6–8</text>
+<path d="M987 825 L993 836 L981 836 Z" fill="none" stroke="#000" stroke-width="1.4"/>
+<text x="1000" y="836" class="b t12">Round 2 · start after round 1 is done · 2 moves</text>
+</svg>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1440 900" color="#2C2E2A" role="img" aria-label="Smart Warehouse Planner — landing page (concept 08 Guide Map)">
+<title>Smart Warehouse Planner — landing page (concept 08 Guide Map)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&amp;display=swap');
+text{font-family:'Bricolage Grotesque','Schibsted Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:600;fill:#2C2E2A;font-variant-numeric:tabular-nums}
+.d{letter-spacing:-0.06em}
+.s{fill:#4A4D45}
+.ic{fill:none;stroke:currentColor;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<defs>
+<clipPath id="frame"><rect width="1440" height="900"/></clipPath>
+<symbol id="i-check" viewBox="0 0 24 24"><path class="ic" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path class="ic" d="M6 9.5l6 6 6-6"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path class="ic" d="M9.5 6l6 6-6 6"/></symbol>
+<symbol id="i-chev-l" viewBox="0 0 24 24"><path class="ic" d="M14.5 6l-6 6 6 6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path class="ic" d="M10.5 4a6.5 6.5 0 1 1 0 13a6.5 6.5 0 1 1 0-13zM15.5 15.5L20 20"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path class="ic" d="M12 8.8a3.2 3.2 0 1 1 0 6.4a3.2 3.2 0 1 1 0-6.4zM12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.9 1.9M16.6 16.6l1.9 1.9M5.5 18.5l1.9-1.9M16.6 7.4l1.9-1.9"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><path class="ic" d="M4.5 6.5h15v13h-15zM4.5 10.5h15M8.5 4v4M15.5 4v4"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path class="ic" d="M4 12h15M13.5 6.5L19 12l-5.5 5.5"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path class="ic" d="M8.5 5L4 9.5 8.5 14M4.5 9.5H14a5.5 5.5 0 0 1 0 11h-3"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path class="ic" d="M7.5 5v14l11-7z"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path class="ic" d="M7 9V4h10v5M7 17H4.5v-8h15v8H17M7 14h10v6H7z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><path class="ic" d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path class="ic" d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11zM12 7.6a2.4 2.4 0 1 1 0 4.8a2.4 2.4 0 1 1 0-4.8z"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><path class="ic" d="M12 3.5a8.5 8.5 0 1 1 0 17a8.5 8.5 0 1 1 0-17zM12 11v5.5M12 7.8v.4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path class="ic" d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path class="ic" d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path class="ic" d="M12 15.5V4.5M7.5 9L12 4.5 16.5 9M4.5 15.5v4h15v-4"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path class="ic" d="M6 3.5h8l4 4v13H6zM14 3.5v4h4"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path class="ic" d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5l-5.5 2.5-6-2.5-5.5 2.5zM9 4v13.5M15 6.5V20"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path class="ic" d="M8.5 6.5h11M8.5 12h11M8.5 17.5h11M4.5 6.5h.5M4.5 12h.5M4.5 17.5h.5"/></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><path class="ic" d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11M11 10.5V5a1.5 1.5 0 0 1 3 0v5.5M14 10.5V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.5a6 6 0 0 1-5-2.7L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path class="ic" d="M4.5 8.5h14M14.5 4.5l4 4-4 4M19.5 15.5h-14M9.5 11.5l-4 4 4 4"/></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><path class="ic" d="M12 4l9 15.5H3zM12 10v4.5M12 17v.3"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path class="ic" d="M3.5 6.5h6l2 2.5h9v10.5h-17z"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path class="ic" d="M12 4l8.5 4.5L12 13 3.5 8.5zM3.5 12.5L12 17l8.5-4.5M3.5 16.5L12 21l8.5-4.5"/></symbol>
+<symbol id="i-group" viewBox="0 0 24 24"><path class="ic" d="M8.5 6.5a3 3 0 1 1 0 6a3 3 0 1 1 0-6zM15.5 11.5a3 3 0 1 1 0 6a3 3 0 1 1 0-6zM11 10.6l2.1 2.4"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path class="ic" d="M12 4l2.4 5 5.4.6-4 3.7 1.1 5.3L12 16l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><path class="ic" d="M4 5h16v14H4zM4 10h16M4 14.5h16M12 5v14"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path class="ic" d="M12 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8zM4.5 20.5c1-3.8 4-5.5 7.5-5.5s6.5 1.7 7.5 5.5"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path class="ic" d="M4 4h7.5l8.5 8.5-7.5 7.5L4 11.5zM8.5 7.5v.4"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path class="ic" d="M4 7.5L12 4l8 3.5v9L12 20l-8-3.5zM4 7.5l8 3.5 8-3.5M12 11v9"/></symbol>
+<symbol id="i-sort" viewBox="0 0 24 24"><path class="ic" d="M8 5v14M4.5 15.5L8 19l3.5-3.5M16 19V5M12.5 8.5L16 5l3.5 3.5"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><path class="ic" d="M6 19a2 2 0 1 1 0-4a2 2 0 1 1 0 4zM18 9a2 2 0 1 1 0-4a2 2 0 1 1 0 4zM6 15V11a4 4 0 0 1 4-4h6"/></symbol>
+
+<symbol id="gF" viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" fill="#2C2E2A"/></symbol>
+<symbol id="gM" viewBox="0 0 12 12"><rect x="2.6" y="2.6" width="6.8" height="6.8" fill="none" stroke="#2C2E2A" stroke-width="1.3"/><rect x="2" y="6" width="8" height="4" fill="#2C2E2A"/></symbol>
+<symbol id="gS" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.7" fill="#2C2E2A"/></symbol>
+<symbol id="gD" viewBox="0 0 12 12"><circle cx="6" cy="6" r="3.3" fill="none" stroke="#2C2E2A" stroke-width="1.4"/></symbol>
+<symbol id="gE" viewBox="0 0 12 12"><rect x="0.5" y="0.5" width="11" height="11" rx="3" fill="#F5F1E4" stroke="#2C2E2A" stroke-opacity="0.55" stroke-width="1"/></symbol>
+
+</defs>
+<g clip-path="url(#frame)">
+
+<rect x="0.0" y="0.0" width="1440.0" height="900.0" rx="0" fill="#F5F1E4"/>
+<path d="M-80.6,94.8 C-62.5,75.8 -13.9,94.9 19.6,96.3 C53.0,97.7 86.6,105.5 119.9,103.1 C153.2,100.7 186.0,84.7 219.3,81.7 C252.6,78.8 286.1,83.8 319.6,85.6 C353.0,87.4 387.7,93.4 420.0,92.5 C452.4,91.7 482.5,81.7 513.6,80.4 C544.8,79.1 575.8,83.5 606.9,84.8 C638.0,86.0 669.1,87.2 700.2,87.8 C731.3,88.4 762.5,86.8 793.6,88.5 C824.6,90.2 855.7,98.3 886.7,98.2 C917.8,98.1 949.2,89.8 979.6,88.0 C1010.1,86.1 1039.6,86.3 1069.7,87.0 C1099.7,87.7 1129.8,92.8 1159.8,92.3 C1189.8,91.8 1219.7,84.2 1249.7,84.3 C1279.7,84.3 1309.9,92.9 1339.9,92.4 C1369.9,91.9 1396.9,81.2 1429.7,81.1 C1462.5,81.0 1520.7,74.3 1536.6,92.0 C1552.6,109.7 1525.9,155.6 1525.4,187.4 C1524.9,219.2 1532.6,251.0 1533.5,282.9 C1534.4,314.7 1532.1,346.5 1530.9,378.3 C1529.8,410.1 1525.5,441.9 1526.8,473.7 C1528.1,505.5 1538.5,537.3 1538.8,569.1 C1539.0,601.0 1531.1,631.6 1528.0,664.6 C1525.0,697.5 1539.2,747.3 1520.5,767.0 C1501.9,786.7 1451.1,779.2 1416.1,782.8 C1381.2,786.5 1346.1,787.4 1311.0,788.8 C1275.9,790.2 1240.8,789.0 1205.6,791.4 C1170.4,793.9 1134.1,801.6 1099.9,803.6 C1065.6,805.7 1033.2,804.7 999.8,803.8 C966.5,802.8 933.2,798.4 899.9,797.9 C866.6,797.5 833.2,800.9 799.8,800.9 C766.5,800.9 733.1,799.0 699.9,798.1 C666.6,797.2 633.0,795.1 600.2,795.6 C567.4,796.1 535.5,800.1 503.1,801.2 C470.8,802.3 438.4,802.8 406.0,802.2 C373.6,801.7 341.1,797.3 308.7,798.1 C276.3,798.9 244.0,804.7 211.7,807.0 C179.3,809.3 147.0,812.7 114.6,811.9 C82.2,811.2 51.3,804.7 17.2,802.8 C-16.9,800.8 -70.6,816.8 -90.0,800.0 C-109.4,783.2 -100.1,734.5 -99.2,701.7 C-98.4,669.0 -86.7,636.2 -84.9,603.4 C-83.0,570.7 -85.4,537.9 -87.9,505.1 C-90.4,472.4 -100.4,439.6 -99.9,406.9 C-99.5,374.1 -87.2,341.3 -85.3,308.6 C-83.5,275.8 -89.8,245.9 -89.0,210.3 C-88.3,174.7 -98.7,113.8 -80.6,94.8Z" fill="#8ED462"/>
+<path d="M890.0,139.8 C911.7,129.9 934.4,146.8 956.7,147.4 C978.9,148.0 1001.1,143.9 1023.3,143.5 C1045.6,143.1 1067.8,145.2 1090.0,144.9 C1112.2,144.7 1134.4,142.3 1156.7,141.8 C1178.9,141.3 1200.1,141.5 1223.3,141.9 C1246.5,142.3 1274.5,133.0 1295.9,144.1 C1317.2,155.2 1330.6,187.6 1351.4,208.6 C1372.3,229.5 1409.8,249.8 1421.0,270.0 C1432.2,290.2 1419.8,310.0 1418.6,330.0 C1417.4,350.0 1414.0,370.0 1414.0,390.0 C1413.9,410.0 1418.4,430.0 1418.3,450.0 C1418.2,470.0 1413.0,490.0 1413.5,510.0 C1414.0,530.0 1421.5,549.4 1421.5,570.0 C1421.6,590.6 1424.5,612.6 1413.8,633.8 C1403.0,655.0 1377.6,676.6 1357.0,697.0 C1336.3,717.4 1312.3,745.7 1290.0,756.3 C1267.7,766.8 1245.6,760.1 1223.3,760.4 C1201.1,760.6 1178.9,758.0 1156.7,757.7 C1134.4,757.3 1112.2,758.7 1090.0,758.2 C1067.8,757.8 1045.6,755.4 1023.3,754.9 C1001.1,754.4 979.7,755.1 956.7,755.1 C933.7,755.0 907.6,764.3 885.3,754.7 C863.1,745.0 842.9,717.8 823.0,697.0 C803.2,676.2 775.9,651.2 766.2,630.0 C756.4,608.8 765.7,590.0 764.6,570.0 C763.5,550.0 759.7,530.0 759.5,510.0 C759.3,490.0 762.9,470.0 763.4,450.0 C763.9,430.0 762.3,410.0 762.6,390.0 C762.8,370.0 764.5,351.0 764.7,330.0 C765.0,309.0 753.7,284.6 764.0,264.0 C774.3,243.5 805.7,227.4 826.7,206.7 C847.7,186.0 868.3,149.7 890.0,139.8Z" fill="#F5F1E4"/>
+<path d="M27.8,24.7 C29.5,22.4 33.9,24.5 36.9,24.3 C40.0,24.2 42.6,23.4 46.1,23.9 C49.6,24.3 56.2,24.6 58.0,27.0 C59.8,29.4 57.6,34.2 57.1,38.2 C56.7,42.3 57.1,49.1 55.2,51.4 C53.4,53.6 49.1,51.8 46.1,51.9 C43.0,52.0 40.3,52.5 36.9,52.1 C33.6,51.7 27.7,51.8 26.0,49.5 C24.2,47.2 26.3,42.4 26.6,38.2 C26.9,34.1 26.0,27.0 27.8,24.7Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/><path d="M39.0,33.7 C40.3,32.7 44.9,33.2 45.9,34.5 C47.0,35.8 46.5,40.4 45.2,41.4 C44.0,42.4 39.3,42.0 38.2,40.8 C37.2,39.5 37.7,34.8 39.0,33.7Z" fill="#F5F1E4" stroke="#2C2E2A" stroke-width="1.2"/>
+<text x="66.0" y="45.0" font-size="19">Smart Warehouse Planner</text>
+<text x="600.0" y="45.0" font-size="15">How it works</text>
+<text x="739.6" y="45.0" font-size="15">The three rules</text>
+<text x="892.1" y="45.0" font-size="15">Demo data</text>
+<text x="1010.6" y="45.0" font-size="15">README</text>
+<rect x="1250.0" y="22.0" width="172.0" height="36" rx="18.0" fill="#F5E211" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="1404.0" cy="40.0" r="14.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><use xlink:href="#i-arrow" x="1395.2" y="31.2" width="17.5" height="17.5" color="#2C2E2A"/><text x="1264.0" y="45.0" font-size="14" fill="#2C2E2A">Open the demo</text>
+<text x="60.0" y="238.0" font-size="76" class="d">Re-slot the</text>
+<text x="60.0" y="308.0" font-size="76" class="d">warehouse from</text>
+<text x="60.0" y="378.0" font-size="76" class="d">its own exports.</text>
+<text x="62.0" y="440.0" font-size="18">Smart Warehouse Planner reads the Locations, Inventory</text>
+<text x="62.0" y="466.0" font-size="18">and Transactions files your warehouse already exports,</text>
+<text x="62.0" y="492.0" font-size="18">classifies every part by its picks and recommends moves</text>
+<text x="62.0" y="518.0" font-size="18">in rounds. Every move names its rule and its numbers.</text>
+<rect x="60.0" y="556.0" width="251.2" height="56" rx="28.0" fill="#F5E211" stroke="#2C2E2A" stroke-width="2"/><circle cx="283.2" cy="584.0" r="24.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><use xlink:href="#i-arrow" x="268.2" y="569.0" width="30.0" height="30.0" color="#2C2E2A"/><text x="84.0" y="590.8" font-size="19" fill="#2C2E2A">Open the demo</text>
+<rect x="325.2" y="556.0" width="272.1" height="56" rx="28.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="2"/><circle cx="569.4" cy="584.0" r="24.0" fill="#F5F1E4" stroke="#2C2E2A" stroke-width="1.25"/><use xlink:href="#i-plus" x="554.4" y="569.0" width="30.0" height="30.0" color="#2C2E2A"/><text x="349.2" y="590.8" font-size="19" fill="#2C2E2A">Start a New Plan</text>
+<text x="62.0" y="648.0" font-size="15">Synthetic demo data, ready to explore. Runs on a laptop,</text>
+<text x="62.0" y="670.0" font-size="15">no accounts, no network calls, no AI at runtime.</text>
+<text x="62.0" y="720.0" font-size="13">Never claims distance, shelf capacity, metres saved or live stock.</text>
+<text x="62.0" y="739.0" font-size="13">The data-as-of date is always on screen.</text>
+<path d="M826.0,180.7 C837.4,175.4 851.1,182.9 863.7,183.5 C876.2,184.1 888.8,184.3 901.3,184.2 C913.9,184.2 926.4,183.5 939.0,183.1 C951.6,182.7 964.1,181.7 976.7,181.9 C989.2,182.1 1001.6,183.9 1014.3,184.4 C1027.1,184.9 1041.4,179.5 1053.2,184.8 C1065.0,190.1 1079.6,204.0 1084.9,216.0 C1090.2,228.0 1090.4,245.4 1084.9,256.9 C1079.4,268.3 1063.8,279.7 1052.0,284.7 C1040.2,289.7 1026.9,286.2 1014.3,286.7 C1001.8,287.3 989.2,287.5 976.7,287.8 C964.1,288.2 951.6,289.2 939.0,288.9 C926.4,288.5 913.9,285.9 901.3,285.7 C888.8,285.4 876.7,287.2 863.7,287.5 C850.6,287.7 835.0,292.6 823.0,287.0 C811.0,281.4 796.1,266.0 791.5,254.0 C786.8,242.0 789.4,227.4 795.2,215.2 C801.0,203.0 814.6,186.0 826.0,180.7Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M1148.0,202.4 C1160.1,197.2 1174.9,202.5 1188.4,202.9 C1201.9,203.3 1215.3,204.9 1228.8,204.5 C1242.3,204.1 1255.7,200.7 1269.2,200.4 C1282.7,200.2 1295.8,202.3 1309.6,202.9 C1323.4,203.5 1339.7,198.6 1351.8,204.2 C1364.0,209.7 1377.3,223.7 1382.6,236.0 C1388.0,248.3 1389.3,266.1 1383.9,277.9 C1378.4,289.7 1362.4,302.0 1350.0,306.7 C1337.6,311.5 1323.1,306.1 1309.6,306.4 C1296.1,306.7 1282.7,308.0 1269.2,308.3 C1255.7,308.7 1242.3,308.9 1228.8,308.6 C1215.3,308.3 1202.1,307.3 1188.4,306.8 C1174.7,306.3 1159.0,311.1 1146.4,305.6 C1133.7,300.2 1117.6,286.0 1112.5,274.0 C1107.4,262.0 1109.9,245.7 1115.8,233.8 C1121.7,221.8 1135.9,207.5 1148.0,202.4Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M890.0,325.6 C902.1,321.0 916.9,329.4 930.4,329.6 C943.9,329.9 957.3,327.7 970.8,327.3 C984.3,326.8 997.7,326.9 1011.2,326.8 C1024.7,326.6 1038.1,326.0 1051.6,326.4 C1065.1,326.9 1080.1,324.0 1092.4,329.6 C1104.7,335.2 1119.9,347.8 1125.3,360.0 C1130.7,372.2 1130.3,390.8 1124.8,402.8 C1119.2,414.7 1104.2,426.8 1092.0,431.6 C1079.8,436.5 1065.1,431.6 1051.6,431.9 C1038.1,432.2 1024.7,433.0 1011.2,433.4 C997.7,433.8 984.3,434.6 970.8,434.2 C957.3,433.7 944.3,431.1 930.4,430.8 C916.5,430.5 899.9,437.5 887.6,432.4 C875.3,427.2 861.5,412.5 856.5,400.0 C851.5,387.5 852.1,370.0 857.6,357.6 C863.2,345.2 877.9,330.3 890.0,325.6Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M1130.0,449.5 C1141.6,444.5 1155.1,449.6 1167.7,449.9 C1180.2,450.2 1192.8,451.7 1205.3,451.3 C1217.9,450.8 1230.4,447.5 1243.0,447.1 C1255.6,446.8 1268.1,448.9 1280.7,449.2 C1293.2,449.5 1305.5,448.9 1318.3,449.1 C1331.1,449.4 1345.4,445.1 1357.4,450.6 C1369.4,456.1 1385.5,468.6 1390.5,482.0 C1395.4,495.4 1393.0,518.0 1387.3,531.3 C1381.5,544.5 1367.5,556.2 1356.0,561.6 C1344.5,567.0 1330.9,563.1 1318.3,563.7 C1305.8,564.2 1293.2,565.0 1280.7,564.9 C1268.1,564.7 1255.6,562.9 1243.0,562.5 C1230.4,562.2 1217.9,562.3 1205.3,562.6 C1192.8,562.8 1180.7,564.0 1167.7,564.1 C1154.6,564.1 1138.6,568.8 1126.9,563.1 C1115.1,557.5 1102.0,543.8 1097.2,530.0 C1092.4,516.2 1092.7,493.6 1098.2,480.2 C1103.6,466.7 1118.4,454.5 1130.0,449.5Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M830.0,525.4 C842.0,520.5 856.9,528.4 870.4,528.6 C883.9,528.7 897.3,526.8 910.8,526.2 C924.3,525.7 937.7,525.2 951.2,525.4 C964.7,525.5 977.9,526.6 991.6,527.1 C1005.3,527.6 1021.3,522.9 1033.7,528.3 C1046.0,533.8 1060.5,547.5 1065.8,560.0 C1071.1,572.5 1071.1,591.6 1065.5,603.5 C1059.9,615.4 1044.3,626.2 1032.0,631.2 C1019.7,636.2 1005.1,633.1 991.6,633.5 C978.1,633.9 964.7,633.6 951.2,633.7 C937.7,633.8 924.3,634.7 910.8,634.1 C897.3,633.6 884.4,630.8 870.4,630.6 C856.4,630.5 839.3,638.1 827.0,633.0 C814.6,627.9 801.1,612.5 796.3,600.0 C791.5,587.5 792.5,570.6 798.1,558.1 C803.7,545.7 818.0,530.4 830.0,525.4Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M1122.0,626.7 C1133.5,621.5 1147.1,627.3 1159.7,627.3 C1172.2,627.4 1184.8,627.7 1197.3,627.3 C1209.9,626.8 1222.4,624.6 1235.0,624.7 C1247.6,624.8 1260.1,627.0 1272.7,627.6 C1285.2,628.2 1297.5,628.2 1310.3,628.3 C1323.2,628.3 1337.9,622.8 1349.9,628.1 C1361.8,633.4 1377.2,647.1 1382.2,660.0 C1387.2,672.9 1385.4,693.2 1379.7,705.7 C1374.0,718.3 1359.6,730.0 1348.0,735.3 C1336.4,740.7 1322.9,737.6 1310.3,737.9 C1297.8,738.2 1285.2,737.5 1272.7,737.1 C1260.1,736.7 1247.6,735.9 1235.0,735.6 C1222.4,735.3 1209.9,735.0 1197.3,735.5 C1184.8,736.0 1172.6,738.3 1159.7,738.4 C1146.8,738.5 1131.5,741.9 1119.9,736.1 C1108.3,730.4 1094.9,716.9 1090.0,704.0 C1085.2,691.1 1085.4,671.6 1090.7,658.7 C1096.0,645.8 1110.5,631.9 1122.0,626.7Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="1.5"/>
+<path d="M1082,238 Q1100.0,258.0 1118,250" fill="none" stroke="#2C2E2A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 8"/>
+<path d="M1200,304 Q1145.0,331.0 1090,330" fill="none" stroke="#2C2E2A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 8"/>
+<path d="M1060,430 Q1105.0,455.0 1150,452" fill="none" stroke="#2C2E2A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 8"/>
+<path d="M1100,520 Q1081.0,554.0 1062,560" fill="none" stroke="#2C2E2A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 8"/>
+<path d="M1000,630 Q1046.0,662.0 1092,666" fill="none" stroke="#2C2E2A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 8"/>
+<circle cx="822.0" cy="212.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="822.0" y="216.3" font-size="12" text-anchor="middle" fill="#2C2E2A">1</text>
+<text x="842.0" y="218.0" font-size="16">Import three files</text>
+<circle cx="1144.0" cy="232.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="1144.0" y="236.3" font-size="12" text-anchor="middle" fill="#2C2E2A">2</text>
+<text x="1164.0" y="238.0" font-size="16">Classify every part</text>
+<circle cx="886.0" cy="356.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="886.0" y="360.3" font-size="12" text-anchor="middle" fill="#2C2E2A">3</text>
+<text x="906.0" y="362.0" font-size="16">Mark best locations</text>
+<circle cx="1126.0" cy="478.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="1126.0" y="482.3" font-size="12" text-anchor="middle" fill="#2C2E2A">4</text>
+<text x="1146.0" y="484.0" font-size="16">Recommendations in rounds</text>
+<circle cx="826.0" cy="556.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="826.0" y="560.3" font-size="12" text-anchor="middle" fill="#2C2E2A">5</text>
+<text x="846.0" y="562.0" font-size="16">Before/after per aisle</text>
+<circle cx="1118.0" cy="656.0" r="12" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/><text x="1118.0" y="660.3" font-size="12" text-anchor="middle" fill="#2C2E2A">6</text>
+<text x="1138.0" y="662.0" font-size="16">Printed move list</text>
+<use xlink:href="#i-file" x="816.0" y="238.0" width="16" height="16"/>
+<text x="834.0" y="251.0" font-size="12">Locations</text>
+<use xlink:href="#i-file" x="908.0" y="238.0" width="16" height="16"/>
+<text x="926.0" y="251.0" font-size="12">Inventory</text>
+<use xlink:href="#i-file" x="995.9" y="238.0" width="16" height="16"/>
+<text x="1013.9" y="251.0" font-size="12">Transactions</text>
+<text x="816.0" y="272.0" font-size="11">errors name the file, row and column</text>
+<use xlink:href="#gF" x="1138" y="258" width="16" height="16"/>
+<text x="1158.0" y="271.0" font-size="12">24+</text>
+<use xlink:href="#gM" x="1196.704" y="258" width="16" height="16"/>
+<text x="1216.7" y="271.0" font-size="12">6–23</text>
+<use xlink:href="#gS" x="1263.0639999999999" y="258" width="16" height="16"/>
+<text x="1283.1" y="271.0" font-size="12">1–5</text>
+<use xlink:href="#gD" x="1318.6" y="258" width="16" height="16"/>
+<text x="1338.6" y="271.0" font-size="12">0</text>
+<text x="1138.0" y="293.0" font-size="11">picks in the last 12 months</text>
+<path d="M890.0,379.2 C894.6,377.7 901.1,379.9 906.7,379.8 C912.2,379.8 917.8,379.1 923.3,378.9 C928.9,378.6 934.4,378.7 940.0,378.4 C945.6,378.2 951.1,377.6 956.7,377.5 C962.2,377.5 967.6,377.9 973.3,378.1 C979.1,378.4 986.3,376.9 991.1,378.9 C995.9,380.9 1000.4,385.9 1002.1,390.0 C1003.8,394.1 1003.3,399.4 1001.3,403.3 C999.3,407.2 994.7,411.7 990.0,413.3 C985.3,414.9 978.9,413.0 973.3,412.8 C967.8,412.6 962.2,412.0 956.7,412.1 C951.1,412.2 945.6,413.2 940.0,413.5 C934.4,413.8 928.9,414.0 923.3,414.1 C917.8,414.2 912.5,414.3 906.7,414.2 C900.9,414.1 893.2,415.6 888.5,413.5 C883.8,411.5 880.1,406.1 878.5,402.0 C876.9,397.9 876.9,392.7 878.9,388.9 C880.8,385.1 885.4,380.7 890.0,379.2Z" fill="#F5E211" stroke="#2C2E2A" stroke-width="1.5"/>
+<use xlink:href="#gF" x="890" y="390" width="12" height="12"/>
+<use xlink:href="#gF" x="905" y="390" width="12" height="12"/>
+<use xlink:href="#gE" x="920" y="390" width="12" height="12"/>
+<use xlink:href="#gM" x="935" y="390" width="12" height="12"/>
+<use xlink:href="#gF" x="950" y="390" width="12" height="12"/>
+<use xlink:href="#gE" x="965" y="390" width="12" height="12"/>
+<use xlink:href="#gF" x="980" y="390" width="12" height="12"/>
+<text x="1012.0" y="394.0" font-size="12">aisle, level or</text>
+<text x="1012.0" y="410.0" font-size="12">single location</text>
+<rect x="1120.0" y="500.0" width="77.0" height="24" rx="12.0" fill="#2BA0FF" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="1185.0" cy="512.0" r="8.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><text x="1185.0" y="516.0" font-size="11" text-anchor="middle" fill="#2C2E2A">1</text><text x="1129.0" y="516.3" font-size="12" fill="#2C2E2A">Rule 1</text>
+<rect x="1203.0" y="500.0" width="80.1" height="24" rx="12.0" fill="#FF705D" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="1271.1" cy="512.0" r="8.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><text x="1271.1" y="516.0" font-size="11" text-anchor="middle" fill="#2C2E2A">2</text><text x="1212.0" y="516.3" font-size="12" fill="#2C2E2A">Rule 2</text>
+<rect x="1289.1" y="500.0" width="80.1" height="24" rx="12.0" fill="#EBC1FF" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="1357.2" cy="512.0" r="8.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><text x="1357.2" y="516.0" font-size="11" text-anchor="middle" fill="#2C2E2A">3</text><text x="1298.1" y="516.3" font-size="12" fill="#2C2E2A">Rule 3</text>
+<text x="1120.0" y="546.0" font-size="11">apply · another location · keep in place</text>
+<text x="820.0" y="594.0" font-size="12">Aisle A, fast-moving in best</text>
+<text x="820.0" y="616.0" font-size="18" class="d">71</text>
+<use xlink:href="#i-arrow" x="846.0" y="602.0" width="16" height="16"/>
+<text x="868.0" y="616.0" font-size="18" class="d">72</text>
+<text x="904.0" y="615.0" font-size="11">import vs. planning copy</text>
+<rect x="1112.0" y="680.0" width="14.0" height="14.0" rx="3" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/>
+<text x="1134.0" y="692.0" font-size="12">Round 1</text>
+<text x="1192.0" y="692.0" font-size="12">G-14-04-02</text>
+<use xlink:href="#i-arrow" x="1270.8" y="680.0" width="14" height="14"/>
+<text x="1287.8" y="692.0" font-size="12">A-02-01-01</text>
+<rect x="1112.0" y="704.0" width="14.0" height="14.0" rx="3" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.5"/>
+<text x="1134.0" y="716.0" font-size="12">Round 1</text>
+<text x="1192.0" y="716.0" font-size="12">A-01-04-01</text>
+<use xlink:href="#i-arrow" x="1265.5" y="704.0" width="14" height="14"/>
+<text x="1282.5" y="716.0" font-size="12">H-11-04-03</text>
+<text x="60.0" y="862.0" font-size="40" class="d">The tool suggests; the planner decides.</text>
+<rect x="820.0" y="822.0" width="86.0" height="28" rx="14.0" fill="#2BA0FF" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="892.0" cy="836.0" r="10.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><text x="892.0" y="840.0" font-size="11" text-anchor="middle" fill="#2C2E2A">1</text><text x="830.0" y="840.7" font-size="13" fill="#2C2E2A">Rule 1</text>
+<text x="918.0" y="841.0" font-size="14">fast-moving part into a best location</text>
+<rect x="820.0" y="860.0" width="89.5" height="28" rx="14.0" fill="#FF705D" stroke="#2C2E2A" stroke-width="1.5"/><circle cx="895.5" cy="874.0" r="10.0" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="1.25"/><text x="895.5" y="878.0" font-size="11" text-anchor="middle" fill="#2C2E2A">2</text><text x="830.0" y="878.7" font-size="13" fill="#2C2E2A">Rule 2</text>
+<text x="921.5" y="879.0" font-size="14">slow-moving part or dead stock out of a best location</text>
+</g>
+</svg>

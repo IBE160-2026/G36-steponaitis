@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1440 900" width="1440" height="900" role="img">
+<title>Smart Warehouse Planner - Recommendations workspace</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=Courier+Prime:wght@400;700&amp;display=swap');
+text { font-family: 'Public Sans', 'Work Sans', 'Helvetica Neue', Arial, sans-serif; }
+.d { font-family: 'Courier Prime', 'Courier New', Courier, monospace; font-variant-numeric: tabular-nums; }
+.b { font-weight: 600; }
+.bb { font-weight: 700; }
+.m { font-weight: 500; }
+</style>
+
+<defs>
+  <filter id="lift" x="-20%" y="-20%" width="140%" height="160%">
+    <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0E1418" flood-opacity="0.38"/>
+  </filter>
+  <filter id="soft" x="-10%" y="-10%" width="120%" height="140%">
+    <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0E1418" flood-opacity="0.28"/>
+  </filter>
+  <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="6" height="6" fill="#D9E5D4"/>
+    <line x1="0" y1="0" x2="0" y2="6" stroke="#9FB599" stroke-width="2"/>
+  </pattern>
+  <pattern id="lockhatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="8" height="8" fill="#4A5861"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#56646C" stroke-width="3"/>
+  </pattern>
+  <!-- riders: 10 x 18 box, clip rises above the strip -->
+  <symbol id="r-plain" viewBox="0 0 10 18"><rect x="1.5" y="0.5" width="7" height="17" fill="#9AA6AE" stroke="#172026" stroke-width="1"/><line x1="1.5" y1="4" x2="8.5" y2="4" stroke="#172026" stroke-width="0.8"/></symbol>
+  <symbol id="r-best" viewBox="0 0 10 18"><path d="M0.5 0.5 H9.5 V17.5 L5 12.5 L0.5 17.5 Z" fill="#2C5AA0" stroke="#172026" stroke-width="1"/></symbol>
+  <symbol id="r-pend" viewBox="0 0 12 18"><path d="M0.5 0.5 H6.5 L11.5 9 L6.5 17.5 H0.5 Z" fill="#B8322A" stroke="#172026" stroke-width="1"/></symbol>
+  <symbol id="r-keep" viewBox="0 0 10 18"><rect x="0.5" y="0.5" width="9" height="17" fill="#15191C" stroke="#172026" stroke-width="1"/><circle cx="5" cy="9" r="2.3" fill="#E5EEE1"/></symbol>
+  <symbol id="r-old" viewBox="0 0 10 18"><path d="M0.5 0.5 H5 L9.5 5 V17.5 H0.5 Z" fill="#E3B21C" stroke="#172026" stroke-width="1"/><line x1="2" y1="15.5" x2="8" y2="7" stroke="#172026" stroke-width="1.1"/></symbol>
+  <!-- icons, 16x16, stroke 1.6 -->
+  <symbol id="i-drawer" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="5.5" y="5.5" width="5" height="3" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="6" y1="11" x2="10" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 7 V5 a2.5 2.5 0 0 1 5 0 V7" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10.4" y1="10.4" x2="14" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4 6 L8 10 L12 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevr" viewBox="0 0 16 16"><path d="M6 4 L10 8 L6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevl" viewBox="0 0 16 16"><path d="M10 4 L6 8 L10 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M2 8 H13 M9 4 L13 8 L9 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 16 16"><path d="M5 3.5 L2.5 6 L5 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.8 6 H10 a3.5 3.5 0 0 1 0 7 H6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3 L13 8 L5 13 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-print" viewBox="0 0 16 16"><path d="M4.5 6 V2 H11.5 V6" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="1.5" y="6" width="13" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4.5" y="10" width="7" height="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3 V13 M3 8 H13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.8 V3.6 M8 12.4 V14.2 M1.8 8 H3.6 M12.4 8 H14.2 M3.6 3.6 L4.9 4.9 M11.1 11.1 L12.4 12.4 M3.6 12.4 L4.9 11.1 M11.1 4.9 L12.4 3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 11 V2.5 M4.5 6 L8 2.5 L11.5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 10.5 V13.5 H13.5 V10.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 16 16"><path d="M8 2 L14.5 13.5 H1.5 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="6.5" x2="8" y2="9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r="0.9" fill="currentColor"/></symbol>
+  <symbol id="i-pair" viewBox="0 0 16 16"><rect x="1.5" y="4" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="8.5" y="4" width="6" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M4 4 L12 12 M12 4 L4 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</defs>
+<rect width="1440" height="900" fill="#4E5D68"/>
+
+<rect x="0" y="0" width="1440" height="52" fill="#2F3B44"/>
+<use href="#i-drawer" xlink:href="#i-drawer" x="24" y="16" width="20" height="20" color="#F1F4F2"/>
+<text x="52" y="31" font-size="15" fill="#F1F4F2" class="b">Smart Warehouse Planner</text>
+<line x1="262" y1="14" x2="262" y2="38" stroke="#4C5963" stroke-width="1"/>
+<text x="280" y="31" font-size="13" fill="#D3DCE1">Saved plans</text>
+<use href="#i-chevr" xlink:href="#i-chevr" x="354" y="23" width="12" height="12" color="#AEBAC1"/>
+<rect x="374" y="9" width="360" height="34" fill="#4A5861" stroke="#8D9CA4" stroke-width="1.2" rx="3"/>
+<rect x="378" y="13" width="352" height="26" fill="#E5EEE1" rx="1.5"/>
+<text x="388" y="31" font-size="13" fill="#172026" class="bb">Spring re-slot 2026</text>
+<text x="534" y="31" font-size="11" fill="#5E6C63">Data as of</text>
+<text x="592" y="31" font-size="13" fill="#172026" class="d bb">2026-09-30</text>
+<text x="684" y="31" font-size="11" fill="#5E6C63">round 2</text>
+<text x="1236" y="31" font-size="12" fill="#AEBAC1" text-anchor="end">Saved 14:32</text>
+<use href="#i-check" xlink:href="#i-check" x="1242" y="20" width="13" height="13" color="#AEBAC1"/>
+<rect x="1270" y="12" width="1" height="28" fill="#4C5963"/>
+<circle cx="1300" cy="26" r="13" fill="#E5EEE1"/>
+<text x="1300" y="31" font-size="13" fill="#172026" class="bb" text-anchor="middle">J</text>
+<text x="1322" y="31" font-size="13" fill="#F1F4F2">Justas</text>
+<use href="#i-chev" xlink:href="#i-chev" x="1370" y="20" width="13" height="13" color="#AEBAC1"/>
+<rect x="0" y="52" width="1440" height="46" fill="#3F4D57"/>
+<circle cx="34" cy="76" r="9" fill="#AEBAC1"/>
+<use href="#i-check" xlink:href="#i-check" x="28" y="70" width="12" height="12" color="#2F3B44"/>
+<text x="48" y="81" font-size="13" fill="#F1F4F2" class="m">Overview</text>
+<line x1="115.24000000000001" y1="76" x2="119.24000000000001" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="136.24" cy="76" r="9" fill="#AEBAC1"/>
+<use href="#i-check" xlink:href="#i-check" x="130.24" y="70" width="12" height="12" color="#2F3B44"/>
+<text x="150.24" y="81" font-size="13" fill="#F1F4F2" class="m">Parts</text>
+<line x1="195.64000000000001" y1="76" x2="199.64000000000001" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="216.64000000000001" cy="76" r="9" fill="#AEBAC1"/>
+<use href="#i-check" xlink:href="#i-check" x="210.64000000000001" y="70" width="12" height="12" color="#2F3B44"/>
+<text x="230.64000000000001" y="81" font-size="13" fill="#F1F4F2" class="m">Locations</text>
+<line x1="305.16" y1="76" x2="309.16" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="326.16" cy="76" r="9" fill="#AEBAC1"/>
+<use href="#i-check" xlink:href="#i-check" x="320.16" y="70" width="12" height="12" color="#2F3B44"/>
+<text x="340.16" y="81" font-size="13" fill="#F1F4F2" class="m">Pick groups</text>
+<line x1="429.24" y1="76" x2="433.24" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="450.24" cy="76" r="9" fill="#AEBAC1"/>
+<use href="#i-check" xlink:href="#i-check" x="444.24" y="70" width="12" height="12" color="#2F3B44"/>
+<text x="464.24" y="81" font-size="13" fill="#F1F4F2" class="m">Best locations</text>
+<line x1="575.1600000000001" y1="76" x2="579.1600000000001" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<path d="M578.1600000000001 98 V60 a4 4 0 0 1 4 -4 H723.3600000000001 a4 4 0 0 1 4 4 V98 Z" fill="#E5EEE1"/>
+<rect x="578.1600000000001" y="56" width="149.20000000000002" height="3" fill="#172026"/>
+<circle cx="596.1600000000001" cy="76" r="9" fill="#172026"/>
+<text x="596.1600000000001" y="80" font-size="11" fill="#E5EEE1" class="bb" text-anchor="middle">6</text>
+<text x="610.1600000000001" y="81" font-size="13" fill="#172026" class="b">Recommendations</text>
+<line x1="728.3600000000001" y1="76" x2="732.3600000000001" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="749.3600000000001" cy="76" r="8.5" fill="none" stroke="#AEBAC1" stroke-width="1.3"/>
+<text x="749.3600000000001" y="80" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">7</text>
+<text x="763.3600000000001" y="81" font-size="13" fill="#F1F4F2" class="m">Before/after</text>
+<line x1="859.7200000000001" y1="76" x2="863.7200000000001" y2="76" stroke="#6F7E87" stroke-width="1"/>
+<circle cx="880.7200000000001" cy="76" r="8.5" fill="none" stroke="#AEBAC1" stroke-width="1.3"/>
+<text x="880.7200000000001" y="80" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">8</text>
+<text x="894.7200000000001" y="81" font-size="13" fill="#F1F4F2" class="m">Move list</text>
+<line x1="982.2400000000001" y1="64" x2="982.2400000000001" y2="88" stroke="#6F7E87" stroke-width="1"/>
+<use href="#i-drawer" xlink:href="#i-drawer" x="1004.2400000000001" y="68" width="16" height="16" color="#F1F4F2"/>
+<text x="1026.2400000000002" y="81" font-size="13" fill="#F1F4F2" class="m">Warehouse view</text>
+<rect x="1134.1600000000003" y="68" width="50" height="17" fill="none" stroke="#F1F4F2" stroke-width="1" rx="8.5"/>
+<text x="1159.1600000000003" y="80.5" font-size="10.5" fill="#F1F4F2" class="b" text-anchor="middle">Stage 2</text>
+<rect x="1240" y="62" width="184" height="28" fill="#EEF4EA" rx="4"/>
+<use href="#i-search" xlink:href="#i-search" x="1250" y="69" width="14" height="14" color="#5E6C63"/>
+<text x="1272" y="80" font-size="12" fill="#5E6C63">Search part or location</text>
+<text x="24" y="134" font-size="22" fill="#F1F4F2" class="b">Recommendations</text>
+<text x="24" y="156" font-size="13" fill="#D3DCE1">Step 6 of 8 · Round 2 ran 2026-11-11 14:20 on the planning copy · 19 moves in the plan so far</text>
+<rect x="860" y="114" width="140" height="32" fill="#E5EEE1" rx="4"/>
+<use href="#i-play" xlink:href="#i-play" x="872" y="123.0" width="14" height="14" color="#172026"/>
+<text x="894" y="134.68" font-size="13" fill="#172026" class="b">Run round 3</text>
+<rect x="712.5" y="114.5" width="139" height="31" fill="none" stroke="#AEBAC1" stroke-width="1" rx="4"/>
+<use href="#i-check" xlink:href="#i-check" x="724" y="123.0" width="14" height="14" color="#F1F4F2"/>
+<text x="746" y="134.68" font-size="13" fill="#F1F4F2" class="b">Apply all (13)</text>
+<rect x="570.5" y="114.5" width="133" height="31" fill="none" stroke="#AEBAC1" stroke-width="1" rx="4"/>
+<use href="#i-undo" xlink:href="#i-undo" x="582" y="123.0" width="14" height="14" color="#F1F4F2"/>
+<text x="604" y="134.68" font-size="13" fill="#F1F4F2" class="b">Undo last move</text>
+<rect x="24" y="170" width="69.25" height="28" fill="#E5EEE1" rx="14"/>
+<text x="38" y="188.5" font-size="12.5" fill="#172026" class="b">All</text>
+<text x="79.25" y="188.5" font-size="12.5" fill="#46544B" class="d bb" text-anchor="end">15</text>
+<rect x="101.75" y="170.5" width="82.25" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="115.25" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">Rule 1</text>
+<text x="170.5" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">6</text>
+<rect x="193.0" y="170.5" width="82.25" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="206.5" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">Rule 2</text>
+<text x="261.75" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">6</text>
+<rect x="284.25" y="170.5" width="82.25" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="297.75" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">Rule 3</text>
+<text x="353.0" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">3</text>
+<rect x="375.5" y="170.5" width="104.5" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="389.0" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">No space</text>
+<text x="466.5" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">50</text>
+<rect x="489.0" y="170.5" width="96.75" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="502.5" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">Outdated</text>
+<text x="572.25" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">1</text>
+<rect x="594.75" y="170.5" width="133.0" height="27" fill="none" stroke="#AEBAC1" stroke-width="1" rx="14"/>
+<text x="608.25" y="188.5" font-size="12.5" fill="#F1F4F2" class="b">Kept in place</text>
+<text x="714.25" y="188.5" font-size="12.5" fill="#D3DCE1" class="d bb" text-anchor="end">3</text>
+<text x="1000" y="188.5" font-size="12" fill="#D3DCE1" text-anchor="end">Sorted as the rules run them</text>
+<rect x="24" y="210" width="976" height="674" fill="#E5EEE1" rx="4"/>
+<text x="76" y="236" font-size="11.5" fill="#46544B" class="b">Part</text>
+<text x="308" y="236" font-size="11.5" fill="#46544B" class="b">Reason, in numbers</text>
+<text x="530" y="236" font-size="11.5" fill="#46544B" class="b">Current → suggested location</text>
+<text x="724" y="236" font-size="11.5" fill="#46544B" class="b">Decision</text>
+<text x="38" y="236" font-size="11.5" fill="#46544B" class="b">State</text>
+<line x1="24" y1="246" x2="1000" y2="246" stroke="#9FB599" stroke-width="1"/>
+<rect x="24" y="246" width="976" height="34" fill="#D9E5D4"/>
+<path d="M36 280 V255 a3 3 0 0 1 3 -3 H98 a3 3 0 0 1 3 3 V280 Z" fill="#172026"/>
+<text x="68.5" y="271" font-size="12.5" fill="#E5EEE1" class="bb" text-anchor="middle">Rule 1</text>
+<text x="114" y="269" font-size="13" fill="#172026" class="b">Fast-moving part into a best location</text>
+<text x="984" y="269" font-size="12" fill="#46544B" text-anchor="end">6 recommendations (3 hidden) · 50 no space</text>
+<use href="#r-pend" xlink:href="#r-pend" x="40" y="292" width="13" height="20"/>
+<text x="76" y="299" font-size="13" fill="#172026" class="d bb">4410281</text>
+<text x="76" y="315" font-size="12.5" fill="#172026">Brake pads, front - VW Golf</text>
+<text x="308" y="299" font-size="12.5" fill="#172026" class="m">fast-moving: 61 picks</text>
+<text x="308" y="315" font-size="12" fill="#46544B">in the period (24 or more)</text>
+<text x="530" y="299" font-size="13" fill="#172026" class="d bb">G-14-04-02</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="290" width="14" height="14" color="#172026"/>
+<text x="634" y="299" font-size="13" fill="#172026" class="d bb">A-02-01-01</text>
+<text x="530" y="315" font-size="12" fill="#46544B">not best → best (level 1, aisle A)</text>
+<line x1="24" y1="324" x2="1000" y2="324" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="287" width="56" height="30" fill="#172026" rx="4"/>
+<text x="752" y="306.5" font-size="12.5" fill="#E5EEE1" class="b" text-anchor="middle">Apply</text>
+<rect x="786.5" y="287.5" width="98" height="29" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/>
+<text x="796" y="306.5" font-size="12.5" fill="#172026" class="b">Apply with…</text>
+<use href="#i-chev" xlink:href="#i-chev" x="866" y="295" width="13" height="13" color="#172026"/>
+<rect x="890.5" y="287.5" width="108" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<use href="#r-keep" xlink:href="#r-keep" x="900" y="294" width="8" height="15"/>
+<text x="914" y="306.5" font-size="12.5" fill="#172026" class="b">Keep in place</text>
+<use href="#r-pend" xlink:href="#r-pend" x="40" y="336" width="13" height="20"/>
+<text x="76" y="343" font-size="13" fill="#172026" class="d bb">9723950</text>
+<text x="76" y="359" font-size="12.5" fill="#172026">Headlight bulb H7 - Peugeot 308</text>
+<text x="308" y="343" font-size="12.5" fill="#172026" class="m">fast-moving: 48 picks</text>
+<text x="308" y="359" font-size="12" fill="#46544B">in the period (24 or more)</text>
+<text x="530" y="343" font-size="13" fill="#172026" class="d bb">F-03-02-01</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="334" width="14" height="14" color="#172026"/>
+<text x="634" y="343" font-size="13" fill="#172026" class="d bb">A-02-01-03</text>
+<text x="530" y="359" font-size="12" fill="#46544B">not best → best (level 1, aisle A)</text>
+<line x1="24" y1="368" x2="1000" y2="368" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="331" width="56" height="30" fill="#172026" rx="4"/>
+<text x="752" y="350.5" font-size="12.5" fill="#E5EEE1" class="b" text-anchor="middle">Apply</text>
+<rect x="786.5" y="331.5" width="98" height="29" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/>
+<text x="796" y="350.5" font-size="12.5" fill="#172026" class="b">Apply with…</text>
+<use href="#i-chev" xlink:href="#i-chev" x="866" y="339" width="13" height="13" color="#172026"/>
+<rect x="890.5" y="331.5" width="108" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<use href="#r-keep" xlink:href="#r-keep" x="900" y="338" width="8" height="15"/>
+<text x="914" y="350.5" font-size="12.5" fill="#172026" class="b">Keep in place</text>
+<rect x="24" y="368" width="976" height="44" fill="url(#hatch)" opacity="0.55"/>
+<use href="#r-old" xlink:href="#r-old" x="40" y="380" width="11" height="20"/>
+<text x="76" y="387" font-size="13" fill="#172026" class="d bb">5315766</text>
+<text x="76" y="403" font-size="12.5" fill="#172026">Air filter - Audi A4</text>
+<text x="308" y="387" font-size="12.5" fill="#172026" class="m">fast-moving: 37 picks</text>
+<text x="308" y="403" font-size="12" fill="#46544B">in the period (24 or more)</text>
+<text x="530" y="387" font-size="13" fill="#172026" class="d bb">D-11-03-03</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="378" width="14" height="14" color="#172026"/>
+<text x="634" y="387" font-size="13" fill="#172026" class="d bb">A-04-01-01</text>
+<text x="530" y="403" font-size="12" fill="#46544B">A-04-01-01 is no longer empty</text>
+<line x1="24" y1="412" x2="1000" y2="412" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724.5" y="375.5" width="70" height="29" fill="#D9E5D4" stroke="#C3D3BD" stroke-width="1" rx="4"/>
+<text x="759" y="394.5" font-size="12.5" fill="#7E8A82" class="b" text-anchor="middle">Apply</text>
+<rect x="804" y="378" width="72" height="22" fill="#E3B21C" stroke="#172026" stroke-width="1" rx="11"/>
+<text x="840" y="393.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">Outdated</text>
+<text x="884" y="387" font-size="11.5" fill="#46544B">Manual move 14:26</text>
+<text x="884" y="402" font-size="11.5" fill="#46544B">filled it. Run again.</text>
+<rect x="24" y="412" width="976" height="44" fill="#EEF4EA"/>
+<rect x="38" y="424" width="30" height="20" fill="none" stroke="#172026" stroke-width="1.2" rx="2" stroke-dasharray="3 2"/>
+<text x="76" y="431" font-size="13" fill="#172026" class="d bb">7181839</text>
+<text x="76" y="447" font-size="12.5" fill="#172026">Alternator - Hyundai Tucson</text>
+<text x="308" y="431" font-size="12.5" fill="#172026" class="m">fast-moving: 25 picks</text>
+<text x="308" y="447" font-size="12" fill="#46544B">in the period (24 or more)</text>
+<text x="530" y="431" font-size="13" fill="#172026" class="d bb">E-08-02-02</text>
+<rect x="628.5" y="414.5" width="82" height="19" fill="none" stroke="#172026" stroke-width="1.2" rx="2" stroke-dasharray="3 2"/>
+<text x="669.5" y="428" font-size="12" fill="#172026" class="bb" text-anchor="middle">No space</text>
+<text x="530" y="447" font-size="12" fill="#46544B">no empty best location left</text>
+<rect x="724.5" y="419.5" width="112" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<text x="738" y="438.5" font-size="12.5" fill="#172026" class="b">Manual move…</text>
+<text x="850" y="431" font-size="11.5" fill="#46544B">+49 more no space.</text>
+<text x="850" y="446" font-size="11.5" fill="#46544B">Rule 2 frees 4 for round 3.</text>
+<line x1="24" y1="456" x2="1000" y2="456" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="24" y="456" width="976" height="34" fill="#D9E5D4"/>
+<path d="M36 490 V465 a3 3 0 0 1 3 -3 H98 a3 3 0 0 1 3 3 V490 Z" fill="#172026"/>
+<text x="68.5" y="481" font-size="12.5" fill="#E5EEE1" class="bb" text-anchor="middle">Rule 2</text>
+<text x="114" y="479" font-size="13" fill="#172026" class="b">Slow-moving or dead-stock part out of a best location</text>
+<text x="984" y="479" font-size="12" fill="#46544B" text-anchor="end">6 recommendations · 1 kept in place</text>
+<use href="#r-pend" xlink:href="#r-pend" x="40" y="502" width="13" height="20"/>
+<text x="76" y="509" font-size="13" fill="#172026" class="d bb">3632446</text>
+<text x="76" y="525" font-size="12.5" fill="#172026">Catalytic converter - BMW 320d</text>
+<text x="308" y="509" font-size="12.5" fill="#172026" class="m">dead stock: 0 picks</text>
+<text x="308" y="525" font-size="12" fill="#46544B">in the period (0)</text>
+<text x="530" y="509" font-size="13" fill="#172026" class="d bb">A-01-04-01</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="500" width="14" height="14" color="#172026"/>
+<text x="634" y="509" font-size="13" fill="#172026" class="d bb">H-11-04-03</text>
+<text x="530" y="525" font-size="12" fill="#46544B">best → not best</text>
+<line x1="24" y1="534" x2="1000" y2="534" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="497" width="56" height="30" fill="#172026" rx="4"/>
+<text x="752" y="516.5" font-size="12.5" fill="#E5EEE1" class="b" text-anchor="middle">Apply</text>
+<rect x="786.5" y="497.5" width="98" height="29" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/>
+<text x="796" y="516.5" font-size="12.5" fill="#172026" class="b">Apply with…</text>
+<use href="#i-chev" xlink:href="#i-chev" x="866" y="505" width="13" height="13" color="#172026"/>
+<rect x="890.5" y="497.5" width="108" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<use href="#r-keep" xlink:href="#r-keep" x="900" y="504" width="8" height="15"/>
+<text x="914" y="516.5" font-size="12.5" fill="#172026" class="b">Keep in place</text>
+<use href="#r-pend" xlink:href="#r-pend" x="40" y="546" width="13" height="20"/>
+<text x="76" y="553" font-size="13" fill="#172026" class="d bb">3298226</text>
+<text x="76" y="569" font-size="12.5" fill="#172026">Tail light assembly - Toyota RAV4</text>
+<text x="308" y="553" font-size="12.5" fill="#172026" class="m">slow-moving: 2 picks</text>
+<text x="308" y="569" font-size="12" fill="#46544B">in the period (1–5)</text>
+<text x="530" y="553" font-size="13" fill="#172026" class="d bb">A-05-02-03</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="544" width="14" height="14" color="#172026"/>
+<text x="634" y="553" font-size="13" fill="#172026" class="d bb">H-12-01-02</text>
+<text x="530" y="569" font-size="12" fill="#46544B">best → not best</text>
+<line x1="24" y1="578" x2="1000" y2="578" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="541" width="56" height="30" fill="#172026" rx="4"/>
+<text x="752" y="560.5" font-size="12.5" fill="#E5EEE1" class="b" text-anchor="middle">Apply</text>
+<rect x="786.5" y="541.5" width="98" height="29" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/>
+<text x="796" y="560.5" font-size="12.5" fill="#172026" class="b">Apply with…</text>
+<use href="#i-chev" xlink:href="#i-chev" x="866" y="549" width="13" height="13" color="#172026"/>
+<rect x="890.5" y="541.5" width="108" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<use href="#r-keep" xlink:href="#r-keep" x="900" y="548" width="8" height="15"/>
+<text x="914" y="560.5" font-size="12.5" fill="#172026" class="b">Keep in place</text>
+<use href="#r-keep" xlink:href="#r-keep" x="40" y="590" width="11" height="20"/>
+<text x="76" y="597" font-size="13" fill="#172026" class="d bb">6900616</text>
+<text x="76" y="613" font-size="12.5" fill="#172026">Timing belt kit - Hyundai Tucson</text>
+<text x="308" y="597" font-size="12.5" fill="#172026" class="m">slow-moving: 4 picks</text>
+<text x="308" y="613" font-size="12" fill="#46544B">in the period (1–5)</text>
+<text x="530" y="597" font-size="13" fill="#172026" class="d bb">A-03-01-01</text>
+<text x="530" y="613" font-size="12" fill="#46544B">stays in its best location</text>
+<line x1="24" y1="622" x2="1000" y2="622" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="588" width="104" height="24" fill="#15191C" rx="12"/>
+<text x="776" y="604.5" font-size="12" fill="#E5EEE1" class="bb" text-anchor="middle">Kept in place</text>
+<text x="838" y="597" font-size="11.5" fill="#46544B">by Justas, 14:24</text>
+<text x="838" y="613" font-size="12" fill="#2C5AA0" class="b">Remove mark</text>
+<line x1="838" y1="616" x2="912" y2="616" stroke="#2C5AA0" stroke-width="1"/>
+<text x="76" y="640" font-size="12.5" fill="#2C5AA0" class="b">Show 3 more rule 2 recommendations</text>
+<use href="#i-chev" xlink:href="#i-chev" x="312" y="628" width="14" height="14" color="#2C5AA0"/>
+<line x1="24" y1="650" x2="1000" y2="650" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="24" y="650" width="976" height="34" fill="#D9E5D4"/>
+<path d="M36 684 V659 a3 3 0 0 1 3 -3 H98 a3 3 0 0 1 3 3 V684 Z" fill="#172026"/>
+<text x="68.5" y="675" font-size="12.5" fill="#E5EEE1" class="bb" text-anchor="middle">Rule 3</text>
+<text x="114" y="673" font-size="13" fill="#172026" class="b">Part moved into its partner's aisle</text>
+<text x="984" y="673" font-size="12" fill="#46544B" text-anchor="end">3 recommendations</text>
+<rect x="25.5" y="685.5" width="973" height="41" fill="#EEF4EA" stroke="#172026" stroke-width="2" rx="2"/>
+<use href="#r-pend" xlink:href="#r-pend" x="40" y="696" width="13" height="20"/>
+<text x="76" y="703" font-size="13" fill="#172026" class="d bb">2555849</text>
+<text x="76" y="719" font-size="12.5" fill="#172026">Brake hose - Toyota Corolla</text>
+<text x="308" y="703" font-size="12.5" fill="#172026" class="m">pick group with 2555812:</text>
+<text x="308" y="719" font-size="12" fill="#46544B">9 shared jobs (5 or more)</text>
+<text x="530" y="703" font-size="13" fill="#172026" class="d bb">I-06-03-02</text>
+<use href="#i-arrow" xlink:href="#i-arrow" x="614" y="694" width="14" height="14" color="#172026"/>
+<text x="634" y="703" font-size="13" fill="#172026" class="d bb">D-10-04-03</text>
+<text x="530" y="719" font-size="12" fill="#46544B">into partner's aisle D</text>
+<line x1="24" y1="728" x2="1000" y2="728" stroke="#C3D3BD" stroke-width="1"/>
+<rect x="724" y="691" width="56" height="30" fill="#172026" rx="4"/>
+<text x="752" y="710.5" font-size="12.5" fill="#E5EEE1" class="b" text-anchor="middle">Apply</text>
+<rect x="786.5" y="691.5" width="98" height="29" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/>
+<text x="796" y="710.5" font-size="12.5" fill="#172026" class="b">Apply with…</text>
+<use href="#i-chev" xlink:href="#i-chev" x="866" y="699" width="13" height="13" color="#172026"/>
+<rect x="890.5" y="691.5" width="108" height="29" fill="none" stroke="#9FB599" stroke-width="1" rx="4"/>
+<use href="#r-keep" xlink:href="#r-keep" x="900" y="698" width="8" height="15"/>
+<text x="914" y="710.5" font-size="12.5" fill="#172026" class="b">Keep in place</text>
+<text x="76" y="746" font-size="12.5" fill="#2C5AA0" class="b">Show 2 more rule 3 recommendations</text>
+<use href="#i-chev" xlink:href="#i-chev" x="312" y="734" width="14" height="14" color="#2C5AA0"/>
+<g filter="url(#lift)"><rect x="764" y="724" width="232" height="146" fill="#EEF4EA" stroke="#172026" stroke-width="1" rx="4"/></g>
+<text x="778" y="746" font-size="12.5" fill="#172026" class="bb">Apply with another location</text>
+<text x="778" y="763" font-size="11.5" fill="#46544B">Empty in aisle D now and at the run</text>
+<line x1="764" y1="772" x2="996" y2="772" stroke="#9FB599" stroke-width="1"/>
+<rect x="765" y="773" width="230" height="32" fill="#D9E5D4"/>
+<rect x="765" y="773" width="3" height="32" fill="#172026"/>
+<text x="780" y="794" font-size="13" fill="#172026" class="d bb">D-12-03-01</text>
+<text x="982" y="794" font-size="11.5" fill="#5E6C63" class="d" text-anchor="end">Walk Path 7,370</text>
+<text x="780" y="827" font-size="13" fill="#172026" class="d bb">D-13-04-02</text>
+<text x="982" y="827" font-size="11.5" fill="#5E6C63" class="d" text-anchor="end">Walk Path 7,520</text>
+<line x1="764" y1="840" x2="996" y2="840" stroke="#C3D3BD" stroke-width="1"/>
+<text x="778" y="858" font-size="11.5" fill="#46544B">Keeps rule 3 and round 2 · 1 more</text>
+<rect x="1016" y="108" width="400" height="252" fill="#36434D" rx="4"/>
+<text x="1032" y="134" font-size="14" fill="#F1F4F2" class="b">Where it moves</text>
+<text x="1400" y="134" font-size="12" fill="#F1F4F2" class="b" text-anchor="end">Open in warehouse view</text>
+<line x1="1256" y1="137" x2="1400" y2="137" stroke="#D3DCE1" stroke-width="1"/>
+<rect x="1032.0" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1035.0" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1051.0" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">A</text>
+<text x="1051.0" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">87%</text>
+<rect x="1073.5" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1076.5" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1092.5" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">B</text>
+<text x="1092.5" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">86%</text>
+<rect x="1115.0" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1118.0" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1134.0" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">C</text>
+<text x="1134.0" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">85%</text>
+<rect x="1156.5" y="148" width="38" height="34" fill="#7E8E96" rx="2"/>
+<rect x="1159.5" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1175.5" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">D</text>
+<text x="1175.5" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">83%</text>
+<rect x="1198.0" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1201.0" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1217.0" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">E</text>
+<text x="1217.0" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">81%</text>
+<rect x="1239.5" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1242.5" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1258.5" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">F</text>
+<text x="1258.5" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">79%</text>
+<rect x="1281.0" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1284.0" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1300.0" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">G</text>
+<text x="1300.0" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">76%</text>
+<rect x="1322.5" y="148" width="38" height="34" fill="#66777F" rx="2"/>
+<rect x="1325.5" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1341.5" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">H</text>
+<text x="1341.5" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">71%</text>
+<rect x="1364.0" y="148" width="38" height="34" fill="#7E8E96" rx="2"/>
+<rect x="1367.0" y="151" width="32" height="16" fill="#E5EEE1" rx="1"/>
+<text x="1383.0" y="163.5" font-size="12" fill="#172026" class="bb" text-anchor="middle">I</text>
+<text x="1383.0" y="178" font-size="11" fill="#F1F4F2" class="d" text-anchor="middle">65%</text>
+<path d="M1383.0 186 C 1383.0 204, 1175.5 204, 1175.5 190" fill="none" stroke="#B8322A" stroke-width="2"/>
+<path d="M1170.5 197 L1175.5 188 L1180.5 197" fill="none" stroke="#B8322A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1279.25" y="216" font-size="11.5" fill="#F1F4F2" class="m" text-anchor="middle">Rule 3 · from aisle I to partner's aisle D</text>
+<text x="1032" y="244" font-size="11.5" fill="#D3DCE1" class="b">From</text>
+<text x="1159" y="244" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">F</text>
+<text x="1189" y="244" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">M</text>
+<text x="1219" y="244" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">S</text>
+<text x="1249" y="244" font-size="11" fill="#D3DCE1" class="b" text-anchor="middle">D</text>
+<rect x="1032" y="252" width="368" height="25" fill="#E5EEE1" rx="1"/>
+<line x1="1032" y1="252.5" x2="1400" y2="252.5" stroke="#9FB599" stroke-width="1"/>
+<text x="1050" y="269" font-size="13" fill="#172026" class="d bb">I-06-03-02</text>
+<line x1="1174" y1="257" x2="1174" y2="272" stroke="#C3D3BD" stroke-width="0.8"/>
+<line x1="1204" y1="257" x2="1204" y2="272" stroke="#C3D3BD" stroke-width="0.8"/>
+<line x1="1234" y1="257" x2="1234" y2="272" stroke="#C3D3BD" stroke-width="0.8"/>
+<use href="#r-pend" xlink:href="#r-pend" x="1183.0" y="248" width="12" height="20"/>
+<text x="1276" y="269" font-size="12" fill="#172026" class="m">2555849 · stock 7</text>
+<text x="1032" y="300" font-size="11.5" fill="#D3DCE1" class="b">To</text>
+<rect x="1032.5" y="308.5" width="367" height="24" fill="none" stroke="#93A4AE" stroke-width="1" rx="1" stroke-dasharray="4 3"/>
+<text x="1050" y="325" font-size="13" fill="#F1F4F2" class="d bb">D-10-04-03</text>
+<line x1="1174" y1="313" x2="1174" y2="328" stroke="#55636C" stroke-width="0.8"/>
+<line x1="1204" y1="313" x2="1204" y2="328" stroke="#55636C" stroke-width="0.8"/>
+<line x1="1234" y1="313" x2="1234" y2="328" stroke="#55636C" stroke-width="0.8"/>
+<text x="1276" y="325" font-size="12" fill="#F1F4F2" class="m">Empty location</text>
+<text x="1032" y="352" font-size="11.5" fill="#D3DCE1">Partner 2555812 sits in D-10-02-01, same section.</text>
+<rect x="1016" y="372" width="400" height="190" fill="#E5EEE1" rx="4"/>
+<text x="1032" y="398" font-size="14" fill="#172026" class="b">Effect so far</text>
+<text x="1400" y="398" font-size="12" fill="#2C5AA0" class="b" text-anchor="end">Open before/after</text>
+<line x1="1296" y1="401" x2="1400" y2="401" stroke="#2C5AA0" stroke-width="1"/>
+<text x="1032" y="422" font-size="11.5" fill="#46544B" class="b">Whole warehouse</text>
+<text x="1292" y="422" font-size="11.5" fill="#46544B" class="b" text-anchor="end">Before</text>
+<text x="1362" y="422" font-size="11.5" fill="#46544B" class="b" text-anchor="end">After</text>
+<line x1="1028" y1="429" x2="1404" y2="429" stroke="#172026" stroke-width="1.2"/>
+<text x="1032" y="450" font-size="12.5" fill="#172026">Fast-moving parts in best locations</text>
+<text x="1292" y="450" font-size="13" fill="#172026" class="d bb" text-anchor="end">61</text>
+<text x="1362" y="450" font-size="13" fill="#172026" class="d bb" text-anchor="end">99</text>
+<line x1="1028" y1="459" x2="1404" y2="459" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="478" font-size="12.5" fill="#172026">Pick groups with both parts in one aisle</text>
+<text x="1292" y="478" font-size="13" fill="#172026" class="d bb" text-anchor="end">112</text>
+<text x="1362" y="478" font-size="13" fill="#172026" class="d bb" text-anchor="end">118</text>
+<line x1="1028" y1="487" x2="1404" y2="487" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="506" font-size="12.5" fill="#172026">Moves in the plan (2 rounds)</text>
+<text x="1292" y="506" font-size="13" fill="#172026" class="d bb" text-anchor="end">0</text>
+<text x="1362" y="506" font-size="13" fill="#172026" class="d bb" text-anchor="end">19</text>
+<line x1="1028" y1="515" x2="1404" y2="515" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="538" font-size="11.5" fill="#46544B">Before = the import. After = the planning copy now;</text>
+<text x="1032" y="554" font-size="11.5" fill="#46544B">round 2 recommendations count once applied.</text>
+<rect x="1016" y="574" width="400" height="310" fill="#EEF4EA" stroke="#9FB599" stroke-width="1" rx="4"/>
+<rect x="1016" y="574" width="400" height="40" fill="#D9E5D4" rx="4"/>
+<rect x="1016" y="610" width="400" height="4" fill="#D9E5D4"/>
+<text x="1032" y="600" font-size="16" fill="#172026" class="d bb">2555849</text>
+<text x="1112" y="600" font-size="13" fill="#172026" class="b">Brake hose - Toyota Corolla</text>
+<text x="1032" y="634" font-size="12.5" fill="#172026">medium-moving: 11 picks in the period (6–23)</text>
+<text x="1032" y="652" font-size="12" fill="#46544B">Stock 7 in I-06-03-02 · Inventory file, as of 2026-09-30</text>
+<line x1="1028" y1="664" x2="1404" y2="664" stroke="#172026" stroke-width="1.2"/>
+<text x="1032" y="678" font-size="11" fill="#5E6C63" class="b">Date</text>
+<text x="1136" y="678" font-size="11" fill="#5E6C63" class="b">Transaction type</text>
+<text x="1334" y="678" font-size="11" fill="#5E6C63" class="b" text-anchor="end">In</text>
+<text x="1396" y="678" font-size="11" fill="#5E6C63" class="b" text-anchor="end">Out</text>
+<line x1="1028" y1="685" x2="1404" y2="685" stroke="#9FB599" stroke-width="1"/>
+<line x1="1126" y1="664" x2="1126" y2="846" stroke="#9FB599" stroke-width="0.8"/>
+<line x1="1302" y1="664" x2="1302" y2="846" stroke="#9FB599" stroke-width="0.8"/>
+<line x1="1352" y1="664" x2="1352" y2="846" stroke="#9FB599" stroke-width="0.8"/>
+<text x="1032" y="704" font-size="12.5" fill="#172026" class="d">2026-09-22</text>
+<text x="1136" y="704" font-size="12.5" fill="#172026">Move to Repair</text>
+<text x="1334" y="704" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<text x="1396" y="704" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">1</text>
+<line x1="1028" y1="712" x2="1404" y2="712" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="729" font-size="12.5" fill="#172026" class="d">2026-09-03</text>
+<text x="1136" y="729" font-size="12.5" fill="#172026">Move to Repair</text>
+<text x="1334" y="729" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<text x="1396" y="729" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">1</text>
+<line x1="1028" y1="737" x2="1404" y2="737" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="754" font-size="12.5" fill="#172026" class="d">2026-08-14</text>
+<text x="1136" y="754" font-size="12.5" fill="#172026">Receipt</text>
+<text x="1334" y="754" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">6</text>
+<text x="1396" y="754" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<line x1="1028" y1="762" x2="1404" y2="762" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="779" font-size="12.5" fill="#172026" class="d">2026-07-30</text>
+<text x="1136" y="779" font-size="12.5" fill="#172026">Move to Repair</text>
+<text x="1334" y="779" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<text x="1396" y="779" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">1</text>
+<line x1="1028" y1="787" x2="1404" y2="787" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="804" font-size="12.5" fill="#172026" class="d">2026-07-02</text>
+<text x="1136" y="804" font-size="12.5" fill="#172026">Return to Stock</text>
+<text x="1334" y="804" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">1</text>
+<text x="1396" y="804" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<line x1="1028" y1="812" x2="1404" y2="812" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="829" font-size="12.5" fill="#172026" class="d">2026-06-18</text>
+<text x="1136" y="829" font-size="12.5" fill="#172026">Move to Repair</text>
+<text x="1334" y="829" font-size="12.5" fill="#172026" class="d bb" text-anchor="end"></text>
+<text x="1396" y="829" font-size="12.5" fill="#172026" class="d bb" text-anchor="end">2</text>
+<line x1="1028" y1="837" x2="1404" y2="837" stroke="#C3D3BD" stroke-width="0.8"/>
+<text x="1032" y="868" font-size="11.5" fill="#46544B">Last 6 of 14 shelf lines. Picks = Move to Repair only.</text>
+</svg>

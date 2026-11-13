@@ -1,0 +1,2131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Smart Warehouse Planner: warehouse layout as an exploded parts-catalogue figure</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap');
+text{font-family:'Public Sans','Helvetica Neue',Helvetica,Arial,sans-serif;fill:#15181C;font-size:13px;font-variant-numeric:tabular-nums;}
+.c{font-family:'Barlow Condensed','Avenir Next Condensed','Arial Narrow',sans-serif;}
+.b{font-weight:600}.bb{font-weight:700}.m{font-weight:500}
+.i2{fill:#454C55}.i3{fill:#646B74}.bl{fill:#0066B0}.am{fill:#A3470B}.wh{fill:#FFFFFF}
+.s11{font-size:11px}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s15{font-size:15px}.s16{font-size:16px}.s18{font-size:18px}.s20{font-size:20px}.s22{font-size:22px}.s24{font-size:24px}.s28{font-size:28px}.s32{font-size:32px}
+.up{letter-spacing:0.06em}
+.ic{fill:none;stroke:#15181C;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icb{fill:none;stroke:#0066B0;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ici{fill:none;stroke:#454C55;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icw{fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ica{fill:none;stroke:#A3470B;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hl{stroke:#BEC4CB;stroke-width:1;fill:none}
+.hl2{stroke:#E1E4E8;stroke-width:1;fill:none}
+.ink{stroke:#15181C;stroke-width:1;fill:none}
+</style>
+<defs>
+<pattern id="pMed" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="2.6" stroke="#15181C" stroke-width="1.05"/></pattern>
+<pattern id="pSlow" width="4.6" height="4.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4.6" height="4.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4.6" stroke="#15181C" stroke-width="0.8"/></pattern>
+<pattern id="pDead" width="3.2" height="3.2" patternUnits="userSpaceOnUse"><rect width="3.2" height="3.2" fill="#FFFFFF"/><circle cx="1.6" cy="1.6" r="0.62" fill="#3A4048"/></pattern>
+<pattern id="pNone" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="3" height="3" fill="#EEF0F2"/></pattern>
+<pattern id="pMedL" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#15181C" stroke-width="1.5"/></pattern>
+<pattern id="pSlowL" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="7" stroke="#15181C" stroke-width="1.1"/></pattern>
+<pattern id="pDeadL" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#FFFFFF"/><circle cx="2.5" cy="2.5" r="0.95" fill="#3A4048"/></pattern>
+<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1 L10,5 L0,9 Z" fill="#0066B0"/></marker>
+<marker id="arwK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 Z" fill="#15181C"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1440" height="48" fill="#FFFFFF"/>
+<line x1="0" y1="47.5" x2="1440" y2="47.5" stroke="#15181C" stroke-width="1"/>
+<path d="M20.0,27.0 L30.0,22.0 L40.0,27.0 L30.0,32.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,27.0 L20.0,30.0 L30.0,35.0 L40.0,30.0 L40.0,27.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,17.0 L30.0,12.0 L40.0,17.0 L30.0,22.0 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M20.0,17.0 L20.0,20.0 L30.0,25.0 L40.0,20.0 L40.0,17.0" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M30.0,22.0 L30.0,25.0" stroke="#0066B0" stroke-width="1.2" stroke-dasharray="1.5 1.5"/>
+<text x="50" y="30" class="c s20 bb">Smart Warehouse Planner</text>
+<line x1="232.5" y1="12" x2="232.5" y2="36" stroke="#BEC4CB" stroke-width="1"/>
+<text x="248" y="29" class="s13 i2">Saved plans</text>
+<g transform="translate(327,17) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M10 7l5 5-5 5"/></g>
+<text x="346" y="29" class="s13 b">Spring re-slot 2026</text>
+<text x="482" y="29" class="s12 i3">created by Justas · round 1</text>
+<g transform="translate(846,16) scale(0.6667)" class="ic" style="stroke-width:2.250"><rect x="4" y="5.5" width="16" height="14"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></g>
+<text x="868" y="29" class="s12 i2">Data as of</text>
+<text x="936" y="29" class="s13 b">2026-09-30</text>
+<text x="1032" y="29" class="s12 i3">uploaded 2026-10-02</text>
+<line x1="1170.5" y1="12" x2="1170.5" y2="36" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(1182,16) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="1202" y="29" class="s12 i2">Saved 09:44</text>
+<rect x="1290.5" y="12.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="1302" y="28.5" class="c s14 bb" text-anchor="middle">J</text>
+<text x="1322" y="29" class="s13">Justas</text>
+<g transform="translate(1370,17) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<rect x="0" y="48" width="224" height="852" fill="#FFFFFF"/>
+<line x1="223.5" y1="48" x2="223.5" y2="900" stroke="#15181C" stroke-width="1"/>
+<text x="20" y="74" class="c s16 b">Contents</text>
+<text x="204" y="74" class="s11 i3" text-anchor="end">Steps 1–6</text>
+<text x="20" y="110" class="c s13 b i2 up">Plan</text>
+<line x1="78" y1="106.5" x2="204" y2="106.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,126) scale(0.6667)" class="ici" style="stroke-width:2.250"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 10v10h12V10"/></g>
+<text x="44" y="139" class="s13">Saved plans</text>
+<rect x="20.5" y="158.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="170" class="c s12 bb" text-anchor="middle">1</text>
+<text x="44" y="171" class="s13">Plan overview</text>
+<g transform="translate(190,159) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="20" y="204" class="c s13 b i2 up">Analysis</text>
+<line x1="78" y1="200.5" x2="204" y2="200.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="220.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="232" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="233" class="s13">Parts</text>
+<g transform="translate(190,221) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="233" class="s12 i3" text-anchor="end">1,545</text>
+<rect x="20.5" y="252.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="264" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="265" class="s13">Locations</text>
+<g transform="translate(190,253) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="265" class="s12 i3" text-anchor="end">2,000</text>
+<rect x="20.5" y="284.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="296" class="c s12 bb" text-anchor="middle">2</text>
+<text x="44" y="297" class="s13">Pick groups</text>
+<g transform="translate(190,285) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="297" class="s12 i3" text-anchor="end">212</text>
+<text x="20" y="330" class="c s13 b i2 up">Recommend</text>
+<line x1="78" y1="326.5" x2="204" y2="326.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="346.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="358" class="c s12 bb" text-anchor="middle">3</text>
+<text x="44" y="359" class="s13">Best locations</text>
+<g transform="translate(190,347) scale(0.5833)" class="ici" style="stroke-width:2.571"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="184" y="359" class="s12 i3" text-anchor="end">279</text>
+<rect x="20.5" y="378.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="390" class="c s12 bb" text-anchor="middle">4</text>
+<text x="44" y="391" class="s13">Recommendations</text>
+<text x="204" y="391" class="s12 i3" text-anchor="end">101</text>
+<rect x="12" y="402" width="200" height="32" fill="#E7F0F9"/>
+<rect x="12" y="402" width="2" height="32" fill="#0066B0"/>
+<g transform="translate(20,410) scale(0.6667)" class="icb" style="stroke-width:2.250"><path d="M4 20V5l4-2v15M20 20V5l-4-2"/><path d="M4 9.5h16M4 14.5h16M4 20h16"/></g>
+<text x="44" y="423" class="s13 b bl">Warehouse layout</text>
+<text x="204" y="423" class="s12 bl b" text-anchor="end">Fig. 12</text>
+<text x="20" y="456" class="c s13 b i2 up">Output</text>
+<line x1="78" y1="452.5" x2="204" y2="452.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="20.5" y="472.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="484" class="c s12 bb" text-anchor="middle">5</text>
+<text x="44" y="485" class="s13">Before/after</text>
+<rect x="20.5" y="504.5" width="15" height="15" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="28" y="516" class="c s12 bb" text-anchor="middle">6</text>
+<text x="44" y="517" class="s13">Move list</text>
+<text x="204" y="517" class="s12 i3" text-anchor="end">3</text>
+<text x="20" y="552" class="c s13 b i2 up">Later edition</text>
+<line x1="106" y1="548.5" x2="204" y2="548.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,568) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="579" class="s12 i3">Category check</text>
+<g transform="translate(20,592) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="603" class="s12 i3">Location labels</text>
+<g transform="translate(20,616) scale(0.5833)" class="ici" style="stroke-width:2.571"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></g>
+<text x="44" y="627" class="s12 i3">Account</text>
+<line x1="0" y1="852.5" x2="223" y2="852.5" stroke="#E1E4E8" stroke-width="1"/>
+<g transform="translate(20,866) scale(0.6667)" class="ici" style="stroke-width:2.250"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2.6M12 17.9v2.6M3.5 12h2.6M17.9 12h2.6M6 6l1.8 1.8M16.2 16.2L18 18M6 18l1.8-1.8M16.2 7.8L18 6"/></g>
+<text x="44" y="879" class="s13 i2">Settings</text>
+<text x="204" y="879" class="s11 i3" text-anchor="end">24 · 6 · 5</text>
+<text x="248" y="92" class="c s32 bb">Warehouse layout</text>
+<text x="462" y="92" class="c s20 b i3">Fig. 12</text>
+<rect x="526.5" y="75.5" width="150" height="21" fill="#FFFFFF" stroke="#BEC4CB" stroke-width="1"/>
+<text x="601" y="90" class="s11 i2" text-anchor="middle">Stage 2 · warehouse view</text>
+<rect x="1100.5" y="68.5" width="131" height="31" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1113.6,76.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><rect x="4" y="5" width="16" height="14"/><path d="M4 10h16M12 10v9"/></g>
+<text x="1135.6" y="88.5" class="s13 m">Before/after</text>
+<rect x="1244" y="68" width="180" height="32" fill="#0066B0"/>
+<g transform="translate(1271.25,76.0) scale(0.6667)" class="icw" style="stroke-width:2.250"><path d="M4 12h15M14 7l5 5-5 5"/></g>
+<text x="1293.2" y="88.5" class="s13 m wh">Recommendations</text>
+<text x="248" y="118" class="s13 i2">Planning copy after round 1 · 3 moves applied · whole warehouse 79.2 % occupied: 1,584 of 2,000 locations, 416 empty · 279 best locations, 39 empty</text>
+<rect x="248.5" y="136.5" width="239" height="31" fill="#FFFFFF" stroke="#BEC4CB" stroke-width="1"/>
+<rect x="248.5" y="136.5" width="120" height="31" fill="#E7F0F9" stroke="#0066B0" stroke-width="1"/>
+<text x="308" y="157" class="s13 b bl" text-anchor="middle">Planning copy</text>
+<text x="428" y="157" class="s13" text-anchor="middle">Import (before)</text>
+<rect x="500.5" y="136.5" width="200" height="31" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="512" y="157" class="s13 i2">Movement class:</text>
+<text x="617" y="157" class="s13 b">All classes</text>
+<g transform="translate(678,145) scale(0.5833)" class="ic" style="stroke-width:2.571"><path d="M7 10l5 5 5-5"/></g>
+<rect x="718.5" y="144.5" width="15" height="15" fill="#0066B0" stroke="#0066B0" stroke-width="1"/>
+<g transform="translate(719.5,145.5) scale(0.5417)" class="icw" style="stroke-width:2.769"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="741" y="156.5" class="s13">Recommendations, round 1</text>
+<rect x="930.5" y="144.5" width="15" height="15" fill="#0066B0" stroke="#0066B0" stroke-width="1"/>
+<g transform="translate(931.5,145.5) scale(0.5417)" class="icw" style="stroke-width:2.769"><path d="M5 12.5l4.5 4.5L19 7.5"/></g>
+<text x="953" y="156.5" class="s13">Best locations</text>
+<rect x="1068.5" y="136.5" width="236" height="31" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1078,144) scale(0.6667)" class="ici" style="stroke-width:2.250"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></g>
+<text x="1102" y="157" class="s13 i3">Find location or part</text>
+<rect x="1316.5" y="136.5" width="107" height="31" fill="#FFFFFF" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="1352.5" y1="137" x2="1352.5" y2="167" stroke="#BEC4CB" stroke-width="1"/>
+<line x1="1388.5" y1="137" x2="1388.5" y2="167" stroke="#BEC4CB" stroke-width="1"/>
+<g transform="translate(1326,144) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M5 12h14"/></g>
+<g transform="translate(1362,144) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></g>
+<g transform="translate(1398,144) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M12 5v14M5 12h14"/></g>
+<rect x="248.5" y="180.5" width="803" height="703" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="239.5" y1="180.5" x2="257.5" y2="180.5"/><line x1="248.5" y1="171.5" x2="248.5" y2="189.5"/><circle cx="248.5" cy="180.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1043.5" y1="180.5" x2="1061.5" y2="180.5"/><line x1="1052.5" y1="171.5" x2="1052.5" y2="189.5"/><circle cx="1052.5" cy="180.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="239.5" y1="884.5" x2="257.5" y2="884.5"/><line x1="248.5" y1="875.5" x2="248.5" y2="893.5"/><circle cx="248.5" cy="884.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1043.5" y1="884.5" x2="1061.5" y2="884.5"/><line x1="1052.5" y1="875.5" x2="1052.5" y2="893.5"/><circle cx="1052.5" cy="884.5" r="4.0"/></g>
+<text x="268" y="206" class="c s18 bb">Fig. 12</text>
+<text x="322" y="206" class="s14 b">Warehouse layout, planning copy</text>
+<text x="268" y="224" class="s12 i2">Exploded view · aisles A–I in Walk Path order</text>
+<text x="268" y="240" class="s12 i2">Data as of 2026-09-30</text>
+<line x1="360.00" y1="313.00" x2="360.00" y2="335.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="243.53" x2="925.75" y2="265.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="381.00" x2="360.00" y2="403.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="311.53" x2="925.75" y2="333.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="449.00" x2="360.00" y2="471.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="379.53" x2="925.75" y2="401.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="517.00" x2="360.00" y2="539.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="447.53" x2="925.75" y2="469.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="585.00" x2="360.00" y2="607.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="515.53" x2="925.75" y2="537.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="653.00" x2="360.00" y2="675.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="583.53" x2="925.75" y2="605.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="721.00" x2="360.00" y2="743.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="651.53" x2="925.75" y2="673.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="360.00" y1="789.00" x2="360.00" y2="811.00" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="925.75" y1="719.53" x2="925.75" y2="741.53" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<polygon points="360.00,270.00 925.75,200.53 919.81,195.18 354.05,264.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,270.00L354.05,264.65M389.78,266.34L383.83,260.99M419.55,262.69L413.61,257.33M449.33,259.03L443.38,253.68M479.11,255.38L473.16,250.02M508.88,251.72L502.94,246.37M538.66,248.06L532.71,242.71M568.43,244.41L562.49,239.05M598.21,240.75L592.27,235.40M627.99,237.10L622.04,231.74M657.76,233.44L651.82,228.09M687.54,229.78L681.60,224.43M717.32,226.13L711.37,220.77M747.09,222.47L741.15,217.12M776.87,218.81L770.92,213.46M806.65,215.16L800.70,209.81M836.42,211.50L830.48,206.15M866.20,207.85L860.25,202.49M895.97,204.19L890.03,198.84M925.75,200.53L919.81,195.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,270.00 354.05,264.65 354.05,304.65 360.00,310.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="264.65" x2="360.00" y2="310.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,270.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="10" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="20" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="100" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="100" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="210" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="260" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="300" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="500" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,1.4h7.2v7.2h-7.2zM1.4,11.4h7.2v7.2h-7.2zM1.4,21.4h7.2v7.2h-7.2zM1.4,31.4h7.2v7.2h-7.2zM11.4,1.4h7.2v7.2h-7.2zM11.4,11.4h7.2v7.2h-7.2zM11.4,21.4h7.2v7.2h-7.2zM11.4,31.4h7.2v7.2h-7.2zM21.4,1.4h7.2v7.2h-7.2zM21.4,11.4h7.2v7.2h-7.2zM21.4,21.4h7.2v7.2h-7.2zM21.4,31.4h7.2v7.2h-7.2zM31.4,1.4h7.2v7.2h-7.2zM31.4,11.4h7.2v7.2h-7.2zM31.4,21.4h7.2v7.2h-7.2zM31.4,31.4h7.2v7.2h-7.2zM41.4,1.4h7.2v7.2h-7.2zM41.4,11.4h7.2v7.2h-7.2zM41.4,21.4h7.2v7.2h-7.2zM41.4,31.4h7.2v7.2h-7.2zM51.4,1.4h7.2v7.2h-7.2zM51.4,11.4h7.2v7.2h-7.2zM51.4,21.4h7.2v7.2h-7.2zM51.4,31.4h7.2v7.2h-7.2zM61.4,1.4h7.2v7.2h-7.2zM61.4,11.4h7.2v7.2h-7.2zM61.4,21.4h7.2v7.2h-7.2zM61.4,31.4h7.2v7.2h-7.2zM71.4,1.4h7.2v7.2h-7.2zM71.4,11.4h7.2v7.2h-7.2zM71.4,21.4h7.2v7.2h-7.2zM71.4,31.4h7.2v7.2h-7.2zM81.4,1.4h7.2v7.2h-7.2zM81.4,11.4h7.2v7.2h-7.2zM81.4,21.4h7.2v7.2h-7.2zM81.4,31.4h7.2v7.2h-7.2zM91.4,1.4h7.2v7.2h-7.2zM91.4,11.4h7.2v7.2h-7.2zM91.4,21.4h7.2v7.2h-7.2zM91.4,31.4h7.2v7.2h-7.2zM101.4,1.4h7.2v7.2h-7.2zM101.4,11.4h7.2v7.2h-7.2zM101.4,21.4h7.2v7.2h-7.2zM101.4,31.4h7.2v7.2h-7.2zM111.4,1.4h7.2v7.2h-7.2zM111.4,11.4h7.2v7.2h-7.2zM111.4,21.4h7.2v7.2h-7.2zM111.4,31.4h7.2v7.2h-7.2zM121.4,1.4h7.2v7.2h-7.2zM121.4,11.4h7.2v7.2h-7.2zM121.4,21.4h7.2v7.2h-7.2zM121.4,31.4h7.2v7.2h-7.2zM131.4,1.4h7.2v7.2h-7.2zM131.4,11.4h7.2v7.2h-7.2zM131.4,21.4h7.2v7.2h-7.2zM131.4,31.4h7.2v7.2h-7.2zM141.4,1.4h7.2v7.2h-7.2zM141.4,11.4h7.2v7.2h-7.2zM141.4,21.4h7.2v7.2h-7.2zM141.4,31.4h7.2v7.2h-7.2zM151.4,1.4h7.2v7.2h-7.2zM151.4,11.4h7.2v7.2h-7.2zM151.4,21.4h7.2v7.2h-7.2zM151.4,31.4h7.2v7.2h-7.2zM161.4,1.4h7.2v7.2h-7.2zM161.4,11.4h7.2v7.2h-7.2zM161.4,21.4h7.2v7.2h-7.2zM161.4,31.4h7.2v7.2h-7.2zM171.4,1.4h7.2v7.2h-7.2zM171.4,11.4h7.2v7.2h-7.2zM171.4,21.4h7.2v7.2h-7.2zM171.4,31.4h7.2v7.2h-7.2zM181.4,1.4h7.2v7.2h-7.2zM181.4,11.4h7.2v7.2h-7.2zM181.4,21.4h7.2v7.2h-7.2zM181.4,31.4h7.2v7.2h-7.2zM191.4,1.4h7.2v7.2h-7.2zM191.4,11.4h7.2v7.2h-7.2zM191.4,21.4h7.2v7.2h-7.2zM191.4,31.4h7.2v7.2h-7.2zM201.4,1.4h7.2v7.2h-7.2zM201.4,11.4h7.2v7.2h-7.2zM201.4,21.4h7.2v7.2h-7.2zM201.4,31.4h7.2v7.2h-7.2zM211.4,1.4h7.2v7.2h-7.2zM211.4,11.4h7.2v7.2h-7.2zM211.4,21.4h7.2v7.2h-7.2zM211.4,31.4h7.2v7.2h-7.2zM221.4,1.4h7.2v7.2h-7.2zM221.4,11.4h7.2v7.2h-7.2zM221.4,21.4h7.2v7.2h-7.2zM221.4,31.4h7.2v7.2h-7.2zM231.4,1.4h7.2v7.2h-7.2zM231.4,11.4h7.2v7.2h-7.2zM231.4,21.4h7.2v7.2h-7.2zM231.4,31.4h7.2v7.2h-7.2zM241.4,1.4h7.2v7.2h-7.2zM241.4,11.4h7.2v7.2h-7.2zM241.4,21.4h7.2v7.2h-7.2zM241.4,31.4h7.2v7.2h-7.2zM251.4,1.4h7.2v7.2h-7.2zM251.4,11.4h7.2v7.2h-7.2zM251.4,21.4h7.2v7.2h-7.2zM251.4,31.4h7.2v7.2h-7.2zM261.4,1.4h7.2v7.2h-7.2zM261.4,11.4h7.2v7.2h-7.2zM261.4,21.4h7.2v7.2h-7.2zM261.4,31.4h7.2v7.2h-7.2zM271.4,1.4h7.2v7.2h-7.2zM271.4,11.4h7.2v7.2h-7.2zM271.4,21.4h7.2v7.2h-7.2zM271.4,31.4h7.2v7.2h-7.2zM281.4,1.4h7.2v7.2h-7.2zM281.4,11.4h7.2v7.2h-7.2zM281.4,21.4h7.2v7.2h-7.2zM281.4,31.4h7.2v7.2h-7.2zM291.4,1.4h7.2v7.2h-7.2zM291.4,11.4h7.2v7.2h-7.2zM291.4,21.4h7.2v7.2h-7.2zM291.4,31.4h7.2v7.2h-7.2zM301.4,1.4h7.2v7.2h-7.2zM301.4,11.4h7.2v7.2h-7.2zM301.4,21.4h7.2v7.2h-7.2zM301.4,31.4h7.2v7.2h-7.2zM311.4,1.4h7.2v7.2h-7.2zM311.4,11.4h7.2v7.2h-7.2zM311.4,21.4h7.2v7.2h-7.2zM311.4,31.4h7.2v7.2h-7.2zM321.4,1.4h7.2v7.2h-7.2zM321.4,11.4h7.2v7.2h-7.2zM321.4,21.4h7.2v7.2h-7.2zM321.4,31.4h7.2v7.2h-7.2zM331.4,1.4h7.2v7.2h-7.2zM331.4,11.4h7.2v7.2h-7.2zM331.4,21.4h7.2v7.2h-7.2zM331.4,31.4h7.2v7.2h-7.2zM341.4,1.4h7.2v7.2h-7.2zM341.4,11.4h7.2v7.2h-7.2zM341.4,21.4h7.2v7.2h-7.2zM341.4,31.4h7.2v7.2h-7.2zM351.4,1.4h7.2v7.2h-7.2zM351.4,11.4h7.2v7.2h-7.2zM351.4,21.4h7.2v7.2h-7.2zM351.4,31.4h7.2v7.2h-7.2zM361.4,1.4h7.2v7.2h-7.2zM361.4,11.4h7.2v7.2h-7.2zM361.4,21.4h7.2v7.2h-7.2zM361.4,31.4h7.2v7.2h-7.2zM371.4,1.4h7.2v7.2h-7.2zM371.4,11.4h7.2v7.2h-7.2zM371.4,21.4h7.2v7.2h-7.2zM371.4,31.4h7.2v7.2h-7.2zM381.4,1.4h7.2v7.2h-7.2zM381.4,11.4h7.2v7.2h-7.2zM381.4,21.4h7.2v7.2h-7.2zM381.4,31.4h7.2v7.2h-7.2zM391.4,1.4h7.2v7.2h-7.2zM391.4,11.4h7.2v7.2h-7.2zM391.4,21.4h7.2v7.2h-7.2zM391.4,31.4h7.2v7.2h-7.2zM401.4,1.4h7.2v7.2h-7.2zM401.4,11.4h7.2v7.2h-7.2zM401.4,21.4h7.2v7.2h-7.2zM401.4,31.4h7.2v7.2h-7.2zM411.4,1.4h7.2v7.2h-7.2zM411.4,11.4h7.2v7.2h-7.2zM411.4,21.4h7.2v7.2h-7.2zM411.4,31.4h7.2v7.2h-7.2zM421.4,1.4h7.2v7.2h-7.2zM421.4,11.4h7.2v7.2h-7.2zM421.4,21.4h7.2v7.2h-7.2zM421.4,31.4h7.2v7.2h-7.2zM431.4,1.4h7.2v7.2h-7.2zM431.4,11.4h7.2v7.2h-7.2zM431.4,21.4h7.2v7.2h-7.2zM431.4,31.4h7.2v7.2h-7.2zM441.4,1.4h7.2v7.2h-7.2zM441.4,11.4h7.2v7.2h-7.2zM441.4,21.4h7.2v7.2h-7.2zM441.4,31.4h7.2v7.2h-7.2zM451.4,1.4h7.2v7.2h-7.2zM451.4,11.4h7.2v7.2h-7.2zM451.4,21.4h7.2v7.2h-7.2zM451.4,31.4h7.2v7.2h-7.2zM461.4,1.4h7.2v7.2h-7.2zM461.4,11.4h7.2v7.2h-7.2zM461.4,21.4h7.2v7.2h-7.2zM461.4,31.4h7.2v7.2h-7.2zM471.4,1.4h7.2v7.2h-7.2zM471.4,11.4h7.2v7.2h-7.2zM471.4,21.4h7.2v7.2h-7.2zM471.4,31.4h7.2v7.2h-7.2zM481.4,1.4h7.2v7.2h-7.2zM481.4,11.4h7.2v7.2h-7.2zM481.4,21.4h7.2v7.2h-7.2zM481.4,31.4h7.2v7.2h-7.2zM491.4,1.4h7.2v7.2h-7.2zM491.4,11.4h7.2v7.2h-7.2zM491.4,21.4h7.2v7.2h-7.2zM491.4,31.4h7.2v7.2h-7.2zM501.4,1.4h7.2v7.2h-7.2zM501.4,11.4h7.2v7.2h-7.2zM501.4,21.4h7.2v7.2h-7.2zM501.4,31.4h7.2v7.2h-7.2zM511.4,1.4h7.2v7.2h-7.2zM511.4,11.4h7.2v7.2h-7.2zM511.4,21.4h7.2v7.2h-7.2zM511.4,31.4h7.2v7.2h-7.2zM521.4,1.4h7.2v7.2h-7.2zM521.4,11.4h7.2v7.2h-7.2zM521.4,21.4h7.2v7.2h-7.2zM521.4,31.4h7.2v7.2h-7.2zM531.4,1.4h7.2v7.2h-7.2zM531.4,11.4h7.2v7.2h-7.2zM531.4,21.4h7.2v7.2h-7.2zM531.4,31.4h7.2v7.2h-7.2zM541.4,21.4h7.2v7.2h-7.2zM541.4,31.4h7.2v7.2h-7.2zM551.4,21.4h7.2v7.2h-7.2zM551.4,31.4h7.2v7.2h-7.2zM561.4,21.4h7.2v7.2h-7.2zM561.4,31.4h7.2v7.2h-7.2z" stroke="#15181C" stroke-width="1.05" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,338.00 925.75,268.53 919.81,263.18 354.05,332.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,338.00L354.05,332.65M389.78,334.34L383.83,328.99M419.55,330.69L413.61,325.33M449.33,327.03L443.38,321.68M479.11,323.38L473.16,318.02M508.88,319.72L502.94,314.37M538.66,316.06L532.71,310.71M568.43,312.41L562.49,307.05M598.21,308.75L592.27,303.40M627.99,305.10L622.04,299.74M657.76,301.44L651.82,296.09M687.54,297.78L681.60,292.43M717.32,294.13L711.37,288.77M747.09,290.47L741.15,285.12M776.87,286.81L770.92,281.46M806.65,283.16L800.70,277.81M836.42,279.50L830.48,274.15M866.20,275.85L860.25,270.49M895.97,272.19L890.03,266.84M925.75,268.53L919.81,263.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,338.00 354.05,332.65 354.05,372.65 360.00,378.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="332.65" x2="360.00" y2="378.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,338.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="10" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="190" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="300" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="300" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="420" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="450" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="460" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="500" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="520" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="530" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="540" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,31.4h7.2v7.2h-7.2zM11.4,31.4h7.2v7.2h-7.2zM21.4,31.4h7.2v7.2h-7.2zM31.4,31.4h7.2v7.2h-7.2zM41.4,31.4h7.2v7.2h-7.2zM51.4,31.4h7.2v7.2h-7.2zM61.4,31.4h7.2v7.2h-7.2zM71.4,31.4h7.2v7.2h-7.2zM81.4,31.4h7.2v7.2h-7.2zM91.4,31.4h7.2v7.2h-7.2zM101.4,31.4h7.2v7.2h-7.2zM111.4,31.4h7.2v7.2h-7.2zM121.4,31.4h7.2v7.2h-7.2zM131.4,31.4h7.2v7.2h-7.2zM141.4,31.4h7.2v7.2h-7.2zM151.4,31.4h7.2v7.2h-7.2zM161.4,31.4h7.2v7.2h-7.2zM171.4,31.4h7.2v7.2h-7.2zM181.4,31.4h7.2v7.2h-7.2zM191.4,31.4h7.2v7.2h-7.2zM201.4,31.4h7.2v7.2h-7.2zM211.4,31.4h7.2v7.2h-7.2zM221.4,31.4h7.2v7.2h-7.2zM231.4,31.4h7.2v7.2h-7.2zM241.4,31.4h7.2v7.2h-7.2zM251.4,31.4h7.2v7.2h-7.2zM261.4,31.4h7.2v7.2h-7.2zM271.4,31.4h7.2v7.2h-7.2zM281.4,31.4h7.2v7.2h-7.2zM291.4,31.4h7.2v7.2h-7.2zM301.4,31.4h7.2v7.2h-7.2zM311.4,31.4h7.2v7.2h-7.2zM321.4,31.4h7.2v7.2h-7.2zM331.4,31.4h7.2v7.2h-7.2zM341.4,31.4h7.2v7.2h-7.2zM351.4,31.4h7.2v7.2h-7.2zM361.4,31.4h7.2v7.2h-7.2zM371.4,31.4h7.2v7.2h-7.2zM381.4,31.4h7.2v7.2h-7.2zM391.4,31.4h7.2v7.2h-7.2zM401.4,31.4h7.2v7.2h-7.2zM411.4,31.4h7.2v7.2h-7.2zM421.4,31.4h7.2v7.2h-7.2zM431.4,31.4h7.2v7.2h-7.2zM441.4,31.4h7.2v7.2h-7.2zM451.4,31.4h7.2v7.2h-7.2zM461.4,31.4h7.2v7.2h-7.2zM471.4,31.4h7.2v7.2h-7.2zM481.4,31.4h7.2v7.2h-7.2zM491.4,31.4h7.2v7.2h-7.2zM501.4,31.4h7.2v7.2h-7.2zM511.4,31.4h7.2v7.2h-7.2zM521.4,31.4h7.2v7.2h-7.2zM531.4,31.4h7.2v7.2h-7.2zM541.4,31.4h7.2v7.2h-7.2zM551.4,31.4h7.2v7.2h-7.2zM561.4,31.4h7.2v7.2h-7.2z" stroke="#15181C" stroke-width="1.05" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,406.00 925.75,336.53 919.81,331.18 354.05,400.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,406.00L354.05,400.65M389.78,402.34L383.83,396.99M419.55,398.69L413.61,393.33M449.33,395.03L443.38,389.68M479.11,391.38L473.16,386.02M508.88,387.72L502.94,382.37M538.66,384.06L532.71,378.71M568.43,380.41L562.49,375.05M598.21,376.75L592.27,371.40M627.99,373.10L622.04,367.74M657.76,369.44L651.82,364.09M687.54,365.78L681.60,360.43M717.32,362.13L711.37,356.77M747.09,358.47L741.15,353.12M776.87,354.81L770.92,349.46M806.65,351.16L800.70,345.81M836.42,347.50L830.48,342.15M866.20,343.85L860.25,338.49M895.97,340.19L890.03,334.84M925.75,336.53L919.81,331.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,406.00 354.05,400.65 354.05,440.65 360.00,446.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="400.65" x2="360.00" y2="446.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,406.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="80" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="300" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="370" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="500" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="530" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="530" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="540" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,474.00 925.75,404.53 919.81,399.18 354.05,468.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,474.00L354.05,468.65M389.78,470.34L383.83,464.99M419.55,466.69L413.61,461.33M449.33,463.03L443.38,457.68M479.11,459.38L473.16,454.02M508.88,455.72L502.94,450.37M538.66,452.06L532.71,446.71M568.43,448.41L562.49,443.05M598.21,444.75L592.27,439.40M627.99,441.10L622.04,435.74M657.76,437.44L651.82,432.09M687.54,433.78L681.60,428.43M717.32,430.13L711.37,424.77M747.09,426.47L741.15,421.12M776.87,422.81L770.92,417.46M806.65,419.16L800.70,413.81M836.42,415.50L830.48,410.15M866.20,411.85L860.25,406.49M895.97,408.19L890.03,402.84M925.75,404.53L919.81,399.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,474.00 354.05,468.65 354.05,508.65 360.00,514.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="468.65" x2="360.00" y2="514.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,474.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="370" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="370" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="380" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="420" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="420" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="460" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="540" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,542.00 925.75,472.53 919.81,467.18 354.05,536.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,542.00L354.05,536.65M389.78,538.34L383.83,532.99M419.55,534.69L413.61,529.33M449.33,531.03L443.38,525.68M479.11,527.38L473.16,522.02M508.88,523.72L502.94,518.37M538.66,520.06L532.71,514.71M568.43,516.41L562.49,511.05M598.21,512.75L592.27,507.40M627.99,509.10L622.04,503.74M657.76,505.44L651.82,500.09M687.54,501.78L681.60,496.43M717.32,498.13L711.37,492.77M747.09,494.47L741.15,489.12M776.87,490.81L770.92,485.46M806.65,487.16L800.70,481.81M836.42,483.50L830.48,478.15M866.20,479.85L860.25,474.49M895.97,476.19L890.03,470.84M925.75,472.53L919.81,467.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,542.00 354.05,536.65 354.05,576.65 360.00,582.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="536.65" x2="360.00" y2="582.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,542.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="40" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="300" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="360" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="360" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="440" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="500" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="520" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="540" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,610.00 925.75,540.53 919.81,535.18 354.05,604.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,610.00L354.05,604.65M389.78,606.34L383.83,600.99M419.55,602.69L413.61,597.33M449.33,599.03L443.38,593.68M479.11,595.38L473.16,590.02M508.88,591.72L502.94,586.37M538.66,588.06L532.71,582.71M568.43,584.41L562.49,579.05M598.21,580.75L592.27,575.40M627.99,577.10L622.04,571.74M657.76,573.44L651.82,568.09M687.54,569.78L681.60,564.43M717.32,566.13L711.37,560.77M747.09,562.47L741.15,557.12M776.87,558.81L770.92,553.46M806.65,555.16L800.70,549.81M836.42,551.50L830.48,546.15M866.20,547.85L860.25,542.49M895.97,544.19L890.03,538.84M925.75,540.53L919.81,535.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,610.00 354.05,604.65 354.05,644.65 360.00,650.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="604.65" x2="360.00" y2="650.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,610.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="130" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="230" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="370" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="500" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="540" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="540" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,678.00 925.75,608.53 919.81,603.18 354.05,672.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,678.00L354.05,672.65M389.78,674.34L383.83,668.99M419.55,670.69L413.61,665.33M449.33,667.03L443.38,661.68M479.11,663.38L473.16,658.02M508.88,659.72L502.94,654.37M538.66,656.06L532.71,650.71M568.43,652.41L562.49,647.05M598.21,648.75L592.27,643.40M627.99,645.10L622.04,639.74M657.76,641.44L651.82,636.09M687.54,637.78L681.60,632.43M717.32,634.13L711.37,628.77M747.09,630.47L741.15,625.12M776.87,626.81L770.92,621.46M806.65,623.16L800.70,617.81M836.42,619.50L830.48,614.15M866.20,615.85L860.25,610.49M895.97,612.19L890.03,606.84M925.75,608.53L919.81,603.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,678.00 354.05,672.65 354.05,712.65 360.00,718.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="672.65" x2="360.00" y2="718.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,678.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="10" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="10" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="10" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="30" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="30" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="190" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="290" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="290" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="320" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="330" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="350" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="360" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="410" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="450" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="510" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="520" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="540" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="540" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,746.00 925.75,676.53 919.81,671.18 354.05,740.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,746.00L354.05,740.65M389.78,742.34L383.83,736.99M419.55,738.69L413.61,733.33M449.33,735.03L443.38,729.68M479.11,731.38L473.16,726.02M508.88,727.72L502.94,722.37M538.66,724.06L532.71,718.71M568.43,720.41L562.49,715.05M598.21,716.75L592.27,711.40M627.99,713.10L622.04,707.74M657.76,709.44L651.82,704.09M687.54,705.78L681.60,700.43M717.32,702.13L711.37,696.77M747.09,698.47L741.15,693.12M776.87,694.81L770.92,689.46M806.65,691.16L800.70,685.81M836.42,687.50L830.48,682.15M866.20,683.85L860.25,678.49M895.97,680.19L890.03,674.84M925.75,676.53L919.81,671.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,746.00 354.05,740.65 354.05,780.65 360.00,786.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="740.65" x2="360.00" y2="786.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,746.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="0" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="20" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="20" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="30" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="40" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="70" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="100" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="140" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="230" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="230" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="240" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="250" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="270" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="280" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="290" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="300" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="320" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="320" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="330" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="370" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="370" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="380" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="380" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="400" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="400" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="420" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="430" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="430" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="440" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="460" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="460" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="470" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="490" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="540" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="540" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="560" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="10" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<polygon points="360.00,814.00 925.75,744.53 919.81,739.18 354.05,808.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M360.00,814.00L354.05,808.65M389.78,810.34L383.83,804.99M419.55,806.69L413.61,801.33M449.33,803.03L443.38,797.68M479.11,799.38L473.16,794.02M508.88,795.72L502.94,790.37M538.66,792.06L532.71,786.71M568.43,788.41L562.49,783.05M598.21,784.75L592.27,779.40M627.99,781.10L622.04,775.74M657.76,777.44L651.82,772.09M687.54,773.78L681.60,768.43M717.32,770.13L711.37,764.77M747.09,766.47L741.15,761.12M776.87,762.81L770.92,757.46M806.65,759.16L800.70,753.81M836.42,755.50L830.48,750.15M866.20,751.85L860.25,746.49M895.97,748.19L890.03,742.84M925.75,744.53L919.81,739.18" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="360.00,814.00 354.05,808.65 354.05,848.65 360.00,854.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="354.05" y1="808.65" x2="360.00" y2="854.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,360.00,814.00)">
+<rect x="0" y="0" width="570" height="40" fill="#FFFFFF"/>
+<rect x="0" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="0" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="0" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="0" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="10" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="10" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="20" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="20" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="30" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="40" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="50" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="50" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="50" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="60" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="70" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="80" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="80" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="90" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="90" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="100" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="100" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="100" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="110" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="110" y="30" width="10" height="10" fill="#2A2F35"/>
+<rect x="120" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="120" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="120" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="130" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="130" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="140" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="140" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="150" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="150" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="160" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="160" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="170" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="170" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="180" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="180" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="190" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="190" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="200" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="200" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="210" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="210" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="220" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="220" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="220" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="230" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="240" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="240" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="250" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="260" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="260" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="260" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="270" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="270" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="280" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="280" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="290" y="20" width="10" height="10" fill="#2A2F35"/>
+<rect x="290" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="300" y="0" width="10" height="10" fill="#2A2F35"/>
+<rect x="300" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="310" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="310" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="310" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="320" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="330" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="340" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="340" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="350" y="0" width="10" height="10" fill="url(#pMed)"/>
+<rect x="350" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="350" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="360" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="380" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="390" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="390" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="390" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="390" y="30" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="400" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="400" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="410" y="0" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="410" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="420" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="420" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="430" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="430" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="440" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="450" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="450" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="450" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="460" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="460" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="460" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="470" y="10" width="10" height="10" fill="#2A2F35"/>
+<rect x="470" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="480" y="10" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="480" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="490" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="500" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="500" y="30" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="510" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="10" width="10" height="10" fill="url(#pDead)"/>
+<rect x="510" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="520" y="0" width="10" height="10" fill="url(#pDead)"/>
+<rect x="520" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="10" width="10" height="10" fill="url(#pMed)"/>
+<rect x="530" y="20" width="10" height="10" fill="url(#pMed)"/>
+<rect x="540" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="550" y="20" width="10" height="10" fill="url(#pSlow)"/>
+<rect x="550" y="30" width="10" height="10" fill="url(#pMed)"/>
+<rect x="560" y="20" width="10" height="10" fill="url(#pDead)"/>
+<rect x="560" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="560" y="10" width="10" height="10" fill="#EEF0F2"/>
+<rect x="540" y="0" width="10" height="10" fill="#EEF0F2"/>
+<rect x="550" y="0" width="10" height="10" fill="#EEF0F2"/>
+<path d="M10,0V40M20,0V40M40,0V40M50,0V40M70,0V40M80,0V40M100,0V40M110,0V40M130,0V40M140,0V40M160,0V40M170,0V40M190,0V40M200,0V40M220,0V40M230,0V40M250,0V40M260,0V40M280,0V40M290,0V40M310,0V40M320,0V40M340,0V40M350,0V40M370,0V40M380,0V40M400,0V40M410,0V40M430,0V40M440,0V40M460,0V40M470,0V40M490,0V40M500,0V40M520,0V40M530,0V40M550,0V40M560,0V40" stroke="#7E868F" stroke-width="0.5" fill="none"/>
+<path d="M0,0V40M30,0V40M60,0V40M90,0V40M120,0V40M150,0V40M180,0V40M210,0V40M240,0V40M270,0V40M300,0V40M330,0V40M360,0V40M390,0V40M420,0V40M450,0V40M480,0V40M510,0V40M540,0V40M570,0V40M0,0H570M0,10H570M0,20H570M0,30H570M0,40H570" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="570" height="40" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<rect x="262.5" y="276.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="297" class="c s22 bb" text-anchor="middle">A</text>
+<rect x="298.5" y="282.5" width="15" height="15" fill="#15181C"/>
+<text x="306" y="294.5" class="c s13 bb wh" text-anchor="middle">B</text>
+<text x="318" y="294" class="s11 i2">aisle</text>
+<text x="958" y="214.53447425906595" class="c s16 bb">86.9 %</text>
+<text x="958" y="229.53447425906595" class="s11 i3">193 / 222</text>
+<rect x="1006.5" y="208.03447425906595" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="208.53447425906595" width="30.4" height="4" fill="#15181C"/>
+<rect x="262.5" y="344.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="365" class="c s22 bb" text-anchor="middle">B</text>
+<rect x="298.5" y="365.5" width="15" height="15" fill="#15181C"/>
+<text x="306" y="377.5" class="c s13 bb wh" text-anchor="middle">B</text>
+<text x="318" y="377" class="s11 i2">L1</text>
+<text x="958" y="282.534474259066" class="c s16 bb">83.8 %</text>
+<text x="958" y="297.534474259066" class="s11 i3">186 / 222</text>
+<rect x="1006.5" y="276.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="276.534474259066" width="29.3" height="4" fill="#15181C"/>
+<rect x="262.5" y="412.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="433" class="c s22 bb" text-anchor="middle">C</text>
+<text x="958" y="350.534474259066" class="c s16 bb">82.0 %</text>
+<text x="958" y="365.534474259066" class="s11 i3">182 / 222</text>
+<rect x="1006.5" y="344.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="344.534474259066" width="28.7" height="4" fill="#15181C"/>
+<rect x="262.5" y="480.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="501" class="c s22 bb" text-anchor="middle">D</text>
+<text x="958" y="418.534474259066" class="c s16 bb">80.2 %</text>
+<text x="958" y="433.534474259066" class="s11 i3">178 / 222</text>
+<rect x="1006.5" y="412.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="412.534474259066" width="28.1" height="4" fill="#15181C"/>
+<rect x="262.5" y="548.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="569" class="c s22 bb" text-anchor="middle">E</text>
+<text x="958" y="486.534474259066" class="c s16 bb">79.3 %</text>
+<text x="958" y="501.534474259066" class="s11 i3">176 / 222</text>
+<rect x="1006.5" y="480.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="480.534474259066" width="27.7" height="4" fill="#15181C"/>
+<rect x="262.5" y="616.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="637" class="c s22 bb" text-anchor="middle">F</text>
+<text x="958" y="554.534474259066" class="c s16 bb">78.4 %</text>
+<text x="958" y="569.534474259066" class="s11 i3">174 / 222</text>
+<rect x="1006.5" y="548.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="548.534474259066" width="27.4" height="4" fill="#15181C"/>
+<rect x="262.5" y="684.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="705" class="c s22 bb" text-anchor="middle">G</text>
+<text x="958" y="622.534474259066" class="c s16 bb">76.1 %</text>
+<text x="958" y="637.534474259066" class="s11 i3">169 / 222</text>
+<rect x="1006.5" y="616.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="616.534474259066" width="26.6" height="4" fill="#15181C"/>
+<rect x="262.5" y="752.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="773" class="c s22 bb" text-anchor="middle">H</text>
+<text x="958" y="690.534474259066" class="c s16 bb">81.1 %</text>
+<text x="958" y="705.534474259066" class="s11 i3">180 / 222</text>
+<rect x="1006.5" y="684.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="684.534474259066" width="28.4" height="4" fill="#15181C"/>
+<rect x="262.5" y="820.5" width="27" height="27" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="276" y="841" class="c s22 bb" text-anchor="middle">I</text>
+<text x="958" y="758.534474259066" class="c s16 bb">65.2 %</text>
+<text x="958" y="773.534474259066" class="s11 i3">146 / 224</text>
+<rect x="1006.5" y="752.034474259066" width="36" height="5" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="1007" y="752.534474259066" width="22.8" height="4" fill="#15181C"/>
+<text x="936" y="194.53447425906595" class="s11 i3">Level</text>
+<text x="942" y="209.53447425906595" class="s11 i2" text-anchor="middle">4</text>
+<text x="942" y="219.53447425906595" class="s11 i2" text-anchor="middle">3</text>
+<text x="942" y="229.53447425906595" class="s11 i2" text-anchor="middle">2</text>
+<text x="942" y="239.53447425906595" class="s11 i2" text-anchor="middle">1</text>
+<line x1="958" y1="198.53447425906595" x2="1040" y2="198.53447425906595" stroke="#E1E4E8" stroke-width="1"/>
+<text x="374.9" y="865.2" class="s11 i3" text-anchor="middle" transform="rotate(-7 374.9 865.2)">01</text>
+<text x="404.7" y="861.5" class="s11 i3" text-anchor="middle" transform="rotate(-7 404.7 861.5)">02</text>
+<text x="434.4" y="857.9" class="s11 i3" text-anchor="middle" transform="rotate(-7 434.4 857.9)">03</text>
+<text x="464.2" y="854.2" class="s11 i3" text-anchor="middle" transform="rotate(-7 464.2 854.2)">04</text>
+<text x="494.0" y="850.5" class="s11 i3" text-anchor="middle" transform="rotate(-7 494.0 850.5)">05</text>
+<text x="523.8" y="846.9" class="s11 i3" text-anchor="middle" transform="rotate(-7 523.8 846.9)">06</text>
+<text x="553.5" y="843.2" class="s11 i3" text-anchor="middle" transform="rotate(-7 553.5 843.2)">07</text>
+<text x="583.3" y="839.6" class="s11 i3" text-anchor="middle" transform="rotate(-7 583.3 839.6)">08</text>
+<text x="613.1" y="835.9" class="s11 i3" text-anchor="middle" transform="rotate(-7 613.1 835.9)">09</text>
+<text x="642.9" y="832.3" class="s11 i3" text-anchor="middle" transform="rotate(-7 642.9 832.3)">10</text>
+<text x="672.7" y="828.6" class="s11 i3" text-anchor="middle" transform="rotate(-7 672.7 828.6)">11</text>
+<text x="702.4" y="825.0" class="s11 i3" text-anchor="middle" transform="rotate(-7 702.4 825.0)">12</text>
+<text x="732.2" y="821.3" class="s11 i3" text-anchor="middle" transform="rotate(-7 732.2 821.3)">13</text>
+<text x="762.0" y="817.6" class="s11 i3" text-anchor="middle" transform="rotate(-7 762.0 817.6)">14</text>
+<text x="791.8" y="814.0" class="s11 i3" text-anchor="middle" transform="rotate(-7 791.8 814.0)">15</text>
+<text x="821.5" y="810.3" class="s11 i3" text-anchor="middle" transform="rotate(-7 821.5 810.3)">16</text>
+<text x="851.3" y="806.7" class="s11 i3" text-anchor="middle" transform="rotate(-7 851.3 806.7)">17</text>
+<text x="881.1" y="803.0" class="s11 i3" text-anchor="middle" transform="rotate(-7 881.1 803.0)">18</text>
+<text x="910.9" y="799.4" class="s11 i3" text-anchor="middle" transform="rotate(-7 910.9 799.4)">19</text>
+<text x="352" y="867" class="s11 i3" text-anchor="end">Section</text>
+<polygon points="757.02,629.25 766.94,628.03 766.94,638.03 757.02,639.25" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<polygon points="389.78,296.34 399.70,295.13 399.70,305.13 389.78,306.34" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<polygon points="360.00,270.00 369.93,268.78 369.93,278.78 360.00,280.00" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<polygon points="677.61,707.00 687.54,705.78 687.54,715.78 677.61,717.00" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<polygon points="558.51,401.63 568.43,400.41 568.43,410.41 558.51,411.63" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<polygon points="618.06,598.31 627.99,597.10 627.99,607.10 618.06,608.31" fill="none" stroke="#0066B0" stroke-width="1.8"/>
+<path d="M761.98,633.64 L761.98,272.56 L394.74,317.65 L394.74,307.23" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linejoin="round"/>
+<path d="M761.98,633.64 L761.98,272.56 L394.74,317.65 L394.74,307.23" stroke="#0066B0" stroke-width="1.6" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)" stroke-linejoin="round"/>
+<circle cx="761.98" cy="633.64" r="3" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.6"/>
+<circle cx="608.1" cy="291.5" r="13" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="596.1" y1="291.5" x2="620.1" y2="291.5" stroke="#0066B0" stroke-width="1"/>
+<text x="608.1" y="289.0" class="c s12 bb bl" text-anchor="middle">1</text>
+<text x="608.1" y="302.0" class="c s11 bb bl" text-anchor="middle">R1</text>
+<path d="M364.96,274.39 L364.96,247.39 L682.58,208.39 L682.58,704.89" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linejoin="round"/>
+<path d="M364.96,274.39 L364.96,247.39 L682.58,208.39 L682.58,704.89" stroke="#0066B0" stroke-width="1.6" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)" stroke-linejoin="round"/>
+<circle cx="364.96" cy="274.39" r="3" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.6"/>
+<circle cx="620.0" cy="216.1" r="13" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="608.0" y1="216.1" x2="632.0" y2="216.1" stroke="#0066B0" stroke-width="1"/>
+<text x="620.0" y="213.6" class="c s12 bb bl" text-anchor="middle">2</text>
+<text x="620.0" y="226.6" class="c s11 bb bl" text-anchor="middle">R2</text>
+<path d="M563.47,406.02 L563.47,432.94 L623.02,425.62 L623.02,596.20" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linejoin="round"/>
+<path d="M563.47,406.02 L563.47,432.94 L623.02,425.62 L623.02,596.20" stroke="#0066B0" stroke-width="1.6" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)" stroke-linejoin="round"/>
+<circle cx="563.47" cy="406.02" r="3" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.6"/>
+<circle cx="656.8" cy="421.5" r="13" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="644.8" y1="421.5" x2="668.8" y2="421.5" stroke="#0066B0" stroke-width="1"/>
+<text x="656.8" y="419.0" class="c s12 bb bl" text-anchor="middle">3</text>
+<text x="656.8" y="432.0" class="c s11 bb bl" text-anchor="middle">R3</text>
+<polygon points="846.35,288.28 856.27,287.07 856.27,297.07 846.35,298.28" fill="none" stroke="#15181C" stroke-width="1.8"/>
+<line x1="851.31" y1="292.67" x2="876.07" y2="265.69" stroke="#15181C" stroke-width="1"/>
+<circle cx="851.31" cy="292.67" r="1.8" fill="#15181C"/>
+<circle cx="883.1" cy="257.7" r="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="883.1" y="262.7" class="c s14 b" text-anchor="middle">4</text>
+<line x1="550" y1="352" x2="557.5" y2="402.0" stroke="#15181C" stroke-width="1"/>
+<rect x="296.5" y="330.5" width="254" height="150" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="310" y="356" class="c s20 bb">C-07-02-03</text>
+<rect x="463.5" y="341.5" width="74" height="20" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<rect x="468.5" y="347.5" width="9" height="9" fill="#2A2F35"/>
+<text x="482" y="356" class="s11 b">Occupied</text>
+<text x="310" y="376" class="s11 i2">Aisle C · section 07 · level 2 · position 3</text>
+<text x="310" y="392" class="s11 i2">Walk Path 5,210 · not a best location</text>
+<line x1="297" y1="402.5" x2="550" y2="402.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="310" y="420" class="s12 b">5315766</text>
+<text x="376" y="420" class="s12">Air filter - Audi A4</text>
+<text x="310" y="437" class="s11 i2">Stock 24 · slow-moving · 4 picks</text>
+<line x1="297" y1="447.5" x2="550" y2="447.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="322" cy="464" r="11" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="312" y1="464" x2="332" y2="464" stroke="#0066B0" stroke-width="1"/>
+<text x="322" y="461.5" class="c s12 bb bl" text-anchor="middle">3</text>
+<text x="322" y="474.5" class="c s11 bb bl" text-anchor="middle">R3</text>
+<text x="340" y="469" class="s11 b bl">Rule 3 → F-09-02-03, next to partner</text>
+<text x="1068" y="204" class="c s20 bb">Parts table</text>
+<text x="1424" y="204" class="s12 i3" text-anchor="end">keys to Fig. 12</text>
+<line x1="1068" y1="215.5" x2="1424" y2="215.5" stroke="#15181C" stroke-width="1"/>
+<text x="1068" y="232" class="c s13 b i2">Ref</text>
+<text x="1102" y="232" class="c s13 b i2">Part no.</text>
+<text x="1172" y="232" class="c s13 b i2">Description</text>
+<text x="1424" y="232" class="c s13 b i2" text-anchor="end">Qty</text>
+<line x1="1068" y1="239.5" x2="1424" y2="239.5" stroke="#BEC4CB" stroke-width="1"/>
+<circle cx="1080" cy="262" r="11" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="1070" y1="262" x2="1090" y2="262" stroke="#0066B0" stroke-width="1"/>
+<text x="1080" y="259.5" class="c s12 bb bl" text-anchor="middle">1</text>
+<text x="1080" y="272.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<text x="1102" y="260" class="s13 b">4410281</text>
+<text x="1172" y="260" class="s13">Brake pads, front - VW Golf</text>
+<text x="1424" y="260" class="s13" text-anchor="end">18</text>
+<text x="1102" y="277" class="s12 bl b">G-14-04-02 → A-02-01-01 · rule 1</text>
+<text x="1102" y="293" class="s12 i2">fast-moving: 61 picks (24 or more)</text>
+<line x1="1068" y1="302.5" x2="1424" y2="302.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="1080" cy="324" r="11" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="1070" y1="324" x2="1090" y2="324" stroke="#0066B0" stroke-width="1"/>
+<text x="1080" y="321.5" class="c s12 bb bl" text-anchor="middle">2</text>
+<text x="1080" y="334.5" class="c s11 bb bl" text-anchor="middle">R2</text>
+<text x="1102" y="322" class="s13 b">3632446</text>
+<text x="1172" y="322" class="s13">Catalytic converter - BMW 320d</text>
+<text x="1424" y="322" class="s13" text-anchor="end">2</text>
+<text x="1102" y="339" class="s12 bl b">A-01-04-01 → H-11-04-03 · rule 2</text>
+<text x="1102" y="355" class="s12 i2">dead stock: 0 picks; frees a best location</text>
+<line x1="1068" y1="364.5" x2="1424" y2="364.5" stroke="#E1E4E8" stroke-width="1"/>
+<rect x="1062" y="365" width="362" height="61" fill="#E7F0F9"/>
+<circle cx="1080" cy="386" r="11" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="1070" y1="386" x2="1090" y2="386" stroke="#0066B0" stroke-width="1"/>
+<text x="1080" y="383.5" class="c s12 bb bl" text-anchor="middle">3</text>
+<text x="1080" y="396.5" class="c s11 bb bl" text-anchor="middle">R3</text>
+<text x="1102" y="384" class="s13 b">5315766</text>
+<text x="1172" y="384" class="s13">Air filter - Audi A4</text>
+<text x="1424" y="384" class="s13" text-anchor="end">24</text>
+<text x="1102" y="401" class="s12 bl b">C-07-02-03 → F-09-02-03 · rule 3</text>
+<text x="1102" y="417" class="s12 i2">pick group with 5315790: 7 shared jobs</text>
+<line x1="1068" y1="426.5" x2="1424" y2="426.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="1080" cy="448" r="11" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="1080" y="453" class="c s14 b" text-anchor="middle">4</text>
+<text x="1102" y="446" class="s13 b">2555849</text>
+<text x="1172" y="446" class="s13">Brake hose - Toyota Corolla</text>
+<text x="1424" y="446" class="s13" text-anchor="end">30</text>
+<g transform="translate(1102,452) scale(0.5833)" class="ica" style="stroke-width:2.571"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.2v.3"/></g>
+<text x="1120" y="463" class="s12 am b">B-17-03-02 · rule 1 · no space</text>
+<text x="1102" y="479" class="s12 i2">fast-moving: 24 picks; no empty best location left</text>
+<line x1="1068" y1="488.5" x2="1424" y2="488.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1068" y="518" class="c s18 bb">Key to symbols</text>
+<line x1="1068" y1="527.5" x2="1424" y2="527.5" stroke="#15181C" stroke-width="1"/>
+<polygon points="1068.00,545.00 1090.00,542.00 1090.00,556.00 1068.00,559.00" fill="#2A2F35" stroke="#15181C" stroke-width="0.8"/>
+<text x="1098" y="552" class="s12 b">Fast-moving</text>
+<text x="1098" y="566" class="s11 i3">24+ picks</text>
+<polygon points="1248.00,545.00 1270.00,542.00 1270.00,556.00 1248.00,559.00" fill="url(#pMedL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="1278" y="552" class="s12 b">Medium-moving</text>
+<text x="1278" y="566" class="s11 i3">6–23</text>
+<polygon points="1068.00,579.00 1090.00,576.00 1090.00,590.00 1068.00,593.00" fill="url(#pSlowL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="1098" y="586" class="s12 b">Slow-moving</text>
+<text x="1098" y="600" class="s11 i3">1–5</text>
+<polygon points="1248.00,579.00 1270.00,576.00 1270.00,590.00 1248.00,593.00" fill="url(#pDeadL)" stroke="#15181C" stroke-width="0.8"/>
+<text x="1278" y="586" class="s12 b">Dead stock</text>
+<text x="1278" y="600" class="s11 i3">0 picks</text>
+<polygon points="1068.00,613.00 1090.00,610.00 1090.00,624.00 1068.00,627.00" fill="#FFFFFF" stroke="#15181C" stroke-width="0.8"/>
+<text x="1098" y="620" class="s12 b">Empty location</text>
+<text x="1098" y="634" class="s11 i3">outline only</text>
+<polygon points="1248.00,613.00 1270.00,610.00 1270.00,624.00 1248.00,627.00" fill="#FFFFFF" stroke="#15181C" stroke-width="1.8"/>
+<rect x="1274.5" y="611.5" width="13" height="13" fill="#15181C"/>
+<text x="1281" y="622" class="c s12 bb wh" text-anchor="middle">B</text>
+<text x="1294" y="620" class="s12 b">Best location</text>
+<text x="1294" y="634" class="s11 i3">heavy frame, B</text>
+<path d="M1068,652 L1090,652" stroke="#0066B0" stroke-width="1.6" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)"/>
+<text x="1098" y="654" class="s12 b">Recommendation</text>
+<text x="1098" y="668" class="s11 i3">from → to, balloon: ref / rule</text>
+<polygon points="1248.00,647.00 1270.00,644.00 1270.00,658.00 1248.00,661.00" fill="#EEF0F2" stroke="#15181C" stroke-width="0.8"/>
+<text x="1278" y="654" class="s12 b">No location in file</text>
+<text x="1278" y="668" class="s11 i3">end of section 19</text>
+<text x="1068" y="702" class="c s18 bb">Locations by class of stored part</text>
+<line x1="1068" y1="711.5" x2="1424" y2="711.5" stroke="#15181C" stroke-width="1"/>
+<text x="1068" y="734" class="c s20 bb">128</text>
+<text x="1068" y="750" class="s11 i2">Fast</text>
+<text x="1139" y="734" class="c s20 bb">310</text>
+<text x="1139" y="750" class="s11 i2">Medium</text>
+<text x="1210" y="734" class="c s20 bb">444</text>
+<text x="1210" y="750" class="s11 i2">Slow</text>
+<text x="1281" y="734" class="c s20 bb">702</text>
+<text x="1281" y="750" class="s11 i2">Dead</text>
+<text x="1352" y="734" class="c s20 bb">416</text>
+<text x="1352" y="750" class="s11 i2">Empty</text>
+<text x="1068" y="774" class="s11 i3">Class comes from picks in 2025-10-01 – 2026-09-30.</text>
+<text x="1068" y="789" class="s11 i3">A location with two parts shows the faster class.</text>
+</svg>

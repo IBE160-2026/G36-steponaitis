@@ -1,0 +1,517 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<title>Smart Warehouse Planner: landing page, the plan drawn as an exploded parts-catalogue figure</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap');
+text{font-family:'Public Sans','Helvetica Neue',Helvetica,Arial,sans-serif;fill:#15181C;font-size:13px;font-variant-numeric:tabular-nums;}
+.c{font-family:'Barlow Condensed','Avenir Next Condensed','Arial Narrow',sans-serif;}
+.b{font-weight:600}.bb{font-weight:700}.m{font-weight:500}
+.i2{fill:#454C55}.i3{fill:#646B74}.bl{fill:#0066B0}.am{fill:#A3470B}.wh{fill:#FFFFFF}
+.s11{font-size:11px}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s15{font-size:15px}.s16{font-size:16px}.s18{font-size:18px}.s20{font-size:20px}.s22{font-size:22px}.s24{font-size:24px}.s28{font-size:28px}.s32{font-size:32px}
+.up{letter-spacing:0.06em}
+.ic{fill:none;stroke:#15181C;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icb{fill:none;stroke:#0066B0;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ici{fill:none;stroke:#454C55;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.icw{fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ica{fill:none;stroke:#A3470B;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hl{stroke:#BEC4CB;stroke-width:1;fill:none}
+.hl2{stroke:#E1E4E8;stroke-width:1;fill:none}
+.ink{stroke:#15181C;stroke-width:1;fill:none}
+</style>
+<defs>
+<pattern id="pMed" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="2.6" stroke="#15181C" stroke-width="1.05"/></pattern>
+<pattern id="pSlow" width="4.6" height="4.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4.6" height="4.6" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4.6" stroke="#15181C" stroke-width="0.8"/></pattern>
+<pattern id="pDead" width="3.2" height="3.2" patternUnits="userSpaceOnUse"><rect width="3.2" height="3.2" fill="#FFFFFF"/><circle cx="1.6" cy="1.6" r="0.62" fill="#3A4048"/></pattern>
+<pattern id="pNone" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="3" height="3" fill="#EEF0F2"/></pattern>
+<pattern id="pMedL" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="4" stroke="#15181C" stroke-width="1.5"/></pattern>
+<pattern id="pSlowL" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2="7" stroke="#15181C" stroke-width="1.1"/></pattern>
+<pattern id="pDeadL" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="#FFFFFF"/><circle cx="2.5" cy="2.5" r="0.95" fill="#3A4048"/></pattern>
+<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1 L10,5 L0,9 Z" fill="#0066B0"/></marker>
+<marker id="arwK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,1.5 L10,5 L0,8.5 Z" fill="#15181C"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#FFFFFF"/>
+<path d="M80.0,37.6 L91.0,32.1 L102.0,37.6 L91.0,43.1 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M80.0,37.6 L80.0,40.9 L91.0,46.4 L102.0,40.9 L102.0,37.6" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M80.0,26.6 L91.0,21.1 L102.0,26.6 L91.0,32.1 Z" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/><path d="M80.0,26.6 L80.0,29.9 L91.0,35.4 L102.0,29.9 L102.0,26.6" fill="none" stroke="#15181C" stroke-width="1.2"/><path d="M91.0,32.1 L91.0,35.4" stroke="#0066B0" stroke-width="1.2" stroke-dasharray="1.5 1.5"/>
+<text x="112" y="41" class="c s22 bb">Smart Warehouse Planner</text>
+<text x="560" y="40" class="s14">How it works</text>
+<text x="680" y="40" class="s14">The three rules</text>
+<text x="818" y="40" class="s14">Move list</text>
+<text x="918" y="40" class="s14">README</text>
+<rect x="1132.5" y="18.5" width="127" height="35" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<g transform="translate(1140.15,28.0) scale(0.6667)" class="ic" style="stroke-width:2.250"><path d="M6 3.5h12v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></g>
+<text x="1162.2" y="40.5" class="s13 m">Read the code</text>
+<rect x="1272" y="18" width="128" height="36" fill="#0066B0"/>
+<text x="1336.0" y="40.5" class="s13 m wh" text-anchor="middle">Open the demo</text>
+<line x1="0" y1="71.5" x2="1440" y2="71.5" stroke="#15181C" stroke-width="1"/>
+<text x="80" y="172" class="c bb" style="font-size:58px;letter-spacing:-0.01em">Re-slot a spare-parts</text>
+<text x="80" y="236" class="c bb" style="font-size:58px;letter-spacing:-0.01em">warehouse from the files</text>
+<text x="80" y="300" class="c bb" style="font-size:58px;letter-spacing:-0.01em">it already exports.</text>
+<text x="80" y="362" class="s18 i2">Import the Locations, Inventory and Transactions files. Every</text>
+<text x="80" y="388" class="s18 i2">part is classified by its picks, pick groups are found, and you</text>
+<text x="80" y="414" class="s18 i2">mark the best locations. Recommendations come in rounds, each</text>
+<text x="80" y="440" class="s18 i2">with its rule and its numbers. You apply, adjust or keep in place;</text>
+<text x="80" y="466" class="s18 i2">the import never changes.</text>
+<rect x="80" y="510" width="184" height="44" fill="#0066B0"/>
+<text x="172.0" y="536.5" class="s15 b wh" text-anchor="middle">Open the demo</text>
+<rect x="276.5" y="510.5" width="195" height="43" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="374.0" y="536.5" class="s15 b" text-anchor="middle">Start a New Plan</text>
+<text x="80" y="588" class="s13 i2">The demo runs on synthetic data, data as of 2026-09-30.</text>
+<text x="80" y="608" class="s13 i2">Rules you can check by hand. No AI at runtime, no account needed.</text>
+<rect x="640.5" y="96.5" width="759" height="519" fill="none" stroke="#BEC4CB" stroke-width="1"/>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="631.5" y1="96.5" x2="649.5" y2="96.5"/><line x1="640.5" y1="87.5" x2="640.5" y2="105.5"/><circle cx="640.5" cy="96.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1391.5" y1="96.5" x2="1409.5" y2="96.5"/><line x1="1400.5" y1="87.5" x2="1400.5" y2="105.5"/><circle cx="1400.5" cy="96.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="631.5" y1="616.5" x2="649.5" y2="616.5"/><line x1="640.5" y1="607.5" x2="640.5" y2="625.5"/><circle cx="640.5" cy="616.5" r="4.0"/></g>
+<g stroke="#15181C" stroke-width="1" fill="none"><line x1="1391.5" y1="616.5" x2="1409.5" y2="616.5"/><line x1="1400.5" y1="607.5" x2="1400.5" y2="625.5"/><circle cx="1400.5" cy="616.5" r="4.0"/></g>
+<text x="660" y="124" class="c s18 bb">Fig. 1</text>
+<text x="712" y="124" class="s14 b">A plan, exploded</text>
+<polygon points="800.00,190.00 958.81,170.50 954.35,166.49 795.54,185.99" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="800.00,190.00 795.54,185.99 795.54,221.99 800.00,226.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="800.00,190.00 958.81,170.50 958.81,206.50 800.00,226.00" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<g transform="matrix(0.99255,-0.12187,0,1,800.00,190.00)"><text x="10" y="16" class="s12 b">Locations.xlsx</text>
+<text x="10" y="30" class="s11 i2">2,000 rows</text>
+</g>
+<polygon points="986.00,190.00 1144.81,170.50 1140.35,166.49 981.54,185.99" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="986.00,190.00 981.54,185.99 981.54,221.99 986.00,226.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="986.00,190.00 1144.81,170.50 1144.81,206.50 986.00,226.00" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<g transform="matrix(0.99255,-0.12187,0,1,986.00,190.00)"><text x="10" y="16" class="s12 b">Inventory.xlsx</text>
+<text x="10" y="30" class="s11 i2">1,625 rows</text>
+</g>
+<polygon points="1172.00,190.00 1330.81,170.50 1326.35,166.49 1167.54,185.99" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="1172.00,190.00 1167.54,185.99 1167.54,221.99 1172.00,226.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="1172.00,190.00 1330.81,170.50 1330.81,206.50 1172.00,226.00" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<g transform="matrix(0.99255,-0.12187,0,1,1172.00,190.00)"><text x="10" y="16" class="s12 b">transactions.xlsx</text>
+<text x="10" y="30" class="s11 i2">12 months</text>
+</g>
+<polygon points="800.00,300.00 1157.32,256.13 1152.11,251.44 794.80,295.32" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M800.00,300.00L794.80,295.32M835.73,295.61L830.53,290.93M871.46,291.23L866.26,286.54M907.19,286.84L901.99,282.15M942.93,282.45L937.72,277.77M978.66,278.06L973.46,273.38M1014.39,273.68L1009.19,268.99M1050.12,269.29L1044.92,264.61M1085.85,264.90L1080.65,260.22M1121.58,260.51L1116.38,255.83M1157.32,256.13L1152.11,251.44" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="800.00,300.00 794.80,295.32 794.80,343.32 800.00,348.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="794.80" y1="295.32" x2="800.00" y2="348.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,800.00,300.00)">
+<rect x="0" y="0" width="360" height="48" fill="#FFFFFF"/>
+<rect x="0" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="0" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="0" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="0" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="12" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="12" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="12" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="24" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="24" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="24" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="36" y="0" width="12" height="12" fill="#2A2F35"/>
+<rect x="36" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="36" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="48" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="48" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="60" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="60" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="60" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="72" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="72" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="72" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="84" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="84" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="96" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="96" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="108" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="108" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="108" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="0" width="12" height="12" fill="#2A2F35"/>
+<rect x="120" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="120" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="132" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="132" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="132" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="132" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="144" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="144" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="144" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="144" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="156" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="156" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="156" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="168" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="168" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="168" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="168" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="192" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="192" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="192" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="192" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="204" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="204" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="204" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="204" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="216" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="216" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="216" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="216" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="228" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="228" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="228" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="228" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="240" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="240" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="240" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="240" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="252" y="0" width="12" height="12" fill="#2A2F35"/>
+<rect x="252" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="252" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="264" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="264" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="264" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="276" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="288" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="288" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="288" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="300" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="300" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="300" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="312" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="312" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="312" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="312" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="324" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="324" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="336" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="348" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="348" y="24" width="12" height="12" fill="#2A2F35"/>
+<rect x="348" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<path d="M12,0V48M24,0V48M48,0V48M60,0V48M84,0V48M96,0V48M120,0V48M132,0V48M156,0V48M168,0V48M192,0V48M204,0V48M228,0V48M240,0V48M264,0V48M276,0V48M300,0V48M312,0V48M336,0V48M348,0V48" stroke="#7E868F" stroke-width="0.6" fill="none"/>
+<path d="M0,0V48M36,0V48M72,0V48M108,0V48M144,0V48M180,0V48M216,0V48M252,0V48M288,0V48M324,0V48M360,0V48M0,0H360M0,12H360M0,24H360M0,36H360M0,48H360" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,1.4h9.2v9.2h-9.2zM1.4,13.4h9.2v9.2h-9.2zM1.4,25.4h9.2v9.2h-9.2zM1.4,37.4h9.2v9.2h-9.2zM13.4,1.4h9.2v9.2h-9.2zM13.4,13.4h9.2v9.2h-9.2zM13.4,25.4h9.2v9.2h-9.2zM13.4,37.4h9.2v9.2h-9.2zM25.4,1.4h9.2v9.2h-9.2zM25.4,13.4h9.2v9.2h-9.2zM25.4,25.4h9.2v9.2h-9.2zM25.4,37.4h9.2v9.2h-9.2zM37.4,1.4h9.2v9.2h-9.2zM37.4,13.4h9.2v9.2h-9.2zM37.4,25.4h9.2v9.2h-9.2zM37.4,37.4h9.2v9.2h-9.2zM49.4,1.4h9.2v9.2h-9.2zM49.4,13.4h9.2v9.2h-9.2zM49.4,25.4h9.2v9.2h-9.2zM49.4,37.4h9.2v9.2h-9.2zM61.4,1.4h9.2v9.2h-9.2zM61.4,13.4h9.2v9.2h-9.2zM61.4,25.4h9.2v9.2h-9.2zM61.4,37.4h9.2v9.2h-9.2zM73.4,1.4h9.2v9.2h-9.2zM73.4,13.4h9.2v9.2h-9.2zM73.4,25.4h9.2v9.2h-9.2zM73.4,37.4h9.2v9.2h-9.2zM85.4,1.4h9.2v9.2h-9.2zM85.4,13.4h9.2v9.2h-9.2zM85.4,25.4h9.2v9.2h-9.2zM85.4,37.4h9.2v9.2h-9.2zM97.4,1.4h9.2v9.2h-9.2zM97.4,13.4h9.2v9.2h-9.2zM97.4,25.4h9.2v9.2h-9.2zM97.4,37.4h9.2v9.2h-9.2zM109.4,1.4h9.2v9.2h-9.2zM109.4,13.4h9.2v9.2h-9.2zM109.4,25.4h9.2v9.2h-9.2zM109.4,37.4h9.2v9.2h-9.2zM121.4,1.4h9.2v9.2h-9.2zM121.4,13.4h9.2v9.2h-9.2zM121.4,25.4h9.2v9.2h-9.2zM121.4,37.4h9.2v9.2h-9.2zM133.4,1.4h9.2v9.2h-9.2zM133.4,13.4h9.2v9.2h-9.2zM133.4,25.4h9.2v9.2h-9.2zM133.4,37.4h9.2v9.2h-9.2zM145.4,1.4h9.2v9.2h-9.2zM145.4,13.4h9.2v9.2h-9.2zM145.4,25.4h9.2v9.2h-9.2zM145.4,37.4h9.2v9.2h-9.2zM157.4,1.4h9.2v9.2h-9.2zM157.4,13.4h9.2v9.2h-9.2zM157.4,25.4h9.2v9.2h-9.2zM157.4,37.4h9.2v9.2h-9.2zM169.4,1.4h9.2v9.2h-9.2zM169.4,13.4h9.2v9.2h-9.2zM169.4,25.4h9.2v9.2h-9.2zM169.4,37.4h9.2v9.2h-9.2zM181.4,1.4h9.2v9.2h-9.2zM181.4,13.4h9.2v9.2h-9.2zM181.4,25.4h9.2v9.2h-9.2zM181.4,37.4h9.2v9.2h-9.2zM193.4,1.4h9.2v9.2h-9.2zM193.4,13.4h9.2v9.2h-9.2zM193.4,25.4h9.2v9.2h-9.2zM193.4,37.4h9.2v9.2h-9.2zM205.4,1.4h9.2v9.2h-9.2zM205.4,13.4h9.2v9.2h-9.2zM205.4,25.4h9.2v9.2h-9.2zM205.4,37.4h9.2v9.2h-9.2zM217.4,1.4h9.2v9.2h-9.2zM217.4,13.4h9.2v9.2h-9.2zM217.4,25.4h9.2v9.2h-9.2zM217.4,37.4h9.2v9.2h-9.2zM229.4,1.4h9.2v9.2h-9.2zM229.4,13.4h9.2v9.2h-9.2zM229.4,25.4h9.2v9.2h-9.2zM229.4,37.4h9.2v9.2h-9.2zM241.4,1.4h9.2v9.2h-9.2zM241.4,13.4h9.2v9.2h-9.2zM241.4,25.4h9.2v9.2h-9.2zM241.4,37.4h9.2v9.2h-9.2zM253.4,1.4h9.2v9.2h-9.2zM253.4,13.4h9.2v9.2h-9.2zM253.4,25.4h9.2v9.2h-9.2zM253.4,37.4h9.2v9.2h-9.2zM265.4,1.4h9.2v9.2h-9.2zM265.4,13.4h9.2v9.2h-9.2zM265.4,25.4h9.2v9.2h-9.2zM265.4,37.4h9.2v9.2h-9.2zM277.4,1.4h9.2v9.2h-9.2zM277.4,13.4h9.2v9.2h-9.2zM277.4,25.4h9.2v9.2h-9.2zM277.4,37.4h9.2v9.2h-9.2zM289.4,1.4h9.2v9.2h-9.2zM289.4,13.4h9.2v9.2h-9.2zM289.4,25.4h9.2v9.2h-9.2zM289.4,37.4h9.2v9.2h-9.2zM301.4,1.4h9.2v9.2h-9.2zM301.4,13.4h9.2v9.2h-9.2zM301.4,25.4h9.2v9.2h-9.2zM301.4,37.4h9.2v9.2h-9.2zM313.4,1.4h9.2v9.2h-9.2zM313.4,13.4h9.2v9.2h-9.2zM313.4,25.4h9.2v9.2h-9.2zM313.4,37.4h9.2v9.2h-9.2zM325.4,1.4h9.2v9.2h-9.2zM325.4,13.4h9.2v9.2h-9.2zM325.4,25.4h9.2v9.2h-9.2zM325.4,37.4h9.2v9.2h-9.2zM337.4,1.4h9.2v9.2h-9.2zM337.4,13.4h9.2v9.2h-9.2zM337.4,25.4h9.2v9.2h-9.2zM337.4,37.4h9.2v9.2h-9.2zM349.4,1.4h9.2v9.2h-9.2zM349.4,13.4h9.2v9.2h-9.2zM349.4,25.4h9.2v9.2h-9.2zM349.4,37.4h9.2v9.2h-9.2z" stroke="#15181C" stroke-width="1.3" fill="none"/>
+<rect x="0" y="0" width="360" height="48" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<path d="M1157.3,251.1L1161.3,272.4L1153.3,287.8L1157.3,309.1" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<rect x="762.5" y="312.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="774" y="330" class="c s18 bb" text-anchor="middle">A</text>
+<polygon points="800.00,366.00 1157.32,322.13 1152.11,317.44 794.80,361.32" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M800.00,366.00L794.80,361.32M835.73,361.61L830.53,356.93M871.46,357.23L866.26,352.54M907.19,352.84L901.99,348.15M942.93,348.45L937.72,343.77M978.66,344.06L973.46,339.38M1014.39,339.68L1009.19,334.99M1050.12,335.29L1044.92,330.61M1085.85,330.90L1080.65,326.22M1121.58,326.51L1116.38,321.83M1157.32,322.13L1152.11,317.44" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="800.00,366.00 794.80,361.32 794.80,409.32 800.00,414.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="794.80" y1="361.32" x2="800.00" y2="414.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,800.00,366.00)">
+<rect x="0" y="0" width="360" height="48" fill="#FFFFFF"/>
+<rect x="0" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="0" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="0" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="12" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="12" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="12" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="24" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="24" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="24" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="36" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="36" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="36" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="48" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="48" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="48" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="60" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="60" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="60" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="72" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="72" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="72" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="72" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="84" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="84" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="108" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="108" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="108" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="108" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="120" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="120" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="132" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="132" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="144" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="144" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="144" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="144" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="156" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="156" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="156" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="156" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="168" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="168" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="168" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="180" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="192" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="192" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="204" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="204" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="204" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="216" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="216" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="216" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="228" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="228" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="228" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="228" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="240" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="240" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="240" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="240" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="252" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="252" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="252" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="252" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="264" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="264" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="264" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="276" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="288" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="300" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="300" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="300" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="312" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="312" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="312" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="324" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="324" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="336" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="348" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="348" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="348" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="348" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<path d="M12,0V48M24,0V48M48,0V48M60,0V48M84,0V48M96,0V48M120,0V48M132,0V48M156,0V48M168,0V48M192,0V48M204,0V48M228,0V48M240,0V48M264,0V48M276,0V48M300,0V48M312,0V48M336,0V48M348,0V48" stroke="#7E868F" stroke-width="0.6" fill="none"/>
+<path d="M0,0V48M36,0V48M72,0V48M108,0V48M144,0V48M180,0V48M216,0V48M252,0V48M288,0V48M324,0V48M360,0V48M0,0H360M0,12H360M0,24H360M0,36H360M0,48H360" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<path d="M1.4,37.4h9.2v9.2h-9.2zM13.4,37.4h9.2v9.2h-9.2zM25.4,37.4h9.2v9.2h-9.2zM37.4,37.4h9.2v9.2h-9.2zM49.4,37.4h9.2v9.2h-9.2zM61.4,37.4h9.2v9.2h-9.2zM73.4,37.4h9.2v9.2h-9.2zM85.4,37.4h9.2v9.2h-9.2zM97.4,37.4h9.2v9.2h-9.2zM109.4,37.4h9.2v9.2h-9.2zM121.4,37.4h9.2v9.2h-9.2zM133.4,37.4h9.2v9.2h-9.2zM145.4,37.4h9.2v9.2h-9.2zM157.4,37.4h9.2v9.2h-9.2zM169.4,37.4h9.2v9.2h-9.2zM181.4,37.4h9.2v9.2h-9.2zM193.4,37.4h9.2v9.2h-9.2zM205.4,37.4h9.2v9.2h-9.2zM217.4,37.4h9.2v9.2h-9.2zM229.4,37.4h9.2v9.2h-9.2zM241.4,37.4h9.2v9.2h-9.2zM253.4,37.4h9.2v9.2h-9.2zM265.4,37.4h9.2v9.2h-9.2zM277.4,37.4h9.2v9.2h-9.2zM289.4,37.4h9.2v9.2h-9.2zM301.4,37.4h9.2v9.2h-9.2zM313.4,37.4h9.2v9.2h-9.2zM325.4,37.4h9.2v9.2h-9.2zM337.4,37.4h9.2v9.2h-9.2zM349.4,37.4h9.2v9.2h-9.2z" stroke="#15181C" stroke-width="1.3" fill="none"/>
+<rect x="0" y="0" width="360" height="48" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<path d="M1157.3,317.1L1161.3,338.4L1153.3,353.8L1157.3,375.1" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<rect x="762.5" y="378.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="774" y="396" class="c s18 bb" text-anchor="middle">B</text>
+<polygon points="800.00,432.00 1157.32,388.13 1152.11,383.44 794.80,427.32" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<path d="M800.00,432.00L794.80,427.32M835.73,427.61L830.53,422.93M871.46,423.23L866.26,418.54M907.19,418.84L901.99,414.15M942.93,414.45L937.72,409.77M978.66,410.06L973.46,405.38M1014.39,405.68L1009.19,400.99M1050.12,401.29L1044.92,396.61M1085.85,396.90L1080.65,392.22M1121.58,392.51L1116.38,387.83M1157.32,388.13L1152.11,383.44" stroke="#9AA1A9" stroke-width="0.5" fill="none"/>
+<polygon points="800.00,432.00 794.80,427.32 794.80,475.32 800.00,480.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<line x1="794.80" y1="427.32" x2="800.00" y2="480.00" stroke="#9AA1A9" stroke-width="0.5"/>
+<g transform="matrix(0.99255,-0.12187,0,1,800.00,432.00)">
+<rect x="0" y="0" width="360" height="48" fill="#FFFFFF"/>
+<rect x="0" y="0" width="12" height="12" fill="#2A2F35"/>
+<rect x="0" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="12" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="12" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="12" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="24" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="24" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="24" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="24" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="36" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="36" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="36" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="36" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="48" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="48" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="48" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="48" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="60" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="72" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="72" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="72" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="84" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="84" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="84" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="96" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="96" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="96" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="96" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="108" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="108" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="120" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="120" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="132" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="132" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="132" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="132" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="144" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="144" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="144" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="144" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="156" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="156" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="156" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="168" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="168" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="168" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="180" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="180" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="180" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="192" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="192" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="192" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="204" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="204" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="204" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="204" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="216" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="216" y="12" width="12" height="12" fill="#2A2F35"/>
+<rect x="216" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="216" y="36" width="12" height="12" fill="#2A2F35"/>
+<rect x="228" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="228" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="228" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="240" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="240" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="240" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="252" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="252" y="12" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="252" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="252" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="264" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="264" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="276" y="24" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="276" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="288" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="288" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="300" y="0" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="300" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="300" y="36" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="312" y="0" width="12" height="12" fill="#2A2F35"/>
+<rect x="312" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="324" y="0" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="324" y="12" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="324" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="324" y="36" width="12" height="12" fill="url(#pMedL)"/>
+<rect x="336" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="336" y="24" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="336" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="348" y="0" width="12" height="12" fill="url(#pDeadL)"/>
+<rect x="348" y="12" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="348" y="24" width="12" height="12" fill="url(#pSlowL)"/>
+<rect x="348" y="36" width="12" height="12" fill="url(#pSlowL)"/>
+<path d="M12,0V48M24,0V48M48,0V48M60,0V48M84,0V48M96,0V48M120,0V48M132,0V48M156,0V48M168,0V48M192,0V48M204,0V48M228,0V48M240,0V48M264,0V48M276,0V48M300,0V48M312,0V48M336,0V48M348,0V48" stroke="#7E868F" stroke-width="0.6" fill="none"/>
+<path d="M0,0V48M36,0V48M72,0V48M108,0V48M144,0V48M180,0V48M216,0V48M252,0V48M288,0V48M324,0V48M360,0V48M0,0H360M0,12H360M0,24H360M0,36H360M0,48H360" stroke="#15181C" stroke-width="1.0" fill="none"/>
+<rect x="0" y="0" width="360" height="48" fill="none" stroke="#15181C" stroke-width="1.2"/>
+</g>
+<path d="M1157.3,383.1L1161.3,404.4L1153.3,419.8L1157.3,441.1" stroke="#15181C" stroke-width="1.2" fill="none"/>
+<rect x="762.5" y="444.5" width="23" height="23" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="774" y="462" class="c s18 bb" text-anchor="middle">C</text>
+<text x="762" y="520" class="s12 i3">+ aisles D–I</text>
+<line x1="800" y1="236" x2="800" y2="292" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="1157" y1="210" x2="1157" y2="250" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<polygon points="1062.03,411.83 1073.94,410.36 1073.94,422.36 1062.03,423.83" fill="none" stroke="#0066B0" stroke-width="2"/>
+<polygon points="835.73,331.61 847.64,330.15 847.64,342.15 835.73,343.61" fill="none" stroke="#0066B0" stroke-width="2"/>
+<path d="M1068.0,417.1 L1068.0,331.1 L841.7,358.9 L841.7,344.4" stroke="#FFFFFF" stroke-width="5" fill="none"/>
+<path d="M1068.0,417.1 L1068.0,331.1 L841.7,358.9 L841.7,344.4" stroke="#0066B0" stroke-width="1.7" fill="none" stroke-dasharray="6 3" marker-end="url(#arw)"/>
+<circle cx="1068.0" cy="417.1" r="3.2" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.6"/>
+<circle cx="954.8" cy="345.0" r="13" fill="#FFFFFF" stroke="#0066B0" stroke-width="1.3"/>
+<line x1="942.8" y1="345.0" x2="966.8" y2="345.0" stroke="#0066B0" stroke-width="1"/>
+<text x="954.8" y="342.5" class="c s12 bb bl" text-anchor="middle">4</text>
+<text x="954.8" y="355.5" class="c s11 bb bl" text-anchor="middle">R1</text>
+<rect x="1196.5" y="300.5" width="184" height="104" fill="#FFFFFF" stroke="#15181C" stroke-width="1"/>
+<text x="1208" y="322" class="s12 b">Before/after, aisle A</text>
+<line x1="1197" y1="331.5" x2="1380" y2="331.5" stroke="#E1E4E8" stroke-width="1"/>
+<text x="1208" y="352" class="s11 i2">Fast-moving in best</text>
+<text x="1368" y="352" class="s12 b" text-anchor="end">40 → 42</text>
+<text x="1208" y="374" class="s11 i2">Moves in / out</text>
+<text x="1368" y="374" class="s12 b" text-anchor="end">3 / 2</text>
+<text x="1208" y="394" class="s11 i2">Pick groups together</text>
+<text x="1368" y="394" class="s12 b" text-anchor="end">9 → 9</text>
+<polygon points="880.00,548.00 1177.76,511.44 1174.05,508.09 876.28,544.65" fill="#F1F3F5" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="880.00,548.00 876.28,544.65 876.28,592.65 880.00,596.00" fill="#E3E6E9" stroke="#15181C" stroke-width="0.8"/>
+<polygon points="880.00,548.00 1177.76,511.44 1177.76,559.44 880.00,596.00" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<g transform="matrix(0.99255,-0.12187,0,1,880.00,548.00)"><text x="10" y="15" class="s11 b">Move list · Spring re-slot 2026 · round 1</text>
+<rect x="10.5" y="21.5" width="8" height="8" fill="#FFFFFF" stroke="#15181C" stroke-width="0.8"/>
+<text x="26" y="29" class="s11">C-08-03-02  →  A-02-01-01   rule 1</text>
+<rect x="10.5" y="34.5" width="8" height="8" fill="#FFFFFF" stroke="#15181C" stroke-width="0.8"/>
+<text x="26" y="42" class="s11">A-01-04-01  →  H-11-04-03   rule 2</text>
+</g>
+<line x1="1032" y1="470" x2="1032" y2="520" stroke="#646B74" stroke-width="0.6" stroke-dasharray="9 2.5 1.5 2.5"/>
+<line x1="700" y1="210" x2="806" y2="212" stroke="#15181C" stroke-width="1"/>
+<circle cx="806" cy="212" r="1.8" fill="#15181C"/>
+<circle cx="700" cy="210" r="12" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="700" y="215" class="c s14 b" text-anchor="middle">1</text>
+<line x1="700" y1="392" x2="862" y2="396" stroke="#15181C" stroke-width="1"/>
+<circle cx="862" cy="396" r="1.8" fill="#15181C"/>
+<circle cx="700" cy="392" r="12" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="700" y="397" class="c s14 b" text-anchor="middle">2</text>
+<line x1="700" y1="330" x2="808" y2="340" stroke="#15181C" stroke-width="1"/>
+<circle cx="808" cy="340" r="1.8" fill="#15181C"/>
+<circle cx="700" cy="330" r="12" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="700" y="335" class="c s14 b" text-anchor="middle">3</text>
+<line x1="1290" y1="440" x2="1290" y2="405" stroke="#15181C" stroke-width="1"/>
+<circle cx="1290" cy="405" r="1.8" fill="#15181C"/>
+<circle cx="1290" cy="440" r="12" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="1290" y="445" class="c s14 b" text-anchor="middle">5</text>
+<line x1="1240" y1="560" x2="1150" y2="560" stroke="#15181C" stroke-width="1"/>
+<circle cx="1150" cy="560" r="1.8" fill="#15181C"/>
+<circle cx="1240" cy="560" r="12" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="1240" y="565" class="c s14 b" text-anchor="middle">6</text>
+<text x="80" y="664" class="c s24 bb">Parts table, Fig. 1: how a plan is built</text>
+<text x="1360" y="664" class="s13 i3" text-anchor="end">Steps in the order you take them</text>
+<line x1="80" y1="676.5" x2="1360" y2="676.5" stroke="#15181C" stroke-width="1"/>
+<text x="80" y="698" class="c s14 b i2">Ref</text>
+<text x="130" y="698" class="c s14 b i2">Step</text>
+<text x="420" y="698" class="c s14 b i2">What you get</text>
+<text x="1050" y="698" class="c s14 b i2">Where in the app</text>
+<line x1="80" y1="706.5" x2="1360" y2="706.5" stroke="#BEC4CB" stroke-width="1"/>
+<circle cx="92" cy="722" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="727" class="c s13 b" text-anchor="middle">1</text>
+<text x="130" y="727" class="s14 b">Import the three files</text>
+<text x="420" y="727" class="s13 i2">A frozen import with its data-as-of date. Errors name the file, the row and the column.</text>
+<text x="1050" y="727" class="s13 bl">New Plan</text>
+<line x1="80" y1="738.5" x2="1360" y2="738.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="92" cy="753" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="758" class="c s13 b" text-anchor="middle">2</text>
+<text x="130" y="758" class="s14 b">Classify every part</text>
+<text x="420" y="758" class="s13 i2">Movement classes from picks (24+, 6–23, 1–5, 0) and pick groups at 5+ shared jobs.</text>
+<text x="1050" y="758" class="s13 bl">Parts, pick groups</text>
+<line x1="80" y1="769.5" x2="1360" y2="769.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="92" cy="784" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="789" class="c s13 b" text-anchor="middle">3</text>
+<text x="130" y="789" class="s14 b">Mark best locations</text>
+<text x="420" y="789" class="s13 i2">Whole aisles, levels or single locations. The tool never guesses which are best.</text>
+<text x="1050" y="789" class="s13 bl">Best locations</text>
+<line x1="80" y1="800.5" x2="1360" y2="800.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="92" cy="815" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="820" class="c s13 b" text-anchor="middle">4</text>
+<text x="130" y="820" class="s14 b">Recommendations in rounds</text>
+<text x="420" y="820" class="s13 i2">Rule 1, 2 and 3 each name the numbers behind them. Apply, apply elsewhere, or keep in place.</text>
+<text x="1050" y="820" class="s13 bl">Recommendations</text>
+<line x1="80" y1="831.5" x2="1360" y2="831.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="92" cy="846" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="851" class="c s13 b" text-anchor="middle">5</text>
+<text x="130" y="851" class="s14 b">Compare before and after</text>
+<text x="420" y="851" class="s13 i2">Per aisle: parts in and out, fast-moving in best locations, pick groups together.</text>
+<text x="1050" y="851" class="s13 bl">Before/after</text>
+<line x1="80" y1="862.5" x2="1360" y2="862.5" stroke="#E1E4E8" stroke-width="1"/>
+<circle cx="92" cy="877" r="10" fill="#FFFFFF" stroke="#15181C" stroke-width="1.2"/>
+<text x="92" y="882" class="c s13 b" text-anchor="middle">6</text>
+<text x="130" y="882" class="s14 b">Print the move list</text>
+<text x="420" y="882" class="s13 i2">Round order, from-location before to-location, a tick box per line. Legible in black and white.</text>
+<text x="1050" y="882" class="s13 bl">Move list</text>
+<line x1="80" y1="893.5" x2="1360" y2="893.5" stroke="#E1E4E8" stroke-width="1"/>
+</svg>

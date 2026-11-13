@@ -1,0 +1,549 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="t d">
+<title id="t">Screen map, floor marking</title>
+<desc id="d">Sketch sheet of the other key screens: saved plans, New Plan with import error, plan overview, parts, locations, pick groups, best locations, before/after table and the move list print view.</desc>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&amp;family=Saira+Stencil+One&amp;display=swap');
+.ui{font-family:'Overpass','Helvetica Neue',Arial,sans-serif}
+.num{font-family:'Overpass','Helvetica Neue',Arial,sans-serif;font-variant-numeric:tabular-nums}
+.st{font-family:'Saira Stencil One','Arial Narrow',sans-serif}
+</style>
+<defs>
+<!-- concrete speckle -->
+<pattern id="concrete" width="23" height="19" patternUnits="userSpaceOnUse">
+  <rect width="23" height="19" fill="#B9B6AF"/>
+  <circle cx="3" cy="4" r="0.7" fill="#AEABA4"/><circle cx="14" cy="2" r="0.5" fill="#C3C0B9"/>
+  <circle cx="19" cy="11" r="0.8" fill="#AEABA4"/><circle cx="8" cy="14" r="0.6" fill="#C3C0B9"/>
+  <circle cx="12" cy="9" r="0.4" fill="#AEABA4"/><circle cx="21" cy="17" r="0.5" fill="#C3C0B9"/>
+</pattern>
+<!-- red/white keep-in-place tape -->
+<pattern id="rw" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="6" height="6" fill="#FFFFFF"/><rect width="3" height="6" fill="#C0302A"/>
+</pattern>
+<!-- hazard stripe (used once: Reset) -->
+<pattern id="haz" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="10" height="10" fill="#F2C200"/><rect width="5" height="10" fill="#16191C"/>
+</pattern>
+<pattern id="pillar" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+  <rect width="4" height="4" fill="#6E7378"/><rect width="1.4" height="4" fill="#3B4045"/>
+</pattern>
+
+<!-- location cells, 14 x 11 -->
+<symbol id="c-fast" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#1E2226" stroke="#0E1012" stroke-width="1"/><path d="M7 2.6 L10 8 L4 8 Z" fill="#F4F2EC"/></symbol>
+<symbol id="c-med" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#545A60" stroke="#2A2E32" stroke-width="1"/><rect x="3.5" y="4.6" width="7" height="1.8" fill="#F4F2EC"/></symbol>
+<symbol id="c-slow" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#969BA1" stroke="#3A3F44" stroke-width="1"/><circle cx="7" cy="5.5" r="1.7" fill="#16191C"/></symbol>
+<symbol id="c-dead" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#E6E2D9" stroke="#3A3F44" stroke-width="1"/><circle cx="7" cy="5.5" r="2.3" fill="none" stroke="#16191C" stroke-width="1.2"/></symbol>
+<symbol id="c-empty" viewBox="0 0 14 11" width="14" height="11"><rect x="0.5" y="0.5" width="13" height="10" fill="#CFCCC5" fill-opacity="0.35" stroke="#3A3F44" stroke-width="1"/><path d="M1 10 L13 1" stroke="#3A3F44" stroke-width="1"/></symbol>
+
+<!-- ISO 7010 shape grammar signs, 20 x 20 (linked squares 26 x 20) -->
+<symbol id="s-r1" viewBox="0 0 20 20"><rect x="1" y="1" width="18" height="18" rx="2" fill="#1D5DB0" stroke="#FFFFFF" stroke-width="1.2"/><text x="10" y="14.6" text-anchor="middle" class="ui" font-size="12.5" font-weight="800" fill="#FFFFFF">1</text></symbol>
+<symbol id="s-r2" viewBox="0 0 20 20"><path d="M10 1.2 L19.2 18.2 L0.8 18.2 Z" fill="#F2C200" stroke="#16191C" stroke-width="1.6" stroke-linejoin="round"/><text x="10" y="16.4" text-anchor="middle" class="ui" font-size="10.5" font-weight="800" fill="#16191C">2</text></symbol>
+<symbol id="s-r3" viewBox="0 0 26 20"><rect x="1" y="4" width="11" height="11" rx="1.6" fill="#1D5DB0" stroke="#FFFFFF" stroke-width="1"/><rect x="11.5" y="8.4" width="4" height="2.4" fill="#1D5DB0"/><rect x="14.5" y="4.5" width="10" height="10" rx="1.6" fill="#FFFFFF" stroke="#1D5DB0" stroke-width="2"/><text x="6.5" y="13.4" text-anchor="middle" class="ui" font-size="9" font-weight="800" fill="#FFFFFF">3</text></symbol>
+<symbol id="s-keep" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.2" fill="#FFFFFF" stroke="#C0302A" stroke-width="2.6"/><path d="M4.4 4.4 L15.6 15.6" stroke="#C0302A" stroke-width="2.6"/></symbol>
+<symbol id="s-nospace" viewBox="0 0 20 20"><path d="M6.3 1 H13.7 L19 6.3 V13.7 L13.7 19 H6.3 L1 13.7 V6.3 Z" fill="#C0302A" stroke="#FFFFFF" stroke-width="1"/><rect x="4.5" y="8.6" width="11" height="2.8" fill="#FFFFFF"/></symbol>
+<symbol id="s-out" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="2" fill="#E2E0DA" stroke="#6B7076" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M1 19 L19 1" stroke="#16191C" stroke-width="2.2"/></symbol>
+<symbol id="s-manual" viewBox="0 0 20 20"><rect x="1.5" y="1.5" width="17" height="17" rx="2" fill="#FFFFFF" stroke="#16191C" stroke-width="1.6"/><text x="10" y="14.4" text-anchor="middle" class="ui" font-size="11" font-weight="800" fill="#16191C">M</text></symbol>
+<symbol id="s-uc" viewBox="0 0 20 20"><path d="M10 2 L18.6 17.6 L1.4 17.6 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 7.4 V12.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14.7" r="1.1" fill="currentColor"/></symbol>
+
+<!-- icons, 16 x 16, stroke 1.5 -->
+<g id="icons">
+<symbol id="i-overview" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="1.75" width="5.5" height="5.5"/><rect x="8.75" y="1.75" width="5.5" height="5.5"/><rect x="1.75" y="8.75" width="5.5" height="5.5"/><rect x="8.75" y="8.75" width="5.5" height="5.5"/></g></symbol>
+<symbol id="i-parts" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 1.5 L14.25 4.5 V11.5 L8 14.5 L1.75 11.5 V4.5 Z"/><path d="M1.75 4.5 L8 7.5 L14.25 4.5 M8 7.5 V14.5"/></g></symbol>
+<symbol id="i-locations" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 1.5 V14.5 M14 1.5 V14.5 M2 5.5 H14 M2 10 H14"/><path d="M5 3.5 H7 M9 8 H11 M5 12.5 H7"/></g></symbol>
+<symbol id="i-pick" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="5" width="5" height="6"/><rect x="9.25" y="5" width="5" height="6"/><path d="M6.75 8 H9.25"/></g></symbol>
+<symbol id="i-best" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M1.75 5.5 V1.75 H5.5 M10.5 1.75 H14.25 V5.5 M14.25 10.5 V14.25 H10.5 M5.5 14.25 H1.75 V10.5"/><rect x="5.5" y="5.5" width="5" height="5"/></g></symbol>
+<symbol id="i-rec" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M2.5 13.5 V8.5 H12"/><path d="M9.5 5.5 L12.5 8.5 L9.5 11.5"/><path d="M2.5 2.5 H6"/></g></symbol>
+<symbol id="i-ba" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="2.5" width="5" height="11"/><rect x="9.25" y="2.5" width="5" height="11"/><path d="M3.25 9.5 H5.25 M10.75 6 H12.75"/></g></symbol>
+<symbol id="i-list" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.5" y="2" width="11" height="12.5"/><path d="M5.5 1 H10.5 V3 H5.5 Z"/><rect x="4.75" y="6" width="2" height="2"/><path d="M8.5 7 H11.5 M4.75 11 H6.75 M8.5 11 H11.5"/></g></symbol>
+<symbol id="i-settings" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4 H14 M2 8 H14 M2 12 H14"/><circle cx="5" cy="4" r="1.6" fill="#1A1E22"/><circle cx="11" cy="8" r="1.6" fill="#1A1E22"/><circle cx="7" cy="12" r="1.6" fill="#1A1E22"/></g></symbol>
+<symbol id="i-plans" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2 4.5 H14 V13.5 H2 Z"/><path d="M3.5 2.5 H12.5"/></g></symbol>
+<symbol id="i-floor" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="1.75" width="12.5" height="12.5"/><path d="M4.5 4.5 H11.5 M4.5 8 H11.5 M4.5 11.5 H11.5"/></g></symbol>
+<symbol id="i-tag" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M1.75 1.75 H8 L14.25 8 L8 14.25 L1.75 8 Z"/><circle cx="5" cy="5" r="1.1"/></g></symbol>
+<symbol id="i-label" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="3.5" width="12.5" height="9"/><rect x="3.75" y="5.5" width="4" height="4"/><path d="M9.5 6 H12 M9.5 9 H12"/></g></symbol>
+<symbol id="i-user" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 14.5 C3 11 5.2 9.75 8 9.75 C10.8 9.75 13 11 13.5 14.5"/></g></symbol>
+<symbol id="i-back" viewBox="0 0 16 16"><path d="M10 3 L5 8 L10 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-next" viewBox="0 0 16 16"><path d="M6 3 L11 8 L6 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-down" viewBox="0 0 16 16"><path d="M3.5 6 L8 10.5 L12.5 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.75"/><path d="M10.5 10.5 L14 14"/></g></symbol>
+<symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5 L6.5 12 L13 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-undo" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 L2 6 L5 9"/><path d="M2 6 H10 A4 4 0 0 1 10 14 H6"/></g></symbol>
+<symbol id="i-run" viewBox="0 0 16 16"><path d="M4.5 2.5 L13 8 L4.5 13.5 Z" fill="currentColor"/></symbol>
+<symbol id="i-print" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 6 V1.75 H12 V6"/><rect x="1.75" y="6" width="12.5" height="6"/><path d="M4 10 H12 V14.25 H4 Z"/></g></symbol>
+<symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 2.5 V13.5 M2.5 8 H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-dir" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="1.75" y="1.75" width="12.5" height="12.5"/><path d="M4.5 5 H8.5 M4.5 8 H9.5 M4.5 11 H7.5"/><path d="M10.5 9.5 L12.5 11 L10.5 12.5"/></g></symbol>
+<symbol id="i-cal" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.75" y="3" width="12.5" height="11.25"/><path d="M1.75 6.5 H14.25 M5 1.5 V4.5 M11 1.5 V4.5"/></g></symbol>
+<symbol id="i-upload" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5 V2 M4.5 5.5 L8 2 L11.5 5.5"/><path d="M2 10 V14 H14 V10"/></g></symbol>
+<symbol id="i-info" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25 V11.25"/></g><circle cx="8" cy="4.9" r="0.95" fill="currentColor"/></symbol>
+<symbol id="i-zoomin" viewBox="0 0 16 16"><path d="M8 3 V13 M3 8 H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-zoomout" viewBox="0 0 16 16"><path d="M3 8 H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-fit" viewBox="0 0 16 16"><path d="M2 6 V2 H6 M10 2 H14 V6 M14 10 V14 H10 M6 14 H2 V10" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-lock" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7.25"/><path d="M5.25 7 V4.75 A2.75 2.75 0 0 1 10.75 4.75 V7"/></g></symbol>
+<symbol id="i-arrowr" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8 H13.5"/><path d="M9.5 4 L13.5 8 L9.5 12"/></g></symbol>
+<symbol id="i-arrowu" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 V2.5"/><path d="M4 6.5 L8 2.5 L12 6.5"/></g></symbol>
+<symbol id="i-arrowd" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2 V13.5"/><path d="M4 9.5 L8 13.5 L12 9.5"/></g></symbol>
+<symbol id="i-arrowl" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8 H2.5"/><path d="M6.5 4 L2.5 8 L6.5 12"/></g></symbol>
+<symbol id="i-file" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 1.75 H10 L13 4.75 V14.25 H3 Z"/><path d="M10 1.75 V4.75 H13"/></g></symbol>
+</g>
+
+<!-- logo mark: a floor spot marker with taped corners -->
+<symbol id="logo" viewBox="0 0 24 24"><rect x="0" y="0" width="24" height="24" rx="3" fill="#16191C"/><path d="M3 9 V3 H9 M15 3 H21 V9 M21 15 V21 H15 M9 21 H3 V15" fill="none" stroke="#F2C200" stroke-width="2.6"/><rect x="8.5" y="8.5" width="7" height="7" fill="#ECEAE4"/></symbol>
+<marker id="ahb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#1D5DB0"/></marker>
+</defs>
+<rect width="1440" height="900" fill="#E9E7E2"/>
+<rect width="1440" height="56" fill="#1A1E22"/><use href="#logo" x="40" y="15" width="26" height="26"/><text x="78" y="34" class="ui" font-size="15" font-weight="800" fill="#ECEAE4">Screen map · Smart Warehouse Planner · concept 06 Floor Marking</text><text x="1400" y="34" class="ui" font-size="12" font-weight="400" fill="#A9AFB5" text-anchor="end">Read left to right, top to bottom: the order of the walkway</text><text x="40" y="85" class="ui" font-size="14" font-weight="800" fill="#16191C">Saved-plans list</text>
+<text x="480" y="85" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">start page</text>
+<rect x="40" y="94" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M45 94 H80 V324 H45 A5 5 0 0 1 40 319 V99 A5 5 0 0 1 45 94 Z" fill="#1A1E22"/>
+<use href="#logo" x="51" y="102" width="18" height="18"/>
+<use href="#i-overview" x="53" y="132" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="53" y="154" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="53" y="176" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="53" y="198" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="53" y="220" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="53" y="242" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="53" y="264" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="53" y="286" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="96" y="124" class="ui" font-size="16" font-weight="800" fill="#16191C">Saved plans</text>
+<rect x="368" y="106" width="98" height="26" rx="5" fill="#F2C200" stroke="#B89300"/>
+<use href="#i-plus" x="378" y="112.0" width="14" height="14" color="#16191C" style="color:#16191C"/>
+<text x="426.0" y="123.32" class="ui" font-size="12" font-weight="700" fill="#16191C" text-anchor="middle">New Plan</text>
+<text x="96" y="154" class="ui" font-size="11" font-weight="700" fill="#575C63">Plan</text>
+<text x="244" y="154" class="ui" font-size="11" font-weight="700" fill="#575C63">Data as of</text>
+<text x="320" y="154" class="ui" font-size="11" font-weight="700" fill="#575C63">Created by</text>
+<text x="390" y="154" class="ui" font-size="11" font-weight="700" fill="#575C63">Last edited</text>
+<rect x="96" y="160" width="368" height="1" fill="#CFCCC5"/>
+<text x="96" y="180" class="num" font-size="11" font-weight="400" fill="#1A1D20">Spring re-slot 2026</text>
+<text x="244" y="180" class="num" font-size="11" font-weight="400" fill="#1A1D20">2026-09-30</text>
+<text x="320" y="180" class="num" font-size="11" font-weight="400" fill="#1A1D20">Justas</text>
+<text x="390" y="180" class="num" font-size="11" font-weight="400" fill="#1A1D20">today 09:58</text>
+<rect x="96" y="185" width="368" height="1" fill="#DEDBD5"/>
+<text x="96" y="204" class="num" font-size="11" font-weight="400" fill="#1A1D20">Rule 3 trial, aisles D to F</text>
+<text x="244" y="204" class="num" font-size="11" font-weight="400" fill="#1A1D20">2026-09-30</text>
+<text x="320" y="204" class="num" font-size="11" font-weight="400" fill="#1A1D20">Justas</text>
+<text x="390" y="204" class="num" font-size="11" font-weight="400" fill="#1A1D20">2026-11-04</text>
+<rect x="96" y="209" width="368" height="1" fill="#DEDBD5"/>
+<text x="96" y="228" class="num" font-size="11" font-weight="400" fill="#1A1D20">Baseline, no moves</text>
+<text x="244" y="228" class="num" font-size="11" font-weight="400" fill="#1A1D20">2026-06-30</text>
+<text x="320" y="228" class="num" font-size="11" font-weight="400" fill="#1A1D20">Justas</text>
+<text x="390" y="228" class="num" font-size="11" font-weight="400" fill="#1A1D20">2026-10-02</text>
+<rect x="96" y="233" width="368" height="1" fill="#DEDBD5"/>
+<text x="96" y="260" class="ui" font-size="11" font-weight="400" fill="#575C63">Plans save automatically and are shared by all users.</text>
+<text x="96" y="278" class="ui" font-size="11" font-weight="400" fill="#575C63">Each plan rests on one import that never changes.</text>
+<text x="500" y="85" class="ui" font-size="14" font-weight="800" fill="#16191C">New Plan</text>
+<text x="940" y="85" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">import error names file, row, column</text>
+<rect x="500" y="94" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M505 94 H540 V324 H505 A5 5 0 0 1 500 319 V99 A5 5 0 0 1 505 94 Z" fill="#1A1E22"/>
+<use href="#logo" x="511" y="102" width="18" height="18"/>
+<use href="#i-overview" x="513" y="132" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="513" y="154" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="513" y="176" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="513" y="198" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="513" y="220" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="513" y="242" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="513" y="264" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="513" y="286" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="556" y="122" class="ui" font-size="16" font-weight="800" fill="#16191C">New Plan</text>
+<text x="556" y="142" class="ui" font-size="11" font-weight="700" fill="#575C63">Plan name</text>
+<rect x="556" y="147" width="170" height="22" rx="3" fill="#FFFFFF" stroke="#8F8C85"/>
+<text x="564" y="162" class="ui" font-size="11" font-weight="600" fill="#16191C">Spring re-slot 2026</text>
+<text x="742" y="142" class="ui" font-size="11" font-weight="400" fill="#1D5DB0" text-decoration="underline">or reuse the import of a plan</text>
+<rect x="556" y="178" width="370" height="22" rx="3" fill="#FFFFFF" stroke="#B9B5AD"/>
+<use href="#i-file" x="562" y="182" width="14" height="14" color="#16191C" style="color:#16191C"/>
+<text x="582" y="193" class="ui" font-size="11" font-weight="700" fill="#16191C">Locations.xlsx</text>
+<use href="#i-check" x="904" y="182" width="14" height="14" color="#23743F" style="color:#23743F"/>
+<text x="898" y="193" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">checked</text>
+<rect x="556" y="204" width="370" height="22" rx="3" fill="#FFFFFF" stroke="#C0302A"/>
+<use href="#i-file" x="562" y="208" width="14" height="14" color="#16191C" style="color:#16191C"/>
+<text x="582" y="219" class="ui" font-size="11" font-weight="700" fill="#16191C">Inventory.xlsx</text>
+<use href="#s-nospace" x="904" y="207" width="15.0" height="15"/>
+<text x="898" y="219" class="ui" font-size="11" font-weight="700" fill="#C0302A" text-anchor="end">1 error</text>
+<rect x="556" y="230" width="370" height="22" rx="3" fill="#FFFFFF" stroke="#B9B5AD"/>
+<use href="#i-file" x="562" y="234" width="14" height="14" color="#16191C" style="color:#16191C"/>
+<text x="582" y="245" class="ui" font-size="11" font-weight="700" fill="#16191C">transactions.xlsx</text>
+<use href="#i-check" x="904" y="234" width="14" height="14" color="#23743F" style="color:#23743F"/>
+<text x="898" y="245" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">checked</text>
+<rect x="556" y="258" width="370" height="40" rx="3" fill="#FBEAE8" stroke="#E2A49E"/>
+<text x="564" y="274" class="ui" font-size="11" font-weight="700" fill="#7A1E19">Inventory.xlsx, row 214, column Stock: "twelve" is not a number.</text>
+<text x="564" y="290" class="ui" font-size="11" font-weight="400" fill="#7A1E19">Fix the file and upload it again. Nothing was saved.</text>
+<rect x="556" y="306" width="104" height="24" rx="5" fill="#EFEDE9" stroke="#D6D3CC"/>
+<text x="608.0" y="322.32" class="ui" font-size="12" font-weight="700" fill="#8D9197" text-anchor="middle">Create plan</text>
+<text x="960" y="85" class="ui" font-size="14" font-weight="800" fill="#16191C">Plan overview</text>
+<text x="1400" y="85" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">counts, settings, data-as-of date</text>
+<rect x="960" y="94" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M965 94 H1000 V324 H965 A5 5 0 0 1 960 319 V99 A5 5 0 0 1 965 94 Z" fill="#1A1E22"/>
+<use href="#logo" x="971" y="102" width="18" height="18"/>
+<rect x="966" y="129" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-overview" x="973" y="132" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-parts" x="973" y="154" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="973" y="176" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="973" y="198" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="973" y="220" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="973" y="242" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="973" y="264" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="973" y="286" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="1016" y="122" class="ui" font-size="16" font-weight="800" fill="#16191C">Spring re-slot 2026</text>
+<text x="1016" y="140" class="num" font-size="11" font-weight="400" fill="#575C63">Data as of 2026-09-30 · uploaded 2026-10-02 · created by Justas</text>
+<text x="1016" y="162" class="ui" font-size="11" font-weight="700" fill="#16191C">Parts</text>
+<text x="1188" y="162" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">1,545</text>
+<text x="1026" y="179" class="ui" font-size="11" font-weight="400" fill="#575C63">fast-moving</text>
+<text x="1188" y="179" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">187</text>
+<text x="1026" y="196" class="ui" font-size="11" font-weight="400" fill="#575C63">medium-moving</text>
+<text x="1188" y="196" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">326</text>
+<text x="1026" y="213" class="ui" font-size="11" font-weight="400" fill="#575C63">slow-moving</text>
+<text x="1188" y="213" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">396</text>
+<text x="1026" y="230" class="ui" font-size="11" font-weight="400" fill="#575C63">dead stock</text>
+<text x="1188" y="230" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">636</text>
+<text x="1026" y="247" class="ui" font-size="11" font-weight="400" fill="#575C63">in two locations</text>
+<text x="1188" y="247" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">80</text>
+<text x="1206" y="162" class="ui" font-size="11" font-weight="700" fill="#16191C">Locations</text>
+<text x="1378" y="162" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">2,000</text>
+<text x="1216" y="179" class="ui" font-size="11" font-weight="400" fill="#575C63">occupied / empty</text>
+<text x="1378" y="179" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">1,584 / 416</text>
+<text x="1206" y="196" class="ui" font-size="11" font-weight="700" fill="#16191C">Best locations</text>
+<text x="1378" y="196" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">334</text>
+<text x="1216" y="213" class="ui" font-size="11" font-weight="400" fill="#575C63">empty best</text>
+<text x="1378" y="213" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">48</text>
+<text x="1206" y="230" class="ui" font-size="11" font-weight="700" fill="#16191C">Pick groups</text>
+<text x="1378" y="230" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">212</text>
+<text x="1206" y="247" class="ui" font-size="11" font-weight="700" fill="#16191C">Kept in place</text>
+<text x="1378" y="247" class="num" font-size="11" font-weight="700" fill="#16191C" text-anchor="end">1</text>
+<rect x="1016" y="266" width="364" height="1" fill="#CFCCC5"/>
+<text x="1016" y="284" class="num" font-size="11" font-weight="400" fill="#575C63">Settings: 12-month period · class limits 24, 6, 1 · pick group 5+ jobs</text>
+<text x="40" y="359" class="ui" font-size="14" font-weight="800" fill="#16191C">Parts list</text>
+<text x="480" y="359" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">search, class, manual move</text>
+<rect x="40" y="368" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M45 368 H80 V598 H45 A5 5 0 0 1 40 593 V373 A5 5 0 0 1 45 368 Z" fill="#1A1E22"/>
+<use href="#logo" x="51" y="376" width="18" height="18"/>
+<use href="#i-overview" x="53" y="406" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="46" y="425" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-parts" x="53" y="428" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-locations" x="53" y="450" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="53" y="472" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="53" y="494" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="53" y="516" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="53" y="538" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="53" y="560" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="96" y="396" class="ui" font-size="16" font-weight="800" fill="#16191C">Parts</text>
+<rect x="266" y="382" width="200" height="22" rx="3" fill="#FFFFFF" stroke="#B9B5AD"/>
+<use href="#i-search" x="272" y="386" width="13" height="13" color="#575C63" style="color:#575C63"/>
+<text x="290" y="397" class="ui" font-size="11" font-weight="400" fill="#6A6F75">Part number or description</text>
+<text x="96" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Part</text>
+<text x="152" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Description</text>
+<text x="312" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Class</text>
+<text x="376" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Picks</text>
+<text x="410" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Current loc.</text>
+<rect x="96" y="434" width="388" height="1" fill="#CFCCC5"/>
+<text x="96" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">4410281</text>
+<text x="152" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">Brake pads, front - VW Golf</text>
+<use href="#c-fast" x="312" y="443" width="13" height="10"/><text x="329" y="452" class="ui" font-size="11" font-weight="400" fill="#1A1D20">fast</text>
+<text x="376" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">61</text>
+<text x="410" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">G-14-04-02</text>
+<rect x="96" y="457" width="388" height="1" fill="#DEDBD5"/>
+<text x="96" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">9723950</text>
+<text x="152" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">Headlight bulb H7 - Peugeot</text>
+<use href="#c-fast" x="312" y="465" width="13" height="10"/><text x="329" y="474" class="ui" font-size="11" font-weight="400" fill="#1A1D20">fast</text>
+<text x="376" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">48</text>
+<text x="410" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">E-09-03-01</text>
+<rect x="96" y="479" width="388" height="1" fill="#DEDBD5"/>
+<text x="96" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">6900623</text>
+<text x="152" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">Water pump - Hyundai Tucson</text>
+<use href="#c-med" x="312" y="487" width="13" height="10"/><text x="329" y="496" class="ui" font-size="11" font-weight="400" fill="#1A1D20">medium</text>
+<text x="376" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">11</text>
+<text x="410" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">D-06-03-01</text>
+<rect x="96" y="501" width="388" height="1" fill="#DEDBD5"/>
+<text x="96" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">2555849</text>
+<text x="152" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">Brake hose - Toyota Corolla</text>
+<use href="#c-slow" x="312" y="509" width="13" height="10"/><text x="329" y="518" class="ui" font-size="11" font-weight="400" fill="#1A1D20">slow</text>
+<text x="376" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">4</text>
+<text x="410" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">C-08-02-01</text>
+<rect x="96" y="523" width="388" height="1" fill="#DEDBD5"/>
+<text x="96" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">3632446</text>
+<text x="152" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">Catalytic converter - BMW</text>
+<use href="#c-dead" x="312" y="531" width="13" height="10"/><text x="329" y="540" class="ui" font-size="11" font-weight="400" fill="#1A1D20">dead</text>
+<text x="376" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="410" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">A-01-04-01</text>
+<rect x="96" y="545" width="388" height="1" fill="#DEDBD5"/>
+<text x="96" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">5315766</text>
+<text x="152" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">Air filter - Audi A4</text>
+<use href="#c-fast" x="312" y="553" width="13" height="10"/><text x="329" y="562" class="ui" font-size="11" font-weight="400" fill="#1A1D20">fast</text>
+<text x="376" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">37</text>
+<text x="410" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">C-12-02-03</text>
+<rect x="96" y="567" width="388" height="1" fill="#DEDBD5"/>
+<text x="500" y="359" class="ui" font-size="14" font-weight="800" fill="#16191C">Locations list</text>
+<text x="940" y="359" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">best, occupied/empty, Walk Path</text>
+<rect x="500" y="368" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M505 368 H540 V598 H505 A5 5 0 0 1 500 593 V373 A5 5 0 0 1 505 368 Z" fill="#1A1E22"/>
+<use href="#logo" x="511" y="376" width="18" height="18"/>
+<use href="#i-overview" x="513" y="406" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="513" y="428" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="506" y="447" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-locations" x="513" y="450" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-pick" x="513" y="472" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="513" y="494" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="513" y="516" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="513" y="538" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="513" y="560" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="556" y="396" class="ui" font-size="16" font-weight="800" fill="#16191C">Locations</text>
+<text x="646" y="396" class="num" font-size="11" font-weight="400" fill="#575C63">2,000 · 416 empty · 334 best</text>
+<text x="556" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Location</text>
+<text x="628" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Aisle</text>
+<text x="662" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Lvl</text>
+<text x="688" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Walk Path</text>
+<text x="746" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Best</text>
+<text x="798" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Status</text>
+<text x="876" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Part</text>
+<rect x="556" y="434" width="374" height="1" fill="#CFCCC5"/>
+<text x="556" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">A-02-01-01</text>
+<text x="628" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">A</text>
+<text x="662" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="688" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">120</text>
+<rect x="746" y="443" width="14" height="10" fill="none" stroke="#23743F" stroke-width="2"/><text x="764" y="452" class="ui" font-size="11" font-weight="400" fill="#1A1D20">best</text>
+<use href="#c-empty" x="798" y="443" width="13" height="10"/><text x="815" y="452" class="ui" font-size="11" font-weight="400" fill="#1A1D20">empty</text>
+<text x="876" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">–</text>
+<rect x="556" y="457" width="374" height="1" fill="#DEDBD5"/>
+<text x="556" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">A-01-04-01</text>
+<text x="628" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">A</text>
+<text x="662" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">4</text>
+<text x="688" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">30</text>
+<rect x="746" y="465" width="14" height="10" fill="none" stroke="#23743F" stroke-width="2"/><text x="764" y="474" class="ui" font-size="11" font-weight="400" fill="#1A1D20">best</text>
+<use href="#c-dead" x="798" y="465" width="13" height="10"/><text x="815" y="474" class="ui" font-size="11" font-weight="400" fill="#1A1D20">occupied</text>
+<text x="876" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">3632446</text>
+<rect x="556" y="479" width="374" height="1" fill="#DEDBD5"/>
+<text x="556" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">C-08-02-01</text>
+<text x="628" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">C</text>
+<text x="662" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">2</text>
+<text x="688" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">5,020</text>
+<text x="746" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<use href="#c-slow" x="798" y="487" width="13" height="10"/><text x="815" y="496" class="ui" font-size="11" font-weight="400" fill="#1A1D20">occupied</text>
+<text x="876" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">2555849</text>
+<rect x="556" y="501" width="374" height="1" fill="#DEDBD5"/>
+<text x="556" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">G-14-04-02</text>
+<text x="628" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">G</text>
+<text x="662" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">4</text>
+<text x="688" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">14,940</text>
+<text x="746" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<use href="#c-fast" x="798" y="509" width="13" height="10"/><text x="815" y="518" class="ui" font-size="11" font-weight="400" fill="#1A1D20">occupied</text>
+<text x="876" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">4410281</text>
+<rect x="556" y="523" width="374" height="1" fill="#DEDBD5"/>
+<text x="556" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">H-11-04-03</text>
+<text x="628" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">H</text>
+<text x="662" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">4</text>
+<text x="688" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">15,940</text>
+<text x="746" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<use href="#c-empty" x="798" y="531" width="13" height="10"/><text x="815" y="540" class="ui" font-size="11" font-weight="400" fill="#1A1D20">empty</text>
+<text x="876" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">–</text>
+<rect x="556" y="545" width="374" height="1" fill="#DEDBD5"/>
+<text x="556" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">I-19-04-02</text>
+<text x="628" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">I</text>
+<text x="662" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">4</text>
+<text x="688" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">19,990</text>
+<text x="746" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<use href="#c-med" x="798" y="553" width="13" height="10"/><text x="815" y="562" class="ui" font-size="11" font-weight="400" fill="#1A1D20">occupied</text>
+<text x="876" y="562" class="num" font-size="11" font-weight="400" fill="#1A1D20">1187420</text>
+<rect x="556" y="567" width="374" height="1" fill="#DEDBD5"/>
+<text x="960" y="359" class="ui" font-size="14" font-weight="800" fill="#16191C">Pick groups</text>
+<text x="1400" y="359" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">parts on 5+ shared jobs</text>
+<rect x="960" y="368" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M965 368 H1000 V598 H965 A5 5 0 0 1 960 593 V373 A5 5 0 0 1 965 368 Z" fill="#1A1E22"/>
+<use href="#logo" x="971" y="376" width="18" height="18"/>
+<use href="#i-overview" x="973" y="406" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="973" y="428" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="973" y="450" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="966" y="469" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-pick" x="973" y="472" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-best" x="973" y="494" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="973" y="516" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="973" y="538" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="973" y="560" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="1016" y="396" class="ui" font-size="16" font-weight="800" fill="#16191C">Pick groups</text>
+<text x="1120" y="396" class="num" font-size="11" font-weight="400" fill="#575C63">212 groups · 5 or more shared jobs</text>
+<text x="1016" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Part</text>
+<text x="1154" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Partner</text>
+<text x="1292" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Jobs</text>
+<text x="1326" y="428" class="ui" font-size="11" font-weight="700" fill="#575C63">Aisles</text>
+<rect x="1016" y="434" width="374" height="1" fill="#CFCCC5"/>
+<text x="1016" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">4410281 Brake pads, front</text>
+<text x="1154" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">4410297 Brake disc, front</text>
+<text x="1292" y="452" class="num" font-size="11" font-weight="400" fill="#1A1D20">14</text>
+<use href="#s-r3" x="1326" y="441" width="16.9" height="13"/><text x="1348" y="452" class="ui" font-size="11" font-weight="400" fill="#1A1D20">G / A</text>
+<rect x="1016" y="457" width="374" height="1" fill="#DEDBD5"/>
+<text x="1016" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">6900616 Timing belt kit</text>
+<text x="1154" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">6900623 Water pump</text>
+<text x="1292" y="474" class="num" font-size="11" font-weight="400" fill="#1A1D20">9</text>
+<use href="#s-r3" x="1326" y="463" width="16.9" height="13"/><text x="1348" y="474" class="ui" font-size="11" font-weight="400" fill="#1A1D20">E / D</text>
+<rect x="1016" y="479" width="374" height="1" fill="#DEDBD5"/>
+<text x="1016" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">2555832 Brake caliper</text>
+<text x="1154" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">2555849 Brake hose</text>
+<text x="1292" y="496" class="num" font-size="11" font-weight="400" fill="#1A1D20">7</text>
+<use href="#s-r3" x="1326" y="485" width="16.9" height="13"/><text x="1348" y="496" class="ui" font-size="11" font-weight="400" fill="#1A1D20">A / C</text>
+<rect x="1016" y="501" width="374" height="1" fill="#DEDBD5"/>
+<text x="1016" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">7181839 Alternator</text>
+<text x="1154" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">7181846 V-belt</text>
+<text x="1292" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">6</text>
+<text x="1326" y="518" class="num" font-size="11" font-weight="400" fill="#1A1D20">same aisle A</text>
+<rect x="1016" y="523" width="374" height="1" fill="#DEDBD5"/>
+<text x="1016" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">3298226 Tail light assy</text>
+<text x="1154" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">3298233 Bulb holder</text>
+<text x="1292" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">5</text>
+<text x="1326" y="540" class="num" font-size="11" font-weight="400" fill="#1A1D20">same aisle A</text>
+<rect x="1016" y="545" width="374" height="1" fill="#DEDBD5"/>
+<text x="1016" y="570" class="ui" font-size="11" font-weight="400" fill="#575C63">All VW Golf, Hyundai Tucson, Toyota Corolla parts are synthetic demo data.</text>
+<text x="40" y="633" class="ui" font-size="14" font-weight="800" fill="#16191C">Best locations</text>
+<text x="480" y="633" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">marking: aisle, level, single</text>
+<rect x="40" y="642" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M45 642 H80 V872 H45 A5 5 0 0 1 40 867 V647 A5 5 0 0 1 45 642 Z" fill="#1A1E22"/>
+<use href="#logo" x="51" y="650" width="18" height="18"/>
+<use href="#i-overview" x="53" y="680" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="53" y="702" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="53" y="724" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="53" y="746" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="46" y="765" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-best" x="53" y="768" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-rec" x="53" y="790" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-ba" x="53" y="812" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-list" x="53" y="834" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="96" y="670" class="ui" font-size="16" font-weight="800" fill="#16191C">Best locations</text>
+<text x="214" y="670" class="num" font-size="11" font-weight="400" fill="#575C63">334 best · 48 empty</text>
+<rect x="96" y="682" width="83.3" height="22" fill="#FFFFFF" stroke="#B9B5AD"/>
+<text x="137.65" y="697" class="ui" font-size="11" font-weight="600" fill="#16191C" text-anchor="middle">Whole aisle</text>
+<rect x="179.3" y="682" width="121.1" height="22" fill="#FFFFFF" stroke="#B9B5AD"/>
+<text x="239.85000000000002" y="697" class="ui" font-size="11" font-weight="600" fill="#16191C" text-anchor="middle">Level, all aisles</text>
+<rect x="300.4" y="682" width="114.8" height="22" fill="#16191C" stroke="#B9B5AD"/>
+<text x="357.79999999999995" y="697" class="ui" font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">Level, one aisle</text>
+<rect x="415.2" y="682" width="64.4" height="22" fill="#FFFFFF" stroke="#B9B5AD"/>
+<text x="447.4" y="697" class="ui" font-size="11" font-weight="600" fill="#16191C" text-anchor="middle">Location</text>
+<rect x="96" y="710" width="64" height="22" rx="3" fill="#FFFFFF" stroke="#8F8C85"/>
+<text x="104" y="725" class="ui" font-size="11" font-weight="600" fill="#16191C">Aisle B</text>
+<use href="#i-down" x="144" y="714" width="12" height="12" color="#16191C" style="color:#16191C"/>
+<rect x="166" y="710" width="64" height="22" rx="3" fill="#FFFFFF" stroke="#8F8C85"/>
+<text x="174" y="725" class="ui" font-size="11" font-weight="600" fill="#16191C">Level 2</text>
+<use href="#i-down" x="214" y="714" width="12" height="12" color="#16191C" style="color:#16191C"/>
+<rect x="238" y="710" width="82" height="22" rx="5" fill="#16191C" stroke="#16191C"/>
+<text x="279.0" y="724.96" class="ui" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Add mark</text>
+<rect x="96" y="743" width="14" height="12" fill="none" stroke="#23743F" stroke-width="2"/>
+<text x="118" y="754" class="ui" font-size="11" font-weight="700" fill="#16191C">Aisle A, all levels</text>
+<text x="292" y="754" class="num" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">222 loc.</text>
+<text x="300" y="754" class="ui" font-size="11" font-weight="700" fill="#1D5DB0" text-decoration="underline">Remove</text>
+<rect x="96" y="763" width="14" height="12" fill="none" stroke="#23743F" stroke-width="2"/>
+<text x="118" y="774" class="ui" font-size="11" font-weight="700" fill="#16191C">Aisle B, level 1</text>
+<text x="292" y="774" class="num" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">56 loc.</text>
+<text x="300" y="774" class="ui" font-size="11" font-weight="700" fill="#1D5DB0" text-decoration="underline">Remove</text>
+<rect x="96" y="783" width="14" height="12" fill="none" stroke="#23743F" stroke-width="2"/>
+<text x="118" y="794" class="ui" font-size="11" font-weight="700" fill="#16191C">Aisle B, level 2</text>
+<text x="292" y="794" class="num" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">56 loc.</text>
+<text x="300" y="794" class="ui" font-size="11" font-weight="700" fill="#1D5DB0" text-decoration="underline">Remove</text>
+<text x="358" y="822" class="st" font-size="10" fill="#16191C">A</text>
+<rect x="372" y="814" width="96" height="7" fill="#4B5056"/>
+<text x="358" y="832" class="st" font-size="10" fill="#16191C">B</text>
+<rect x="372" y="824" width="96" height="7" fill="#4B5056"/>
+<text x="358" y="842" class="st" font-size="10" fill="#16191C">C</text>
+<rect x="372" y="834" width="96" height="7" fill="#4B5056"/>
+<rect x="370" y="812" width="100" height="11" fill="none" stroke="#23743F" stroke-width="1.6"/>
+<rect x="370" y="825" width="100" height="6" fill="none" stroke="#23743F" stroke-width="1.2"/>
+<text x="500" y="633" class="ui" font-size="14" font-weight="800" fill="#16191C">Before/after table</text>
+<text x="940" y="633" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">import vs planning copy, per aisle</text>
+<rect x="500" y="642" width="440" height="230" rx="5" fill="#F7F6F3" stroke="#A9A59D"/>
+<path d="M505 642 H540 V872 H505 A5 5 0 0 1 500 867 V647 A5 5 0 0 1 505 642 Z" fill="#1A1E22"/>
+<use href="#logo" x="511" y="650" width="18" height="18"/>
+<use href="#i-overview" x="513" y="680" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-parts" x="513" y="702" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-locations" x="513" y="724" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-pick" x="513" y="746" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-best" x="513" y="768" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<use href="#i-rec" x="513" y="790" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<rect x="506" y="809" width="28" height="20" rx="3" fill="#2C3238"/>
+<use href="#i-ba" x="513" y="812" width="14" height="14" color="#F2C200" style="color:#F2C200"/>
+<use href="#i-list" x="513" y="834" width="14" height="14" color="#9AA0A6" style="color:#9AA0A6"/>
+<text x="556" y="670" class="ui" font-size="16" font-weight="800" fill="#16191C">Before/after</text>
+<text x="660" y="670" class="num" font-size="11" font-weight="400" fill="#575C63">2 moves · current best-location marks</text>
+<text x="556" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">Aisle</text>
+<text x="596" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">In</text>
+<text x="622" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">Out</text>
+<text x="652" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">Fast in best</text>
+<text x="734" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">Groups together</text>
+<text x="830" y="698" class="ui" font-size="11" font-weight="700" fill="#575C63">Occ. %</text>
+<rect x="556" y="704" width="358" height="1" fill="#CFCCC5"/>
+<text x="556" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">A</text>
+<text x="596" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="622" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="652" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">112 → 113</text>
+<text x="734" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">38 → 38</text>
+<text x="830" y="721" class="num" font-size="11" font-weight="400" fill="#1A1D20">87.4 → 87.4</text>
+<rect x="556" y="726" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">B</text>
+<text x="596" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="622" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="652" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">41 → 41</text>
+<text x="734" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">22 → 22</text>
+<text x="830" y="742" class="num" font-size="11" font-weight="400" fill="#1A1D20">81.5 → 81.5</text>
+<rect x="556" y="747" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">C</text>
+<text x="596" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="622" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="652" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">6 → 6</text>
+<text x="734" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">19 → 19</text>
+<text x="830" y="763" class="num" font-size="11" font-weight="400" fill="#1A1D20">84.7 → 84.7</text>
+<rect x="556" y="768" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">F</text>
+<text x="596" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">0</text>
+<text x="622" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="652" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">1 → 0</text>
+<text x="734" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">11 → 11</text>
+<text x="830" y="784" class="num" font-size="11" font-weight="400" fill="#1A1D20">73.9 → 73.4</text>
+<rect x="556" y="789" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20">…</text>
+<text x="596" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<text x="622" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<text x="652" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<text x="734" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<text x="830" y="805" class="num" font-size="11" font-weight="400" fill="#1A1D20"></text>
+<rect x="556" y="810" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">Total</text>
+<text x="596" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="622" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">1</text>
+<text x="652" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">160 → 161</text>
+<text x="734" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">141 → 141</text>
+<text x="830" y="826" class="num" font-size="11" font-weight="400" fill="#1A1D20">79.2 → 79.2</text>
+<rect x="556" y="831" width="358" height="1" fill="#DEDBD5"/>
+<text x="556" y="840" class="ui" font-size="11" font-weight="400" fill="#575C63">Click an aisle to list the parts that move in and out.</text>
+<text x="960" y="633" class="ui" font-size="14" font-weight="800" fill="#16191C">Move list print view</text>
+<text x="1400" y="633" class="ui" font-size="11" font-weight="400" fill="#575C63" text-anchor="end">black and white, later state: 2 rounds</text>
+<rect x="960" y="642" width="440" height="230" fill="#FFFFFF" stroke="#000000"/>
+<text x="978" y="666" class="ui" font-size="14" font-weight="800" fill="#000000">Move list · Spring re-slot 2026</text>
+<text x="978" y="682" class="num" font-size="10.5" font-weight="400" fill="#000000">Data as of 2026-09-30 · uploaded 2026-10-02 · 2 rounds · generated 2026-11-11 10:05</text>
+<rect x="978" y="689" width="404" height="1.6" fill="#000000"/>
+<text x="978" y="706" class="ui" font-size="11" font-weight="800" fill="#000000">Round 1 · one walk, top to bottom</text>
+<text x="1002" y="720" class="ui" font-size="11" font-weight="700" fill="#000000">Part</text>
+<text x="1148" y="720" class="ui" font-size="11" font-weight="700" fill="#000000">From</text>
+<text x="1228" y="720" class="ui" font-size="11" font-weight="700" fill="#000000">To</text>
+<text x="1382" y="720" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">Rule</text>
+<rect x="978" y="726" width="12" height="12" fill="none" stroke="#000000" stroke-width="1.3"/>
+<text x="1002" y="736" class="num" font-size="11" font-weight="400" fill="#000000">4410281 Brake pads, front</text>
+<text x="1148" y="736" class="num" font-size="11" font-weight="700" fill="#000000">G-14-04-02</text>
+<text x="1228" y="736" class="num" font-size="11" font-weight="700" fill="#000000">A-02-01-01</text>
+<text x="1382" y="736" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">1</text>
+<rect x="978" y="741" width="404" height="0.7" fill="#000000"/>
+<rect x="978" y="745" width="12" height="12" fill="none" stroke="#000000" stroke-width="1.3"/>
+<text x="1002" y="755" class="num" font-size="11" font-weight="400" fill="#000000">3632446 Catalytic conv.</text>
+<text x="1148" y="755" class="num" font-size="11" font-weight="700" fill="#000000">A-01-04-01</text>
+<text x="1228" y="755" class="num" font-size="11" font-weight="700" fill="#000000">H-11-04-03</text>
+<text x="1382" y="755" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">2</text>
+<rect x="978" y="760" width="404" height="0.7" fill="#000000"/>
+<rect x="978" y="764" width="12" height="12" fill="none" stroke="#000000" stroke-width="1.3"/>
+<text x="1002" y="774" class="num" font-size="11" font-weight="400" fill="#000000">7181839 Alternator</text>
+<text x="1148" y="774" class="num" font-size="11" font-weight="700" fill="#000000">F-04-01-01</text>
+<text x="1228" y="774" class="num" font-size="11" font-weight="700" fill="#000000">A-04-01-04</text>
+<text x="1382" y="774" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">1</text>
+<rect x="978" y="779" width="404" height="0.7" fill="#000000"/>
+<rect x="978" y="783" width="12" height="12" fill="none" stroke="#000000" stroke-width="1.3"/>
+<text x="1002" y="793" class="num" font-size="11" font-weight="400" fill="#000000">1187420 Wiper blade set</text>
+<text x="1148" y="793" class="num" font-size="11" font-weight="700" fill="#000000">A-14-03-01</text>
+<text x="1228" y="793" class="num" font-size="11" font-weight="700" fill="#000000">A-03-01-02</text>
+<text x="1382" y="793" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">M</text>
+<rect x="978" y="798" width="404" height="0.7" fill="#000000"/>
+<text x="978" y="820" class="ui" font-size="11" font-weight="800" fill="#000000">Round 2 · second walk</text>
+<rect x="978" y="828" width="12" height="12" fill="none" stroke="#000000" stroke-width="1.3"/>
+<text x="1002" y="838" class="num" font-size="11" font-weight="400" fill="#000000">9723950 Headlight bulb H7</text>
+<text x="1148" y="838" class="num" font-size="11" font-weight="700" fill="#000000">E-09-03-01</text>
+<text x="1228" y="838" class="num" font-size="11" font-weight="700" fill="#000000">A-01-04-01</text>
+<text x="1382" y="838" class="ui" font-size="11" font-weight="700" fill="#000000" text-anchor="end">1</text>
+</svg>
