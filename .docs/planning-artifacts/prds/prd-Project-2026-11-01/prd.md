@@ -588,13 +588,15 @@ The planner can see all aisles with their locations, occupancy, movement classes
 
 #### FR-49: Change the warehouse colours
 
-The planner can change the colours used in the warehouse view from a settings page in the app (user decision 2026-11-13, UX step).
+The planner can change the colours used in the warehouse view in the app, from a settings page or by clicking an entry in the warehouse view's key (user decision 2026-11-13, UX step).
 
 **Consequences (testable):**
 - The planner can choose a colour for each movement class (fast-moving, medium-moving, slow-moving, dead stock), for best locations and for selection.
+- Clicking an entry in the warehouse view's key (or choosing it with the keyboard) opens a colour chooser for that colour, and the view shows the new colour at once. The key entries without a colour (such as empty) are not clickable.
 - Symbols, the text BEST and all other text stay the same, so no information depends on the chosen colours (NFR-10).
 - The chosen colours are used wherever the warehouse colours appear: the warehouse view, the recommendation detail and the movement-class swatches in lists. The printed move list stays black and white.
 - When a chosen colour has less than 3:1 contrast against a background it is drawn on, a warning names the colour and the background; the planner can still keep it.
+- When two of the chosen colours are hard to tell apart (the threshold is set in the UX spec), a warning names both; the planner can still keep them.
 - "Reset to defaults" restores the original colours.
 - The colours are kept in the browser and survive a reload. They are not part of Settings (FR-18), and they change no plan, no import and no analysis result.
 
