@@ -22,7 +22,7 @@ sources:
 - **UI system:** none chosen yet. The stack is decided in the architecture step (PRODUCT.md, Stack). Controls are plain, buildable web controls: buttons, tabs, tables, segmented controls, a native `<dialog>`-style modal. Whatever library is picked, it must honour these behaviours and the tokens in `DESIGN.md`.
 - **Visual identity:** `DESIGN.md` is the reference. This spine names its tokens and components by path, for example `{colors.best}` or `{components.bin}`.
 - **Language:** the UI is in English (NFR-11). Copy uses the PRD glossary terms exactly: best location, pick group, partner, keep in place, "no space", round, data-as-of date, planning copy, move list, outdated recommendation.
-- **Scope change carried here (decided 2026-11-13; the PRD records it as FR-42, milestone 2, and FR-49):** the warehouse view (FR-42) is in the core (milestone 2). It becomes the **Locations view** (aisle bin walls) and the **wall crops in the recommendation detail**. FR-42 is rewritten so occupancy shows by shape plus text, never red/green. Colour stays reserved for movement class.
+- **Scope change carried here (decided 2026-11-13; the PRD records it as FR-42, milestone 2, which also covers changing colours from the Key):** the warehouse view (FR-42) is in the core (milestone 2). It becomes the **Locations view** (aisle bin walls) and the **wall crops in the recommendation detail**. FR-42 is rewritten so occupancy shows by shape plus text, never red/green. Colour stays reserved for movement class.
 - **Users in this spine:** the **planner** (in the PRD journeys this is Justas) and the **colleague**, who only meets the printed move list. Core has no login, so "created by" / "last edited by" show the fixed value `planner` (FR-11). Mocks that show "Justas" or a "JS" avatar show stage 2.
 
 ## Information Architecture
@@ -43,7 +43,7 @@ The saved-plans list is the start page (FR-8). Everything else lives inside an o
 | Recommendations | Flow step 6; **REC** | Run, tabs per rule, apply / other location / keep in place, no space, outdated, apply all, undo, reset; **recommendation detail** with the from and to wall crops | 6 |
 | Before/after table | Flow step 7; **B/A**; "Before/after table" link | Per aisle and total: moves in and out, fast-moving in best locations, pick groups in the same aisle | 7 |
 | Move list print view | Flow step 8; **MOV** | Screen preview plus browser print; black and white | 8 |
-| Settings and Warehouse colours | Launcher **SET**; plan overview; "All colours…" at the end of the wall's Key | One page, two separate blocks. **Settings** (the glossary term): read-only, the settings this plan was computed with (FR-18), changed in the config file, not in the app. **Warehouse colours (display only, kept in this browser)**: editable in the app (FR-49), not part of Settings; see Warehouse wall | — |
+| Settings | Launcher **SET**; plan overview | **Settings** (the glossary term), read-only: the analysis settings this plan was computed with (FR-18), changed in the config file, not in the app. Colours are not settings: they are changed only from the wall's Key (FR-42; see Warehouse wall) | — |
 | Launcher (features menu) | Toolbar grid button; `Ctrl+K` / `⌘K` | All features as plates in flow order, the open plan, other saved plans, the Keyboard box listing every shortcut | — |
 | Part panel | Search result, roster row, tooltip part line, recommendation | One part: class and picks, locations and stock, pick groups and partners, keep in place, Manual move… | — [ASSUMPTION] |
 | Manual move dialog | Part panel, location tooltip, list row action | From-location (if the part has several), to-location, confirm | — |
@@ -146,7 +146,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 | Input `{components.input}` | Search, plan name, launcher | `Enter` submits, `Esc` clears and then blurs. The plan name is required: "Give the plan a name." inline under the field. Plan names need not be unique [ASSUMPTION]. |
 | Segmented control `{components.segmented-control}` | Wall header, Locations, Best locations | Behaves as a radio group: arrow keys switch, and the selection persists per plan [ASSUMPTION]. |
 | Toast `{components.toast}` | Global, bottom-left | One at a time, at least 10 s (longer for longer text), paused while hovered or focused, at most one action. **Undo** appears only when Undo last move would reverse exactly what the toast reports, that is, a move ("Applied · move 16, round 1 · 4410281 G-14-04-02 → A-02-01-01" · Undo). A toast about marks never offers Undo, because FR-35 undo never reverses marks: "Best-location marks changed · 3 recommendations are now outdated" · **View** (opens the Outdated tab). Every toast action also exists elsewhere (Undo last move, the Outdated tab). Under reduced motion it appears without sliding. Announced via `aria-live="polite"`. → [components sheet 1](./mockups/components-sheet.svg) |
-| Focus ring `{components.focus-ring}` | Everything focusable | Fixed: the Warehouse colours never change it. On graphite (wall, toolbar, launcher) the dark inner and white outer ring; on paper the ink ring with a white gap. |
+| Focus ring `{components.focus-ring}` | Everything focusable | Fixed: the Key colours never change it. On graphite (wall, toolbar, launcher) the dark inner and white outer ring; on paper the ink ring with a white gap. |
 
 **Print.**
 
@@ -187,8 +187,8 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 | No moves to print | Move list | "There are no moves to print." (FR-38) Print is disabled. A link goes to Recommendations. |
 | Search: no match | Search field | "No part or location matches “xyz”." |
 | Launcher: no match | Launcher | "No feature or saved plan matches “xyz”." |
-| Warehouse colours can't be kept | Warehouse colours block, Key popover | When browser storage is blocked (private window, blocked site data), the defaults are used and a note says "Colours can't be kept in this browser; changes last until you close this tab." Changes still apply for the session. |
-| Focus | All | The fixed `{components.focus-ring}`: on graphite a 2px white ring outside a 2px dark ring, on paper a 2px ink ring with a 2px white gap. The Warehouse colours never change it, and it never looks like selection (a single cased violet line). |
+| Key colours can't be kept | Key colour popover | When browser storage is blocked (private window, blocked site data), the defaults are used and a note says "Colours can't be kept in this browser; changes last until you close this tab." Changes still apply for the session. |
+| Focus | All | The fixed `{components.focus-ring}`: on graphite a 2px white ring outside a 2px dark ring, on paper a 2px ink ring with a 2px white gap. The Key colours never change it, and it never looks like selection (a single cased violet line). |
 | Stage 2: plan changed by someone else | Any plan surface | FR-41 warning: "Someone saved this plan after you opened it. Reload it, or keep going and your version replaces theirs." Not in core. |
 
 ## Interaction Primitives
@@ -196,7 +196,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 **Keyboard-complete (NFR-10).** Every action has a keyboard path. The mouse is never required.
 
 - `Tab` / `Shift+Tab` follow reading order: toolbar → page header actions → main content → side panel.
-- Destructive actions (Delete…, Reset…, Reset to defaults…) always open a confirm dialog or popover with **Cancel** focused.
+- Destructive actions (Delete…, Reset…) always open a confirm dialog or popover with **Cancel** focused.
 
 **Shortcuts.** There are no single-character shortcuts (WCAG 2.1.4): every shortcut uses a modifier, and plain letters, digits and `/` never trigger anything. The launcher's Keyboard box lists them.
 
@@ -229,7 +229,7 @@ The app takes `Ctrl+K` from the browser's search-bar shortcut, as most web apps 
 
 ## Warehouse wall
 
-This section covers the Locations view and the recommendation detail. It realises FR-14 and the rewritten FR-42, plus FR-22 on the wall. → [warehouse layout mock](./mockups/warehouse-layout.svg) · [components sheet 1](./mockups/components-sheet.svg) (Key, colour popover, Warehouse colours)
+This section covers the Locations view and the recommendation detail. It realises FR-14 and the rewritten FR-42, plus FR-22 on the wall. → [warehouse layout mock](./mockups/warehouse-layout.svg) · [components sheet 1](./mockups/components-sheet.svg) (Key and colour popover)
 
 **Overview of 9 aisles.** The left rail lists aisles in walk order A → I ("Walk order A → I"). At the top is the whole-warehouse card: occupancy %, "1,584 of 2,000 locations · 416 empty", "174 best locations · 7 of them empty" (FR-14, FR-22). Each aisle card shows its mini-wall, %, "occupied of total · empty" and the moves that touch it. Opening the Locations view shows the aisle last opened in this plan, or aisle A [ASSUMPTION].
 
@@ -240,7 +240,7 @@ This section covers the Locations view and the recommendation detail. It realise
 - Locations are placed left to right in Walk Path order within their aisle and level. Section and position numbers are read from the location code when it matches `<aisle>-<section>-<level>-<position>`. [ASSUMPTION] When codes follow another pattern (FR-6 allows several), locations are drawn as one continuous run per level without section labels. See Open Questions.
 - **Sections are split into two runs**: the first ⌈n/2⌉ sections on top (01–10 of 19) and the rest below (11–19), each run with its own level labels. An end cap closes the aisle: "End of aisle A · Walk Path 2,270 →".
 - Positions with no location in the file are hatched `{components.slot-none}`, are not focusable, and are skipped by arrow keys.
-- The **Key** (`{components.legend}`) is always visible under the wall. Its colour entries are buttons that open the colour popover (see Warehouse colours below).
+- The **Key** (`{components.legend}`) is always visible under the wall. Its colour entries are buttons that open the colour popover (see Change a colour from the Key below).
 
 **The wall always shows movement class.** Bins are in class colours with glyphs. The concept's colour-mode switch is removed, because the FR-42 rewrite drops red/green occupancy and occupancy is already readable by shape (bin against open slot) and by the text counts.
 
@@ -260,24 +260,24 @@ In the Best locations step the wall becomes the marking tool. **Whole aisle | Le
 
 **Recommendation detail crops.** These are the same wall at the same bin size, cropped to the three sections around the from-location and the to-location, stacked "From aisle G" over "To aisle A" with the rule and round between them. A cross-aisle move needs no long arrow: the crops are the arrow. The crops are pictures, not grids: each is `role="img"` with a text name ("From G-14-04-02, aisle G, level 4 → to A-02-01-01, aisle A, level 1, best location"), so they add no tab stops; "Show on the Locations wall" opens the full grid.
 
-**Change a colour from the Key (FR-49).** The quickest way to change a colour is to click its entry in the Key under the wall. The six colour entries are Fast-moving, Medium-moving, Slow-moving, Dead stock, Best location and Selected; Empty and 2 parts are not clickable. Each entry is a button named by its glossary name, never by a colour ("Fast-moving, change colour"), with `aria-haspopup="dialog"` and `aria-expanded`. Clicking it, or pressing `Enter` or `Space` on it, opens a small colour popover above it, a non-modal `role="dialog"` labelled by its title:
+**Change a colour from the Key (FR-42).** The only way to change a colour is to click its entry in the Key under the wall; there is no colours page and no colour entry in Settings. The six colour entries are Fast-moving, Medium-moving, Slow-moving, Dead stock, Best location and Selected; Empty and 2 parts are not clickable. Each entry is a button named by its glossary name, never by a colour ("Fast-moving, change colour"), with `aria-haspopup="dialog"` and `aria-expanded`. Clicking it, or pressing `Enter` or `Space` on it, opens a small colour popover above it, a non-modal `role="dialog"` labelled by its title:
 - a title naming what is being changed, with its fixed glyph or cue ("Fast-moving ▲ colour");
 - eight preset shades of that entry's hue (`{components.colour-presets}`), a `radiogroup` of named `radio` swatches ("Fast-moving shade 3 of 8", the default one "Default") with the current one ringed and checked; every preset passes that entry's contrast check;
 - a Default chip showing the default swatch and hex;
 - a hex field and a swatch button that opens the browser's own colour picker. The hex field and the presets are the guaranteed keyboard path, since the native picker is not keyboard-operable in every browser. An invalid value sets `aria-invalid` and shows "Enter a colour as #RRGGBB";
-- the contrast and likeness warnings for this colour (the same checks as the Warehouse colours block), shown under the presets only when a check fails, linked to the hex field with `aria-describedby` and announced with `role="status"`;
+- the contrast and likeness warnings for this colour (the checks below), shown under the presets only when a check fails, linked to the hex field with `aria-describedby` and announced with `role="status"`;
 - **Reset this colour** (back to the default for this colour only) and **Done**.
 
-Focus starts on the current preset. Arrow keys move between presets and preview each one live on the wall behind the popover, so the choice is judged on the real wall. **Done** or a click outside keeps the pick and announces it ("Fast-moving colour changed"). `Esc` restores the colour the entry had when the popover opened, then closes [ASSUMPTION]. Either way focus returns to the Key entry. The popover flips or shifts to stay inside the viewport, also at 200% zoom. It saves to the same browser-stored choice as the Warehouse colours block, so both always agree.
+Focus starts on the current preset. Arrow keys move between presets and preview each one live on the wall behind the popover, so the choice is judged on the real wall. **Done** or a click outside keeps the pick and announces it ("Fast-moving colour changed"). `Esc` restores the colour the entry had when the popover opened, then closes [ASSUMPTION]. Either way focus returns to the Key entry. The popover flips or shifts to stay inside the viewport, also at 200% zoom.
 
-**Warehouse colours (FR-49).** All six colours can also be changed in one place: the **Warehouse colours (display only, kept in this browser)** block on the SET page, reached from the launcher or from an "All colours…" link at the end of the Key. It is separate from the Settings block (FR-18). The block lists six rows: fast-moving, medium-moving, slow-moving, dead stock, best location and selection. Each row shows its fixed glyph or cue (▲, ◆, ▼, slashed ring, the BEST tag, the selection frame), a colour input with a visible label ("Fast-moving colour", hex field plus the browser's colour picker), the current check result ("Passes · wall 3.05:1 · open slot 4.44:1"), and a live preview: a strip of the bin wall with an open slot, a best-location rail and a selected bin, drawn with the chosen colours. Changes apply at once to every wall, mini-wall, wall crop and class swatch; the printed move list stays black and white.
+**Key colours (FR-42).** Each of the six colours (fast-moving, medium-moving, slow-moving, dead stock, best location and selection) keeps its fixed glyph or cue (▲, ◆, ▼, slashed ring, the BEST tag, the selection frame) whatever its colour. A change applies at once to every wall, mini-wall, wall crop and class swatch; the printed move list stays black and white.
 
-The checks measure each colour where it is drawn (pairs and default ratios in DESIGN.md, Colors):
+The popover's checks measure each colour where it is drawn (pairs and default ratios in DESIGN.md, Colors):
 - **Movement classes:** against the wall face `{colors.wall}` and against an open slot `{colors.slot-empty}`. Not against white: on paper a class swatch always has an ink outline.
 - **Best location:** against the wall and an open slot, plus ink text on it (the BEST tag) at 4.5:1.
 - **Selection:** against its dark casing `{colors.slot-empty}` on the wall, and against white `{colors.surface}` on paper.
 
-A failing pair shows a warning naming the colour and the background, for example "Slow-moving on the wall: 2.1:1 (3:1 or more recommended)". A second warning appears when two of the six colours are **too alike** (CIELAB ΔE below 20) and names both: "Slow-moving and Selection look alike (ΔE 12). Bins and the selection frame may be hard to tell apart." The planner can keep either choice. All six defaults pass both checks, so a fresh browser shows no warnings. For best location the planner picks the wall shade; the paper shade is derived by darkening the same hue until white text on it reaches 4.5:1 and the colour reaches 3:1 on white [ASSUMPTION]. **Reset to defaults…** restores the DESIGN.md defaults after a confirm popover (Cancel focused). The choice is stored in the browser, survives a reload, and changes no plan or import; if storage is blocked, see State Patterns. Focus is never affected: it uses the fixed `{components.focus-ring}`.
+A failing pair shows a warning naming the colour and the background, for example "Slow-moving on the wall: 2.1:1 (3:1 or more recommended)". A second warning appears when two of the six colours are **too alike** (CIELAB ΔE below 20) and names both: "Slow-moving and Selection look alike (ΔE 12). Bins and the selection frame may be hard to tell apart." The planner can keep either choice. All six defaults pass both checks, so a fresh browser shows no warnings. For best location the planner picks the wall shade; the paper shade is derived by darkening the same hue until white text on it reaches 4.5:1 and the colour reaches 3:1 on white [ASSUMPTION]. **Reset this colour** restores that entry's DESIGN.md default; nothing resets every colour at once. The choice is stored in the browser, survives a reload, and changes no plan or import; if storage is blocked, see State Patterns. Focus is never affected: it uses the fixed `{components.focus-ring}`.
 
 ## Move list print
 
@@ -332,7 +332,7 @@ The direction came from a round of ten divergent concepts (memlog 2026-11-11). T
 
 ## Key Flows
 
-Not yet narrated: Warehouse colours and the Key colour popover, the demo front page, Pick groups, Parts and the launcher (see Open Questions 10–14).
+Not yet narrated: changing a colour from the Key, the demo front page, Pick groups, Parts and the launcher (see Open Questions 10–14).
 
 ### UJ-1. Justas builds a re-slotting plan from a fresh export
 
@@ -377,7 +377,7 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 
 ## Open Questions
 
-**Resolved on 2026-11-13** (each is written into the body; history in `.memlog.md`): applied state, the two best greens, the wall always showing movement class, the demo front page and no demo shortcut, violet selection, Warehouse colours (FR-49), and from the review pass: the fixed focus ring, modifier-only shortcuts, reflow, the print band, a Round value on every printed line, and the class defaults `#D85144` / `#417DDC`.
+**Resolved on 2026-11-13** (each is written into the body; history in `.memlog.md`): applied state, the two best greens, the wall always showing movement class, the demo front page and no demo shortcut, violet selection, Key colours (FR-42, changed only from the Key), and from the review pass: the fixed focus ring, modifier-only shortcuts, reflow, the print band, a Round value on every printed line, and the class defaults `#D85144` / `#417DDC`.
 
 **Still open. Not blocking; each stays as drafted until the user says otherwise:**
 
@@ -390,7 +390,7 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 7. **Paper shade of a chosen best colour.** Derived by darkening the hue until white text reaches 4.5:1 (as drafted), or a fixed paper shade whatever the wall shade?
 8. **Colour popover `Esc`.** `Esc` restores the colour from when the popover opened; Done or a click outside keeps the pick (as drafted, replacing the earlier "Esc keeps"). Keep as drafted?
 9. **Colour presets and likeness threshold.** Eight shades of each entry's hue (as drafted, DESIGN.md `colour-presets`) and a "too alike" warning below ΔE 20. Keep as drafted?
-10. **Journey: Warehouse colours.** Needs a narrated journey from the user (Key popover and the Warehouse colours block).
+10. **Journey: changing a colour from the Key.** Needs a narrated journey from the user (the Key colour popover).
 11. **Journey: first-time demo visitor.** Needs a narrated journey from the user (demo front page → Open the app → empty saved-plans list → New Plan with `data/sample/`).
 12. **Journey: Pick groups.** Needs a narrated journey from the user.
 13. **Journey: Parts roster.** Needs a narrated journey from the user (UJ-1 goes from Locations to Best locations without visiting Parts or Pick groups).

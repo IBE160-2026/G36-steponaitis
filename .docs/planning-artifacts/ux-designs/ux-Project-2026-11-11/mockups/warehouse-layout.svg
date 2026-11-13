@@ -2427,7 +2427,6 @@ text { font-variant-numeric: tabular-nums; }
 <text x="1197" y="627" class="b w5" font-size="12" fill="#1B1E22">Selected</text><use href="#i-palette" x="1249" y="616" width="12" height="12" color="#4A5058"/>
 <rect x="1275" y="614" width="16" height="18" rx="2" fill="#fff" stroke="#6B717A" stroke-width="1"/><line x1="1283" y1="618" x2="1283" y2="628" stroke="#6B717A" stroke-width="0.8"/>
 <text x="1297" y="627" class="b w5" font-size="12" fill="#1B1E22">2 parts</text>
-<text x="1416" y="627" class="b w6" font-size="12" fill="#1B1E22" text-anchor="end" text-decoration="underline">All colours…</text>
 <g filter="url(#pop)"><rect x="760" y="425" width="264" height="176" rx="6" fill="#fff" stroke="#D6D4CD" stroke-width="1"/></g>
 <path d="M759 600.5 L766 608 L773 600.5Z" fill="#fff" stroke="#D6D4CD" stroke-width="1"/>
 <rect x="759.5" y="599" width="13" height="2.5" fill="#fff"/>
