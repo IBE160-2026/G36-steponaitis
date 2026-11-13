@@ -2,7 +2,7 @@
 title: "PRD: Smart Warehouse Planner"
 status: final
 created: 2026-11-01
-updated: 2026-11-11
+updated: 2026-11-13
 ---
 
 # PRD: Smart Warehouse Planner
@@ -50,7 +50,7 @@ The data needed to place parts by usage already exists in the warehouse's own ex
 
 - **UJ-1. Justas builds a re-slotting plan from a fresh export.**
   Justas, the warehouse planner, suspects the fast-moving parts have drifted to the far aisles and has a fresh export of the three files. On the saved-plans list Justas clicks New Plan, names it "Autumn re-slot" and uploads the files. The import passes and the plan opens with its data-as-of date, movement classes and pick groups. Justas marks aisle A and level 1 in all aisles as best and runs the recommendations. Round 1 lists rule 1, 2 and 3 recommendations, each with its reason, and a few parts with "no space". Justas applies most of them, applies one with another suggested location, marks one part "keep in place" because it would not fit physically, and makes one manual move. **Climax:** the before/after table shows, aisle by aisle, more fast-moving parts in best locations and more pick groups in the same aisle, and which parts move in and out. **Resolution:** the plan is saved automatically; Justas runs round 2 to use the best locations that the rule 2 moves freed. **Edge case:** the Inventory file lacks the Quantity column; the import stops with a message naming the file and the column, nothing is saved, and Justas fixes the export and uploads again.
-  *Realized by FR-1, FR-3–FR-8, FR-10, FR-13–FR-33, FR-37.*
+  *Realized by FR-1, FR-3–FR-8, FR-10, FR-13–FR-33, FR-37, FR-42.*
 
 - **UJ-2. A colleague carries out the move list.**
   Justas prints the move list from the plan. A colleague takes the printout; the header shows the plan name, the data-as-of date and when it was generated. The colleague works through round 1 from top to bottom, moving each part from its from-location to its to-location and ticking the box; a line into a location always comes after the line that empties it. Then the colleague starts on round 2, whose moves use locations that round 1 freed. **Edge case:** a part is not at its from-location because someone moved it after the export; the colleague notes it on the printout and Justas decides. The tool does not track whether moves were carried out.
@@ -119,16 +119,16 @@ Downstream documents use these terms exactly.
 - **Keyword rule** (stage 2) — a mapping from a keyword in the part description to a category, in an order the planner sets.
 - **Aisle categories** (stage 2) — the categories the planner assigns to an aisle.
 - **Category check** (stage 2) — the list of parts whose category is not among their aisle's categories.
-- **Warehouse view** (stage 2) — a visual view of all aisles and locations with occupancy.
+- **Warehouse view** — a visual view of all aisles, drawn shelf by shelf, with occupancy, movement classes and best locations (FR-42).
 - **Location label** (stage 2) — a printed label with a location code and its QR code.
 
 ## 4. Features
 
-Core features (4.1–4.10) are built, tested and stable before any stage 2 feature (4.11–4.14) is started; the core itself is built in two milestones (§7.1).
+Core features (4.1–4.10 and 4.12) are built, tested and stable before any stage 2 feature (4.11, 4.13, 4.14) is started; the core itself is built in two milestones (§7.1).
 
 ### 4.0 Key screens
 
-An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view. Stage 2: login and create account; warehouse view; category settings and category check; location label print view.
+An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view. Stage 2: login and create account; category settings and category check; location label print view.
 
 ### 4.1 New Plan and import
 
@@ -355,7 +355,7 @@ The planner can set and remove best-location marks in a plan.
 The planner can see which locations are best.
 
 **Consequences (testable):**
-- The locations list (FR-14) and the before/after table (FR-37) show which locations are best.
+- The locations list (FR-14), the warehouse view (FR-42) and the before/after table (FR-37) show which locations are best.
 - The plan shows the number of best locations and of empty best locations.
 
 ### 4.7 Recommendations
@@ -567,19 +567,23 @@ A user who changes a plan that someone else has saved since the user opened it i
 - The warning says the plan has changed and offers to reload it.
 - If the user continues, the user's version of the whole plan is saved and the other user's changes since then are lost (last save wins).
 
-### 4.12 Warehouse view (stage 2)
+### 4.12 Warehouse view (core, milestone 2)
 
-**Description:** A visual overview of the whole warehouse and its occupancy, for the planning copy of the open plan. It does not rely on color alone.
+**Description:** A visual view of the warehouse as the plan has it now. Each aisle is drawn shelf by shelf, the way it looks from the floor, with occupancy, movement classes and best locations. The planner uses it to look at locations and to see where a recommendation moves a part. It shows the planning copy of the open plan and does not rely on colour alone. Part of the core since the UX step (decision 2026-11-13); the section keeps its number so that FR-42 keeps its ID. Realizes UJ-1.
 
 #### FR-42: Show the warehouse view
 
-The planner can see all aisles with their locations and occupancy.
+The planner can see all aisles with their locations, occupancy, movement classes and best locations.
 
 **Consequences (testable):**
-- Occupied locations are red and empty locations green, and each location also has a text label (occupied or empty).
-- Each location has a tooltip with the location code and the parts stored there.
-- Occupancy is shown for each aisle and for the whole warehouse.
-- The view shows the plan's planning copy.
+- Each aisle is drawn by section and level, with one place for every location in the Locations file.
+- Occupancy is shown by shape and text, not by red/green colour: an occupied location is drawn filled, an empty location is drawn as an open, empty place, and its tooltip says occupied or empty.
+- Colour is reserved for movement class: each part stored in a location shows its movement class by colour and by a symbol, so the class can also be read without colour.
+- Best locations are marked with a green rail or frame and the text BEST.
+- Each location has a tooltip with the location code, its level, whether it is a best location, and the parts stored there with movement class, picks and stock. The tooltip can also be opened with the keyboard.
+- Occupancy is shown for each aisle and for the whole warehouse, as a percentage and as occupied and empty counts.
+- From a recommendation, the planner can see the part's current location and the suggested location in the warehouse view.
+- The view shows the plan's planning copy and updates after every move, undo and reset.
 
 ### 4.13 Category check (stage 2)
 
@@ -670,7 +674,7 @@ The planner can print a label for every location in a chosen aisle.
 
 ### 7.1 In Scope: the core, in two milestones
 
-The core is FR-1–FR-38. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
+The core is FR-1–FR-38 and FR-42. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
 
 **Milestone 1: the core flow on one stored plan.** Import, classify, find pick groups, get recommendations, try them in the planning copy.
 - FR-1, FR-3–FR-7 (New Plan from files, import checks), FR-10–FR-11 (autosave, created by / last edited by)
@@ -685,12 +689,12 @@ The core is FR-1–FR-38. It is built in two milestones so that the teacher's fi
 - FR-2, FR-8, FR-9, FR-12 (saved-plans list, reopen, reuse an import, delete)
 - FR-31, FR-32, FR-34, FR-35 (apply with another suggested location, keep in place, combined moves, undo and reset)
 - FR-38 (move list)
+- FR-42 (warehouse view; moved from stage 2, decision 2026-11-13)
 - **Gate:** SM-1 and SM-2 pass in full.
 
 ### 7.2 Stage 2 (after the milestone 2 gate)
 
 - Accounts, login, and the warning when two people edit the same plan (FR-39–FR-41)
-- Warehouse view (FR-42)
 - Category check (FR-43–FR-47)
 - Location labels with QR codes (FR-48)
 
@@ -768,6 +772,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Demo flow metric:** must run from a clean checkout following only the README.
 - **Before/after table:** also shows pick groups in the same aisle.
 - **Answer-key details (user decision 2026-11-11):** the period counts transactions by date only; a slow-moving or dead-stock part whose partner's aisle has only best locations empty is "no space" under rule 3; a part that already has a recommendation is skipped silently in its other pick groups; a part that is "no space" under rule 1 gets no rule 3 entry; the answer-key test dataset lives in `data/answer-key/`.
+- **Warehouse view in the core, and FR-42 rewritten** (user decision 2026-11-13, UX step): the warehouse view moves from stage 2 into milestone 2 and draws each aisle shelf by shelf; it is also where a recommendation's current and suggested locations are shown. Occupancy is shown by shape and text instead of red and green, colour is reserved for movement class, and best locations get a green rail or frame with the text BEST. Milestone 1 is unchanged, so the small-core-first order still holds.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions
