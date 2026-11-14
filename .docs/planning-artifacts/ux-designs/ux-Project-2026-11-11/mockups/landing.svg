@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" role="img" aria-labelledby="t d"><title id="t">Smart Warehouse Planner — Demo front page (Bin Wall)</title><desc id="d">Front page of the public demo deployment: what the tool does, a note that the demo holds synthetic data only, one Open the app action, a bin wall with one bin lifted toward a best location, and the six-step flow as bin labels.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" role="img" aria-labelledby="t d"><title id="t">Smart Warehouse Planner — Demo front page (Bin Wall)</title><desc id="d">Front page of the public demo deployment: what the tool does, Log in, Create account and Demo version, a bin wall with one bin lifted to a best location with its reason, and four panels following part 4410281 from its export row to the printed move list.</desc>
 <defs>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap');
@@ -26,286 +26,129 @@ text { font-variant-numeric: tabular-nums; }
 
 <symbol id="i-info" viewBox="0 0 20 20"><g class="ic"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5"/></g><circle cx="10" cy="6.4" r="1.05" fill="currentColor"/></symbol>
 </defs>
+
 <rect x="0" y="0" width="1440" height="900" fill="#EEEDE8"/>
-<rect x="0" y="0" width="1440" height="64" fill="url(#louvre)"/>
-<g><rect x="24" y="17" width="30" height="30" rx="2" fill="#F0B323"/><rect x="24" y="17" width="30" height="3.5" rx="1.5" fill="#000" fill-opacity="0.22"/><path d="M25.5 44 H52.5" stroke="#000" stroke-opacity="0.18" stroke-width="1.5"/><rect x="27" y="26.0" width="24" height="13" rx="1" fill="#fff"/><use href="#g-med" x="34.5" y="28.0" width="9" height="9"/></g>
-<text x="64" y="39" class="lb w7" font-size="19" fill="#fff">Smart Warehouse Planner</text>
-<text x="1010" y="38" class="b w5" font-size="14" fill="#E3E6E9">How it works</text>
-<text x="1130" y="38" class="b w5" font-size="14" fill="#E3E6E9">The four rules</text>
-<text x="1260" y="38" class="b w5" font-size="14" fill="#E3E6E9">Demo data</text>
-<text x="1360" y="38" class="b w5" font-size="14" fill="#E3E6E9">README</text>
-<text x="72" y="168" class="lb w7" font-size="66" fill="#1B1E22">Three exports in.</text>
-<text x="72" y="236" class="lb w7" font-size="66" fill="#1B1E22">A move list out.</text>
-<text x="72" y="292" class="b w4" font-size="19" fill="#1B1E22">Smart Warehouse Planner recommends which spare parts to move</text>
-<text x="72" y="318" class="b w4" font-size="19" fill="#1B1E22">where, from three files your warehouse already exports.</text>
-<text x="72" y="352" class="b w7" font-size="19" fill="#1B1E22">The tool suggests. The planner decides.</text>
-<rect x="72" y="380" width="184" height="52" rx="8" fill="#1B1E22"/>
-<text x="96" y="412" class="b w7" font-size="17" fill="#fff">Open the app</text>
-<use href="#i-arrow-r" x="216" y="397" width="18" height="18" stroke="#fff" color="#fff"/>
-<rect x="72" y="456" width="616" height="80" rx="6" fill="#fff" stroke="#D6D4CD" stroke-width="1"/>
-<use href="#i-info" x="86" y="469" width="20" height="20" stroke="#1B1E22" color="#1B1E22"/>
-<text x="116" y="484" class="b w7" font-size="14" fill="#1B1E22">This demo holds synthetic data only.</text>
-<text x="116" y="505" class="b w4" font-size="13.5" fill="#4A5058">9 aisles, 2,000 locations and 1,545 parts, data as of 2026-09-30.</text>
-<text x="116" y="524" class="b w4" font-size="13.5" fill="#4A5058">No real company data, no account, no AI at runtime.</text>
-<rect x="744" y="96" width="672" height="452" rx="8" fill="url(#louvre2)"/>
-<text x="892" y="126" class="lb w6" font-size="13" fill="#C9CED3" text-anchor="middle">Section 01</text>
-<rect x="788" y="136" width="6" height="394" fill="#454B52"/>
-<text x="1098" y="126" class="lb w6" font-size="13" fill="#C9CED3" text-anchor="middle">Section 02</text>
-<rect x="994" y="136" width="6" height="394" fill="#454B52"/>
-<text x="1304" y="126" class="lb w6" font-size="13" fill="#C9CED3" text-anchor="middle">Section 03</text>
-<rect x="1200" y="136" width="6" height="394" fill="#454B52"/>
-<rect x="1406" y="136" width="6" height="394" fill="#454B52"/>
-<text x="758" y="176" class="lb w7" font-size="15" fill="#E3E6E9">L4</text>
-<rect x="788" y="216" width="624" height="6" fill="#1F2326"/>
-<rect x="802" y="152" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="802" y="152" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="807" y="168" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="811" y="176" width="10" height="10"/>
-<text x="824" y="185.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="866" y="152" width="60" height="58" rx="2" fill="#141719"/><rect x="882.8" y="155" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M869 207 H923" stroke="#2C3136" stroke-width="1"/>
-<rect x="930" y="152" width="60" height="58" rx="2" fill="#141719"/><rect x="946.8" y="155" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M933 207 H987" stroke="#2C3136" stroke-width="1"/>
-<rect x="1008" y="152" width="60" height="58" rx="2" fill="#141719"/><rect x="1024.8" y="155" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M1011 207 H1065" stroke="#2C3136" stroke-width="1"/>
-<rect x="1072" y="152" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="1072" y="152" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1077" y="168" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="1081" y="176" width="10" height="10"/>
-<text x="1094" y="185.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="1136" y="152" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1136" y="152" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1141" y="168" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1145" y="176" width="10" height="10"/>
-<text x="1158" y="185.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1214" y="152" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="1214" y="152" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1219" y="168" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="1223" y="176" width="10" height="10"/>
-<text x="1236" y="185.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="1278" y="152" width="60" height="58" rx="2" fill="#141719"/><rect x="1294.8" y="155" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M1281 207 H1335" stroke="#2C3136" stroke-width="1"/>
-<rect x="1342" y="152" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1342" y="152" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1347" y="168" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1351" y="176" width="10" height="10"/>
-<text x="1364" y="185.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<text x="758" y="274" class="lb w7" font-size="15" fill="#E3E6E9">L3</text>
-<rect x="788" y="314" width="624" height="6" fill="#1F2326"/>
-<rect x="802" y="250" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="802" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="807" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="811" y="274" width="10" height="10"/>
-<text x="824" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="866" y="250" width="60" height="58" rx="3" fill="#F0B323"/>
-<rect x="866" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="871" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-med" x="875" y="274" width="10" height="10"/>
-<text x="888" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">MED</text>
-<rect x="930" y="250" width="60" height="58" rx="2" fill="#141719"/><rect x="946.8" y="253" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M933 305 H987" stroke="#2C3136" stroke-width="1"/>
-<rect x="1008" y="250" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1008" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1013" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1017" y="274" width="10" height="10"/>
-<text x="1030" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1072" y="250" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1072" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1077" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1081" y="274" width="10" height="10"/>
-<text x="1094" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1136" y="250" width="60" height="58" rx="2" fill="#141719"/><rect x="1152.8" y="253" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M1139 305 H1193" stroke="#2C3136" stroke-width="1"/>
-<rect x="1214" y="250" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1214" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1219" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1223" y="274" width="10" height="10"/>
-<text x="1236" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1278" y="250" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1278" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1283" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1287" y="274" width="10" height="10"/>
-<text x="1300" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1342" y="250" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="1342" y="250" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1347" y="266" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="1351" y="274" width="10" height="10"/>
-<text x="1364" y="283.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<text x="758" y="372" class="lb w7" font-size="15" fill="#E3E6E9">L2</text>
-<rect x="788" y="412" width="624" height="6" fill="#3DAE6B"/>
-<rect x="752" y="382" width="32" height="16" rx="2" fill="#3DAE6B"/>
-<text x="768" y="394" class="lb w7" font-size="11" fill="#1B1E22" text-anchor="middle">BEST</text>
-<rect x="802" y="348" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="802" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="807" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="811" y="372" width="10" height="10"/>
-<text x="824" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="866" y="348" width="60" height="58" rx="3" fill="#F0B323"/>
-<rect x="866" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="871" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-med" x="875" y="372" width="10" height="10"/>
-<text x="888" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">MED</text>
-<rect x="930" y="348" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="930" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="935" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="939" y="372" width="10" height="10"/>
-<text x="952" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="1008" y="348" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1008" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1013" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1017" y="372" width="10" height="10"/>
-<text x="1030" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1072" y="348" width="60" height="58" rx="3" fill="#F0B323"/>
-<rect x="1072" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1077" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-med" x="1081" y="372" width="10" height="10"/>
-<text x="1094" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">MED</text>
-<rect x="1136" y="348" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1136" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1141" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1145" y="372" width="10" height="10"/>
-<text x="1158" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1214" y="348" width="60" height="58" rx="3" fill="#F0B323"/>
-<rect x="1214" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1219" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-med" x="1223" y="372" width="10" height="10"/>
-<text x="1236" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">MED</text>
-<rect x="1278" y="348" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="1278" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1283" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="1287" y="372" width="10" height="10"/>
-<text x="1300" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="1342" y="348" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1342" y="348" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1347" y="364" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1351" y="372" width="10" height="10"/>
-<text x="1364" y="381.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<text x="758" y="470" class="lb w7" font-size="15" fill="#E3E6E9">L1</text>
-<rect x="788" y="510" width="624" height="6" fill="#3DAE6B"/>
-<rect x="752" y="480" width="32" height="16" rx="2" fill="#3DAE6B"/>
-<text x="768" y="492" class="lb w7" font-size="11" fill="#1B1E22" text-anchor="middle">BEST</text>
-<rect x="802" y="446" width="60" height="58" rx="3" fill="#F0B323"/>
-<rect x="802" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="807" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-med" x="811" y="470" width="10" height="10"/>
-<text x="824" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">MED</text>
-<rect x="866" y="446" width="60" height="58" rx="3" fill="#8C939A"/>
-<rect x="866" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="871" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-dead" x="875" y="470" width="10" height="10"/>
-<text x="888" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">DED</text>
-<rect x="930" y="446" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="930" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="935" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="939" y="470" width="10" height="10"/>
-<text x="952" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1008" y="446" width="60" height="58" rx="2" fill="#141719"/><rect x="1024.8" y="449" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M1011 501 H1065" stroke="#2C3136" stroke-width="1"/>
-<rect x="1005" y="443" width="66" height="64" rx="4" fill="none" stroke="#9466F0" stroke-width="3"/>
-<use href="#i-plus" x="1029" y="466" width="18" height="18" stroke="#fff" color="#fff"/>
-<rect x="1072" y="446" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1072" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1077" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1081" y="470" width="10" height="10"/>
-<text x="1094" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1136" y="446" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1136" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1141" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1145" y="470" width="10" height="10"/>
-<text x="1158" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<rect x="1214" y="446" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1214" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1219" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1223" y="470" width="10" height="10"/>
-<text x="1236" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1278" y="446" width="60" height="58" rx="3" fill="#D85144"/>
-<rect x="1278" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1283" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-fast" x="1287" y="470" width="10" height="10"/>
-<text x="1300" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">FST</text>
-<rect x="1342" y="446" width="60" height="58" rx="3" fill="#417DDC"/>
-<rect x="1342" y="446" width="60" height="6" rx="2" fill="#000" fill-opacity="0.22"/>
-<rect x="1347" y="462" width="50" height="26" rx="1.5" fill="#fff"/>
-<use href="#g-slow" x="1351" y="470" width="10" height="10"/>
-<text x="1364" y="479.5" class="lb w7" font-size="12" fill="#1B1E22">SLW</text>
-<path d="M1298 192 C 1186 218, 1158 326, 1044.0 436" fill="none" stroke="#9466F0" stroke-width="4" stroke-linecap="round"/>
-<path d="M1032.0 426 L1043.0 439 L1055.0 427" fill="none" stroke="#9466F0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-<g filter="url(#lift)"><rect x="1306" y="148" width="76" height="72" rx="4" fill="#D85144"/><rect x="1306" y="148" width="76" height="8" rx="3" fill="#000" fill-opacity="0.22"/><rect x="1312" y="168" width="64" height="32" rx="2" fill="#fff"/></g>
-<use href="#g-fast" x="1317" y="178" width="12" height="12"/>
-<text x="1334" y="190" class="lb w7" font-size="14" fill="#1B1E22">FST</text>
-<g filter="url(#pop)"><rect x="1006" y="106" width="276" height="84" rx="4" fill="#fff"/></g>
-<rect x="1006" y="106" width="6" height="84" fill="#9466F0"/>
-<text x="1024" y="128" class="lb w7" font-size="15" fill="#1B1E22">Rule 1 · 4410281</text>
-<text x="1024" y="146" class="b w6" font-size="12.5" fill="#1B1E22">Brake pads, front - VW Golf</text>
-<text x="1024" y="164" class="b w4" font-size="12" fill="#4A5058">Fast-moving: 61 picks (24 or more)</text>
-<text x="1024" y="181" class="b w6" font-size="12" fill="#1B1E22">G-14-04-02 → best location A-02-01-01</text>
-<text x="72" y="600" class="lb w7" font-size="26" fill="#1B1E22">From export to paper, in the order you work</text>
-<text x="72" y="626" class="b w4" font-size="15" fill="#4A5058">Every step names its numbers, so you can check the tool before you trust it.</text>
-<rect x="64" y="658" width="1352" height="7" rx="2" fill="#454B52"/>
-<rect x="94" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="252" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="72" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="88" y="714" class="lb w7" font-size="38" fill="#1B1E22">IMP</text>
-<use href="#i-upload" x="214" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="260" cy="695" r="12" fill="#1B1E22"/>
-<text x="260" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">1</text>
-<line x1="86" y1="728" x2="270" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="88" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Import</text>
-<text x="88" y="772" class="b w4" font-size="13" fill="#4A5058">Three files, checked. Errors</text>
-<text x="88" y="789" class="b w4" font-size="13" fill="#4A5058">name the file, row and column.</text>
-<use href="#i-chev-r" x="282" y="740" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="318" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="476" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="296" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="312" y="714" class="lb w7" font-size="38" fill="#1B1E22">CLS</text>
-<use href="#i-box" x="438" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="484" cy="695" r="12" fill="#1B1E22"/>
-<text x="484" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">2</text>
-<line x1="310" y1="728" x2="494" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="312" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Classify</text>
-<text x="312" y="772" class="b w4" font-size="13" fill="#4A5058">Picks in the last 12 months:</text>
-<text x="312" y="789" class="b w4" font-size="13" fill="#4A5058">fast, medium, slow, dead</text>
-<text x="312" y="806" class="b w4" font-size="13" fill="#4A5058">stock.</text>
-<use href="#i-chev-r" x="506" y="740" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="542" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="700" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="520" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="536" y="714" class="lb w7" font-size="38" fill="#1B1E22">BST</text>
-<use href="#i-ribbon" x="662" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="708" cy="695" r="12" fill="#1B1E22"/>
-<text x="708" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">3</text>
-<line x1="534" y1="728" x2="718" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="536" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Mark best locations</text>
-<text x="536" y="772" class="b w4" font-size="13" fill="#4A5058">You choose: a whole aisle, a</text>
-<text x="536" y="789" class="b w4" font-size="13" fill="#4A5058">level or one location.</text>
-<use href="#i-chev-r" x="730" y="740" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="766" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="924" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="744" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="760" y="714" class="lb w7" font-size="38" fill="#1B1E22">REC</text>
-<use href="#i-lift" x="886" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="932" cy="695" r="12" fill="#1B1E22"/>
-<text x="932" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">4</text>
-<line x1="758" y1="728" x2="942" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="760" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Recommendations</text>
-<text x="760" y="772" class="b w4" font-size="13" fill="#4A5058">Run in rounds by rule 1, 2 and</text>
-<text x="760" y="789" class="b w4" font-size="13" fill="#4A5058">3. Apply or keep in place.</text>
-<use href="#i-chev-r" x="954" y="740" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="990" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="1148" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="968" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="984" y="714" class="lb w7" font-size="38" fill="#1B1E22">B/A</text>
-<use href="#i-compare" x="1110" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="1156" cy="695" r="12" fill="#1B1E22"/>
-<text x="1156" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">5</text>
-<line x1="982" y1="728" x2="1166" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="984" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Before/after</text>
-<text x="984" y="772" class="b w4" font-size="13" fill="#4A5058">Per aisle: what moves in and</text>
-<text x="984" y="789" class="b w4" font-size="13" fill="#4A5058">out, before and after.</text>
-<use href="#i-chev-r" x="1178" y="740" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="1214" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="1372" y="656" width="10" height="16" rx="2" fill="#1A1D20"/>
-<rect x="1192" y="670" width="212" height="156" rx="4" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
-<text x="1208" y="714" class="lb w7" font-size="38" fill="#1B1E22">MOV</text>
-<use href="#i-print" x="1334" y="684" width="22" height="22" stroke="#1B1E22" color="#1B1E22"/>
-<circle cx="1380" cy="695" r="12" fill="#1B1E22"/>
-<text x="1380" y="699.5" class="lb w7" font-size="13" fill="#fff" text-anchor="middle">6</text>
-<line x1="1206" y1="728" x2="1390" y2="728" stroke="#E6E4DE" stroke-width="1"/>
-<text x="1208" y="750" class="b w7" font-size="15.5" fill="#1B1E22">Move list</text>
-<text x="1208" y="772" class="b w4" font-size="13" fill="#4A5058">Printed in round order, with a</text>
-<text x="1208" y="789" class="b w4" font-size="13" fill="#4A5058">tick box per line.</text>
-<text x="72" y="868" class="b w4" font-size="13.5" fill="#4A5058">Honest about the data: the data-as-of date is always shown. Walk Path orders the list; it is not a distance. No capacity checks, no live stock, no metres-saved claims.</text>
+<rect x="0" y="0" width="1440" height="64" fill="url(#louvre)"/><g><rect x="24" y="17" width="30" height="30" rx="2" fill="#F0B323"/><rect x="24" y="17" width="30" height="3.5" rx="1.5" fill="#000" fill-opacity="0.22"/><rect x="27" y="26" width="24" height="13" rx="1" fill="#fff"/><use href="#g-med" x="34.5" y="28" width="9" height="9"/></g><text x="64" y="39" class="lb w7" font-size="19" fill="#fff">Smart Warehouse Planner</text><text x="1210" y="38" class="b w5" font-size="14" fill="#E3E6E9">How it works</text><rect x="1312" y="14" width="104" height="36" rx="6" fill="none" stroke="#E3E6E9" stroke-width="1.5"/><use href="#i-person" x="1328" y="23" width="18" height="18" stroke="#fff" color="#fff"/><text x="1352" y="38" class="b w6" font-size="15" fill="#fff">Log in</text>
+<text x="72" y="160" class="lb w7" font-size="66" fill="#1B1E22">Every move</text>
+<text x="72" y="230" class="lb w7" font-size="66" fill="#1B1E22">comes with a reason.</text>
+<text x="72" y="282" class="b w4" font-size="19" fill="#1B1E22">Smart Warehouse Planner reads your warehouse exports and</text>
+<text x="72" y="308" class="b w4" font-size="19" fill="#1B1E22">suggests which parts to move where. You decide each one.</text>
+<rect x="72" y="336" width="140" height="52" rx="8" fill="#1B1E22"/><text x="96" y="368" class="b w7" font-size="17" fill="#fff">Log in</text><use href="#i-arrow-r" x="172" y="353" width="18" height="18" stroke="#fff" color="#fff"/>
+<rect x="228" y="336" width="172" height="52" rx="8" fill="none" stroke="#1B1E22" stroke-width="1.5"/><text x="314.0" y="368" class="b w6" font-size="16" fill="#1B1E22" text-anchor="middle">Create account</text>
+<rect x="416" y="336" width="178" height="52" rx="8" fill="#fff" stroke="#8A9097" stroke-width="1"/>
+<use href="#i-play" x="436" y="353" width="18" height="18" stroke="#1B1E22" color="#1B1E22"/>
+<text x="462" y="368" class="b w6" font-size="16" fill="#1B1E22">Demo version</text>
+<text x="72" y="418" class="b w4" font-size="14" fill="#4A5058">Demo version skips the login and opens the app with a demo account.</text>
+<rect x="800" y="96" width="330" height="352" rx="8" fill="url(#louvre2)"/><text x="981.0" y="119" class="lb w6" font-size="13" fill="#C9CED3" text-anchor="middle">Aisle G · Section 14</text><rect x="842" y="130" width="6" height="304" fill="#454B52"/><rect x="1108" y="130" width="6" height="304" fill="#454B52"/><text x="812" y="170.0" class="lb w7" font-size="15" fill="#E3E6E9">L4</text><rect x="842" y="198" width="266" height="6" fill="#1F2326"/><rect x="854" y="138" width="60" height="54" rx="3.0" fill="#8C939A"/><rect x="854" y="138" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="859.0" y="153.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-dead" x="863.0" y="161.1" width="10.0" height="10.0"/><text x="876.0" y="170.6" class="lb w7" font-size="12.0" fill="#1B1E22">DED</text><rect x="918" y="138" width="60" height="54" rx="2" fill="#141719"/><rect x="934.8" y="141" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M921 189 H975" stroke="#2C3136" stroke-width="1"/><rect x="982" y="138" width="60" height="54" rx="2" fill="#141719"/><rect x="998.8" y="141" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M985 189 H1039" stroke="#2C3136" stroke-width="1"/><rect x="1046" y="138" width="60" height="54" rx="3.0" fill="#417DDC"/><rect x="1046" y="138" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="1051.0" y="153.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-slow" x="1055.0" y="161.1" width="10.0" height="10.0"/><text x="1068.0" y="170.6" class="lb w7" font-size="12.0" fill="#1B1E22">SLW</text><text x="812" y="246.0" class="lb w7" font-size="15" fill="#E3E6E9">L3</text><rect x="842" y="274" width="266" height="6" fill="#1F2326"/><rect x="854" y="214" width="60" height="54" rx="3.0" fill="#D85144"/><rect x="854" y="214" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="859.0" y="229.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-fast" x="863.0" y="237.1" width="10.0" height="10.0"/><text x="876.0" y="246.6" class="lb w7" font-size="12.0" fill="#1B1E22">FST</text><rect x="918" y="214" width="60" height="54" rx="3.0" fill="#F0B323"/><rect x="918" y="214" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="923.0" y="229.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-med" x="927.0" y="237.1" width="10.0" height="10.0"/><text x="940.0" y="246.6" class="lb w7" font-size="12.0" fill="#1B1E22">MED</text><rect x="982" y="214" width="60" height="54" rx="2" fill="#141719"/><rect x="998.8" y="217" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M985 265 H1039" stroke="#2C3136" stroke-width="1"/><rect x="1046" y="214" width="60" height="54" rx="3.0" fill="#417DDC"/><rect x="1046" y="214" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="1051.0" y="229.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-slow" x="1055.0" y="237.1" width="10.0" height="10.0"/><text x="1068.0" y="246.6" class="lb w7" font-size="12.0" fill="#1B1E22">SLW</text><text x="812" y="315.0" class="lb w7" font-size="15" fill="#E3E6E9">L2</text><rect x="806" y="323.0" width="32" height="16" rx="2" fill="#3DAE6B"/><text x="822" y="335.0" class="lb w7" font-size="11" fill="#1B1E22" text-anchor="middle">BEST</text><rect x="842" y="350" width="266" height="6" fill="#3DAE6B"/><rect x="854" y="290" width="60" height="54" rx="3.0" fill="#417DDC"/><rect x="854" y="290" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="859.0" y="305.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-slow" x="863.0" y="313.1" width="10.0" height="10.0"/><text x="876.0" y="322.6" class="lb w7" font-size="12.0" fill="#1B1E22">SLW</text><rect x="918" y="290" width="60" height="54" rx="3.0" fill="#F0B323"/><rect x="918" y="290" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="923.0" y="305.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-med" x="927.0" y="313.1" width="10.0" height="10.0"/><text x="940.0" y="322.6" class="lb w7" font-size="12.0" fill="#1B1E22">MED</text><rect x="982" y="290" width="60" height="54" rx="3.0" fill="#8C939A"/><rect x="982" y="290" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="987.0" y="305.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-dead" x="991.0" y="313.1" width="10.0" height="10.0"/><text x="1004.0" y="322.6" class="lb w7" font-size="12.0" fill="#1B1E22">DED</text><rect x="1046" y="290" width="60" height="54" rx="3.0" fill="#D85144"/><rect x="1046" y="290" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="1051.0" y="305.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-fast" x="1055.0" y="313.1" width="10.0" height="10.0"/><text x="1068.0" y="322.6" class="lb w7" font-size="12.0" fill="#1B1E22">FST</text><text x="812" y="391.0" class="lb w7" font-size="15" fill="#E3E6E9">L1</text><rect x="806" y="399.0" width="32" height="16" rx="2" fill="#3DAE6B"/><text x="822" y="411.0" class="lb w7" font-size="11" fill="#1B1E22" text-anchor="middle">BEST</text><rect x="842" y="426" width="266" height="6" fill="#3DAE6B"/><rect x="854" y="366" width="60" height="54" rx="3.0" fill="#F0B323"/><rect x="854" y="366" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="859.0" y="381.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-med" x="863.0" y="389.1" width="10.0" height="10.0"/><text x="876.0" y="398.6" class="lb w7" font-size="12.0" fill="#1B1E22">MED</text><rect x="918" y="366" width="60" height="54" rx="3.0" fill="#8C939A"/><rect x="918" y="366" width="60" height="6.0" rx="2.0" fill="#000" fill-opacity="0.22"/><rect x="923.0" y="381.1" width="50.0" height="26.0" rx="1.5" fill="#fff"/><use href="#g-dead" x="927.0" y="389.1" width="10.0" height="10.0"/><text x="940.0" y="398.6" class="lb w7" font-size="12.0" fill="#1B1E22">DED</text><rect x="982" y="366" width="60" height="54" rx="2" fill="#141719"/><rect x="998.8" y="369" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M985 417 H1039" stroke="#2C3136" stroke-width="1"/><rect x="1046" y="366" width="60" height="54" rx="2" fill="#141719"/><rect x="1062.8" y="369" width="26.4" height="2.6" rx="1.3" fill="#3A4046"/><path d="M1049 417 H1103" stroke="#2C3136" stroke-width="1"/><rect x="1043" y="363" width="66" height="60" rx="4" fill="none" stroke="#9466F0" stroke-width="3"/><use href="#i-plus" x="1067.0" y="384.0" width="18" height="18" stroke="#fff" color="#fff"/>
+<rect x="918" y="138" width="60" height="54" rx="2" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 3"/>
+<path d="M988 158 C 1118 178, 1166 326, 1076 358" fill="none" stroke="#9466F0" stroke-width="4" stroke-linecap="round"/>
+<path d="M1068 346 L1076 360 L1090 352" fill="none" stroke="#9466F0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<g filter="url(#lift)"><rect x="932" y="120" width="66" height="60" rx="3.3" fill="#D85144"/><rect x="932" y="120" width="66" height="6.6" rx="2.2" fill="#000" fill-opacity="0.22"/><rect x="937.5" y="136.8" width="55.0" height="28.6" rx="1.5" fill="#fff"/></g><use href="#g-fast" x="941.9" y="145.6" width="11.0" height="11.0"/><text x="956.2" y="156.1" class="lb w7" font-size="13.2" fill="#1B1E22">FST</text>
+<g filter="url(#pop)"><rect x="1154" y="136" width="222" height="150" rx="6" fill="#fff"/></g>
+<rect x="1154" y="136" width="6" height="150" fill="#9466F0"/>
+<text x="1174" y="162" class="lb w7" font-size="12" fill="#4A5058" letter-spacing="1">RULE 1 · MOVE 1</text>
+<text x="1174" y="186" class="lb w7" font-size="18" fill="#1B1E22">4410281</text>
+<text x="1174" y="206" class="b w6" font-size="13.5" fill="#1B1E22">Brake pads, front</text>
+<text x="1174" y="230" class="b w4" font-size="13" fill="#4A5058">61 picks in 12 months</text>
+<text x="1174" y="248" class="b w4" font-size="13" fill="#4A5058">sits on L4, not best</text>
+<text x="1174" y="272" class="b w7" font-size="13" fill="#267A4B">→ G-14-01-04, best location</text>
+<text x="72" y="486" class="lb w7" font-size="26" fill="#1B1E22">One part, start to finish</text>
+<rect x="72" y="520" width="1296" height="6" rx="2" fill="#454B52"/>
+<rect x="92" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="348" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="72" y="548" width="306" height="290" rx="6" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
+<circle cx="102" cy="580" r="15" fill="#1B1E22"/>
+<text x="102" y="585" class="lb w7" font-size="14" fill="#fff" text-anchor="middle">1</text>
+<text x="128" y="578" class="b w7" font-size="17" fill="#1B1E22">In your export</text>
+<text x="128" y="597" class="b w4" font-size="13" fill="#4A5058">The row you already have</text>
+<rect x="92" y="616" width="266" height="1" fill="#E6E4DE"/>
+<use href="#i-chev-r" x="380" y="684" width="20" height="20" stroke="#1B1E22" color="#1B1E22"/>
+<rect x="92" y="634" width="266" height="28" fill="#E4E2DB"/>
+<text x="102" y="653" class="b w6" font-size="12.5" fill="#4A5058">Part</text>
+<text x="188" y="653" class="b w6" font-size="12.5" fill="#4A5058">Location</text>
+<text x="298" y="653" class="b w6" font-size="12.5" fill="#4A5058">Picks</text>
+<rect x="92" y="698" width="266" height="1" fill="#E6E4DE"/>
+<text x="102" y="685" class="lb w7" font-size="14" fill="#6B717A">3301877</text>
+<text x="188" y="685" class="lb w7" font-size="14" fill="#6B717A">B-07-04-03</text>
+<text x="298" y="685" class="lb w7" font-size="14" fill="#6B717A">9</text>
+<rect x="92" y="698" width="266" height="36" fill="#F3EFFD"/>
+<rect x="92" y="698" width="4" height="36" fill="#9466F0"/>
+<rect x="92" y="734" width="266" height="1" fill="#E6E4DE"/>
+<text x="102" y="721" class="lb w7" font-size="14" fill="#1B1E22">4410281</text>
+<text x="188" y="721" class="lb w7" font-size="14" fill="#1B1E22">G-14-04-02</text>
+<text x="298" y="721" class="lb w7" font-size="14" fill="#1B1E22">61</text>
+<rect x="92" y="770" width="266" height="1" fill="#E6E4DE"/>
+<text x="102" y="757" class="lb w7" font-size="14" fill="#6B717A">5520114</text>
+<text x="188" y="757" class="lb w7" font-size="14" fill="#6B717A">C-03-03-01</text>
+<text x="298" y="757" class="lb w7" font-size="14" fill="#6B717A">33</text>
+<rect x="92" y="806" width="266" height="1" fill="#E6E4DE"/>
+<text x="102" y="793" class="lb w7" font-size="14" fill="#6B717A">6612040</text>
+<text x="188" y="793" class="lb w7" font-size="14" fill="#6B717A">D-11-04-01</text>
+<text x="298" y="793" class="lb w7" font-size="14" fill="#6B717A">2</text>
+<rect x="422" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="678" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="402" y="548" width="306" height="290" rx="6" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
+<circle cx="432" cy="580" r="15" fill="#1B1E22"/>
+<text x="432" y="585" class="lb w7" font-size="14" fill="#fff" text-anchor="middle">2</text>
+<text x="458" y="578" class="b w7" font-size="17" fill="#1B1E22">Classified fast</text>
+<text x="458" y="597" class="b w4" font-size="13" fill="#4A5058">24 picks or more is fast</text>
+<rect x="422" y="616" width="266" height="1" fill="#E6E4DE"/>
+<use href="#i-chev-r" x="710" y="684" width="20" height="20" stroke="#1B1E22" color="#1B1E22"/>
+<rect x="495.0" y="644" width="120" height="112" rx="6.0" fill="#D85144"/><rect x="495.0" y="644" width="120" height="12.0" rx="4.0" fill="#000" fill-opacity="0.22"/><rect x="505.0" y="675.4" width="100.0" height="52.0" rx="1.5" fill="#fff"/><use href="#g-fast" x="513.0" y="691.4" width="20.0" height="20.0"/><text x="539.0" y="710.4" class="lb w7" font-size="24.0" fill="#1B1E22">FST</text>
+<text x="555.0" y="794" class="lb w7" font-size="30" fill="#1B1E22" text-anchor="middle">61</text>
+<text x="555.0" y="816" class="b w4" font-size="13" fill="#4A5058" text-anchor="middle">picks in the last 12 months</text>
+<rect x="752" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="1008" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="732" y="548" width="306" height="290" rx="6" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
+<circle cx="762" cy="580" r="15" fill="#1B1E22"/>
+<text x="762" y="585" class="lb w7" font-size="14" fill="#fff" text-anchor="middle">3</text>
+<text x="788" y="578" class="b w7" font-size="17" fill="#1B1E22">You decide</text>
+<text x="788" y="597" class="b w4" font-size="13" fill="#4A5058">Apply it, or keep in place</text>
+<rect x="752" y="616" width="266" height="1" fill="#E6E4DE"/>
+<use href="#i-chev-r" x="1040" y="684" width="20" height="20" stroke="#1B1E22" color="#1B1E22"/>
+<text x="752" y="656" class="b w7" font-size="14" fill="#1B1E22">4410281 · Brake pads, front</text>
+<text x="752" y="680" class="lb w7" font-size="15" fill="#1B1E22">G-14-04-02</text>
+<use href="#i-arrow-r" x="836" y="667" width="16" height="16" stroke="#1B1E22" color="#1B1E22"/>
+<text x="860" y="680" class="lb w7" font-size="15" fill="#1B1E22">G-14-01-04</text>
+<rect x="944" y="667" width="36" height="16" rx="2" fill="#267A4B"/>
+<text x="962" y="679" class="lb w7" font-size="11" fill="#fff" text-anchor="middle">BEST</text>
+<rect x="752" y="710" width="122" height="44" rx="6" fill="#1B1E22"/>
+<use href="#i-check" x="768" y="723" width="18" height="18" stroke="#fff" color="#fff"/>
+<text x="792" y="738" class="b w7" font-size="15" fill="#fff">Apply</text>
+<rect x="886" y="710" width="132" height="44" rx="6" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
+<text x="952" y="738" class="b w6" font-size="15" fill="#1B1E22" text-anchor="middle">Keep in place</text>
+<text x="752" y="786" class="b w4" font-size="13" fill="#4A5058">Nothing changes until you apply it.</text>
+<rect x="1082" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="1338" y="516" width="10" height="16" rx="2" fill="#1A1D20"/>
+<rect x="1062" y="548" width="306" height="290" rx="6" fill="#fff" stroke="#1B1E22" stroke-width="1.2"/>
+<circle cx="1092" cy="580" r="15" fill="#1B1E22"/>
+<text x="1092" y="585" class="lb w7" font-size="14" fill="#fff" text-anchor="middle">4</text>
+<text x="1118" y="578" class="b w7" font-size="17" fill="#1B1E22">On the move list</text>
+<text x="1118" y="597" class="b w4" font-size="13" fill="#4A5058">Printed, one walk per round</text>
+<rect x="1082" y="616" width="266" height="1" fill="#E6E4DE"/>
+<rect x="1082" y="634" width="266" height="176" fill="#fff" stroke="#000" stroke-width="1"/>
+<text x="1094" y="656" class="b w7" font-size="12" fill="#000">Move list · Spring re-slot 2026</text>
+<rect x="1094" y="668" width="242" height="1.5" fill="#000"/>
+<rect x="1094" y="678" width="62" height="20" fill="none" stroke="#000" stroke-width="1.5"/>
+<text x="1125" y="693" class="lb w7" font-size="12" fill="#000" text-anchor="middle">ROUND 1</text>
+<text x="1166" y="693" class="b w4" font-size="11" fill="#000">one walk</text>
+<rect x="1094" y="716" width="14" height="14" fill="none" stroke="#000" stroke-width="1.2"/>
+<path d="M1095 722 l4 6 l10 -14" fill="none" stroke="#1B1E22" stroke-width="2.2" stroke-linecap="round"/>
+<text x="1116" y="728" class="lb w7" font-size="12.5" fill="#000">4410281</text>
+<text x="1174" y="728" class="lb w7" font-size="12.5" fill="#000">G-14-04-02</text>
+<text x="1242" y="728" class="b w4" font-size="12" fill="#000">→</text>
+<text x="1256" y="728" class="lb w7" font-size="12.5" fill="#000">G-14-01-04</text>
+<rect x="1094" y="738" width="242" height="1" fill="#000" fill-opacity="0.35"/>
+<rect x="1094" y="748" width="14" height="14" fill="none" stroke="#000" stroke-width="1.2"/>
+<text x="1116" y="760" class="lb w7" font-size="12.5" fill="#000">5520114</text>
+<text x="1174" y="760" class="lb w7" font-size="12.5" fill="#000">C-03-03-01</text>
+<text x="1242" y="760" class="b w4" font-size="12" fill="#000">→</text>
+<text x="1256" y="760" class="lb w7" font-size="12.5" fill="#000">A-02-01-02</text>
+<rect x="1094" y="770" width="242" height="1" fill="#000" fill-opacity="0.35"/>
+<rect x="1094" y="780" width="14" height="14" fill="none" stroke="#000" stroke-width="1.2"/>
+<text x="1116" y="792" class="lb w7" font-size="12.5" fill="#000">3301877</text>
+<text x="1174" y="792" class="lb w7" font-size="12.5" fill="#000">B-07-04-03</text>
+<text x="1242" y="792" class="b w4" font-size="12" fill="#000">→</text>
+<text x="1256" y="792" class="lb w7" font-size="12.5" fill="#000">A-03-02-01</text>
+<rect x="1094" y="802" width="242" height="1" fill="#000" fill-opacity="0.35"/>
 </svg>

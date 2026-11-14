@@ -41,7 +41,7 @@ Success means the planner would act on the recommendations and hand the printed 
 
 ## Capabilities and Constraints
 
-- Core (milestones 1–2): FR-1–FR-38 and FR-42 (the warehouse view, moved into milestone 2 on 2026-11-13; its key colours can be changed by clicking them). Stage 2 (accounts and login, category check, location labels with QR) starts only after the milestone 2 gate.
+- Core (milestones 1–2): FR-1–FR-40, FR-42 and FR-50 (the warehouse view, moved into milestone 2 on 2026-11-13; its key colours can be changed by clicking them; accounts, login and a Demo version button that skips the login, moved into milestone 2 on 2026-11-14; FR-50). Stage 2 (category check, location labels with QR) starts only after the milestone 2 gate. The concurrent-edit warning (FR-41) is an "if time allows" item.
 - The data has no size or capacity information, so the app cannot check whether a part fits. The planner judges that and uses "keep in place".
 - Walk Path is an ordering only. No distances or "meters saved" claims.
 - Out of scope: PDF or CSV export, tracking whether moves were carried out, live collaboration, roles, creating or editing locations, comparing plans, AI-generated explanations.

@@ -3,7 +3,7 @@ name: Smart Warehouse Planner — Bin Wall
 description: Desktop planning tool for re-slotting a spare-parts warehouse. Light paper ground, a graphite shelf wall, and bins coloured by movement class. Concept 05 "Bin Wall".
 status: final
 created: 2026-11-11
-updated: 2026-11-13
+updated: 2026-11-14
 sources:
   - ../../../../PRODUCT.md
   - ../../prds/prd-Project-2026-11-01/prd.md
@@ -539,7 +539,7 @@ Mocks that have not been re-rendered since 2026-11-13 may still show these super
 - a yellow frame and arrow for the selected move (now violet `{colors.accent}` with a dark casing);
 - a colour-mode switch above the wall (removed);
 - green for applied / done / together (now an ink check);
-- "Open the demo" (now "Open the app");
+- "Open the demo" or "Open the app" on the front page (now Log in and Create account; the front page mock was redrawn 2026-11-14);
 - the old red and blue class hexes;
 - a violet plan-plate edge and violet input focus border (now ink and the fixed focus ring);
 - `#2C8A55` for best on paper (now `#267A4B`, and "best" in table text is ink);
@@ -715,7 +715,7 @@ Visual specs only. Behaviour lives in EXPERIENCE.md, Component Patterns.
 - **Listbox and menu** (Other location ▾, the plan plate menu, the row menu, manual-move autocomplete). `{colors.surface}`, 1px `{colors.border}`, `{rounded.lg}`, overlay shadow; rows `{spacing.control-md}` tall; the highlighted row has `{colors.selected-tint}` and an ink left bar; location codes in `{typography.code}`.
 - **Global notice** (Save failed, storage unavailable). A full-width strip under the toolbar, `{colors.surface}` with a 2px `{colors.ink}` bottom rule, a warning triangle and `{typography.body-strong}` text.
 - **Data table** (saved plans, Moves touching aisle, before/after, Open as list, pick groups). `{colors.surface}`, rows `{spacing.table-row}` minimum, `{typography.column-head}` heads in `{colors.ink-secondary}`, `{colors.hairline}` dividers, codes in `{typography.code-table}`, numbers right-aligned and tabular. Before/after values show "Before → After" with the change in `{typography.body-strong}`.
-- **Demo front page.** `{colors.ground}` page, one column at most 960px wide: the name in `{typography.display-hero}`, the one-line summary in `{typography.lead}`, a short bin wall drawn at large scale (56px bins with FST/MED/SLW/DED), the flow import → move list as eight plates, the line "Synthetic demo data only", and one `{components.button-primary}` "Open the app".
+- **Demo front page.** `{colors.ground}` page under the graphite header, which holds only the logo and name, a "How it works" link and a Log in button outlined in `{colors.on-dark}`. Hero: the headline in `{typography.display-hero}` and the one-line summary in `{typography.lead}`, with `{components.button-primary}` "Log in", `{components.button-secondary}` "Create account" and `{components.button-tertiary}` "Demo version" with a play glyph (FR-50); beside it, a short bin wall drawn at large scale (56px bins with FST/MED/SLW/DED) with one lifted bin, the accent arrow to a dashed best-location target, and a reason card. Below, "One part, start to finish": four `{colors.surface}` panels hung from a graphite rail, numbered 1–4, following one demo part from its export row, to its movement class, to Apply / Keep in place, to its line on the printed move list. No synthetic-data line, no README or demo-data links and no footer text (user decision 2026-11-14).
 
 **Print move list** (`{components.print-move-list}`). Pure black on white, no tints, and nothing that depends on the browser printing backgrounds. The header block shows the plan name in Barlow 14pt bold, then "Data as of … · uploaded … · N rounds", then the generated time. Each round starts with a band that has no fill: **ROUND 1** in bold `{typography.print-round}` inside a 1.5px black box, followed by "one walk · from-location before to-location", with 2px black rules above and below. Each line has a 14px tick box, the round, the part number and the from- and to-codes in `{typography.print-code}`, the description and the rule in `{typography.print-body}`, and a blank Note space. Lines are separated by 1px rules. The print stylesheet may add `print-color-adjust: exact` (with the `-webkit-` prefix), but nothing relies on it.
 

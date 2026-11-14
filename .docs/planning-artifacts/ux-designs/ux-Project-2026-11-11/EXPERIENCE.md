@@ -2,7 +2,7 @@
 name: Smart Warehouse Planner
 status: final
 created: 2026-11-11
-updated: 2026-11-13
+updated: 2026-11-14
 sources:
   - ../../../../PRODUCT.md
   - ../../prds/prd-Project-2026-11-01/prd.md
@@ -23,17 +23,19 @@ sources:
 - **Visual identity:** `DESIGN.md` is the reference. This spine names its tokens and components by path, for example `{colors.best}` or `{components.bin}`.
 - **Language:** the UI is in English (NFR-11). Copy uses the PRD glossary terms exactly: best location, pick group, partner, keep in place, "no space", round, data-as-of date, planning copy, move list, outdated recommendation.
 - **Scope change carried here (decided 2026-11-13; the PRD records it as FR-42, milestone 2, which also covers changing colours from the Key):** the warehouse view (FR-42) is in the core (milestone 2). It becomes the **Locations view** (aisle bin walls) and the **wall crops in the recommendation detail**. FR-42 is rewritten so occupancy shows by shape plus text, never red/green. Colour stays reserved for movement class.
-- **Users in this spine:** the **planner** (in the PRD journeys this is Justas) and the **colleague**, who only meets the printed move list. Core has no login, so "created by" / "last edited by" show the fixed value `planner` (FR-11). Mocks that show "Justas" or a "JS" avatar show stage 2.
+- **Users in this spine:** the **planner** (in the PRD journeys this is Justas) and the **colleague**, who only meets the printed move list. Login is in the core from milestone 2 (FR-39, FR-40, decision 2026-11-14). In milestone 1 "created by" / "last edited by" show the fixed value `planner` (FR-11); from milestone 2 they show the logged-in user, as the mocks with "Justas" or a "JS" avatar do.
 
 ## Information Architecture
 
-The saved-plans list is the start page (FR-8). Everything else lives inside an open plan, under the always-visible toolbar: plan plate · flow bar · launcher button.
+The saved-plans list is the start page after login (FR-8, FR-40). Everything else lives inside an open plan, under the always-visible toolbar: plan plate · flow bar · launcher button.
 
 **Naming.** The PRD glossary's **warehouse view** (FR-42) is shown as the **Wall** mode of the Locations step (page title "Locations") and as the wall crops in the recommendation detail. This spine calls it "the wall". The `legend` component is labelled **Key** in the UI, and UI-facing text says "Key".
 
 | Surface | Reached from | Purpose | Flow step |
 |---|---|---|---|
-| Saved-plans list | App open; launcher **SAV**; plan plate menu | All plans, most recently edited first (FR-8): name, data-as-of date, upload date (FR-7), created/edited by and at; New Plan; delete | — |
+| Log in | Demo front page "Log in"; any page while logged out; after Log out | Username and password, a link to Create account; wrong details say "Wrong username or password." [ASSUMPTION]; then the saved-plans list (FR-40) | — |
+| Create account | Demo front page "Create account"; Log in page link | Username (unique) and password, no email, no password reset (FR-39); then logged in on the saved-plans list [ASSUMPTION] | — |
+| Saved-plans list | After login or Demo version; launcher **SAV**; plan plate menu | All plans, most recently edited first (FR-8): name, data-as-of date, upload date (FR-7), created/edited by and at; New Plan; delete | — |
 | New Plan | Saved-plans list "New Plan"; launcher **NEW** | Name, three files *or* "Or reuse the import of a saved plan"; import errors | — |
 | Plan overview | Flow step 1; launcher **OVR**; after a successful import | Data-as-of and upload dates, period, settings, counts per movement class, best and empty counts, parts kept in place | 1 |
 | Parts (ranked roster) | Flow step 2; **PRT**; search | Every part ranked by picks, filter by class, keep in place, open the part panel | 2 |
@@ -48,11 +50,11 @@ The saved-plans list is the start page (FR-8). Everything else lives inside an o
 | Part panel | Search result, roster row, tooltip part line, recommendation | One part: class and picks, locations and stock, pick groups and partners, keep in place, Manual move… | — [ASSUMPTION] |
 | Manual move dialog | Part panel, location tooltip, list row action | From-location (if the part has several), to-location, confirm | — |
 
-**Later (stage 2, after the milestone 2 gate), shown in the launcher as empty slots marked "Coming in stage 2":** login and create account (**ACC**), category settings and category check (**CAT**), location label print view (**LBL**). The concept's separate **WHV** "Warehouse view" plate is retired, because the warehouse view is now the core Locations wall.
+**Later (stage 2, after the milestone 2 gate), shown in the launcher as empty slots marked "Coming in stage 2":** category settings and category check (**CAT**), location label print view (**LBL**). The concept's separate **WHV** "Warehouse view" plate is retired, because the warehouse view is now the core Locations wall.
 
-**Navigation model.** The flow bar is navigation, not a wizard. Any step can be opened at any time, and the check marks only report state. The launcher is the full map. The plan plate opens a small menu: switch to a recent plan, "All saved plans", "New Plan from this import" (FR-2) [ASSUMPTION]. Modals stack at most one deep.
+**Navigation model.** The flow bar is navigation, not a wizard. Any step can be opened at any time, and the check marks only report state. The launcher is the full map. The plan plate opens a small menu: switch to a recent plan, "All saved plans", "New Plan from this import" (FR-2) [ASSUMPTION]. Modals stack at most one deep. The username and **Log out** sit in a small user menu at the right end of the toolbar [ASSUMPTION].
 
-**Demo front page (public deployment only).** The concept's [landing page](./mockups/landing.svg) becomes the front page of the public demo deployment (NFR-5, user decision 2026-11-13). It says in one line what the tool does, shows the flow from import to the printed move list, states that the demo holds synthetic data only, and has one primary action, **Open the app**, which goes to the saved-plans list. It makes no claims about customers, savings or distances. A local install opens straight on the saved-plans list, which stays the app's start page (FR-8). There is no "Open the demo" shortcut: first-time users follow the README and upload the three files from `data/sample/` in New Plan (UJ-1, user decision 2026-11-13).
+**Demo front page (public deployment only).** The [demo front page](./mockups/landing.svg) is the first page of the public demo deployment (NFR-5; redesigned 2026-11-14 as layout B, "Follow one part"). It says in one line what the tool does ("Every move comes with a reason."), and its four numbered panels follow one demo part from its export row, to its movement class, to the planner's choice (Apply or Keep in place), to its line on the printed move list. It has three actions: **Log in** (primary, also in the header), **Create account** (FR-39, FR-40) and **Demo version** (FR-50), which skips the login page and opens the saved-plans list as the seeded demo account. In the app a demo visitor is simply that account: the user menu shows its username and Log out. The header holds only the name, a "How it works" link that scrolls to the panels, and Log in. There is no README or demo-data link, no synthetic-data notice and no explanatory footer text (user decision 2026-11-14); the README states that the deployment holds synthetic data only and lists the demo account. It makes no claims about customers, savings or distances. A local install opens on Log in; after login the saved-plans list is the start page (FR-8). Demo version preloads no plan: first-time visitors upload the three files from `data/sample/` in New Plan, as the README describes (UJ-1). A local install has no Demo version; there the README's demo account is used.
 
 → Composition references: [recommendations interface](./mockups/interface.svg) · [features menu](./mockups/features-menu.svg) · [screen map of the other key screens](./mockups/screen-map.svg). The spines win on conflict (DESIGN.md, Brand & Style, lists details the older mocks still show).
 
@@ -189,7 +191,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 | Launcher: no match | Launcher | "No feature or saved plan matches “xyz”." |
 | Key colours can't be kept | Key colour popover | When browser storage is blocked (private window, blocked site data), the defaults are used and a note says "Colours can't be kept in this browser; changes last until you close this tab." Changes still apply for the session. |
 | Focus | All | The fixed `{components.focus-ring}`: on graphite a 2px white ring outside a 2px dark ring, on paper a 2px ink ring with a 2px white gap. The Key colours never change it, and it never looks like selection (a single cased violet line). |
-| Stage 2: plan changed by someone else | Any plan surface | FR-41 warning: "Someone saved this plan after you opened it. Reload it, or keep going and your version replaces theirs." Not in core. |
+| If time allows: plan changed by someone else | Any plan surface | FR-41 warning: "Someone saved this plan after you opened it. Reload it, or keep going and your version replaces theirs." Not in core. |
 
 ## Interaction Primitives
 
@@ -338,7 +340,7 @@ Not yet narrated: changing a colour from the Key, the demo front page, Pick grou
 
 Justas, the warehouse planner, suspects the fast-moving parts have drifted to the far aisles.
 
-1. On the saved-plans list Justas clicks **New Plan**, types "Autumn re-slot" and chooses the Locations, Inventory and Transactions files.
+1. Justas logs in and lands on the saved-plans list (FR-40). There Justas clicks **New Plan**, types "Autumn re-slot" and chooses the Locations, Inventory and Transactions files.
 2. The import runs its step list. It passes, and the plan opens on the **Plan overview**: data as of the newest transaction date, uploaded today, the period, the settings, and counts per movement class.
 3. Justas opens **Locations** (step 3). The wall shows aisle A. Justas tabs into the wall, arrows across a level and reads tooltips: which parts sit where, occupied or empty.
 4. Justas goes to **Best locations**, chooses Whole aisle and marks aisle A, then chooses Level · in all aisles and marks level 1. Green frames and rails appear, the BEST tags appear on the L1 labels, and "best · empty" counts update.
@@ -373,11 +375,13 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 6. **Climax:** the new printout's header carries a new generated time, so the fresh list is clearly told apart from last week's paper on the desk.
 7. To try a different set of best locations without losing this plan, Justas uses **New Plan from this import** from the plan plate menu. The new plan has the same import and none of the marks or moves.
 
-**Failure path (stage 2):** another planner has saved the same plan meanwhile. Justas's next change shows the FR-41 warning. Justas reloads or continues, and the last save wins.
+**Failure path (if time allows):** another planner has saved the same plan meanwhile. Justas's next change shows the FR-41 warning. Justas reloads or continues, and the last save wins.
 
 ## Open Questions
 
 **Resolved on 2026-11-13** (each is written into the body; history in `.memlog.md`): applied state, the two best greens, the wall always showing movement class, the demo front page and no demo shortcut, violet selection, Key colours (FR-42, changed only from the Key), and from the review pass: the fixed focus ring, modifier-only shortcuts, reflow, the print band, a Round value on every printed line, and the class defaults `#D85144` / `#417DDC`.
+
+**Resolved on 2026-11-14:** the demo front page redesign (layout B, "Follow one part", with no synthetic-data notice) login in the core (FR-39, FR-40, milestone 2), the Demo version button (FR-50, milestone 2), and FR-41 moved to "if time allows".
 
 **Still open. Not blocking; each stays as drafted until the user says otherwise:**
 
@@ -391,7 +395,8 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 8. **Colour popover `Esc`.** `Esc` restores the colour from when the popover opened; Done or a click outside keeps the pick (as drafted, replacing the earlier "Esc keeps"). Keep as drafted?
 9. **Colour presets and likeness threshold.** Eight shades of each entry's hue (as drafted, DESIGN.md `colour-presets`) and a "too alike" warning below ΔE 20. Keep as drafted?
 10. **Journey: changing a colour from the Key.** Needs a narrated journey from the user (the Key colour popover).
-11. **Journey: first-time demo visitor.** Needs a narrated journey from the user (demo front page → Open the app → empty saved-plans list → New Plan with `data/sample/`).
+11. **Journey: first-time demo visitor.** Needs a narrated journey from the user (demo front page → Demo version, Log in with the README's demo account, or Create account → empty saved-plans list → New Plan with `data/sample/`).
 12. **Journey: Pick groups.** Needs a narrated journey from the user.
 13. **Journey: Parts roster.** Needs a narrated journey from the user (UJ-1 goes from Locations to Best locations without visiting Parts or Pick groups).
 14. **Journey: launcher and search.** Needs a narrated journey from the user.
+15. **Log in and Create account pages.** Described in words only (Information Architecture table); no mock yet. Layout, error copy and the place of Log out (drafted as a user menu at the toolbar's right end) need a mock and the user's review.

@@ -2,7 +2,7 @@
 title: "PRD: Smart Warehouse Planner"
 status: final
 created: 2026-11-01
-updated: 2026-11-13
+updated: 2026-11-14
 ---
 
 # PRD: Smart Warehouse Planner
@@ -57,8 +57,8 @@ The data needed to place parts by usage already exists in the warehouse's own ex
   *Realized by FR-38.*
 
 - **UJ-3. Justas continues a saved plan a week later.**
-  Justas opens the saved-plans list, sees "Autumn re-slot" with its last-edited time, and opens it exactly as it was left: marks, moves, rounds and recommendations. Justas undoes the last manual move, applies two more recommendations and prints again; the new generated-at time tells the new printout from the old one. To try a different set of best locations without losing this plan, Justas starts a New Plan from the same import. **Edge case (stage 2):** another planner saves a change to the same plan while Justas has it open; Justas's next change shows a warning, and the last save wins.
-  *Realized by FR-2, FR-8–FR-10, FR-30, FR-35, FR-38; in stage 2 also FR-39–FR-41.*
+  Justas opens the saved-plans list, sees "Autumn re-slot" with its last-edited time, and opens it exactly as it was left: marks, moves, rounds and recommendations. Justas undoes the last manual move, applies two more recommendations and prints again; the new generated-at time tells the new printout from the old one. To try a different set of best locations without losing this plan, Justas starts a New Plan from the same import. **Edge case (if time allows):** another planner saves a change to the same plan while Justas has it open; Justas's next change shows a warning, and the last save wins.
+  *Realized by FR-2, FR-8–FR-10, FR-30, FR-35, FR-38, FR-40; if time allows also FR-41.*
 
 ## 3. Glossary
 
@@ -112,9 +112,10 @@ Downstream documents use these terms exactly.
 
 **People (and stage 2)**
 
-- **Planner** — a person who uses the app to plan placement. In stage 2 every user is a planner.
+- **Planner** — a person who uses the app to plan placement. Once login exists (milestone 2), every user is a planner.
 - **Colleague** — a warehouse worker who carries out a printed move list; does not use the app.
-- **User** (stage 2) — a person with an account who logs in to the app.
+- **User** — a person with an account who logs in to the app (milestone 2).
+- **Demo version** — the public deployment's way into the app without typing a login: it logs the visitor in as the seeded demo account (FR-50).
 - **Category** (stage 2) — a kind of part (e.g. Filters), given by keyword rules.
 - **Keyword rule** (stage 2) — a mapping from a keyword in the part description to a category, in an order the planner sets.
 - **Aisle categories** (stage 2) — the categories the planner assigns to an aisle.
@@ -124,11 +125,11 @@ Downstream documents use these terms exactly.
 
 ## 4. Features
 
-Core features (4.1–4.10 and 4.12) are built, tested and stable before any stage 2 feature (4.11, 4.13, 4.14) is started; the core itself is built in two milestones (§7.1).
+Core features (4.1–4.10, FR-39–FR-40 and FR-50 in 4.11, and 4.12) are built, tested and stable before any stage 2 feature (4.13, 4.14) or "if time allows" item (FR-41, §7.5) is started; the core itself is built in two milestones (§7.1).
 
 ### 4.0 Key screens
 
-An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view; on the public deployment only, a **demo front page** in front of the app (NFR-5). Stage 2: login and create account; category settings and category check; location label print view.
+An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view; **login** and **create account** (milestone 2); on the public deployment only, a **demo front page** in front of the app, with **Demo version** (NFR-5, FR-50). Stage 2: category settings and category check; location label print view.
 
 ### 4.1 New Plan and import
 
@@ -214,7 +215,7 @@ The planner can see all saved plans and start a New Plan from the list. Realizes
 **Consequences (testable):**
 - Each plan shows its name, data-as-of date, created by, created at, last edited by and last edited at.
 - Plans are listed with the most recently edited first.
-- The list is the start page of the app (on the public deployment it comes after the demo front page, NFR-5; in stage 2 it is the page a user lands on after login).
+- The list is the start page of the app (from milestone 2 it is the page a user lands on after login, FR-40; on the public deployment the demo front page comes first, NFR-5).
 
 #### FR-9: Reopen a plan with identical state
 
@@ -232,15 +233,15 @@ Every change to a plan is saved automatically. Realizes UJ-1, UJ-3.
 - A change (best-location mark, keep-in-place mark, run, applied recommendation, move, undo, reset) is saved without a Save button; reloading the page shows it.
 
 **Out of Scope:**
-- Warning when two people edit the same plan at the same time: stage 2 (FR-41). Live collaboration is not planned at all.
+- Warning when two people edit the same plan at the same time: if time allows (FR-41). Live collaboration is not planned at all.
 
 #### FR-11: Record who created and last edited a plan
 
 Every plan records who created it and who last edited it, from the first version.
 
 **Consequences (testable):**
-- Before login exists (core), both fields hold the fixed value `planner`.
-- From stage 2, both fields hold the logged-in user (FR-40).
+- Before login exists (milestone 1), both fields hold the fixed value `planner`.
+- From milestone 2, both fields hold the logged-in user (FR-40).
 
 #### FR-12: Delete a plan
 
@@ -536,9 +537,9 @@ The planner can open a print view of the plan's move list and print it from the 
 **Out of Scope:**
 - PDF or CSV export; tracking who printed a list or whether it was carried out.
 
-### 4.11 Accounts and login (stage 2)
+### 4.11 Accounts and login (core, milestone 2; FR-41 if time allows)
 
-**Description:** Login tracks who uses the app and gives it a more professional look. Anyone can create an account. Plans stay shared: every user sees, edits and deletes every plan. With separate users, the app also warns when two people edit the same plan.
+**Description:** Login tracks who uses the app and gives it a more professional look. Anyone can create an account. Plans stay shared: every user sees, edits and deletes every plan. With separate users, the app also warns when two people edit the same plan (if time allows). Accounts, login and the demo version moved into the core on 2026-11-14 (UX step); the section keeps its number so the FR IDs stay.
 
 #### FR-39: Create an account
 
@@ -554,12 +555,22 @@ Any person with access to the app can create an account and use the app.
 A user can log in and log out.
 
 **Consequences (testable):**
-- Every page except login and create account requires login.
+- Every page except login, create account and, on the public deployment, the demo front page (NFR-5) requires login.
 - After login, the user lands on the saved-plans list (FR-8).
 - Plans record the logged-in user as created by and last edited by (FR-11).
 - The README lists a seeded demo account so examiners can log in without creating one.
 
-#### FR-41: Warn when two people edit the same plan
+#### FR-50: Open the demo version without logging in
+
+On the public deployment, a visitor can skip the login: **Demo version** on the demo front page opens the app as the seeded demo account. Numbered FR-50 because requirement IDs are global and FR-49 is withdrawn; it sits here because it belongs with login.
+
+**Consequences (testable):**
+- Demo version goes straight to the saved-plans list (FR-8), with no login page and no password.
+- The visitor is logged in as the seeded demo account (FR-40), so created by / last edited by show that account (FR-11), and Log out works as for any user.
+- Plans stay shared (§4.11): the demo account sees the same plans as every other user. No plan is preloaded; a first-time visitor uploads the files from `data/sample/` in New Plan (UJ-1).
+- A local install has no demo front page and no Demo version; there the README's demo account is used (NFR-2).
+
+#### FR-41: Warn when two people edit the same plan (if time allows)
 
 A user who changes a plan that someone else has saved since the user opened it is warned. Realizes UJ-3.
 
@@ -649,17 +660,17 @@ The planner can print a label for every location in a chosen aisle.
 ## 5. Cross-Cutting Non-Functional Requirements
 
 - **NFR-1 Separate, testable rules.** Classification, pick groups, recommendations, rounds and move-list order are separate modules. They take data and settings as input, do no database, file or network work, give the same output for the same input, and are tested directly against the answer-key test dataset (§7.3) without the user interface.
-- **NFR-2 Runs locally for examiners.** The app installs and runs on a laptop with no paid accounts, API keys, external services or network calls at runtime. The README gives the install and start steps, a step-by-step import of the demo files in `data/sample/`, how to run the tests and, in stage 2, the demo account.
+- **NFR-2 Runs locally for examiners.** The app installs and runs on a laptop with no paid accounts, API keys, external services or network calls at runtime. The README gives the install and start steps, a step-by-step import of the demo files in `data/sample/`, how to run the tests and the demo account.
 - **NFR-3 No AI at runtime.** The app uses no language model or AI service. AI is used only during development.
 - **NFR-4 Confidentiality.** The repo is public. Only synthetic data is committed: the demo data made by `data/generate_demo_data.py` and the hand-made answer-key test dataset. The database, uploaded files and real exports (kept only in `data/private/`) are git-ignored and never committed. No real part numbers, files or screenshots go into test data, documentation or `.logs/`.
-- **NFR-5 Public deployment is a demo.** The public deployment (Vercel, linked from the README) holds synthetic demo data only; real company data is never uploaded to it (decision 2026-11-02). Real use would need a company-internal setup, outside the course. How the deployment is built is decided in architecture. The public deployment opens on a demo front page: it says what the tool does, shows the flow from import to the printed move list, states that the data is synthetic, and links into the app (the saved-plans list). It makes no claims about customers, savings or distances. A local install opens straight on the saved-plans list (user decision 2026-11-13, UX step).
-- **NFR-6 Secrets (stage 2).** Secrets such as the session key come from environment variables and are never committed; the README explains how to set them for a local run, with an example file that holds no real values.
+- **NFR-5 Public deployment is a demo.** The public deployment (Vercel, linked from the README) holds synthetic demo data only; real company data is never uploaded to it (decision 2026-11-02). Real use would need a company-internal setup, outside the course. How the deployment is built is decided in architecture. The public deployment opens on a demo front page: it says what the tool does, shows the flow from import to the printed move list, and offers Log in, Create account and Demo version (FR-39, FR-40, FR-50). It makes no claims about customers, savings or distances, and it carries no synthetic-data notice: the README states that the public deployment holds synthetic data only (user decision 2026-11-14, UX step). A local install opens on the login page; after login, on the saved-plans list.
+- **NFR-6 Secrets (milestone 2).** Secrets such as the session key come from environment variables and are never committed; the README explains how to set them for a local run, with an example file that holds no real values.
 - **NFR-7 Scale.** Up to about 10 users in total and a few at the same time; no special scaling work.
 - **NFR-8 Responsiveness.** On a typical laptop, importing the demo data and computing classes and pick groups takes under 10 seconds, a run takes under 5 seconds, and other actions respond within 1 second.
 - **NFR-9 Browsers.** Current desktop versions of Chrome, Edge and Firefox, including their print function. Phones and handheld devices are not supported in v1.
 - **NFR-10 Accessibility.** No information is shown by color alone; forms and buttons can be used with the keyboard.
 - **NFR-11 Language.** The user interface is in English.
-- **NFR-12 Persistence.** Plans, their imports and (in stage 2) accounts are stored persistently and survive a restart of the app. The storage technology is decided in architecture.
+- **NFR-12 Persistence.** Plans, their imports and accounts are stored persistently and survive a restart of the app. The storage technology is decided in architecture.
 
 ## 6. Non-Goals (Explicit)
 
@@ -678,7 +689,7 @@ The planner can print a label for every location in a chosen aisle.
 
 ### 7.1 In Scope: the core, in two milestones
 
-The core is FR-1–FR-38 and FR-42. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
+The core is FR-1–FR-40, FR-42 and FR-50. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
 
 **Milestone 1: the core flow on one stored plan.** Import, classify, find pick groups, get recommendations, try them in the planning copy.
 - FR-1, FR-3–FR-7 (New Plan from files, import checks), FR-10–FR-11 (autosave, created by / last edited by)
@@ -694,11 +705,11 @@ The core is FR-1–FR-38 and FR-42. It is built in two milestones so that the te
 - FR-31, FR-32, FR-34, FR-35 (apply with another suggested location, keep in place, combined moves, undo and reset)
 - FR-38 (move list)
 - FR-42 (warehouse view; moved from stage 2, decision 2026-11-13)
+- FR-39–FR-40 (create an account, log in and out; moved from stage 2, decision 2026-11-14) and FR-50 (demo version without login, new 2026-11-14)
 - **Gate:** SM-1 and SM-2 pass in full.
 
 ### 7.2 Stage 2 (after the milestone 2 gate)
 
-- Accounts, login, and the warning when two people edit the same plan (FR-39–FR-41)
 - Category check (FR-43–FR-47)
 - Location labels with QR codes (FR-48)
 
@@ -727,7 +738,7 @@ The answer-key test dataset is a small hand-made dataset (about 20 parts, more i
 
 ### 7.5 Out of Scope for MVP
 
-- **If time allows:** drag-and-drop placement, whole-warehouse optimization, and QR/barcode scanning.
+- **If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and the warning when two people edit the same plan (FR-41; moved from stage 2, decision 2026-11-14).
 - **Vision (after the course):** an everyday tool, re-run on fresh transaction data to catch parts that have sped up or slowed down; handheld devices; other warehouses in the company.
 
 ## 8. Success Metrics
@@ -760,7 +771,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 
 ## 10. Changes from the Brief and Addendum
 
-- **Accounts (stage 2):** anyone can create an account (self-registration). Replaces "users are created by the planner or seeded, no self-registration" (user decision 2026-11-02).
+- **Accounts:** anyone can create an account (self-registration). Replaces "users are created by the planner or seeded, no self-registration" (user decision 2026-11-02).
 - **Core in two milestones, and the concurrent-edit warning moved to stage 2** (user decision 2026-11-02), following the teacher's advice to finish a small core first.
 - **Deleting plans:** permanent after confirmation, no archive. Closes the addendum's open question.
 - **Keep in place:** new; the planner can decline a recommendation so it does not come back (user decision 2026-11-02).
@@ -778,6 +789,10 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Answer-key details (user decision 2026-11-11):** the period counts transactions by date only; a slow-moving or dead-stock part whose partner's aisle has only best locations empty is "no space" under rule 3; a part that already has a recommendation is skipped silently in its other pick groups; a part that is "no space" under rule 1 gets no rule 3 entry; the answer-key test dataset lives in `data/answer-key/`.
 - **Warehouse view in the core, and FR-42 rewritten** (user decision 2026-11-13, UX step): the warehouse view moves from stage 2 into milestone 2 and draws each aisle shelf by shelf; it is also where a recommendation's current and suggested locations are shown. Occupancy is shown by shape and text instead of red and green, colour is reserved for movement class, and best locations get a green rail or frame with the text BEST. Milestone 1 is unchanged, so the small-core-first order still holds.
 - **Key colours instead of a colour setting** (user decision 2026-11-13, UX step): the planner can change a colour in the warehouse view by clicking its entry in the view's key (FR-42). A separate colour-settings requirement, FR-49, was drafted and withdrawn the same day to keep the core small; its ID is not reused.
+- **Login in the core** (user decision 2026-11-14, UX step): create an account and log in and out (FR-39–FR-40) move from stage 2 into milestone 2, so the app and the demo front page offer Log in and Create account. Milestone 1 is unchanged.
+- **Demo version** (user decision 2026-11-14, UX step): a Demo version button on the demo front page opens the app without typing a login, as the seeded demo account (FR-50, milestone 2). This replaces the 2026-11-13 decision that there is no demo shortcut; there is still no preloaded plan.
+- **Concurrent-edit warning to "if time allows"** (user decision 2026-11-14): FR-41 moves from stage 2 to the if-time-allows list (§7.5), since it matters little while plans are shared.
+- **Demo front page without a synthetic-data notice** (user decision 2026-11-14, UX step): NFR-5 no longer asks the front page to state that the data is synthetic; the deployment still holds synthetic data only, and the README says so.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions
@@ -792,7 +807,7 @@ These details were inferred while writing the PRD and confirmed by the author on
 - **A-6** (FR-6) An import with more than one warehouse is rejected.
 - **A-7** (FR-4) Negative quantities are rejected.
 - **A-8** (FR-8) Saved-plans list sorted by most recently edited.
-- **A-9** (FR-11) Before login exists, created by / last edited by hold the fixed value `planner`.
+- **A-9** (FR-11) Before login exists (milestone 1), created by / last edited by hold the fixed value `planner`.
 - **A-10** (§4.3, FR-42) Parts list, locations list and warehouse view show the planning copy.
 - **A-11** (FR-15) Search matches partial text in part numbers, part descriptions and location codes, ignoring upper/lower case.
 - **A-12** (FR-17, FR-19) Only parts in the Inventory file are classified and considered for pick groups.
