@@ -43,6 +43,14 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - README har fått seksjonen «Demo og data»: bare syntetiske data, `data/sample/`, Demo version, demokontoen `demo`/`demo` og Create account.
 - Committet på brukerens bestilling som `4d5b869` på `main` (ikke pushet): PRD, PRODUCT.md, README, DESIGN.md, EXPERIENCE.md, `.memlog.md`, `mockups/landing.svg` og `.working/landing-redesign/`.
 
+- Oppfølging 2: Brukeren godkjente demokontoen `demo`/`demo`. Ny mock `mockups/login.svg`, laget med `.working/landing-redesign/gen_login.py`:
+  - Log in-side med Show, lenke til Create account og «or» + Demo version.
+  - Create account-side med Repeat password og en tekst om at det ikke trengs e-post og ikke finnes tilbakestilling av passord.
+  - Tilstander: feil brukernavn eller passord, feltfeil (brukernavn opptatt, passordene er ulike) og brukermeny med Log out fra avataren i verktøylinja.
+  - FR-50 sier nå at Demo version også står på Log in-siden.
+  - IA-radene i EXPERIENCE.md har fått felt og feiltekster, og navigasjonsmodellen beskriver brukermenyen.
+  - DESIGN.md har fått en komponentbeskrivelse og en lenke til arket. Open Question 15 er skrevet om.
+  - Ikke committet: PRD, DESIGN.md, EXPERIENCE.md, `.memlog.md`, `mockups/login.svg` og generatoren.
+
 ### Åpne punkter
-- Log in- og Create account-sidene finnes bare i tekst, uten mock. Layout, feiltekster og plasseringen av Log out må tegnes og vurderes (EXPERIENCE.md Open Question 15).
-- Demokontoens brukernavn og passord (`demo`/`demo`) i README er valgt av Claude og må bekreftes, og seedingen må bruke dem.
+- Bekreft detaljene i login-mocken: feltet Repeat password, hinten «Letters and numbers», Demo version også på Log in-siden, og at Log out går til forsiden på den offentlige demoen (EXPERIENCE.md Open Question 15).
