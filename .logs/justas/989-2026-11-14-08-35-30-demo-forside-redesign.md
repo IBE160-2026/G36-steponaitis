@@ -50,7 +50,7 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - FR-50 sier nå at Demo version også står på Log in-siden.
   - IA-radene i EXPERIENCE.md har fått felt og feiltekster, og navigasjonsmodellen beskriver brukermenyen.
   - DESIGN.md har fått en komponentbeskrivelse og en lenke til arket. Open Question 15 er skrevet om.
-  - Ikke committet: PRD, DESIGN.md, EXPERIENCE.md, `.memlog.md`, `mockups/login.svg` og generatoren.
+  - Committet på brukerens bestilling som `8c3754a` på `main` (ikke pushet).
 
 ### Åpne punkter
 - Bekreft detaljene i login-mocken: feltet Repeat password, hinten «Letters and numbers», Demo version også på Log in-siden, og at Log out går til forsiden på den offentlige demoen (EXPERIENCE.md Open Question 15).
