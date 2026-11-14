@@ -60,5 +60,7 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - Skrevet inn i PRD FR-39 og FR-40 og i EXPERIENCE.md. Open Question 15 er lukket.
   - Committet på brukerens bestilling som `d4d5f14` på `main` (ikke pushet).
 
+- Pushet til `origin/main` på brukerens bestilling: `dca1480..5c85e38`, ti commits.
+
 ### Åpne punkter
 Ingen.
