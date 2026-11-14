@@ -546,7 +546,8 @@ The planner can open a print view of the plan's move list and print it from the 
 Any person with access to the app can create an account and use the app.
 
 **Consequences (testable):**
-- An account needs a username and a password; usernames are unique. No email address is needed.
+- An account needs a username and a password; usernames are unique and use letters and numbers only. No email address is needed.
+- The password is typed twice when the account is created, and the two must match (there is no password reset).
 - Passwords are stored hashed, never in plain text.
 - There are no roles, no admin and no password reset.
 
@@ -557,6 +558,7 @@ A user can log in and log out.
 **Consequences (testable):**
 - Every page except login, create account and, on the public deployment, the demo front page (NFR-5) requires login.
 - After login, the user lands on the saved-plans list (FR-8).
+- Log out returns to the login page; on the public deployment, to the demo front page.
 - Plans record the logged-in user as created by and last edited by (FR-11).
 - The README lists a seeded demo account so examiners can log in without creating one.
 
