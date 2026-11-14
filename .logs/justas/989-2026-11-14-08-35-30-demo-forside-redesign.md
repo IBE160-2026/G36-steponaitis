@@ -52,5 +52,12 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - DESIGN.md har fått en komponentbeskrivelse og en lenke til arket. Open Question 15 er skrevet om.
   - Committet på brukerens bestilling som `8c3754a` på `main` (ikke pushet).
 
+- Oppfølging 3: Brukeren bekreftet alle fire detaljene i login-mocken:
+  - Repeat password.
+  - Brukernavn bare med bokstaver og tall.
+  - Demo version også på Log in-siden.
+  - Log out går til innloggingssiden, og til demo-forsiden på den offentlige demoen.
+  - Skrevet inn i PRD FR-39 og FR-40 og i EXPERIENCE.md. Open Question 15 er lukket.
+
 ### Åpne punkter
-- Bekreft detaljene i login-mocken: feltet Repeat password, hinten «Letters and numbers», Demo version også på Log in-siden, og at Log out går til forsiden på den offentlige demoen (EXPERIENCE.md Open Question 15).
+Ingen.
