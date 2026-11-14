@@ -41,7 +41,7 @@ text { font-variant-numeric: tabular-nums; }
 <text x="72" y="124" class="lb w7" font-size="40" fill="#1B1E22">Locations</text>
 <text x="72" y="152" class="b w4" font-size="14" fill="#4A5058">Planning copy after round 1 · data as of 2026-09-30 · aisles in walk order A → I · click an aisle to open its wall</text>
 <rect x="1332.0" y="104.0" width="36.0" height="36.0" rx="6" fill="#fff" stroke="#D6D4CD" stroke-width="1"/><use href="#i-search" x="1341.0" y="113.0" width="18" height="18" stroke="#1B1E22" color="#1B1E22"/>
-<rect x="1070.2" y="104.0" width="249.8" height="36.0" rx="6" fill="#fff" stroke="#D6D4CD" stroke-width="1"/><rect x="1073.2" y="107.0" width="144.4" height="30.0" rx="4" fill="#1B1E22"/><text x="1145.37375" y="126.86" class="b w6" font-size="13.5" fill="#fff" text-anchor="middle">Whole warehouse</text><text x="1267.28375" y="126.86" class="b w6" font-size="13.5" fill="#1B1E22" text-anchor="middle">One aisle</text>
+<rect x="1070.2" y="104.0" width="249.8" height="36.0" rx="6" fill="#fff" stroke="#D6D4CD" stroke-width="1"/><text x="1122.89625" y="126.86" class="b w6" font-size="13.5" fill="#1B1E22" text-anchor="middle">One aisle</text><rect x="1172.6" y="107.0" width="144.4" height="30.0" rx="4" fill="#1B1E22"/><text x="1244.80625" y="126.86" class="b w6" font-size="13.5" fill="#fff" text-anchor="middle">Whole warehouse</text>
 <text x="72" y="218" class="lb w7" font-size="38" fill="#1B1E22">79.2%</text>
 <text x="72" y="242" class="b w4" font-size="13.5" fill="#4A5058">occupied · 1,584 of 2,000 locations</text>
 <text x="382.2375" y="218" class="lb w7" font-size="38" fill="#1B1E22">416</text>

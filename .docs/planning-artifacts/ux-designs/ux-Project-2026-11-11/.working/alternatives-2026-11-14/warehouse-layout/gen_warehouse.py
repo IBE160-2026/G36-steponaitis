@@ -419,6 +419,8 @@ def make_a():
     s, sw = segmented(0, 0, ["Planning copy", "Import"])
     o.append(search(1408 - 340, 104, 340))
     o.append(segmented(1408 - 340 - 16 - sw, 104, ["Planning copy", "Import"])[0])
+    zs, zw = segmented(0, 0, ["One aisle", "Whole warehouse"])
+    o.append(segmented(1408 - 340 - 16 - sw - 24 - zw, 104, ["One aisle", "Whole warehouse"], sel=0)[0])
 
     # aisle tabs
     ty, tw_, th, tg = 182, 116, 58, 8
@@ -531,9 +533,9 @@ def make_b():
     G, R = 72, 1368
     o.append(t(G, 124, "Locations", 40, INK, LB))
     o.append(t(G, 152, "Planning copy after round 1 · data as of 2026-09-30 · aisles in walk order A → I · click an aisle to open its wall", 14, INK2))
-    seg, sw = segmented(0, 0, ["Whole warehouse", "One aisle"])
+    seg, sw = segmented(0, 0, ["One aisle", "Whole warehouse"])
     o.append(rect(R - 36, 104, 36, 36, "#fff", 6, BORDER, 1) + icon("i-search", R - 27, 113, 18, INK))
-    o.append(segmented(R - 36 - 12 - sw, 104, ["Whole warehouse", "One aisle"])[0])
+    o.append(segmented(R - 36 - 12 - sw, 104, ["One aisle", "Whole warehouse"], sel=1)[0])
 
     # headline numbers
     sy = 188
