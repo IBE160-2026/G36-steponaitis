@@ -562,7 +562,7 @@ A user can log in and log out.
 
 #### FR-50: Open the demo version without logging in
 
-On the public deployment, a visitor can skip the login: **Demo version** on the demo front page opens the app as the seeded demo account. Numbered FR-50 because requirement IDs are global and FR-49 is withdrawn; it sits here because it belongs with login.
+On the public deployment, a visitor can skip the login: **Demo version** on the demo front page, and on the login page, opens the app as the seeded demo account. Numbered FR-50 because requirement IDs are global and FR-49 is withdrawn; it sits here because it belongs with login.
 
 **Consequences (testable):**
 - Demo version goes straight to the saved-plans list (FR-8), with no login page and no password.

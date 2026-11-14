@@ -2,7 +2,6 @@
 import os, sys
 
 S = os.path.dirname(os.path.abspath(__file__))
-OUT = sys.argv[1]
 DEFS = open(os.path.join(S, "defs.svgfrag")).read()
 
 INK, INK2, INK3 = "#1B1E22", "#4A5058", "#6B717A"
@@ -405,7 +404,9 @@ def make_c():
                "\n".join(o), h=900)
 
 
-os.makedirs(OUT, exist_ok=True)
-for name, fn in (("A-before-after.svg", make_a), ("B-follow-one-part.svg", make_b), ("C-paper-first.svg", make_c)):
-    open(os.path.join(OUT, name), "w").write(fn())
-    print("wrote", name)
+if __name__ == "__main__":
+  OUT = sys.argv[1]
+  os.makedirs(OUT, exist_ok=True)
+  for name, fn in (("A-before-after.svg", make_a), ("B-follow-one-part.svg", make_b), ("C-paper-first.svg", make_c)):
+      open(os.path.join(OUT, name), "w").write(fn())
+      print("wrote", name)
