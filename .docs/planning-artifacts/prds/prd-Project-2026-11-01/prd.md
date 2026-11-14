@@ -100,6 +100,7 @@ Downstream documents use these terms exactly.
 - **Planning copy** — the plan's own working state of the warehouse: the import plus all moves. All edits happen here.
 - **Move** — a change in the planning copy that moves a part's stock from one location (the **from-location**) to another (the **to-location**). Every move has a rule and a round.
 - **Manual move** — a move the planner makes by hand, with the rule **Manual**.
+- **Swap** — manual moves made together by dragging a part onto an occupied location in the warehouse view: the chosen parts move there, and the chosen parts from there move back to the from-location (FR-51).
 - **Run** — one execution of the recommendation rules on the planning copy's current state.
 - **Recommendation** — a suggested move from a run: part, current location, **suggested location** and rule. Applying it creates a move.
 - **Rule** — the reason for a move: **rule 1** (fast-moving part into a best location), **rule 2** (slow-moving or dead-stock part out of a best location), **rule 3** (part moved into its partner's aisle) or **Manual**.
@@ -129,7 +130,7 @@ Core features (4.1–4.10, FR-39–FR-40 and FR-50 in 4.11, and 4.12) are built,
 
 ### 4.0 Key screens
 
-An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view; **login** and **create account** (milestone 2); on the public deployment only, a **demo front page** in front of the app, with **Demo version** (NFR-5, FR-50). Stage 2: category settings and category check; location label print view.
+An outline for the UX step, which decides layout and navigation. Core: **saved-plans list** (start page, New Plan button); **New Plan** (name, three files or an existing plan's import, import errors); **plan overview** (data-as-of date, settings, counts); **parts** and **locations** (lists, search, manual move); **warehouse view** (aisles drawn shelf by shelf; also shows where a recommendation moves a part; drag a part to move or swap it); **pick groups**; **best locations** (marking); **recommendations** (run, list per rule with reasons, apply, apply all, apply with another suggested location, keep in place, "no space", outdated); **before/after table**; **move list** print view; **login** and **create account** (milestone 2); on the public deployment only, a **demo front page** in front of the app, with **Demo version** (NFR-5, FR-50). Stage 2: category settings and category check; location label print view.
 
 ### 4.1 New Plan and import
 
@@ -494,6 +495,7 @@ The planner can undo moves and reset the planning copy.
 - Undo reverses the most recent move (an applied recommendation, a manual move, or the second step of a combination under FR-34, which restores the state before that step). It can be repeated back to the first move. A move in the middle cannot be removed on its own.
 - Undo does not reverse runs, best-location marks or keep-in-place marks; marks are removed by unmarking.
 - After any undo, all recommendations of the latest run that are not applied become outdated, and an undone recommendation does not come back until the next run.
+- A swap (FR-51) is not undone as one: undo reverses its moves one at a time, latest first, like any other moves (user decision 2026-11-14).
 - Reset asks for confirmation, then removes all moves, recommendations and "no space" parts; the current round becomes 0. Best-location marks and keep-in-place marks are kept.
 
 #### FR-36: Never change the import
@@ -531,6 +533,7 @@ The planner can open a print view of the plan's move list and print it from the 
 - Each line shows round, part, part description, from-location, to-location, rule and a tick box.
 - Lines are ordered by round. Within a round, a line into a location comes after every line in that round that moves a part out of that location; otherwise lines follow the Walk Path of the from-location, then part-number order. Where lines form a cycle (for example two parts swapping locations), those lines follow Walk Path order (decision 2026-11-02).
 - Within a round, no line moves a part into a location that a later line in the same round moves a part out of, except in a cycle.
+- The lines of one swap (FR-51) follow each other where the order rules above allow it, and each is marked as a swap with its number in the swap and both location codes, for example "Swap 1/2 · A-02-01-01 ↔ G-14-04-02", so the colleague knows to set one bin aside first (user decision 2026-11-14). A line is marked only while every move of its swap is still in the plan as it was made; after one of them is undone or combined (FR-34), the rest print as ordinary manual moves.
 - The header shows the plan name, the data-as-of date, the upload date, the number of rounds and the time the list was generated.
 - A plan with no moves shows that there are no moves to print.
 
@@ -582,7 +585,7 @@ A user who changes a plan that someone else has saved since the user opened it i
 
 ### 4.12 Warehouse view (core, milestone 2)
 
-**Description:** A visual view of the warehouse as the plan has it now. Each aisle is drawn shelf by shelf, the way it looks from the floor, with occupancy, movement classes and best locations. The planner uses it to look at locations and to see where a recommendation moves a part. It shows the planning copy of the open plan and does not rely on colour alone. Part of the core since the UX step (decision 2026-11-13); the section keeps its number so that FR-42 keeps its ID. Realizes UJ-1.
+**Description:** A visual view of the warehouse as the plan has it now. Each aisle is drawn shelf by shelf, the way it looks from the floor, with occupancy, movement classes and best locations. The planner uses it to look at locations, to see where a recommendation moves a part, and to move or swap parts by dragging them (FR-51, added 2026-11-14). It shows the planning copy of the open plan and does not rely on colour alone. Part of the core since the UX step (decision 2026-11-13); the section keeps its number so that FR-42 keeps its ID. Realizes UJ-1.
 
 #### FR-42: Show the warehouse view
 
@@ -601,6 +604,23 @@ The planner can see all aisles with their locations, occupancy, movement classes
 - Symbols, the text BEST and all other text stay the same when a colour is changed, so no information depends on the chosen colours (NFR-10). Key entries without a colour (such as empty) are not clickable.
 - When a chosen colour has less than 3:1 contrast against a background it is drawn on, or two chosen colours are hard to tell apart (the threshold is set in the UX spec), a warning says so; the planner can still keep the colour. Each colour can be reset to its default.
 - Chosen colours are kept in the browser and survive a reload. They change no plan, no import and no analysis result, and the printed move list stays black and white.
+
+#### FR-51: Drag a part to move or swap it
+
+In the warehouse view, the planner can drag a part with the mouse from its location and drop it on another location, to move it there or to swap it with the parts already there (user decision 2026-11-14). Realizes UJ-1.
+
+**Consequences (testable):**
+- Dragging works with the mouse only (user decision 2026-11-14). It adds no new kind of move: everything a drag does can also be done with manual moves (FR-33), which work with the keyboard (NFR-10).
+- Dragging works on the planning copy only, not on a read-only view of the import.
+- When the from-location holds more than one part, the planner chooses which part or parts to move; at least one must be chosen.
+- Dropping on an empty location makes one manual move to it for each chosen part.
+- Dropping on an occupied location always asks **Swap** or **Put together**, with Cancel. Nothing changes until the planner chooses.
+- **Put together** makes one manual move for each chosen part into the location, as FR-33 does for an occupied to-location.
+- **Swap** moves the chosen parts to the dropped-on location and moves parts from that location back to the from-location. When the dropped-on location holds more than one part, the planner chooses which of them move back; at least one must be chosen.
+- Every part moved by a drag gets its own manual move, with the rule Manual and the current round. FR-33's rules (all of the part's stock at the from-location, same part added together) and FR-34 apply to each move.
+- A virtual location cannot be a drop target, and dropping a part on its own location changes nothing.
+- Before a swap, when any part in it is kept in place (FR-32), a warning names the part; the planner can swap anyway or cancel. Swapping keeps the mark (user decision 2026-11-14).
+- A swap is undone one move at a time (FR-35), and its moves are marked as a swap on the move list (FR-38).
 
 ### 4.13 Category check (stage 2)
 
@@ -670,7 +690,7 @@ The planner can print a label for every location in a chosen aisle.
 - **NFR-7 Scale.** Up to about 10 users in total and a few at the same time; no special scaling work.
 - **NFR-8 Responsiveness.** On a typical laptop, importing the demo data and computing classes and pick groups takes under 10 seconds, a run takes under 5 seconds, and other actions respond within 1 second.
 - **NFR-9 Browsers.** Current desktop versions of Chrome, Edge and Firefox, including their print function. Phones and handheld devices are not supported in v1.
-- **NFR-10 Accessibility.** No information is shown by color alone; forms and buttons can be used with the keyboard.
+- **NFR-10 Accessibility.** No information is shown by color alone; forms and buttons can be used with the keyboard. Dragging in the warehouse view (FR-51) is mouse-only (user decision 2026-11-14); every move it makes can also be made with the keyboard as a manual move (FR-33).
 - **NFR-11 Language.** The user interface is in English.
 - **NFR-12 Persistence.** Plans, their imports and accounts are stored persistently and survive a restart of the app. The storage technology is decided in architecture.
 
@@ -691,7 +711,7 @@ The planner can print a label for every location in a chosen aisle.
 
 ### 7.1 In Scope: the core, in two milestones
 
-The core is FR-1–FR-40, FR-42 and FR-50. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
+The core is FR-1–FR-40, FR-42, FR-50 and FR-51. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
 
 **Milestone 1: the core flow on one stored plan.** Import, classify, find pick groups, get recommendations, try them in the planning copy.
 - FR-1, FR-3–FR-7 (New Plan from files, import checks), FR-10–FR-11 (autosave, created by / last edited by)
@@ -706,7 +726,7 @@ The core is FR-1–FR-40, FR-42 and FR-50. It is built in two milestones so that
 - FR-2, FR-8, FR-9, FR-12 (saved-plans list, reopen, reuse an import, delete)
 - FR-31, FR-32, FR-34, FR-35 (apply with another suggested location, keep in place, combined moves, undo and reset)
 - FR-38 (move list)
-- FR-42 (warehouse view; moved from stage 2, decision 2026-11-13)
+- FR-42 (warehouse view; moved from stage 2, decision 2026-11-13) and FR-51 (drag to move or swap in the warehouse view; moved from "if time allows", decision 2026-11-14)
 - FR-39–FR-40 (create an account, log in and out; moved from stage 2, decision 2026-11-14) and FR-50 (demo version without login, new 2026-11-14)
 - **Gate:** SM-1 and SM-2 pass in full.
 
@@ -732,7 +752,8 @@ The answer-key test dataset is a small hand-made dataset (about 20 parts, more i
 - a best location freed by rule 2 in round 1 and used by rule 1 in round 2;
 - a part kept in place;
 - an undo after a later run;
-- a manual move into a location emptied in the same round, and two parts swapping locations.
+- a manual move into a location emptied in the same round, and two parts swapping locations;
+- a swap made by dragging (FR-51) from a location with two parts where only one is chosen, its two lines on the move list, and an undo of one of its moves.
 
 ### 7.4 Constraints
 
@@ -740,13 +761,13 @@ The answer-key test dataset is a small hand-made dataset (about 20 parts, more i
 
 ### 7.5 Out of Scope for MVP
 
-- **If time allows:** drag-and-drop placement, whole-warehouse optimization, QR/barcode scanning, and the warning when two people edit the same plan (FR-41; moved from stage 2, decision 2026-11-14).
+- **If time allows:** whole-warehouse optimization, QR/barcode scanning, and the warning when two people edit the same plan (FR-41; moved from stage 2, decision 2026-11-14).
 - **Vision (after the course):** an everyday tool, re-run on fresh transaction data to catch parts that have sped up or slowed down; handheld devices; other warehouses in the company.
 
 ## 8. Success Metrics
 
 **Primary**
-- **SM-1: Answer-key tests pass.** All automated tests on the answer-key test dataset pass. They cover import checks and integrity (FR-3–FR-6, FR-36), reusing an import (FR-2), reopening with identical state (FR-9), delete isolation (FR-12), occupancy including zero-stock locations (FR-14), picks and classes (FR-16–FR-17), pick groups (FR-19), best locations (FR-21), runs, rules, "no space" and outdated recommendations (FR-23–FR-27, FR-29), moves, keep in place, combined moves, undo and reset (FR-30–FR-35), before/after counts (FR-37), and move-list content and order (FR-38). Validates those FRs and NFR-1.
+- **SM-1: Answer-key tests pass.** All automated tests on the answer-key test dataset pass. They cover import checks and integrity (FR-3–FR-6, FR-36), reusing an import (FR-2), reopening with identical state (FR-9), delete isolation (FR-12), occupancy including zero-stock locations (FR-14), picks and classes (FR-16–FR-17), pick groups (FR-19), best locations (FR-21), runs, rules, "no space" and outdated recommendations (FR-23–FR-27, FR-29), moves, keep in place, combined moves, undo and reset (FR-30–FR-35), swaps (FR-51), before/after counts (FR-37), and move-list content and order (FR-38). Validates those FRs and NFR-1.
 - **SM-2: The demo flow runs from the README.** From a clean checkout, following only the README, the flow New Plan → movement classes → pick groups → best-location marks → recommendations → planning copy → before/after table → move list runs on `data/sample/` without errors. The author's run opens the gate; a run by someone else is done before submission. Validates FR-1, FR-7, FR-13, FR-17, FR-19, FR-21, FR-23, FR-30, FR-37, FR-38 and NFR-2.
 
 **Secondary**
@@ -795,6 +816,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Demo version** (user decision 2026-11-14, UX step): a Demo version button on the demo front page opens the app without typing a login, as the seeded demo account (FR-50, milestone 2). This replaces the 2026-11-13 decision that there is no demo shortcut; there is still no preloaded plan.
 - **Concurrent-edit warning to "if time allows"** (user decision 2026-11-14): FR-41 moves from stage 2 to the if-time-allows list (§7.5), since it matters little while plans are shared.
 - **Demo front page without a synthetic-data notice** (user decision 2026-11-14, UX step): NFR-5 no longer asks the front page to state that the data is synthetic; the deployment still holds synthetic data only, and the README says so.
+- **Drag to move or swap in the core** (user decision 2026-11-14): drag-and-drop placement moves from "if time allows" into milestone 2 as FR-51. Dropping a part on an occupied location always asks Swap or Put together; the planner chooses which parts move when a location holds several; a swap is undone one move at a time; a swap with a part kept in place warns; swap lines are marked on the move list. Dragging is mouse-only, an exception to NFR-10's keyboard rule that manual moves cover.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions

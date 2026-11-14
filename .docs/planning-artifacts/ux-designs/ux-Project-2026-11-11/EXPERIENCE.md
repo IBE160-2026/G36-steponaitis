@@ -49,6 +49,7 @@ The saved-plans list is the start page after login (FR-8, FR-40). Everything els
 | Launcher (features menu) | Toolbar grid button; `Ctrl+K` / `⌘K` | All features as plates in flow order, the open plan, other saved plans, the Keyboard box listing every shortcut | — |
 | Part panel | Search result, roster row, tooltip part line, recommendation | One part: class and picks, locations and stock, pick groups and partners, keep in place, Manual move… | — [ASSUMPTION] |
 | Manual move dialog | Part panel, location tooltip, list row action | From-location (if the part has several), to-location, confirm | — |
+| Drop dialog | Dropping a dragged bin on the wall (FR-51) | Which parts move, then Move, or Swap / Put together on an occupied location; keep-in-place warning | — |
 
 **Later (stage 2, after the milestone 2 gate), shown in the launcher as empty slots marked "Coming in stage 2":** category settings and category check (**CAT**), location label print view (**LBL**). The concept's separate **WHV** "Warehouse view" plate is retired, because the warehouse view is now the core Locations wall.
 
@@ -139,6 +140,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 | Roster row `{components.roster-row}` | Parts, Pick groups | Ranked by picks, with ties in part-number order. The why-line names class, picks and the most relevant fact (partner, current location, "in a best location"). FR-13 fields not on the line (total stock, other locations, number of pick groups, kept in place) appear as right-hand columns. Filter by movement class with glyph chips. |
 | Part panel | Side panel over Parts / Locations | Part number and description, class with glyph, picks and threshold, total stock, current location, other locations, pick groups (partner, shared jobs, aisle), keep in place toggle, "Manual move…". Opening it moves focus to its heading. `Esc` closes it and returns focus to the control that opened it. |
 | Manual move dialog | Part panel, tooltip, list row | From-location (preselected when the part has one), a to-location field with autocomplete over the Locations file. It refuses the from-location and virtual locations with an inline reason (FR-33), shown as `{components.input-error}`: red boundary, warning icon and a sentence ("This is the from-location. Choose another." / "FLSKRS is a virtual location, not a shelf."), with `aria-invalid="true"` and the sentence linked by `aria-describedby`. It shows "to an occupied location: stock is added together" when the target already holds the part. Confirm creates the move with rule Manual and the current round. Then the FR-34 merge happens silently, and a toast says "Combined into one move: G-14-04-02 → A-02-01-01 (Manual)." → [components sheet 2](./mockups/components-sheet-2.svg) |
+| Drop dialog | Wall, after a drop (FR-51) | A popover anchored to the dropped-on location; rules in Warehouse wall, Drag to move or swap. Mouse-first, but its checkboxes and buttons also work with the keyboard. `Esc` or Cancel closes it with nothing changed. No mock yet (Open Question 15). |
 
 **Controls and feedback.**
 
@@ -195,7 +197,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 
 ## Interaction Primitives
 
-**Keyboard-complete (NFR-10).** Every action has a keyboard path. The mouse is never required.
+**Keyboard-complete (NFR-10).** Every action has a keyboard path. The mouse is never required, with one exception: dragging on the wall (FR-51) is mouse-only (user decision 2026-11-14). Every move a drag makes can also be made from the keyboard with **Manual move…**, one part at a time, so a swap is two manual moves.
 
 - `Tab` / `Shift+Tab` follow reading order: toolbar → page header actions → main content → side panel.
 - Destructive actions (Delete…, Reset…) always open a confirm dialog or popover with **Cancel** focused.
@@ -227,7 +229,7 @@ The app takes `Ctrl+K` from the browser's search-bar shortcut, as most web apps 
 
 **Markers link both ways.** Selecting a move anywhere (row, marker, lifted bin, "Moves touching aisle A" table) selects it everywhere, scrolls the other view into place (smoothly only when reduced motion is not requested) and draws its arrow.
 
-**Banned:** drag and drop as the only way to move a part (a keyboard path always exists; drag to move is not planned in v1 [ASSUMPTION]), hover-only information, single-character shortcuts, auto-advancing steps, infinite scroll, modal stacks deeper than one, and any animation longer than 200 ms apart from the bin lift (see Accessibility Floor).
+**Banned:** drag and drop as the only way to move a part (Manual move… is always the keyboard path; drag on the wall is a mouse shortcut, FR-51), hover-only information, single-character shortcuts, auto-advancing steps, infinite scroll, modal stacks deeper than one, and any animation longer than 200 ms apart from the bin lift (see Accessibility Floor).
 
 ## Warehouse wall
 
@@ -251,6 +253,18 @@ This section covers the Locations view and the recommendation detail. It realise
 In the Best locations step the wall becomes the marking tool. **Whole aisle | Level | Single location** sets the mode. In Level mode a scope toggle "in this aisle | in all aisles" covers FR-21 [ASSUMPTION]. Hovering or focusing a cell previews the mark for the current mode ("Mark level 1 in aisle A", "Mark aisle A", "Mark A-07-01-02"), and `Enter` or click sets it; the level labels are also buttons in Level mode, and the rail's hit area is the whole level row. Marks are listed beside the wall with remove buttons (at least 24 × 24px, "×", labelled "Remove mark Level 1 in aisle A"). "174 best · 7 empty" updates live. Changing marks makes affected recommendations outdated (FR-29) and says so in a toast with **View** and no Undo: "Best-location marks changed · 3 recommendations are now outdated".
 
 **Moves on the wall.** Every recommendation of the latest run whose from-location is on this wall shows a **lifted bin** with its numbered marker. Targets on this wall show as dashed slots with a plus glyph and the same number. A move from another aisle into this one shows only its target, with the tooltip "From G-14-04-02 (aisle G)". Applied moves of the current round show applied markers. Manual moves show "M". Outdated ones show the grey dashed marker and no lift. **Only the selected move** draws the accent arrow and the hover note ("Rule 1 · 8044172 Oil filter - Toyota Corolla / 33 picks (24 or more) · A-12-04-02 → A-14-02-01"). This keeps the wall readable when a round has many moves. Below the wall, **"Moves touching aisle A · round 1"** lists the same moves with matching numbers, Rule, Part, Class · picks, From, To, Status and Action (Apply / Keep in place), plus "Open round 1".
+
+**Drag to move or swap (FR-51).** Mouse-only (user decision 2026-11-14), and only in **Planning copy** on the Locations wall: not in Import, not in the Best locations step (where a click sets a mark) and not on the recommendation crops.
+- **Start.** Pressing on an occupied bin and moving the pointer more than 4px starts a drag [ASSUMPTION]; a press without movement is still a click (select, pin the tooltip). The bin follows the pointer as a lifted bin, and its slot shows the dashed outline it leaves behind. With a split label (two parts), the half under the pointer is the part that is dragged; with three or more parts, the part with the most picks is [ASSUMPTION]. The other parts can be added in the drop dialog.
+- **Targets.** Hovering a location shows what a drop does: an empty slot shows the plus glyph and "Move here"; an occupied one shows ⇄ and "Swap or put together". Virtual locations, hatched positions and the bin's own slot show no target and the not-allowed cursor. `Esc` during a drag, or a drop outside the wall, cancels with nothing changed.
+- **One aisle at a time.** The drag stays inside the open aisle. A move to another aisle uses **Manual move…** [ASSUMPTION: no drop on aisle cards, Open Question 15].
+- **Drop on an empty location, one part.** No dialog: the manual move is made at once, with the rule Manual and the current round, and a toast names it: "Moved 4410281: G-14-04-02 → A-02-01-01 (Manual, round 1)." The bin settles into its new slot with the "M" marker.
+- **Drop dialog.** Opens when the from-location holds several parts or the drop is on an occupied location. Title: "Move to A-02-01-01" or "A-02-01-01 is occupied".
+  - *Parts to move from G-14-04-02*: a checkbox per part (glyph, part number, description, class · stock), shown only when the from-location holds several parts; the dragged part is checked.
+  - *Parts to move back to G-14-04-02 (Swap only)*: a checkbox per part, shown only when the dropped-on location holds several parts; all are checked [ASSUMPTION].
+  - Buttons: **Move** on an empty location; **Swap** and **Put together** on an occupied one (both secondary, neither is the default), then **Cancel**. A button with no part checked is disabled with its reason: "Choose at least one part to move." / "Choose at least one part to move back."
+  - **Keep-in-place warning:** when a part in the swap is kept in place, a warning triangle and a sentence in ink sit above the buttons: "4410297 is kept in place. Swap anyway?" The warning is not an error: Swap stays enabled, and the mark stays.
+- **After a swap.** Each moved part gets its own manual move in the current round, the bins settle with "M" markers, and a toast says "Swapped G-14-04-02 ↔ A-02-01-01 · 2 manual moves, round 1." Undo last move reverses one move at a time (FR-35), so undoing a swap of two parts takes two undos. FR-34 merges still happen silently, as in the Manual move dialog.
 
 **Selection and tooltip.** As in Interaction Primitives. The tooltip content is the location code, its level ("Level 1", from the Level column, not parsed from the code), BEST tag, "Occupied · 2 parts" or "Empty", the mark source, Walk Path, one line per part (glyph swatch, part number, description, class · picks · stock), and a partner strip when a partner is relevant ("Partner 4410281 · 14 shared jobs · arrives with move 2"). It never shows capacity or distance.
 
@@ -289,6 +303,7 @@ Realises FR-38 and UJ-2. The reader is the colleague, who has never seen the app
 - **Paper:** A4 portrait [ASSUMPTION]. Pure black on white `{components.print-move-list}`. No colour, no tints, no bin swatches. Legible on a black-and-white office printer.
 - **Header (every page):** "Move list · Spring re-slot 2026"; "Data as of 2026-09-30 · uploaded 2026-10-02 · 2 rounds" (FR-38); "Generated 2026-11-11 10:05 · Smart Warehouse Planner". The page number "Page 1 of 3" sits in the footer [ASSUMPTION].
 - **Rounds:** each round starts with a band that survives printing without backgrounds (browsers' default): bold **ROUND 1** in a 1.5px black box, then "one walk · from-location before to-location", between 2px black rules. `print-color-adjust: exact` may be added, but nothing depends on it. A band never ends a page alone: it keeps at least two lines with it. Column heads repeat on each page.
+- **Swap lines (FR-51):** the Rule cell reads "Manual · Swap 1/2" with "A-02-01-01 ↔ G-14-04-02" under it, and the lines of one swap follow each other where the order allows. The footnote adds: "Swap: set one bin aside, move the other into its place, then put the first one in."
 - **Line:** tick box · Round · Part · Description · From · To · Rule · Note. Every line prints its Round value (FR-38), even under its band. Note is a blank ruled space for the colleague's remark, for example "not at from-location" [ASSUMPTION: the Note column]. The from-location is always printed before the to-location. Codes and part numbers are in Barlow bold at 12pt, text at about 10pt, rules 1px.
 - **Order:** exactly FR-38's order. The UI never re-sorts the printed list, and the footnote states the rule in plain words: "Lines follow Walk Path; an emptied location always comes before a move into it."
 - **Reprint:** the generated time is the only thing that tells two printouts apart (UJ-3). It is printed in the header, not in small print.
@@ -381,7 +396,7 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 
 **Resolved on 2026-11-13** (each is written into the body; history in `.memlog.md`): applied state, the two best greens, the wall always showing movement class, the demo front page and no demo shortcut, violet selection, Key colours (FR-42, changed only from the Key), and from the review pass: the fixed focus ring, modifier-only shortcuts, reflow, the print band, a Round value on every printed line, and the class defaults `#D85144` / `#417DDC`.
 
-**Resolved on 2026-11-14:** the demo front page redesign (layout B, "Follow one part", with no synthetic-data notice) login in the core (FR-39, FR-40, milestone 2), the Demo version button (FR-50, milestone 2), and FR-41 moved to "if time allows"; the Log in and Create account details in [the log in sheet](./mockups/login.svg): Repeat password, letters-and-numbers usernames, Demo version also on Log in, and Log out to the front page on the public deployment.
+**Resolved on 2026-11-14:** the demo front page redesign (layout B, "Follow one part", with no synthetic-data notice) login in the core (FR-39, FR-40, milestone 2), the Demo version button (FR-50, milestone 2), and FR-41 moved to "if time allows"; the Log in and Create account details in [the log in sheet](./mockups/login.svg): Repeat password, letters-and-numbers usernames, Demo version also on Log in, and Log out to the front page on the public deployment. Later the same day: drag to move or swap on the wall moved into the core (FR-51, milestone 2, mouse-only), with Swap or Put together on an occupied location, chosen parts when a location holds several, undo one move at a time, a keep-in-place warning, and marked swap lines on the move list.
 
 **Still open. Not blocking; each stays as drafted until the user says otherwise:**
 
@@ -399,3 +414,4 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 12. **Journey: Pick groups.** Needs a narrated journey from the user.
 13. **Journey: Parts roster.** Needs a narrated journey from the user (UJ-1 goes from Locations to Best locations without visiting Parts or Pick groups).
 14. **Journey: launcher and search.** Needs a narrated journey from the user.
+15. **Drag and drop details (FR-51).** No mock yet for the drag, the drop targets or the drop dialog. Drafted: the drag stays inside the open aisle (no drop on aisle cards); with three or more parts the part with the most picks is the one dragged; in a swap all parts at the dropped-on location are checked to move back. Keep as drafted?
