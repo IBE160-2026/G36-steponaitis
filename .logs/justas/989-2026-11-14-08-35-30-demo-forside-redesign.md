@@ -41,7 +41,7 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
     - Oppdatert i PRD (ordliste, §4.0, NFR-5, §7.1, §10), PRODUCT.md, DESIGN.md og EXPERIENCE.md.
     - Mocken har fått en tertiærknapp med play-ikon og én hjelpelinje under.
   - README har fått seksjonen «Demo og data»: bare syntetiske data, `data/sample/`, Demo version, demokontoen `demo`/`demo` og Create account.
-- Dokumentendringene er ikke committet. Bare loggfilene committes av denne skillen.
+- Committet på brukerens bestilling som `4d5b869` på `main` (ikke pushet): PRD, PRODUCT.md, README, DESIGN.md, EXPERIENCE.md, `.memlog.md`, `mockups/landing.svg` og `.working/landing-redesign/`.
 
 ### Åpne punkter
 - Log in- og Create account-sidene finnes bare i tekst, uten mock. Layout, feiltekster og plasseringen av Log out må tegnes og vurderes (EXPERIENCE.md Open Question 15).
