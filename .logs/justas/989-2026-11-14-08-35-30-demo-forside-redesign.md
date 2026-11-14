@@ -33,10 +33,16 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - UJ-1 starter nå med innlogging.
   - Open Question 11 er oppdatert, og 15 er ny: Log in-sidene har ingen mock.
 - `.memlog.md` har fått fire nye linjer.
-- Ingenting av dette er committet ennå. Bare loggfilene committes av denne skillen.
+- Oppfølging samme dag. Brukeren bekreftet at innlogging og kontoopprettelse skal være i kjernen, og at kjernestørrelsen er under kontroll.
+  - FR-41 er flyttet fra stage 2 til «if time allows» i PRD §7.5, UJ-3, §4.11 og §10, og i EXPERIENCE.md.
+  - Ny FR-50, Demo version (milestone 2):
+    - En knapp på demo-forsiden hopper over innloggingen og åpner lista over lagrede planer som den seedede demokontoen.
+    - Den finnes bare på den offentlige demoen, og ingen plan er forhåndslastet.
+    - Oppdatert i PRD (ordliste, §4.0, NFR-5, §7.1, §10), PRODUCT.md, DESIGN.md og EXPERIENCE.md.
+    - Mocken har fått en tertiærknapp med play-ikon og én hjelpelinje under.
+  - README har fått seksjonen «Demo og data»: bare syntetiske data, `data/sample/`, Demo version, demokontoen `demo`/`demo` og Create account.
+- Dokumentendringene er ikke committet. Bare loggfilene committes av denne skillen.
 
 ### Åpne punkter
 - Log in- og Create account-sidene finnes bare i tekst, uten mock. Layout, feiltekster og plasseringen av Log out må tegnes og vurderes (EXPERIENCE.md Open Question 15).
-- Det er antatt at FR-41 (advarsel ved samtidig redigering) blir i stage 2. Brukeren sa bare «login», så dette må bekreftes.
-- README må si at den offentlige demoen bare har syntetiske data (NFR-5) og liste demokontoen (FR-40, NFR-2). README sier ingen av delene i dag.
-- Innlogging i kjernen gjør kjernen større, mens lærerens tilbakemelding 4.1 sier at den alt er for stor. Dette bør tas med i samme avklaring om hva som kan utsettes.
+- Demokontoens brukernavn og passord (`demo`/`demo`) i README er valgt av Claude og må bekreftes, og seedingen må bruke dem.
