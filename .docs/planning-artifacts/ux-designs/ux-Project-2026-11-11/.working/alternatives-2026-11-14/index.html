@@ -1,0 +1,273 @@
+<title>Bin Wall Alternatives</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: graphite top bar with the six surfaces as tabs; one surface at a time, three option cards, then the chosen option drawn full width. */
+:root {
+  --paper: #EEEDE8; --surface: #FFFFFF; --ink: #1B1E22; --ink-2: #4A5058; --border: #D6D4CD;
+  --bar: #23272B; --on-bar: #E3E6E9; --on-bar-2: #A9B0B7;
+  --pick: #267A4B; --pick-ink: #1E6B40; --select: #9466F0; --tint: #F3EFFD;
+  --display: 'Barlow Semi Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --body: Figtree, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #16191C; --surface: #1F2327; --ink: #E8EAEC; --ink-2: #A9B0B7; --border: #353B41;
+  --bar: #0E1012; --on-bar: #E3E6E9; --on-bar-2: #8C939A; --pick: #267A4B; --pick-ink: #7FD3A1; --select: #A684F4; --tint: #2A2440; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #16191C; --surface: #1F2327; --ink: #E8EAEC; --ink-2: #A9B0B7; --border: #353B41;
+  --bar: #0E1012; --on-bar: #E3E6E9; --on-bar-2: #8C939A; --pick: #267A4B; --pick-ink: #7FD3A1; --select: #A684F4; --tint: #2A2440; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1480px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar); }
+
+header.bar { background: var(--bar); color: var(--on-bar); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+.bar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 20px; white-space: nowrap; }
+.brand-mark { width: 30px; height: 22px; border-radius: 3px; background: #F0B323; display: grid; place-items: center; }
+.brand-mark span { width: 18px; height: 10px; background: #fff; border-radius: 1px; display: grid; place-items: center; }
+.brand-mark span::after { content: ""; width: 5px; height: 5px; background: #1B1E22; transform: rotate(45deg); }
+nav.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+nav.tabs a { color: var(--on-bar); text-decoration: none; font-weight: 600; font-size: 14px; padding: 7px 12px; border-radius: 999px; border: 1px solid #3A4046; display: inline-flex; align-items: center; gap: 7px; }
+nav.tabs a:hover { background: #2E3338; }
+nav.tabs a[aria-current="page"] { background: #fff; color: #1B1E22; border-color: #fff; }
+nav.tabs .chk { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-grid; place-items: center; font-size: 10px; line-height: 1; opacity: .55; }
+nav.tabs a.picked .chk { background: var(--pick); border-color: var(--pick); color: #fff; opacity: 1; }
+
+main { padding-block: 32px 64px; }
+.intro { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px 32px; margin-bottom: 24px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(34px, 5vw, 56px); line-height: 1; margin: 0 0 8px; text-wrap: balance; }
+.lede { color: var(--ink-2); max-width: 62ch; margin: 0; }
+.picks { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-width: 0; max-width: 520px; }
+.picks-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.picks-list { font-size: 13.5px; color: var(--ink-2); margin-top: 4px; }
+button { font: inherit; cursor: pointer; }
+.btn { border-radius: 6px; padding: 7px 14px; font-weight: 600; font-size: 14px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn:focus-visible, nav.tabs a:focus-visible, .card:focus-visible, .open:focus-visible { outline: 3px solid var(--select); outline-offset: 2px; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .cards { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; text-align: left; color: inherit; padding: 0; position: relative; }
+.card[aria-pressed="true"] { border-color: var(--select); box-shadow: 0 0 0 2px var(--select); }
+.thumb { aspect-ratio: 16 / 10; background: #EEEDE8; overflow: hidden; border-bottom: 1px solid var(--border); }
+.thumb img { width: 100%; display: block; }
+.card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.card-title { display: flex; align-items: baseline; gap: 10px; }
+.letter { font-family: var(--display); font-weight: 700; font-size: 22px; width: 32px; height: 32px; border: 2px solid var(--ink); border-radius: 4px; display: inline-grid; place-items: center; flex: none; }
+.name { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.15; }
+.desc { color: var(--ink-2); font-size: 14px; margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+.tag { font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border); color: var(--ink-2); }
+.tag.rec { border-color: var(--ink); color: var(--ink); }
+.tag.mine { background: var(--pick); border-color: var(--pick); color: #fff; }
+
+.stage { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.stage-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.stage-title { font-family: var(--display); font-weight: 700; font-size: 24px; }
+.stage-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.open { font-size: 14px; color: var(--ink-2); }
+.canvas { overflow-x: auto; background: #EEEDE8; }
+.canvas svg { display: block; width: 100%; height: auto; min-width: 900px; }
+.loading { padding: 40px 16px; color: #4A5058; }
+.notes { padding: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 900px) { .notes { grid-template-columns: 1fr; } }
+.notes h3 { font-family: var(--display); font-size: 18px; margin: 0 0 4px; }
+.notes p { margin: 0; color: var(--ink-2); font-size: 14px; max-width: 70ch; }
+.toast { position: fixed; left: max(24px, env(safe-area-inset-left, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); background: #1B1E22; color: #fff; padding: 10px 16px; border-radius: 6px; font-weight: 500; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: box-shadow .15s, border-color .15s; } }
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="brand-mark"><span></span></span>Smart Warehouse Planner</div>
+    <nav class="tabs" id="tabs" aria-label="Surfaces"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <div>
+      <h1 id="surface-title">Warehouse layout</h1>
+      <p class="lede" id="surface-lede"></p>
+    </div>
+    <div class="picks" aria-live="polite">
+      <div class="picks-head"><span>Your picks</span><button class="btn" id="copy" type="button">Copy picks</button></div>
+      <div class="picks-list" id="picks-list">None yet. Open an option and press “Pick this one”.</div>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <section class="stage" aria-labelledby="stage-title">
+    <div class="stage-head">
+      <div class="stage-title" id="stage-title"></div>
+      <div class="stage-actions">
+        <a class="open" id="open-full" href="#" target="_blank" rel="noopener">Open SVG on its own</a>
+        <button class="btn primary" id="pick" type="button">Pick this one</button>
+      </div>
+    </div>
+    <div class="canvas" id="canvas"><div class="loading">Loading the mockup…</div></div>
+    <div class="notes">
+      <div><h3>Idea</h3><p id="note-idea"></p></div>
+      <div><h3>Trade-offs and spine changes</h3><p id="note-trade"></p></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const S = [
+  { id: "warehouse-layout", label: "Warehouse layout", rec: "A",
+    lede: "The Locations view. The current mock crams nine mini-walls, a big wall, a popover and a table into one screen. All three keep the bin wall, the lifted bin and the flow bar.",
+    opts: [
+      { k: "A", f: "A-aisle-in-focus.svg", name: "Aisle in focus",
+        idea: "The left aisle list becomes a row of A–I tabs. Aisle A’s wall gets the full width (two runs, bigger bins), and the moves table becomes a bottom drawer that shows only the selected move with Apply, Other location and Keep in place.",
+        trade: "Least clutter while still showing the whole aisle without scrolling, and closest to the spines. Needs a rewrite of the Locations layout line in DESIGN.md. Could borrow B’s overview for the “whole warehouse” tab and C’s “Move 1 of 7” stepper." },
+      { k: "B", f: "B-warehouse-first.svg", name: "Warehouse first",
+        idea: "Locations opens on the whole warehouse: four big numbers, then the nine aisles as a 3×3 grid of cards, each holding its full bin wall at small scale. A cross-aisle move is drawn as one route from aisle G to aisle A. A “Whole warehouse | One aisle” switch zooms in.",
+        trade: "Best for seeing moves between aisles at a glance. EXPERIENCE.md currently rules out a whole-warehouse zoom level for v1, so it would need a spine change." },
+      { k: "C", f: "C-walk-the-aisle.svg", name: "Walk the aisle",
+        idea: "The aisle is one continuous run at front-page bin size (with FST/MED codes), scrolling sideways under a whole-aisle scrubber. The selected move’s reason and actions sit in a callout under the wall with a “Move 1 of 7” stepper. Also shows a drag-to-swap in progress (FR-51) and the Key’s “Change colour” hover.",
+        trade: "Most readable bins and closest to the front page you liked. Breaks the “two runs fit without scrolling” rule, and keyboard movement to off-screen cells gets harder." } ] },
+  { id: "screen-map", label: "Screen map", rec: "B",
+    lede: "One sheet with the other key screens and how they connect. All three cover every page in the IA table, with thumbnails drawn at readable size instead of shrunk copies.",
+    opts: [
+      { k: "A", f: "A-journey-storyboard.svg", name: "Journey storyboard",
+        idea: "Twelve numbered frames on one graphite track, in the order the planner meets them (UJ-1), from Log in to the A4 sheet the colleague carries (UJ-2). Each frame has a caption and a “Next:” trigger. A bottom strip holds the side doors: Create account, import error, Settings, Launcher, User menu.",
+        trade: "Best for walking someone through the journey. Tall (2004px), and the single track suggests a wizard, which the app is not." },
+      { k: "B", f: "B-flow-bar-map.svg", name: "Flow bar map",
+        idea: "The flow bar drawn at real size is the spine, and each step’s screen hangs off its pill, alternating above and below. Around it sit the screens before a plan is open, the Launcher, Settings (marked “not a step”), the User menu and the printed list.",
+        trade: "Most compact while still readable, and the only one that shows the navigation model: one constant bar, steps opened in any order." },
+      { k: "C", f: "C-sitemap.svg", name: "Sitemap",
+        idea: "Five columns: Outside, Your plans, Inside a plan (the 8 steps on a vertical rail, plus Settings), Opens on top, and On paper. The only option that maps the overlays: part panel, drop dialog (FR-51), Key colour, Manual move, recommendation detail, Launcher.",
+        trade: "Most complete, but says less about each page." } ] },
+  { id: "interface", label: "Interface", rec: "A",
+    lede: "The Recommendations workspace. All three use the same move as the front page (4410281 Brake pads, G-14-04-02 → G-14-01-04 BEST) so you can compare like for like.",
+    opts: [
+      { k: "A", f: "A-review-queue.svg", name: "Review queue",
+        idea: "One recommendation at a time on a large card: the part, a big from → to, three tiles that explain the move (61 picks / L4 now / L1 best), the partner hint, and Apply / Other location / Keep in place / Manual move. The aisle wall sits beside it. A strip of numbered discs grouped by rule is both progress bar and jump list.",
+        trade: "Makes the reason impossible to miss with the fewest elements. Suggested with B’s list as a “List” toggle for overview and before Apply all. Numbers moves 1–19 across rules, which differs from the spines’ “#1 of 9” per rule." },
+      { k: "B", f: "B-list-detail.svg", name: "List and detail",
+        idea: "A compact list on the left with state tabs and counts (Open / Applied / Kept / Outdated / No space) and rule bands inside. The detail on the right gives the reason as one sentence with the numbers in bold, the wall, the move with its effect, and an action bar.",
+        trade: "Familiar and fast for scanning many moves. Uses tabs per state, where EXPERIENCE.md has tabs per rule." },
+      { k: "C", f: "C-wall-first.svg", name: "Wall first",
+        idea: "A large 4-section aisle wall is the main picture, with aisle plates A–I to switch. The selected move has a note by its arrow, its reason and actions sit in a strip under the wall, and a right rail holds state counts, this aisle’s moves and the other aisles.",
+        trade: "Very visual, but moves between aisles show only one end on the wall. Fits better as the “Show on the Locations wall” destination." } ] },
+  { id: "features-menu", label: "Features menu", rec: "B",
+    lede: "The launcher. All three open over a dimmed Recommendations page and show where you are in the flow. They also fix the old mock’s single-key shortcuts and login-as-stage-2.",
+    opts: [
+      { k: "A", f: "A-command-palette.svg", name: "Command palette",
+        idea: "A search-first dialog in the centre. Typing “move” brings up actions, pages and how-to tips in groups, with codes and shortcuts. A strip shows “step 6 of 8”, and a preview pane explains what the highlighted item will do before you press Enter.",
+        trade: "Fastest for people who know what they want. Its empty state (before typing) is not drawn yet." },
+      { k: "B", f: "B-flow-map-drawer.svg", name: "Flow map drawer",
+        idea: "The flow bar unfolds into a white drawer with one column per step: code, Done / You are here / Output, live counts and that step’s actions. Below sit plans, stage 2 items and the keyboard shortcuts.",
+        trade: "Teaches the flow and shows state. Suggested: when you type in its search field it switches to A’s grouped results, so there is still one launcher. The per-step action lists are a draft." },
+      { k: "C", f: "C-workbench.svg", name: "Workbench",
+        idea: "A paper sheet of eight step tiles, each with a miniature of its screen (bin wall, class bar, BEST rail, printed sheet), its state and one action. A dark “Next up” card says what to do now, and a Plans card lists other plans.",
+        trade: "The most inviting, but heavy for a menu. Its “Next up” card and tile previews may fit better on the Plan overview page." } ] },
+  { id: "components-sheet", label: "Components sheet", rec: "B",
+    lede: "Sheet 1: Key and colour popover, read-only Settings, toasts, confirm popover, dialog, buttons. These are tall sheets drawn at real size, so scroll inside the view.",
+    opts: [
+      { k: "A", f: "A-spec-sheet.svg", name: "Spec sheet",
+        idea: "Each component alone on paper with numbered pins, measurement lines and a parts list. Adds a Checks column (contrast, too alike, invalid hex, storage blocked), Key-entry states and a ×3 close-up of the focus ring on paper and graphite.",
+        trade: "Most useful when building. Reads like a technical drawing rather than the product." },
+      { k: "B", f: "B-in-context.svg", name: "In context",
+        idea: "Each component on the faded screen where it opens. The colour popover sits over a full 12-section aisle wall whose slow-moving bins show the previewed shade. The others appear on faded Recommendations, Saved plans and Settings screens with short numbered steps.",
+        trade: "The popover only makes sense next to the wall it recolours, and this is the only one that shows it. Follows the story-led style of the front page. C’s state table could be added as page 2." },
+      { k: "C", f: "C-state-matrix.svg", name: "State matrix",
+        idea: "A table of controls (Key entry, preset swatch, hex field, five button kinds, toast action) against six states (default, hover, focus, pressed, disabled, error). Below: the popover in four states, toast and confirm variants, Settings at wide and narrow widths.",
+        trade: "Most complete for developers. Invents hover and pressed colours DESIGN.md doesn’t define (marked “proposed”)." } ] },
+  { id: "components-sheet-2", label: "Components sheet 2", rec: "C",
+    lede: "Sheet 2: part panel, Manual move with input errors, the FR-51 Swap / Put together drop dialog, Other location list, saved-plans list with row menu and Delete. Tall sheets; scroll inside the view.",
+    opts: [
+      { k: "A", f: "A-specimen-sheet.svg", name: "Specimen sheet",
+        idea: "A classic spec sheet with a drawing title block and five numbered sections. Every component has numbered anatomy pins tied to a legend naming the part and its tokens, plus a 400px dimension line on the part panel.",
+        trade: "Precise and easy to build from. Less about how states change." },
+      { k: "B", f: "B-in-context.svg", name: "In the app",
+        idea: "The planner’s path through three real-size app screens (Saved plans → Locations wall → Recommendations) with the real toolbar. The screen behind is faded and the component stays crisp, with dialogs drawn beside the control that opens them.",
+        trade: "Shows where things live. Several overlays show at once, which a real screen never would." },
+      { k: "C", f: "C-storybook-states.svg", name: "Storybook states",
+        idea: "One card per component state, each with a state chip (READY, TYPING, ERROR, WARNING, OPEN, EMPTY, CONFIRM, DISABLED…), the component on a dotted canvas, and a footer naming the trigger and FR. Adds autocomplete, kept-in-place and no-stock part panel, and row hover.",
+        trade: "Every state has its own place, and each card maps to one story or test. Least text that can drift from the spines." } ] }
+];
+
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+let picks = {}; try { picks = JSON.parse(store.get("binwall-picks") || "{}") || {}; } catch (e) { picks = {}; }
+let viewing = {};
+const $ = (id) => document.getElementById(id);
+const cache = {};
+
+function current() { const h = location.hash.slice(1); return S.find(s => s.id === h) || S[0]; }
+
+function renderTabs(s) {
+  $("tabs").innerHTML = S.map(x => `<a href="#${x.id}" ${x.id === s.id ? 'aria-current="page"' : ""} class="${picks[x.id] ? "picked" : ""}"><span class="chk" aria-hidden="true">${picks[x.id] ? "✓" : ""}</span>${x.label}${picks[x.id] ? ` · ${picks[x.id]}` : ""}</a>`).join("");
+}
+function renderPicks() {
+  const done = S.filter(x => picks[x.id]);
+  $("picks-list").textContent = done.length
+    ? done.map(x => `${x.label}: ${picks[x.id]} (${x.opts.find(o => o.k === picks[x.id]).name})`).join(" · ") + (done.length < S.length ? ` · ${S.length - done.length} still to choose` : "")
+    : "None yet. Open an option and press “Pick this one”.";
+}
+async function loadSvg(path) {
+  if (!cache[path]) cache[path] = fetch(path).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
+  return cache[path];
+}
+async function show(s, k) {
+  viewing[s.id] = k;
+  const o = s.opts.find(x => x.k === k);
+  const path = `${s.id}/${o.f}`;
+  document.querySelectorAll(".card").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.k === k)));
+  $("stage-title").textContent = `${o.k} · ${o.name}`;
+  $("open-full").href = path;
+  $("note-idea").textContent = o.idea;
+  $("note-trade").textContent = o.trade;
+  const p = $("pick");
+  p.textContent = picks[s.id] === k ? "✓ Picked" : "Pick this one";
+  $("canvas").innerHTML = '<div class="loading">Loading the mockup…</div>';
+  try {
+    const txt = await loadSvg(path);
+    if (viewing[s.id] !== k || current().id !== s.id) return;
+    $("canvas").innerHTML = txt.replace(/^<\?xml[^>]*>/, "");
+  } catch (e) {
+    $("canvas").innerHTML = `<div class="loading">Could not load ${path}. Use “Open SVG on its own”.</div>`;
+  }
+}
+function render() {
+  const s = current();
+  renderTabs(s); renderPicks();
+  $("surface-title").textContent = s.label;
+  $("surface-lede").textContent = s.lede;
+  $("cards").innerHTML = s.opts.map(o => `
+    <button class="card" type="button" data-k="${o.k}" aria-pressed="false">
+      <div class="thumb"><img src="${s.id}/${o.f}" alt="Option ${o.k}, ${o.name}" loading="lazy"></div>
+      <div class="card-body">
+        <div class="card-title"><span class="letter">${o.k}</span><span class="name">${o.name}</span></div>
+        <p class="desc">${o.idea.split(". ")[0]}.</p>
+        <div class="tags">${s.rec === o.k ? '<span class="tag rec">Subagent’s pick</span>' : ""}${picks[s.id] === o.k ? '<span class="tag mine">Your pick</span>' : ""}</div>
+      </div>
+    </button>`).join("");
+  document.querySelectorAll(".card").forEach(c => c.addEventListener("click", () => {
+    show(s, c.dataset.k);
+    $("stage-title").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }));
+  show(s, viewing[s.id] || picks[s.id] || s.rec);
+}
+$("pick").addEventListener("click", () => {
+  const s = current(); const k = viewing[s.id];
+  picks[s.id] = picks[s.id] === k ? undefined : k;
+  if (!picks[s.id]) delete picks[s.id];
+  store.set("binwall-picks", JSON.stringify(picks));
+  const v = k; render(); show(s, v);
+});
+function toast(msg) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 4000); }
+$("copy").addEventListener("click", () => {
+  const txt = "My picks: " + S.map(x => `${x.label} ${picks[x.id] || "–"}`).join(", ");
+  navigator.clipboard.writeText(txt).then(() => toast("Copied. Paste it into Claude Code."), () => {
+    const r = document.createRange(); r.selectNodeContents($("picks-list")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Select and copy the text manually.");
+  });
+});
+addEventListener("hashchange", render);
+render();
+</script>
