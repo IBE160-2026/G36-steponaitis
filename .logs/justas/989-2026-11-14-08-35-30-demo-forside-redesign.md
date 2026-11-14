@@ -58,6 +58,7 @@ Brukeren syntes demo-forsiden (landing page) var svak. Den skulle ikke vise READ
   - Demo version også på Log in-siden.
   - Log out går til innloggingssiden, og til demo-forsiden på den offentlige demoen.
   - Skrevet inn i PRD FR-39 og FR-40 og i EXPERIENCE.md. Open Question 15 er lukket.
+  - Committet på brukerens bestilling som `d4d5f14` på `main` (ikke pushet).
 
 ### Åpne punkter
 Ingen.
