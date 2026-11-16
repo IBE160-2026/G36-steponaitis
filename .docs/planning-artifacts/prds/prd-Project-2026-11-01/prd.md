@@ -2,7 +2,7 @@
 title: "PRD: Smart Warehouse Planner"
 status: final
 created: 2026-11-01
-updated: 2026-11-14
+updated: 2026-11-16
 ---
 
 # PRD: Smart Warehouse Planner
@@ -99,6 +99,7 @@ Downstream documents use these terms exactly.
 - **Best location** — a location covered by at least one best-location mark. Comes only from marks, never from Walk Path.
 - **Planning copy** — the plan's own working state of the warehouse: the import plus all moves. All edits happen here.
 - **Move** — a change in the planning copy that moves a part's stock from one location (the **from-location**) to another (the **to-location**). Every move has a rule and a round.
+- **Move number** — the number a move gets when it is made: 1, 2, 3 … across the whole plan, in the order the moves are made. A number is never reused in the plan, not even after an undo; a move combined under FR-34 keeps the number of its first move. After a reset (FR-35) numbering starts at 1 again. Shown as "move 3".
 - **Manual move** — a move the planner makes by hand, with the rule **Manual**.
 - **Swap** — manual moves made together by dragging a part onto an occupied location in the warehouse view: the chosen parts move there, and the chosen parts from there move back to the from-location (FR-51).
 - **Run** — one execution of the recommendation rules on the planning copy's current state.
@@ -217,13 +218,17 @@ The planner can see all saved plans and start a New Plan from the list. Realizes
 - Each plan shows its name, data-as-of date, created by, created at, last edited by and last edited at.
 - Plans are listed with the most recently edited first.
 - The list is the start page of the app (from milestone 2 it is the page a user lands on after login, FR-40; on the public deployment the demo front page comes first, NFR-5).
+- Before the list exists (milestone 1, §7.1), the app opens the most recently edited plan, or New Plan when there is no plan. New Plan always creates a new plan and leaves earlier plans stored unchanged; they are listed once FR-8 is built (decision 2026-11-16).
 
 #### FR-9: Reopen a plan with identical state
 
 The planner can open any saved plan and continue editing it. Realizes UJ-3.
 
 **Consequences (testable):**
-- A reopened plan has identical best-location marks, keep-in-place marks, moves (with rules and rounds), recommendations (including outdated ones), "no space" parts and current round.
+- A reopened plan has identical best-location marks, keep-in-place marks, moves (with rules, rounds and move numbers), recommendations (including outdated ones), "no space" parts and current round.
+- It also has everything Undo needs (FR-35), so Undo reverses the same step after a reopen as before it: the order of the moves and, for a combined move (FR-34), the state before its second step.
+- It keeps, for each run, its round, when it was made and by whom, and for each swap (FR-51), which moves were made together, so the move list marks them the same after a reopen (FR-38).
+- View choices (which step, aisle or view is open) are kept in the browser, not in the plan. Opening or looking at a plan is not a change: it is not saved and does not update last edited by or at (FR-11) (decision 2026-11-16).
 - A plan stays editable after its move list has been printed; there is no locking.
 
 #### FR-10: Save automatically
@@ -351,6 +356,7 @@ The planner can set and remove best-location marks in a plan.
 - A location in a marked aisle, in a marked level, or marked on its own is a best location; all other locations are not.
 - Removing one mark leaves a location best if another mark still covers it.
 - Marks are stored in the plan and never change the import.
+- Marks can be set and removed from the locations list (FR-14), which is the marking surface in milestone 1, and from milestone 2 also in the warehouse view (FR-42) (decision 2026-11-16).
 
 #### FR-22: Show best locations
 
@@ -692,7 +698,7 @@ The planner can print a label for every location in a chosen aisle.
 - **NFR-9 Browsers.** Current desktop versions of Chrome, Edge and Firefox, including their print function. Phones and handheld devices are not supported in v1.
 - **NFR-10 Accessibility.** No information is shown by color alone; forms and buttons can be used with the keyboard. Dragging in the warehouse view (FR-51) is mouse-only (user decision 2026-11-14); every move it makes can also be made with the keyboard as a manual move (FR-33).
 - **NFR-11 Language.** The user interface is in English.
-- **NFR-12 Persistence.** Plans, their imports and accounts are stored persistently and survive a restart of the app. The storage technology is decided in architecture.
+- **NFR-12 Persistence.** Plans, their imports and accounts are stored persistently and survive a restart of the app. All storage goes through one storage layer; the rule modules never touch it (NFR-1). The local install uses storage that needs no external service (NFR-2). The public deployment (NFR-5) has no persistent file system, so it may use a hosted database or file store, chosen by configuration (environment variables, NFR-6); NFR-2's no-external-services rule applies to the local install only. The persistence tests run against the local storage. An import may be kept as its parsed rows rather than as the uploaded files, as long as FR-36 holds. The storage technology is decided in architecture (decision 2026-11-16).
 
 ## 6. Non-Goals (Explicit)
 
@@ -713,7 +719,7 @@ The planner can print a label for every location in a chosen aisle.
 
 The core is FR-1–FR-40, FR-42, FR-50 and FR-51. It is built in two milestones so that the teacher's five-step flow is finished and tested on its own before anything is added (decision 2026-11-02).
 
-**Milestone 1: the core flow on one stored plan.** Import, classify, find pick groups, get recommendations, try them in the planning copy.
+**Milestone 1: the core flow, without the saved-plans list.** Import, classify, find pick groups, get recommendations, try them in the planning copy. Plans are stored the same way as in milestone 2, so milestone 2 adds screens, not a new data model; until the saved-plans list exists, the app opens the most recently edited plan (FR-8). Best locations are marked from the locations list (FR-21), and the recommendation detail shows the from- and to-location as codes, since the warehouse view comes in milestone 2 (decision 2026-11-16).
 - FR-1, FR-3–FR-7 (New Plan from files, import checks), FR-10–FR-11 (autosave, created by / last edited by)
 - FR-13–FR-15 (parts, locations, search)
 - FR-16–FR-20 (movement classification, pick groups)
@@ -817,6 +823,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Concurrent-edit warning to "if time allows"** (user decision 2026-11-14): FR-41 moves from stage 2 to the if-time-allows list (§7.5), since it matters little while plans are shared.
 - **Demo front page without a synthetic-data notice** (user decision 2026-11-14, UX step): NFR-5 no longer asks the front page to state that the data is synthetic; the deployment still holds synthetic data only, and the README says so.
 - **Drag to move or swap in the core** (user decision 2026-11-14): drag-and-drop placement moves from "if time allows" into milestone 2 as FR-51. Dropping a part on an occupied location always asks Swap or Put together; the planner chooses which parts move when a location holds several; a swap is undone one move at a time; a swap with a part kept in place warns; swap lines are marked on the move list. Dragging is mouse-only, an exception to NFR-10's keyboard rule that manual moves cover.
+- **Before architecture, from the PRD and UX review** (decision 2026-11-16): milestone 1 stores plans as milestone 2 does and opens the most recently edited plan until the saved-plans list exists (FR-8, §7.1); best locations are marked from the locations list in milestone 1 (FR-21); a new glossary term, move number; FR-9 also keeps the undo history, run times and users, and swap membership, while view choices stay in the browser; NFR-12 allows a hosted store on the public deployment only.
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions
