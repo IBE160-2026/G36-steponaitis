@@ -8,7 +8,13 @@ web
 
 ## Stack
 
-Undecided: chosen in the architecture step (bmad-architecture), which has not run yet. It must deploy to Vercel as a public demo and also install and run locally on a laptop with no paid accounts, API keys or network calls at runtime (PRD NFR-2, NFR-5).
+Decided in the architecture step (2026-11-16); the full stack and its rules are in `.docs/planning-artifacts/architecture/architecture-Project-2026-11-16/ARCHITECTURE-SPINE.md`.
+
+- **Frontend:** Next.js 16 (App Router, client-side data fetching), React 19, TypeScript, Tailwind CSS 4, shadcn/ui (Radix), TanStack Query, @dnd-kit (drag on the wall), sonner (toasts). Fonts are self-hosted through @fontsource, never from Google Fonts.
+- **Backend:** Python 3.12, FastAPI, Pydantic, SQLAlchemy 2.1 with Alembic, openpyxl for `.xlsx`, managed with uv. All warehouse logic is pure Python in the backend domain; the frontend only renders server views.
+- **Storage:** SQLite locally (no external service), Supabase Postgres on the public demo.
+- **Deployment:** one Vercel project with Vercel Services (Next.js and FastAPI behind one origin, `/api/*` to the backend). Locally, `npm run dev` starts both.
+- **Tests:** pytest (answer-key tests against the domain), Vitest, Playwright (Chrome, Edge, Firefox, including print).
 
 ## Users
 
