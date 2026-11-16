@@ -21,7 +21,7 @@ companions: []
 
 # Architecture Spine: Smart Warehouse Planner
 
-PRD terms (§3 Glossary) and IDs (FR-n, NFR-n, UJ-n) are used verbatim. `[ASSUMPTION]` marks a fast-path guess the author has not confirmed yet.
+PRD terms (§3 Glossary) and IDs (FR-n, NFR-n, UJ-n) are used verbatim. No `[ASSUMPTION]` remains: the last two (the root `npm run dev` with concurrently, and preview deployments off for the whole project) were confirmed on 2026-11-16.
 
 ## Design Paradigm
 
@@ -400,7 +400,7 @@ frontend/
   e2e/                           # Playwright
 data/                            # existing: sample/, answer-key/, generate_demo_data.py
 vercel.json                      # services: frontend + backend (swp.main:app); /api/(.*) → backend
-package.json                     # root: `npm run dev` starts both (concurrently) [ASSUMPTION]
+package.json                     # root: `npm run dev` starts both (concurrently)
 .github/workflows/               # ci.yml, keep-alive.yml (daily GET /api/health)
 ```
 
@@ -442,7 +442,7 @@ Environments:
 | `local` | SQLite. `bootstrap` (migrate and seed) runs in the lifespan. `FEATURE_DEMO` off. `FEATURE_AUTH` follows the milestone. |
 | `production` (Vercel) | `APP_ENV=production`; `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `JWT_SECRET` scoped to Production. Milestone 1: `FEATURE_AUTH` and `FEATURE_DEMO` off, so the app opens with no front page. Milestone 2: both on. Before deploying a schema change, run `uv run swp db upgrade` by hand. |
 
-The first story (the walking skeleton) deploys `GET /api/health` and one page to Vercel. Preview deployments are turned off for the whole project `[ASSUMPTION]`. CI (GitHub Actions) runs on every push: ruff, import-linter, pytest on SQLite, `tests/app` against Postgres 17, the frontend typecheck, Vitest, and the schema diff (AD-13). Playwright runs locally before each milestone gate.
+The first story (the walking skeleton) deploys `GET /api/health` and one page to Vercel. Preview deployments are turned off for the whole project. CI (GitHub Actions) runs on every push: ruff, import-linter, pytest on SQLite, `tests/app` against Postgres 17, the frontend typecheck, Vitest, and the schema diff (AD-13). Playwright runs locally before each milestone gate.
 
 ## Capability → Architecture Map
 
@@ -477,7 +477,7 @@ The first story (the walking skeleton) deploys `GET /api/health` and one page to
 
 ## Upstream Updates
 
-These changes belong in the source documents, not in this spine. They are offered to the author:
+These changes belong in the source documents, not in this spine. All were applied to the PRD and EXPERIENCE.md on 2026-11-16, and PRODUCT.md was updated with the spine:
 
 - **PRD.**
   - FR-29: add the causes `partner_aisle` and `moved_back` (AD-7).

@@ -53,11 +53,11 @@ The data needed to place parts by usage already exists in the warehouse's own ex
   *Realized by FR-1, FR-3–FR-8, FR-10, FR-13–FR-33, FR-37, FR-42.*
 
 - **UJ-2. A colleague carries out the move list.**
-  Justas prints the move list from the plan. A colleague takes the printout; the header shows the plan name, the data-as-of date and when it was generated. The colleague works through round 1 from top to bottom, moving each part from its from-location to its to-location and ticking the box; a line into a location always comes after the line that empties it. Then the colleague starts on round 2, whose moves use locations that round 1 freed. **Edge case:** a part is not at its from-location because someone moved it after the export; the colleague notes it on the printout and Justas decides. The tool does not track whether moves were carried out.
+  Justas prints the move list from the plan. A colleague takes the printout; the header shows the plan name, the data-as-of date and when it was generated. The colleague works through round 1 from top to bottom, moving each part from its from-location to its to-location and ticking the box; a line into a location comes after the lines in that round that move parts out of it, except where moves form a cycle such as a swap (FR-38). After Put together, or a swap in which not every part changes places (FR-51), a to-location can still hold other parts, and the colleague puts the part in beside them. Then the colleague starts on round 2, whose moves use locations that round 1 freed. **Edge case:** a part is not at its from-location because someone moved it after the export; the colleague notes it on the printout and Justas decides. The tool does not track whether moves were carried out.
   *Realized by FR-38.*
 
 - **UJ-3. Justas continues a saved plan a week later.**
-  Justas opens the saved-plans list, sees "Autumn re-slot" with its last-edited time, and opens it exactly as it was left: marks, moves, rounds and recommendations. Justas undoes the last manual move, applies two more recommendations and prints again; the new generated-at time tells the new printout from the old one. To try a different set of best locations without losing this plan, Justas starts a New Plan from the same import. **Edge case (if time allows):** another planner saves a change to the same plan while Justas has it open; Justas's next change shows a warning, and the last save wins.
+  Justas opens the saved-plans list, sees "Autumn re-slot" with its last-edited time, and opens it exactly as it was left: marks, moves, rounds and recommendations. Justas undoes the last manual move, applies two more recommendations and prints again; the new generated-at time tells the new printout from the old one. To try a different set of best locations without losing this plan, Justas starts a New Plan from the same import. **Edge case (if time allows):** another planner saves a change to the same plan while Justas has it open; Justas's next change shows a warning, and if Justas goes on, the change is added on top of the other planner's changes.
   *Realized by FR-2, FR-8–FR-10, FR-30, FR-35, FR-38, FR-40; if time allows also FR-41.*
 
 ## 3. Glossary
@@ -439,7 +439,8 @@ Each recommendation shows the part, part description, current location, suggeste
 A recommendation that a later change has made invalid is shown as outdated.
 
 **Consequences (testable):**
-- A recommendation becomes outdated when its part has been moved; when its suggested location is no longer empty; when a change to the best-location marks means its rule no longer holds; or after any undo (FR-35).
+- A recommendation becomes outdated when its part has been moved by another move in the same round; when its suggested location is no longer empty; when a change to the best-location marks means its rule no longer holds; for rule 3, when the partner is no longer in the suggested location's aisle; or after any undo (FR-35). Nothing else makes a recommendation outdated, and when several causes hold, the first in this list is the one shown (decision 2026-11-16, architecture).
+- An applied recommendation whose move was removed because the part was moved back to its first from-location (FR-34) is shown as outdated, with "moved back" as the cause. Undoing the move-back shows it as applied again.
 - An outdated recommendation cannot be applied, and stays outdated until the next run.
 
 ### 4.8 Planning copy and moves
@@ -528,7 +529,7 @@ The planner can see, for each aisle and for the whole warehouse, the import ("be
 
 ### 4.10 Move list
 
-**Description:** The plan prints as a move list in a browser print view, so colleagues can carry out the moves in an order where every location is emptied before a part is moved into it. Realizes UJ-2.
+**Description:** The plan prints as a move list in a browser print view, so colleagues can carry out the moves in an order where the moves out of a location come before the moves into it. Realizes UJ-2.
 
 #### FR-38: Print the move list
 
@@ -587,7 +588,7 @@ A user who changes a plan that someone else has saved since the user opened it i
 
 **Consequences (testable):**
 - The warning says the plan has changed and offers to reload it.
-- If the user continues, the user's version of the whole plan is saved and the other user's changes since then are lost (last save wins).
+- If the user continues, the user's change is applied on top of the plan as it is now, including the other user's changes. The whole plan is never overwritten by an older copy (decision 2026-11-16, architecture: every change is saved as one command).
 
 ### 4.12 Warehouse view (core, milestone 2)
 
@@ -824,6 +825,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **Demo front page without a synthetic-data notice** (user decision 2026-11-14, UX step): NFR-5 no longer asks the front page to state that the data is synthetic; the deployment still holds synthetic data only, and the README says so.
 - **Drag to move or swap in the core** (user decision 2026-11-14): drag-and-drop placement moves from "if time allows" into milestone 2 as FR-51. Dropping a part on an occupied location always asks Swap or Put together; the planner chooses which parts move when a location holds several; a swap is undone one move at a time; a swap with a part kept in place warns; swap lines are marked on the move list. Dragging is mouse-only, an exception to NFR-10's keyboard rule that manual moves cover.
 - **Before architecture, from the PRD and UX review** (decision 2026-11-16): milestone 1 stores plans as milestone 2 does and opens the most recently edited plan until the saved-plans list exists (FR-8, §7.1); best locations are marked from the locations list in milestone 1 (FR-21); a new glossary term, move number; FR-9 also keeps the undo history, run times and users, and swap membership, while view choices stay in the browser; NFR-12 allows a hosted store on the public deployment only.
+- **From the architecture spine** (decision 2026-11-16): FR-29 names two more causes of an outdated recommendation, the rule 3 partner leaving the suggested aisle and an applied move removed by a move-back (FR-34), and nothing else outdates one; UJ-2 no longer promises that every to-location is empty, since Put together and swaps can leave other parts there; FR-41 adds the change on top of the other user's changes instead of saving the whole plan (last save no longer wins).
 - **New detail decided while writing the PRD** (all confirmed by the author 2026-11-02; listed in §11): required columns and value checks, round 0 for manual moves before the first run, tie-breaks, "no space" handling, outdated recommendations, applying with another suggested location, combined moves, the answer-key cases.
 
 ## 11. Confirmed Assumptions
