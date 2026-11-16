@@ -2,7 +2,7 @@
 name: Smart Warehouse Planner
 status: final
 created: 2026-11-11
-updated: 2026-11-14
+updated: 2026-11-16
 sources:
   - ../../../../PRODUCT.md
   - ../../prds/prd-Project-2026-11-01/prd.md
@@ -14,7 +14,7 @@ sources:
 
 # Smart Warehouse Planner — Experience Spine
 
-> Draft (fast path) from concept 05 "Bin Wall", the PRD and PRODUCT.md. Guesses are tagged [ASSUMPTION]. Decisions the user still has to make are under **Open Questions** at the end. Requirement numbers (FR-n, NFR-n, UJ-n) and glossary terms refer to the PRD and are used verbatim. This spine does not restate them. The spines win on any conflict with a mock.
+> Draft (fast path) from concept 05 "Bin Wall", the PRD and PRODUCT.md. Guesses are tagged [ASSUMPTION]. The Open Questions at the end were all closed on 2026-11-16; the answers are written into the body. Requirement numbers (FR-n, NFR-n, UJ-n) and glossary terms refer to the PRD and are used verbatim. This spine does not restate them. The spines win on any conflict with a mock.
 
 ## Foundation
 
@@ -90,7 +90,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 | Toolbar, current step, stage-2 plates, "You are here" `{components.app-toolbar}`, `{components.flow-step-current}`, `{components.launcher-plate-stage2}`, `{components.you-are-here-tag}` | Shell, launcher | The toolbar stays at the top, except below about 500 CSS px of viewport height, where it scrolls with the page. The current-step pill is the flow link for the open page. "You are here" marks the launcher plate of the open page. Stage-2 plates are listed but inert, with `aria-disabled="true"`. |
 | Plan plate `{components.plan-plate}` | Toolbar, every plan surface | Always shows the plan name, data-as-of date and current round ("round 0" before the first run). Click or `Enter` opens the plan menu. The upload date is in its tooltip and on the overview. |
 | Flow bar `{components.flow-bar}` | Toolbar | Eight links. The current step is `aria-current="step"`. Check rules [ASSUMPTION]: steps 1–4 are checked once the plan exists (their data is computed on import). Best locations is checked when at least one best-location mark exists. Recommendations is checked when the latest run has no unapplied, non-outdated recommendation left. Before/after and Move list never get a check (they are outputs). The check is an ink glyph; the link name carries it as visually hidden text ("Overview, step 1, done"). |
-| Launcher `{components.launcher-plate}` | Grid button or `Ctrl+K` / `⌘K` | A modal drawer that unfolds from the flow bar over the current page: focus moves to the search field ("Search features, actions and plans"), focus stays inside, and the page behind is `inert`. Each step column is a group: its step link (code and name), its state, live counts from the open plan, and its actions (for Recommendations: Continue, Undo last move, Apply all, Run round 2, Reset…). `Tab` moves between columns, `↑`/`↓` within one. Typing filters the steps, actions and saved plans into one result list [ASSUMPTION: grouped results, as in the command-palette alternative]; `Enter` opens the highlighted item (type "REC", then `Enter`). No match shows "No feature or saved plan matches “xyz”." `Esc` closes and returns focus to the grid button. Stage-2 slots are announced as "Coming in stage 2" and are not activatable. |
+| Launcher `{components.launcher-plate}` | Grid button or `Ctrl+K` / `⌘K` | A modal drawer that unfolds from the flow bar over the current page: focus moves to the search field ("Search features, actions and plans"), focus stays inside, and the page behind is `inert`. Each step column is a group: its step link (code and name), its state, live counts from the open plan, and its actions (for Recommendations: Continue, Undo last move, Apply all, Run round 2, Reset…). `Tab` moves between columns, `↑`/`↓` within one. Typing replaces the columns with one result list grouped as Steps, Actions and Saved plans (user decision 2026-11-16); `Enter` opens the highlighted item (type "REC", then `Enter`). No match shows "No feature or saved plan matches “xyz”." `Esc` closes and returns focus to the grid button. Stage-2 slots are announced as "Coming in stage 2" and are not activatable. |
 | Search field | Parts and Locations headers, wall header, launcher | One field matches part numbers, part descriptions and location codes (FR-15), partial text, case-insensitive. Results list parts and locations separately. A location result opens the wall at that bin. A part result opens the part panel and selects its current location on the wall. |
 
 **Wall.**
@@ -116,20 +116,20 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 
 | Component | Use | Behavioural rules |
 |---|---|---|
-| Run recommendations | Recommendations header (secondary, since Apply on the selected row is the one primary) [ASSUMPTION] | Starts a new round (FR-23). While running (≤ 5 s, NFR-8): the button reads "Running…", is disabled, and the list is inert. Afterwards the round chip, tabs and counts update, and focus moves to the first row. Earlier unapplied recommendations and no-space entries are replaced. |
+| Run recommendations | Recommendations header (secondary, since Apply on the selected row is the one primary) | Starts a new round (FR-23). While running (≤ 5 s, NFR-8): the button reads "Running…", is disabled, and the list is inert. Afterwards the round chip, tabs and counts update, and focus moves to the first row. Earlier unapplied recommendations and no-space entries are replaced. |
 | Round chip `{components.round-chip}` | Recommendations header | Shows the current round ("Round 0" before the first run). Next to it, one line: "Run 2026-11-11 09:42 by planner · 19 recommendations · 31 no space" and "The next run starts round 2 and uses the planning copy as it is then." |
 | Tabs + count pills `{components.tab}`, `{components.count-pill}` | Recommendations | State tabs: Open · Applied · Kept in place · Outdated · No space. Open is selected after a run. Counts are always visible, including 0, and are part of each tab's name ("Open, 13 recommendations"). Arrow keys move between tabs. |
-| Rule band `{components.rule-band}` + rule tag `{components.rule-tag}` | Recommendations | Not interactive. It names the rule and its ordering rule, so the list order is explained (Explain every number). Every state tab groups its rows under bands in rule order 1, 2, 3; a rule with no rows in that state shows no band. Recommendations are numbered 1, 2, 3 … across the whole round, not per rule, so a number on the wall is never ambiguous [ASSUMPTION]. |
+| Rule band `{components.rule-band}` + rule tag `{components.rule-tag}` | Recommendations | Not interactive. It names the rule and its ordering rule, so the list order is explained (Explain every number). Every state tab groups its rows under bands in rule order 1, 2, 3; a rule with no rows in that state shows no band. Recommendations are numbered 1, 2, 3 … across the whole round, not per rule, so a number on the wall is never ambiguous. |
 | Collapsed group | Recommendations, under each rule band | Shows the first 5 rows per rule, then "Show 4 more under rule 1" [ASSUMPTION: 5]. No-space parts with the same rule and reason collapse into one line ("30 more like this"), which expands in place. |
 | Recommendation row `{components.recommendation-row}` | Recommendations | Click or `Enter` selects the row and fills the detail panel. The row itself is for scanning (number, class, part, from → to, picks); the actions sit in the detail panel's action bar: **Apply** (primary) · **Other location ▾** · **Keep in place** · **Manual move…**, with `Alt+A` / `Alt+O` / `Alt+K`. Outdated rows: Apply is disabled, with the reason shown (FR-29). Applied rows: no actions, shows "Applied · move N, round R". |
 | Selected / outdated row `{components.recommendation-row-selected}`, `{components.recommendation-row-outdated}` | Recommendations | One selected row per list, kept when switching tabs if the row is visible. An outdated row moves to the Outdated tab and stays there until the next run, so the planner can see what changed. |
 | Other location ▾ | Recommendation row | Opens a listbox of the locations FR-31 allows, in location-code order, each with aisle, level and best/not best. Typing and arrow keys only move the highlight; `Enter` or a click applies the highlighted location, with the rule and round kept. Nothing applies while browsing. An empty list says "No other location fits rule 1 right now." There is no free text; any other placement is a Manual move. |
 | Keep in place (link) | Recommendation row, part panel, roster row | Sets the mark at once (FR-32). The row moves to the "Kept in place" tab, and a toast shows "4410281 is kept in place. Remove the mark from the part or the Kept in place tab." Removing is the same link, now reading "Remove keep in place". |
 | NO SPACE chip `{components.no-space-chip}` | Recommendations, No space tab | Takes the to-chip's place and is not focusable on its own. The row's accessible name includes "no space" and the cause. |
-| Apply all (n) | Recommendations header | n = recommendations of the latest run that are neither applied nor outdated, minus no space and kept in place (FR-30). A confirm popover [ASSUMPTION]: "Apply 15 recommendations from round 1? Undo reverses them one move at a time." Disabled at n = 0. |
+| Apply all (n) | Recommendations header | n = recommendations of the latest run that are neither applied nor outdated, minus no space and kept in place (FR-30). A confirm popover: "Apply 15 recommendations from round 1? Undo reverses them one move at a time." Disabled at n = 0. |
 | Undo last move | Recommendations header, part panel | The tooltip names the move: "Undo move 3: 9723950 A-03-04-02 → A-05-01-03". It reverses the most recent move only (FR-35). Afterwards every unapplied recommendation of the latest run becomes outdated, and a notice says so. Disabled when there are no moves. |
-| Reset… | Recommendations header, "⋯" menu [ASSUMPTION] | A confirm dialog (FR-35) with `{components.button-destructive}`: "Reset removes all 18 moves, the recommendations and the no-space parts. Best-location marks and keep-in-place marks stay. The next run is round 1." Buttons: **Reset plan** (primary) · **Cancel** (default focus). |
-| Recommendation detail | Recommendations, right panel | For the selected row: "Selected · #1 · Rule 1", the part, the reason as one or two plain sentences with the numbers in bold ("61 picks in the period, so it is fast-moving (24 or more). It sits on level 4, not a best location. Rule 1 lifts it to the first empty best location, G-14-01-04."), a **From aisle** wall crop (the 3 sections around the from-location) and a **To aisle** crop (one crop when both ends are in the same aisle), the arrow label "Rule 1 · round 1", "Effect if applied" (Now → After for the counts the before/after table uses) [ASSUMPTION], and "Moves in the planning copy" (the last 3, newest first, "Undo reverses move 3 first"). The link "Show on the Locations wall" opens the from-aisle with the move selected. |
+| Reset… | Recommendations header, "⋯" menu | A confirm dialog (FR-35) with `{components.button-destructive}`: "Reset removes all 18 moves, the recommendations and the no-space parts. Best-location marks and keep-in-place marks stay. The next run is round 1." Buttons: **Reset plan** (primary) · **Cancel** (default focus). |
+| Recommendation detail | Recommendations, right panel | For the selected row: "Selected · #1 · Rule 1", the part, the reason as one or two plain sentences with the numbers in bold ("61 picks in the period, so it is fast-moving (24 or more). It sits on level 4, not a best location. Rule 1 lifts it to the first empty best location, G-14-01-04."), a **From aisle** wall crop (the 3 sections around the from-location) and a **To aisle** crop (one crop when both ends are in the same aisle), the arrow label "Rule 1 · round 1", and "Moves in the planning copy" (the last 3, newest first, "Undo reverses move 3 first"). The link "Show on the Locations wall" opens the from-aisle with the move selected. |
 
 **Plans and parts.**
 
@@ -148,7 +148,7 @@ Behavioural rules. Visual specs are in `DESIGN.md`, Components.
 |---|---|---|
 | Buttons `{components.button-primary}`, `{components.button-secondary}`, `{components.button-tertiary}`, `{components.button-link}`, `{components.button-disabled}` | Everywhere | At most one primary per surface (New Plan, Print, or Apply on the selected recommendation). Secondary for repeatable commits (Apply, Apply all). Tertiary for reversible or navigational actions (Undo last move, Reset…, Open as list, Other location ▾). Link for low-commitment verbs (Keep in place, Before/after table). A disabled button keeps its label, stays focusable with `aria-disabled="true"`, and shows its reason on hover and on focus, linked with `aria-describedby` ("No moves to undo"). Labels end with "…" when a dialog follows. |
 | Input `{components.input}` | Search, plan name, launcher | `Enter` submits, `Esc` clears and then blurs. The plan name is required: "Give the plan a name." inline under the field. Plan names need not be unique [ASSUMPTION]. |
-| Segmented control `{components.segmented-control}` | Wall header, Locations (One aisle \| Whole warehouse, Planning copy \| Import), Best locations | Behaves as a radio group: arrow keys switch, and the selection persists per plan [ASSUMPTION]. |
+| Segmented control `{components.segmented-control}` | Wall header, Locations (One aisle \| Whole warehouse), Best locations | Behaves as a radio group: arrow keys switch, and the selection persists per plan [ASSUMPTION]. |
 | Toast `{components.toast}` | Global, bottom-left | One at a time, at least 10 s (longer for longer text), paused while hovered or focused, at most one action. **Undo** appears only when Undo last move would reverse exactly what the toast reports, that is, a move ("Applied · move 16, round 1 · 4410281 G-14-04-02 → A-02-01-01" · Undo). A toast about marks never offers Undo, because FR-35 undo never reverses marks: "Best-location marks changed · 3 recommendations are now outdated" · **View** (opens the Outdated tab). Every toast action also exists elsewhere (Undo last move, the Outdated tab). Under reduced motion it appears without sliding. Announced via `aria-live="polite"`. → [components sheet 1](./mockups/components-sheet.svg) |
 | Focus ring `{components.focus-ring}` | Everything focusable | Fixed: the Key colours never change it. On graphite (wall, toolbar, launcher) the dark inner and white outer ring; on paper the ink ring with a white gap. |
 
@@ -239,11 +239,11 @@ This section covers the Locations view and the recommendation detail. It realise
 - **One aisle** (default): a row of aisle tabs in walk order A → I, each with the letter, occupancy % and the moves touching the aisle, then the whole-warehouse figure: "79.2% whole warehouse · 1,584 of 2,000 · 416 empty · 174 best" (FR-14, FR-22). Below them, the open aisle's wall at full width. Opening the Locations view shows the aisle last opened in this plan, or aisle A [ASSUMPTION].
 - **Whole warehouse**: four figures on top (79.2% occupied, 416 empty locations, 174 best locations · 7 of them empty, 19 recommendations in round 1), then the nine aisles as cards in walk order (3 × 3), each with its letter, %, "occupied of total · empty", moves, and its whole wall at overview scale. The selected move is drawn as one route from its from-bin to its target, also across aisles. Overview bins are pictures (no glyph, not focusable); selecting a card opens that aisle in One aisle.
 
-**Open aisle.** The header shows "Aisle A" and the text line "86.8% occupied · 198 of 228 locations · 30 empty · 117 best locations (3 empty) · Walk Path 0–2,270". On the right: **Open as list** (the FR-14 table filtered to this aisle, with filters for aisle / occupied-empty / best) and **Edit best-location marks** (switches to the Best locations step with this aisle open). The page header holds **One aisle | Whole warehouse**, **Planning copy | Import** [ASSUMPTION: Import shows the frozen import, read-only, with no markers and no actions] and the search field.
+**Open aisle.** The header shows "Aisle A" and the text line "86.8% occupied · 198 of 228 locations · 30 empty · 117 best locations (3 empty) · Walk Path 0–2,270". On the right: **Open as list** (the FR-14 table filtered to this aisle, with filters for aisle / occupied-empty / best) and **Edit best-location marks** (switches to the Best locations step with this aisle open). The page header holds **One aisle | Whole warehouse** and the search field. The wall always shows the planning copy; there is no read-only Import wall, because the before/after table already shows "before" (user decision 2026-11-16).
 
 **Layout rules.**
 - One wall per aisle (Aisle column). Levels come from the Level column, with the highest level on top and L1 at the bottom, like the real shelf.
-- Locations are placed left to right in Walk Path order within their aisle and level. Section and position numbers are read from the location code when it matches `<aisle>-<section>-<level>-<position>`. [ASSUMPTION] When codes follow another pattern (FR-6 allows several), locations are drawn as one continuous run per level without section labels. See Open Questions.
+- Locations are placed left to right in Walk Path order within their aisle and level. Section and position come from the optional Section and Position columns when the Locations file has them (FR-3; the demo files do), otherwise from the location code when it matches `<aisle>-<section>-<level>-<position>`. When a code follows another pattern (FR-6 allows several) and the columns are absent, its aisle's locations are drawn as one continuous run per level in Walk Path order, without section labels (user decision 2026-11-16).
 - **Sections are split into two runs**: the first ⌈n/2⌉ sections on top (01–10 of 19) and the rest below (11–19), each run with its own level labels. An end cap closes the aisle: "End of aisle A · Walk Path 2,270 →".
 - Positions with no location in the file are hatched `{components.slot-none}`, are not focusable, and are skipped by arrow keys.
 - The **Key** (`{components.legend}`) is always visible under the wall. Its colour entries are buttons that open the colour popover (see Change a colour from the Key below).
@@ -256,14 +256,14 @@ In the Best locations step the wall becomes the marking tool. **Whole aisle | Le
 
 **Moves on the wall.** Every recommendation of the latest run whose from-location is on this wall shows a **lifted bin** with its numbered marker. Targets on this wall show as dashed slots with a plus glyph and the same number. A move from another aisle into this one shows only its target, with the tooltip "From G-14-04-02 (aisle G)". Applied moves of the current round show applied markers. Manual moves show "M". Outdated ones show the grey dashed marker and no lift. **Only the selected move** draws the accent arrow and the hover note ("Rule 1 · 8044172 Oil filter - Toyota Corolla / 33 picks (24 or more) · A-12-04-02 → A-14-02-01"). This keeps the wall readable when a round has many moves. Below the wall, a drawer **"Moves touching aisle A · Round 1 · 7 moves · 4 to decide"** lists the same moves with matching numbers. Collapsed, it shows only the selected move (number, rule, part, class · picks, from → to with BEST, Apply · Other location · Keep in place); **Show all 7** opens the full table with Rule, Part, Class · picks, From, To, Status and Action, plus "Open round 1".
 
-**Drag to move or swap (FR-51).** Mouse-only (user decision 2026-11-14), and only in **Planning copy** on the Locations wall: not in Import, not in the Best locations step (where a click sets a mark) and not on the recommendation crops.
-- **Start.** Pressing on an occupied bin and moving the pointer more than 4px starts a drag [ASSUMPTION]; a press without movement is still a click (select, pin the tooltip). The bin follows the pointer as a lifted bin, and its slot shows the dashed outline it leaves behind. With a split label (two parts), the half under the pointer is the part that is dragged; with three or more parts, the part with the most picks is [ASSUMPTION]. The other parts can be added in the drop dialog.
+**Drag to move or swap (FR-51).** Mouse-only (user decision 2026-11-14), and only on the Locations wall in **One aisle**: not in Whole warehouse, not in the Best locations step (where a click sets a mark) and not on the recommendation crops.
+- **Start.** Pressing on an occupied bin and moving the pointer more than 4px starts a drag; a press without movement is still a click (select, pin the tooltip). The bin follows the pointer as a lifted bin, and its slot shows the dashed outline it leaves behind. With a split label (two parts), the half under the pointer is the part that is dragged; with three or more parts, the part with the most picks is. The other parts can be added in the drop dialog.
 - **Targets.** Hovering a location shows what a drop does: an empty slot shows the plus glyph and "Move here"; an occupied one shows ⇄ and "Swap or put together". Virtual locations, hatched positions and the bin's own slot show no target and the not-allowed cursor. `Esc` during a drag, or a drop outside the wall, cancels with nothing changed.
-- **One aisle at a time.** The drag stays inside the open aisle. A move to another aisle uses **Manual move…** [ASSUMPTION: no drop on aisle cards, Open Question 15].
+- **One aisle at a time.** The drag stays inside the open aisle. A move to another aisle uses **Manual move…**; there is no drop on aisle tabs or cards (user decision 2026-11-16, with the three details above and below).
 - **Drop on an empty location, one part.** No dialog: the manual move is made at once, with the rule Manual and the current round, and a toast names it: "Moved 4410281: G-14-04-02 → G-14-01-04 (Manual, round 1)." The bin settles into its new slot with the "M" marker.
 - **Drop dialog.** Opens when the from-location holds several parts or the drop is on an occupied location. Title: "Move to G-14-01-04" or "G-14-01-03 is occupied".
   - *Parts to move from G-14-04-02*: a checkbox per part (glyph, part number, description, class · stock), shown only when the from-location holds several parts; the dragged part is checked.
-  - *Parts to move back to G-14-04-02 (Swap only)*: a checkbox per part, shown only when the dropped-on location holds several parts; all are checked [ASSUMPTION].
+  - *Parts to move back to G-14-04-02 (Swap only)*: a checkbox per part, shown only when the dropped-on location holds several parts; all are checked.
   - Buttons: **Move** on an empty location; **Swap** and **Put together** on an occupied one (both secondary, neither is the default), then **Cancel**. A button with no part checked is disabled with its reason: "Choose at least one part to move." / "Choose at least one part to move back."
   - **Keep-in-place warning:** when a part in the swap is kept in place, a warning triangle and a sentence in ink sit above the buttons: "4410297 is kept in place. Swap anyway?" The warning is not an error: Swap stays enabled, and the mark stays.
 - **After a swap.** Each moved part gets its own manual move in the current round, the bins settle with "M" markers, and a toast says "Swapped G-14-04-02 ↔ G-14-01-03 · 2 manual moves, round 1." Undo last move reverses one move at a time (FR-35), so undoing a swap of two parts takes two undos. FR-34 merges still happen silently, as in the Manual move dialog.
@@ -286,7 +286,7 @@ In the Best locations step the wall becomes the marking tool. **Whole aisle | Le
 - the contrast and likeness warnings for this colour (the checks below), shown under the presets only when a check fails, linked to the hex field with `aria-describedby` and announced with `role="status"`;
 - **Reset this colour** (back to the default for this colour only) and **Done**.
 
-Focus starts on the current preset. Arrow keys move between presets and preview each one live on the wall behind the popover, so the choice is judged on the real wall. **Done** or a click outside keeps the pick and announces it ("Fast-moving colour changed"). `Esc` restores the colour the entry had when the popover opened, then closes [ASSUMPTION]. Either way focus returns to the Key entry. The popover flips or shifts to stay inside the viewport, also at 200% zoom.
+Focus starts on the current preset. Arrow keys move between presets and preview each one live on the wall behind the popover, so the choice is judged on the real wall. **Done** or a click outside keeps the pick and announces it ("Fast-moving colour changed"). `Esc` restores the colour the entry had when the popover opened, then closes. Either way focus returns to the Key entry. The popover flips or shifts to stay inside the viewport, also at 200% zoom.
 
 **Key colours (FR-42).** Each of the six colours (fast-moving, medium-moving, slow-moving, dead stock, best location and selection) keeps its fixed glyph or cue (▲, ◆, ▼, slashed ring, the BEST tag, the selection frame) whatever its colour. A change applies at once to every wall, mini-wall, wall crop and class swatch; the printed move list stays black and white.
 
@@ -295,18 +295,18 @@ The popover's checks measure each colour where it is drawn (pairs and default ra
 - **Best location:** against the wall and an open slot, plus ink text on it (the BEST tag) at 4.5:1.
 - **Selection:** against its dark casing `{colors.slot-empty}` on the wall, and against white `{colors.surface}` on paper.
 
-A failing pair shows a warning naming the colour and the background, for example "Slow-moving on the wall: 2.1:1 (3:1 or more recommended)". A second warning appears when two of the six colours are **too alike** (CIELAB ΔE below 20) and names both: "Slow-moving and Selection look alike (ΔE 12). Bins and the selection frame may be hard to tell apart." The planner can keep either choice. All six defaults pass both checks, so a fresh browser shows no warnings. For best location the planner picks the wall shade; the paper shade is derived by darkening the same hue until white text on it reaches 4.5:1 and the colour reaches 3:1 on white [ASSUMPTION]. **Reset this colour** restores that entry's DESIGN.md default; nothing resets every colour at once. The choice is stored in the browser, survives a reload, and changes no plan or import; if storage is blocked, see State Patterns. Focus is never affected: it uses the fixed `{components.focus-ring}`.
+A failing pair shows a warning naming the colour and the background, for example "Slow-moving on the wall: 2.1:1 (3:1 or more recommended)". A second warning appears when two of the six colours are **too alike** (CIELAB ΔE below 20) and names both: "Slow-moving and Selection look alike (ΔE 12). Bins and the selection frame may be hard to tell apart." The planner can keep either choice. All six defaults pass both checks, so a fresh browser shows no warnings. For best location the planner picks the wall shade; the paper shade is derived by darkening the same hue until white text on it reaches 4.5:1 and the colour reaches 3:1 on white. **Reset this colour** restores that entry's DESIGN.md default; nothing resets every colour at once. The choice is stored in the browser, survives a reload, and changes no plan or import; if storage is blocked, see State Patterns. Focus is never affected: it uses the fixed `{components.focus-ring}`.
 
 ## Move list print
 
 Realises FR-38 and UJ-2. The reader is the colleague, who has never seen the app. → [screen map, Move list panel](./mockups/screen-map.svg)
 
 - **Screen view:** a paper preview of the list with a toolbar holding **Print** (primary) and "Back to Recommendations". The toolbar and the app shell are hidden in print (`@media print`).
-- **Paper:** A4 portrait [ASSUMPTION]. Pure black on white `{components.print-move-list}`. No colour, no tints, no bin swatches. Legible on a black-and-white office printer.
+- **Paper:** A4 portrait. Pure black on white `{components.print-move-list}`. No colour, no tints, no bin swatches. Legible on a black-and-white office printer.
 - **Header (every page):** "Move list · Spring re-slot 2026"; "Data as of 2026-09-30 · uploaded 2026-10-02 · 2 rounds" (FR-38); "Generated 2026-11-11 10:05 · Smart Warehouse Planner". The page number "Page 1 of 3" sits in the footer [ASSUMPTION].
 - **Rounds:** each round starts with a band that survives printing without backgrounds (browsers' default): bold **ROUND 1** in a 1.5px black box, then "one walk · from-location before to-location", between 2px black rules. `print-color-adjust: exact` may be added, but nothing depends on it. A band never ends a page alone: it keeps at least two lines with it. Column heads repeat on each page.
 - **Swap lines (FR-51):** the Rule cell reads "Manual · Swap 1/2" with "G-14-01-03 ↔ G-14-04-02" under it, and the lines of one swap follow each other where the order allows. The footnote adds: "Swap: set one bin aside, move the other into its place, then put the first one in."
-- **Line:** tick box · Round · Part · Description · From · To · Rule · Note. Every line prints its Round value (FR-38), even under its band. Note is a blank ruled space for the colleague's remark, for example "not at from-location" [ASSUMPTION: the Note column]. The from-location is always printed before the to-location. Codes and part numbers are in Barlow bold at 12pt, text at about 10pt, rules 1px.
+- **Line:** tick box · Round · Part · Description · From · To · Rule · Note. Every line prints its Round value (FR-38), even under its band. Note is a blank ruled space for the colleague's remark, for example "not at from-location". The from-location is always printed before the to-location. Codes and part numbers are in Barlow bold at 12pt, text at about 10pt, rules 1px.
 - **Order:** exactly FR-38's order. The UI never re-sorts the printed list, and the footnote states the rule in plain words: "Lines follow Walk Path; an emptied location always comes before a move into it."
 - **Reprint:** the generated time is the only thing that tells two printouts apart (UJ-3). It is printed in the header, not in small print.
 
@@ -333,7 +333,7 @@ The design width is 1280–1440px, and that is where the two-panel layouts below
 | Viewport width (CSS px) | Behaviour |
 |---|---|
 | ≥ 1440 | As drawn: aisle tabs over a full-width wall panel (bins 35px), recommendations list 640px plus the detail panel. |
-| 1280–1439 [ASSUMPTION] | Aisle tabs drop the %, keeping letter and moves. The wall's bins shrink toward 27px, never below. The recommendation detail narrows, and its wall crops show 2 sections instead of 3. |
+| 1280–1439 | Aisle tabs drop the %, keeping letter and moves. The wall's bins shrink toward 27px, never below. The recommendation detail narrows, and its wall crops show 2 sections instead of 3. |
 | 1024–1279 | The recommendation detail stacks under the list. The aisle tabs scroll sideways inside their row; Whole warehouse shows the aisle cards in two columns. The part panel overlays the page. The wall panel scrolls inside itself. |
 | < 1024 (zoom or a narrow window), down to 320 | One column. The flow bar collapses to "Step 6 of 8 · Recommendations ▾" (a menu of the eight steps) and the plan plate to one line; side panels, the detail panel, forms, settings, the saved-plans list, dialogs and the recommendation list stack. Only the wall panel, the wall crops and data tables wider than the viewport scroll in two dimensions inside their own regions (the two-dimensional-content exception); the page itself never scrolls sideways. Below about 500 CSS px of viewport height the toolbar scrolls with the page. No "too narrow" notice is shown. |
 
@@ -351,7 +351,7 @@ The direction came from a round of ten divergent concepts (memlog 2026-11-11). T
 
 ## Key Flows
 
-Not yet narrated: changing a colour from the Key, the demo front page, Pick groups, Parts and the launcher (see Open Questions 10–14).
+UJ-1 to UJ-3 are the PRD's journeys. UJ-4 to UJ-8 are UX journeys written in this spine only (drafted and accepted by the user on 2026-11-16); the PRD does not number them.
 
 ### UJ-1. Justas builds a re-slotting plan from a fresh export
 
@@ -394,6 +394,61 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 
 **Failure path (if time allows):** another planner has saved the same plan meanwhile. Justas's next change shows the FR-41 warning. Justas reloads or continues, and the last save wins.
 
+### UJ-4. Justas changes a colour from the Key
+
+1. On the Locations wall, Justas finds slow-moving bins and the violet selection frame hard to tell apart on the office's old monitor.
+2. Justas clicks **Slow-moving** in the Key under the wall. A popover opens above it: "Slow-moving ▼ colour", eight shades, the current one ringed.
+3. Justas arrows through the shades; each one previews live on the wall behind the popover.
+4. Shade 6 reads clearly and no warning shows. Justas clicks **Done**. "Slow-moving colour changed" is announced, and focus returns to the Key entry.
+5. **Climax:** every wall, mini-wall, wall crop and class swatch uses the new shade. The ▼ glyph is unchanged, and the printed move list stays black and white.
+6. **Resolution:** the next morning the colour is still there. It is kept in this browser; no plan changed.
+
+**Failure path:** Justas types a hex close to the selection violet. The popover warns "Slow-moving and Selection look alike (ΔE 12). Bins and the selection frame may be hard to tell apart." Justas presses `Esc`, and the colour returns to what it was when the popover opened.
+
+### UJ-5. An examiner tries the public demo
+
+1. The examiner opens the public deployment. The demo front page says "Every move comes with a reason." and follows one part through four panels.
+2. The examiner clicks **Demo version** and lands on the saved-plans list as `demo`, with no login page (FR-50). Plans are shared, so the list shows plans others have saved, or "No plans yet." with "Demo files: data/sample/".
+3. Following the README, the examiner takes the three files from `data/sample/`, clicks **New Plan**, names the plan and chooses the files. The import runs its step list, and the plan opens on the Plan overview.
+4. From here the examiner goes on as in UJ-1, step 3: the Locations wall, best-location marks, Run recommendations.
+5. **Climax:** recommendation #1 shows its reason in numbers and its bin lifted on the wall: the story the front page told, now on the demo data.
+6. **Resolution:** Log out in the avatar menu returns to the demo front page.
+
+**Other ways in:** Log in with the README's demo account (`demo`/`demo`), or Create account (username, and the password typed twice).
+
+**Failure path:** on Create account the username is taken: "That username is taken. Try another." Focus moves to the username field, and the examiner picks another.
+
+### UJ-6. Justas checks which parts are picked together
+
+1. After the import Justas opens **Pick groups** (step 4), sorted by shared jobs, most first. Each row shows both parts, the shared jobs, each part's aisle, and "Same aisle" or "Different aisles" (FR-20).
+2. Near the top: 8044172 (aisle G) with 7181839 (aisle D), 7 shared jobs, different aisles.
+3. Justas opens 8044172's part panel: its pick groups and partners, and its current location as a chip. The chip opens the Locations wall at that bin.
+4. Justas runs recommendations. A rule 3 row moves 7181839 into aisle G, its partner's aisle, with the reason "Pick group with 8044172 (aisle G): 7 shared jobs (5 or more)". Justas applies it.
+5. **Climax:** back on Pick groups the row now says "Same aisle", because aisles come from the planning copy, and Before/after counts one more pick group in the same aisle.
+
+**Empty case:** "No pick groups: no two parts share 5 or more jobs in the period."
+
+### UJ-7. Justas looks through the parts before a run
+
+1. Justas opens **Parts** (step 2): every part ranked by picks, ties in part-number order, each with a why-line ("Fast-moving · 61 picks · G-14-04-02").
+2. Justas clicks the Fast-moving ▲ chip, and only fast-moving parts remain.
+3. One of them is a bulky part that would not fit a lower bin. Justas opens its part panel and clicks **Keep in place**. A toast says "4410281 is kept in place. Remove the mark from the part or the Kept in place tab." The roster row shows the pin and "kept in place".
+4. `Ctrl+/` focuses the search field. Justas types "oil filter", and the results list parts and locations apart. Choosing 8044172 opens its part panel.
+5. Justas uses **Manual move…** to put it in an empty location near the dispatch end, and the wall shows it with "M".
+6. **Climax:** in the next run the kept-in-place part gets no recommendation, and the manual move is already in the planning copy the run starts from.
+
+**Failure path:** a part with no stock shows "No current location (no stock above zero)", and Manual move… is disabled with that reason.
+
+### UJ-8. Justas jumps around with the launcher
+
+1. Deep in Recommendations, Justas wants the move list and presses `Ctrl+K` (`⌘K`). The flow map drawer unfolds from the flow bar, one column per step with its state and live counts, and focus is in the search field.
+2. Justas types "mov". The columns give way to one grouped list: Steps (MOV Move list), Actions (Undo last move) and Saved plans. MOV is highlighted, and `Enter` opens the Move list.
+3. Later, without typing, Justas tabs to the Recommendations column, arrows to "Run round 2" and presses `Enter`.
+4. To compare with another plan, Justas types "spring", and `Enter` opens "Spring re-slot 2026".
+5. **Climax:** any step, action or saved plan is `Ctrl+K` and a few letters away, with no mouse.
+
+**Failure path:** "xyz" shows "No feature or saved plan matches “xyz”." `Esc` closes the drawer and returns focus to the grid button. Stage-2 plates read "Coming in stage 2" and cannot be opened.
+
 ## Open Questions
 
 **Resolved on 2026-11-13** (each is written into the body; history in `.memlog.md`): applied state, the two best greens, the wall always showing movement class, the demo front page and no demo shortcut, violet selection, Key colours (FR-42, changed only from the Key), and from the review pass: the fixed focus ring, modifier-only shortcuts, reflow, the print band, a Round value on every printed line, and the class defaults `#D85144` / `#417DDC`.
@@ -402,22 +457,20 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 
 **Mocks redrawn on 2026-11-14 (user picks from three alternatives each):** Locations = alternative A "Aisle in focus" plus the **One aisle | Whole warehouse** switch from alternative B, whose overview is now the Whole warehouse view; screen map = A "Journey storyboard"; recommendations interface = B "List and detail" (state tabs with rule bands); features menu = B "Flow map drawer"; components sheet 1 = B "In context"; components sheet 2 = C "Storybook states" (it also draws the drop dialog). Alternatives and notes: `.working/alternatives-2026-11-14/`.
 
-**Still open. Not blocking; each stays as drafted until the user says otherwise:**
+**Resolved on 2026-11-16 (user decisions; every one is written into the body):**
 
-1. **Wall placement for other code patterns.** FR-3 makes Section and Position optional columns (the demo files have them). Use them when present; otherwise "Walk Path order within aisle and level, sections parsed from the code when it matches". How should non-matching codes draw? (For architecture.)
-2. **Design width.** Is 1280px the right width for the full two-panel layouts? (Narrower viewports and zoom reflow as in Responsive & Platform.)
-3. **Planning copy | Import toggle on the wall.** Keep it (a read-only "before" wall) or drop it, since the before/after table already covers "before"?
-4. **"Effect if applied" panel.** A per-recommendation preview of the before/after counts is not in the PRD. Keep it as UX, or drop it to stay within FR-37?
-5. **Apply all confirmation.** Confirm before applying many moves (as drafted), or apply at once and rely on undo?
-6. **Move list Note column and paper.** Keep the blank Note column (as drafted)? A4 portrait?
-7. **Paper shade of a chosen best colour.** Derived by darkening the hue until white text reaches 4.5:1 (as drafted), or a fixed paper shade whatever the wall shade?
-8. **Colour popover `Esc`.** `Esc` restores the colour from when the popover opened; Done or a click outside keeps the pick (as drafted, replacing the earlier "Esc keeps"). Keep as drafted?
-9. **Colour presets and likeness threshold.** Eight shades of each entry's hue (as drafted, DESIGN.md `colour-presets`) and a "too alike" warning below ΔE 20. Keep as drafted?
-10. **Journey: changing a colour from the Key.** Needs a narrated journey from the user (the Key colour popover).
-11. **Journey: first-time demo visitor.** Needs a narrated journey from the user (demo front page → Demo version, Log in with the README's demo account, or Create account → empty saved-plans list → New Plan with `data/sample/`).
-12. **Journey: Pick groups.** Needs a narrated journey from the user.
-13. **Journey: Parts roster.** Needs a narrated journey from the user (UJ-1 goes from Locations to Best locations without visiting Parts or Pick groups).
-14. **Journey: launcher and search.** Needs a narrated journey from the user.
-15. **Drag and drop details (FR-51).** The drop dialog is drawn in components sheet 2; the drag itself and the drop targets have no mock yet. Drafted: the drag stays inside the open aisle (no drop on aisle cards); with three or more parts the part with the most picks is the one dragged; in a swap all parts at the dropped-on location are checked to move back. Keep as drafted?
-16. **Recommendations details from the picked interface mock.** Drafted: recommendations numbered 1–19 across the round instead of per rule; Run recommendations as a secondary button (Apply is the one primary); Reset… in a "⋯" menu; actions only in the detail panel's action bar, not on each row. Keep as drafted?
-17. **Launcher typed search.** The flow map drawer's search field: replace the columns with one grouped result list while typing (as drafted, borrowed from the command-palette alternative), or filter inside the columns? The per-step action lists are drafted in the mock.
+1. **Wall placement for other code patterns:** Section and Position columns when present, else parsed from the code; codes that match neither are drawn as one continuous run per level in Walk Path order, without section labels (Warehouse wall, Layout rules).
+2. **Design width:** 1280px stays the minimum for the two-panel layouts (Responsive & Platform).
+3. **Planning copy | Import toggle:** dropped. The wall always shows the planning copy; the before/after table covers "before".
+4. **"Effect if applied" panel:** dropped, to stay within FR-37. The reason sentence and the wall crops explain the move.
+5. **Apply all:** confirms first, as drafted.
+6. **Move list:** blank Note column kept, A4 portrait.
+7. **Paper shade of a chosen best colour:** derived from the chosen hue, as drafted.
+8. **Colour popover `Esc`:** restores the colour from when the popover opened; Done or a click outside keeps the pick.
+9. **Colour presets:** eight shades per entry and the "too alike" warning below ΔE 20, as drafted.
+10–14. **Journeys:** drafted from the spine and the PRD and accepted as UJ-4 to UJ-8 (Key Flows).
+15. **Drag details (FR-51):** all kept as drafted: the drag stays inside the open aisle, the part with the most picks is dragged when there are three or more, all back-parts are checked in a swap, and a drag starts after 4px. The text spec is enough; no separate drag mock is drawn.
+16. **Recommendations details:** all kept as drafted: numbered 1, 2, 3 … across the round, Run recommendations secondary, Reset… in a "⋯" menu, actions only in the detail panel's action bar.
+17. **Launcher typed search:** one result list grouped as Steps, Actions and Saved plans while typing.
+
+**No open questions remain.** Unconfirmed defaults are still marked [ASSUMPTION] in the body; they do not block architecture.

@@ -3,7 +3,7 @@ name: Smart Warehouse Planner — Bin Wall
 description: Desktop planning tool for re-slotting a spare-parts warehouse. Light paper ground, a graphite shelf wall, and bins coloured by movement class. Concept 05 "Bin Wall".
 status: final
 created: 2026-11-11
-updated: 2026-11-14
+updated: 2026-11-16
 sources:
   - ../../../../PRODUCT.md
   - ../../prds/prd-Project-2026-11-01/prd.md
@@ -553,6 +553,8 @@ Mocks that have not been re-rendered since 2026-11-13 may still show these super
 - `#2C8A55` for best on paper (now `#267A4B`, and "best" in table text is ink);
 - presets that fail their own contrast check (presets now always pass).
 
+The 2026-11-14 mocks also still show two details dropped on 2026-11-16: the **Planning copy | Import** switch in the Locations header (the wall always shows the planning copy) and the **"If applied"** effect line in the recommendation detail (dropped to stay within FR-37).
+
 ## Colors
 
 The palette has three layers: paper, graphite and meaning. Colour carries meaning only in the bin system and in a few named states, and every meaning also has a shape or a word. Light ground only; there is no dark mode in v1.
@@ -693,7 +695,7 @@ Visual specs only. Behaviour lives in EXPERIENCE.md, Component Patterns.
 
 **Controls.**
 - **Buttons.** `{components.button-primary}` is ink fill with white text, used for one action per surface ("Run recommendations", "New Plan", "Apply" on the selected row). `{components.button-secondary}` is white with an ink outline ("Apply", "Apply all (15)"). `{components.button-tertiary}` is white with a border outline ("Reset…", "Undo last move", "Other location ▾", "Open as list"). `{components.button-link}` is underlined ink text ("Keep in place", "Before/after table"). `{components.button-disabled}` is a pale fill with grey text.
-- **Segmented control** (`{components.segmented-control}`): One aisle | Whole warehouse, Planning copy | Import, Wall | List, and Whole aisle | Level | Single location.
+- **Segmented control** (`{components.segmented-control}`): One aisle | Whole warehouse, Wall | List, and Whole aisle | Level | Single location.
 - **Tabs** (`{components.tab}`) with **count pills** (`{components.count-pill}`): Open 13 · Applied 2 · Kept in place 3 · Outdated 1 · No space 31. The selected tab has an ink pill and a 3px ink underline.
 - **Input** (`{components.input}`): white, with a 1px `{colors.input-border}` boundary (3.2:1 on white) and the paper focus ring on focus. It contains a search icon and a placeholder in ink muted.
 - **Input error** (`{components.input-error}`): the boundary turns 1.5px `{colors.error}` (4.8:1 on white), and a warning triangle plus a sentence in ink names the problem ("This is the from-location. Choose another."). The icon and the sentence carry the error, so it is never colour alone. → [components sheet 2](./mockups/components-sheet-2.svg), Manual move.
@@ -705,7 +707,7 @@ Visual specs only. Behaviour lives in EXPERIENCE.md, Component Patterns.
 - **Rule band** (`{components.rule-band}`). The 30px band on `{colors.band}` starts with a rule tag (`{components.rule-tag}`, "Rule 1" in white Barlow on ink), then the rule name in body-strong ("Fast-moving parts into best locations"), then the ordering note on the right in caption ("Most picks first · best locations offered in location-code order").
 - **Recommendation row** (`{components.recommendation-row}`). A row for scanning, from left to right: the number (1, 2, 3 … across the round, `{typography.rank}`), a class swatch, the part number in `{typography.code}` over the description, the from code → to code with a BEST tag on a best target, and the picks right-aligned. No actions on the row; they sit in the detail panel's action bar. *Selected* (`{components.recommendation-row-selected}`): tinted, ink outline, 5px accent bar. *Outdated* (`{components.recommendation-row-outdated}`): hatched, secondary ink, struck-through target code, a clock icon with "Outdated". *Applied*: an ink check with "Applied · move 3, round 1" over "In the planning copy". *No space*: the dark hatched **NO SPACE chip** (`{components.no-space-chip}`) in place of the to-chip.
 - **Round chip** (`{components.round-chip}`). "Round 1" in a white chip with an ink outline and a 5px ink bar, next to the page title.
-- **Recommendation detail panel.** On the right, `{colors.surface}`, `{rounded.xl}`, with a 5px `{colors.accent}` bar on its left edge. From top: the eyebrow "SELECTED · #1 · RULE 1" with "Show on the Locations wall" on the right; the part number in `{typography.section-title}` and the description; the reason as plain sentences in `{typography.body}` with the numbers in `{typography.body-strong}`; the wall crop (from-crop over to-crop for a cross-aisle move) with its Key; the move line (from → to with BEST) and the "If applied" effect in `{typography.meta}`; then the action bar: **Apply** primary, **Other location ▾** secondary, **Keep in place** and **Manual move…** as links, with the `Alt` shortcuts as small key caps. → [recommendations interface](./mockups/interface.svg)
+- **Recommendation detail panel.** On the right, `{colors.surface}`, `{rounded.xl}`, with a 5px `{colors.accent}` bar on its left edge. From top: the eyebrow "SELECTED · #1 · RULE 1" with "Show on the Locations wall" on the right; the part number in `{typography.section-title}` and the description; the reason as plain sentences in `{typography.body}` with the numbers in `{typography.body-strong}`; the wall crop (from-crop over to-crop for a cross-aisle move) with its Key; the move line (from → to with BEST) in `{typography.meta}`; then the action bar: **Apply** primary, **Other location ▾** secondary, **Keep in place** and **Manual move…** as links, with the `Alt` shortcuts as small key caps. → [recommendations interface](./mockups/interface.svg)
 
 **Overlays.**
 - **Tooltip** (`{components.tooltip}`). The bin popover. It shows the location code in 20px Barlow, "Level 1", the BEST tag, "Occupied · 2 parts" on the right, the mark source and Walk Path, a hairline, then one line per part (bin swatch, part number, description, class · picks · stock), and a partner strip on the ground colour.
