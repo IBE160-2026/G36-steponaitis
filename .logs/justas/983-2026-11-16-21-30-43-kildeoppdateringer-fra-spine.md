@@ -26,7 +26,7 @@ Etter `bmad-help` ba brukeren meg rette de to åpne punktene fra [arkitektur-spi
   - Notatet «Updated on 2026-11-16 from the architecture spine» står under Open Questions.
 - **Spine:** `[ASSUMPTION]` er fjernet fra root-`npm run dev` (concurrently) og fra preview-deployments av for hele prosjektet. Innledningen sier nå at ingen antakelser gjenstår, og Upstream Updates er markert som utført. Memloggen har to nye linjer.
 - To punkter i `issues.md` fra arkitektur-spine er lukket.
-- Dokumentendringene er ikke committet. Bare loggfilene er committet.
+- Dokumentendringene ble committet som `ea2a693` («Apply architecture upstream updates to PRD and UX; confirm spine assumptions») da brukeren ba om det, og pushet til origin/main sammen med loggcommiten `a26d593` (`3bf2a09..ea2a693`).
 
 ### Åpne punkter
 Ingen.
