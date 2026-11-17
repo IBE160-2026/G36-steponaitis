@@ -21,7 +21,7 @@ Etter `bmad-help` ville brukeren lukke de tre åpne punktene fra [epics-og-stori
   - Story 1.1 delt i 1.1 «Local walking skeleton» (scaffold, `npm run dev`, `/api/health`, lag- og slice-regler lokalt, `.gitignore`, README), 1.2 «CI on every push» (ci.yml med SQLite + Postgres 17, `/api/health` mot Postgres, bevisst brudd feiler CI; schema-diffen legges til av storyen som først genererer `schema.ts`) og 1.3 «Live on the public Vercel URL» (Vercel Services, Supabase, Production-variabler uten `JWT_SECRET` som kommer i 9.7, oppstartssjekk, `keep-alive.yml` med `workflow_dispatch`, README-URL).
   - Tidligere 1.2–1.7 renummerert til 1.4–1.9, med alle henvisninger (1.5→1.7, 1.7→1.9) og «affects Epic 1 Stories 1.1–1.3» i Additional Requirements.
 - Lukket i `issues.md`: alle tre punktene fra 2026-11-17.
-- Endringene i spinen og epics.md er ukommittert ved loggføring.
+- Endringene i spinen og epics.md er committet som `222c3fb` («Resolve open planning items before sprint planning») og pushet til origin/main sammen med loggcommiten, slik brukeren ba om.
 
 ### Åpne punkter
 Ingen.
