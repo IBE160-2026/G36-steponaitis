@@ -141,7 +141,7 @@ PRD glossary terms (§3) and IDs (FR-n, NFR-n, UJ-n, AD-n) are used verbatim. Wh
 
 From `ARCHITECTURE-SPINE.md` (AD-1 to AD-20, conventions, stack, structural seed). Greenfield: no `backend/` or `frontend/` exists yet.
 
-**Starter / scaffold (affects Epic 1 Story 1)**
+**Starter / scaffold (affects Epic 1 Stories 1.1–1.3)**
 
 - No third-party starter template. The first story is a **walking skeleton**: scaffold `backend/` (uv, Python 3.12 pinned in `.python-version`, FastAPI, `swp` package with `domain/ app/ store/ api/`, `config.py`, `cli.py`, `main.py`) and `frontend/` (Next.js 16 App Router, React 19, TS 5.9, Tailwind 4, `shadcn init -b radix`, TanStack Query), a root `package.json` whose `npm run dev` starts both with concurrently, `vercel.json` with Vercel Services (frontend + backend `swp.main:app`, `/api/(.*)` → backend), and deploy `GET /api/health` (runs `SELECT 1`) plus one page to Vercel. Preview deployments off for the whole project.
 - The scaffold story checks `.gitignore` against: `backend/var/` (incl. SQLite `-wal/-shm/-journal`), `data/private/*`, `.env*` except examples, test and Playwright outputs.
@@ -451,11 +451,11 @@ A planner who changes a plan that someone else saved meanwhile is warned and can
 
 The planner uploads the three export files and gets either a plan or an exact list of what is wrong with each file. The plan opens on its overview, which shows the data-as-of date and the settings. This epic also lays the walking skeleton, the shared kernel and the app shell that every later slice reuses.
 
-### Story 1.1: Walking skeleton, running locally and on the public URL
+### Story 1.1: Local walking skeleton
 
 As the planner (and the author),
-I want the app to start locally with one command and to be live on the public Vercel URL,
-So that every later slice is built on a running, deployed and CI-checked base.
+I want the app to start locally with one command, with the layer and slice rules checked from the first commit,
+So that every later slice is built on a running base that keeps its boundaries.
 
 **Acceptance Criteria:**
 
@@ -471,19 +471,9 @@ So that every later slice is built on a running, deployed and CI-checked base.
 **And** the versions match the spine's Stack table.
 
 **Given** the layer rules (AD-1, AD-2) and the slice rules (Epic Design section)
-**When** CI runs ruff and import-linter
+**When** ruff, import-linter and ESLint run locally (one documented command each)
 **Then** `swp.domain` may import only the stdlib and pydantic, only `swp.store` may import SQLAlchemy, `uuid4`, `datetime.now` and `random` are banned in `swp.domain` through ruff `banned-api`, and frontend modules may not import each other (ESLint `no-restricted-imports`)
-**And** a deliberate violation in a throwaway branch fails CI.
-
-**Given** a push to any branch
-**When** GitHub Actions runs `ci.yml`
-**Then** it runs ruff, import-linter, pytest on SQLite, `tests/app` against a Postgres 17 service container, the frontend typecheck and Vitest, and the job is green on the skeleton
-**And** `keep-alive.yml` calls `GET /api/health` on the public URL once a day.
-
-**Given** `vercel.json` with Vercel Services (frontend plus `swp.main:app`, `/api/(.*)` → backend) and preview deployments turned off
-**When** `main` is deployed
-**Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
-**And** the backend refuses to start when `VERCEL` is set and `APP_ENV` is not.
+**And** a deliberate violation of each rule makes its check fail.
 
 **Given** the git-ignore convention
 **When** the scaffold story ends
@@ -491,7 +481,47 @@ So that every later slice is built on a running, deployed and CI-checked base.
 **And** the README has the install, start and test commands
 **And** no dependency calls a language model or AI service, and the app makes no runtime network calls locally (NFR-2, NFR-3).
 
-### Story 1.2: App shell and design foundation
+### Story 1.2: CI on every push
+
+As the author,
+I want every push checked by GitHub Actions on SQLite and Postgres,
+So that a broken rule, test or schema never reaches `main` unnoticed.
+
+**Acceptance Criteria:**
+
+**Given** a push to any branch
+**When** GitHub Actions runs `ci.yml`
+**Then** it runs ruff, import-linter, ESLint, pytest on SQLite, `tests/app` against a Postgres 17 service container, the frontend typecheck and Vitest, and the job is green on the skeleton
+**And** a `tests/app` test runs the `/api/health` `SELECT 1` against Postgres, so the Postgres job tests something from day one.
+
+**Given** the layer and slice checks from Story 1.1
+**When** a deliberate violation is pushed in a throwaway branch
+**Then** CI fails on it, and the branch is deleted afterwards
+**And** the OpenAPI schema diff (AD-13) is added to `ci.yml` by the story that first generates `schema.ts`, not here.
+
+### Story 1.3: Live on the public Vercel URL
+
+As the planner (and the author),
+I want the skeleton deployed to the public Vercel URL against Supabase Postgres,
+So that every later slice is shipped to the same origin it will be judged on.
+
+**Acceptance Criteria:**
+
+**Given** `vercel.json` with Vercel Services (frontend plus `swp.main:app`, `/api/(.*)` → backend) and preview deployments turned off
+**When** `main` is deployed
+**Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
+**And** `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `APP_ENV=production` are set for Production only (`JWT_SECRET` and the auth flags follow in Story 9.7).
+
+**Given** the startup checks (AD-10)
+**When** the backend starts with `VERCEL` set and `APP_ENV` unset
+**Then** it refuses to start, and a test covers it.
+
+**Given** the deployed `/api/health`
+**When** `keep-alive.yml` runs
+**Then** it calls `GET /api/health` on the public URL once a day and can also be started by hand (`workflow_dispatch`)
+**And** the README has the public URL and the steps for the manual `uv run swp db upgrade` before a schema change.
+
+### Story 1.4: App shell and design foundation
 
 As a planner,
 I want the app to open in its own clear, consistent look with the toolbar and the eight-step flow,
@@ -523,7 +553,7 @@ So that I always see where I am and every later screen looks and behaves the sam
 **When** a toast or popover appears
 **Then** it appears without sliding, and nothing animates longer than 200 ms (UX-DR57).
 
-### Story 1.3: Read the files and check their columns and values
+### Story 1.5: Read the files and check their columns and values
 
 As a planner,
 I want each uploaded file read the same way and checked for required columns and valid values,
@@ -556,7 +586,7 @@ So that a bad export is stopped with the exact file, row and column instead of s
 **Then** they are `import_invalid` details per file: `{file_role, file_name, status: passed | failed | not_checked, errors: [{row, column, message}] (at most 20), more_count}`, and every error in every file is reported, not just the first
 **And** domain tests named `test_fr3_*` and `test_fr4_*` cover each rejection with small synthetic fixtures.
 
-### Story 1.4: Check locations, normalize the data and find the data-as-of date
+### Story 1.6: Check locations, normalize the data and find the data-as-of date
 
 As a planner,
 I want the import to check that every shelf line points to a real location, to keep codes exactly as exported and to merge duplicates,
@@ -583,7 +613,7 @@ So that the plan is built on data I can trust and I know how current it is.
 **Then** it holds `locations` keyed by code, the merged `inventory`, `parts` with the first non-blank description in file order, the `transactions` reduced to the fields the analysis needs, `schema_version`, and `data_as_of` = the newest date over every data row of the Transactions file (FR-7, AD-4)
 **And** the answer-key files in `data/answer-key/` pass and give `data_as_of` 2026-09-30.
 
-### Story 1.5: Create and store a plan from three files
+### Story 1.7: Create and store a plan from three files
 
 As a planner,
 I want a plan to be created and saved only when all three files pass,
@@ -619,7 +649,7 @@ So that a plan never rests on a half-imported file and is still there after a re
 **When** they are posted
 **Then** a plan is created within the NFR-8 budget (checked later by `test_nfr8_timing.py`), and after a backend restart the plan and its import are still there (NFR-12, `tests/app` on SQLite and on Postgres in CI).
 
-### Story 1.6: New Plan screen with upload progress and import errors
+### Story 1.8: New Plan screen with upload progress and import errors
 
 As a planner,
 I want to name a plan, choose the three files and see either the new plan or exactly what to fix,
@@ -651,7 +681,7 @@ So that I can start planning from a fresh export without guessing.
 **Then** the plan's overview opens with the toast "<name> created. Data as of <date>."
 **And** a Playwright test imports `data/sample/` in Chromium.
 
-### Story 1.7: Plan overview, settings and the milestone 1 start
+### Story 1.9: Plan overview, settings and the milestone 1 start
 
 As a planner,
 I want the plan to open on an overview of its data and settings, and the app to take me straight to my latest plan,
@@ -713,9 +743,9 @@ So that I can see which parts are fast-moving, medium-moving, slow-moving or dea
 **Then** every part gets the picks and class in `expected.json`, including the boundary parts `9000` (0), `0100` (1), `0500` (5), `0600` (6), `2300` (23) and `10240`/`2400` (24) (`test_fr17_answer_key_classes`).
 
 **Given** `app.plans.create`
-**When** a plan is created from files (Story 1.5)
+**When** a plan is created from files (Story 1.7)
 **Then** `analysis` now holds the movement class and picks of every part, computed from the stored import with the plan's settings snapshot, and the plan reopens with the same classes even if `analysis.toml` changes later (FR-18, AD-4)
-**And** the overview's counts per movement class (left at zero in Story 1.7) show the real counts, and `GET /api/plans/{id}` returns them.
+**And** the overview's counts per movement class (left at zero in Story 1.9) show the real counts, and `GET /api/plans/{id}` returns them.
 
 ### Story 2.2: Find pick groups
 
@@ -950,7 +980,7 @@ So that what I see is always what is stored, and I never lose track of an edit.
 **Given** a network error or a 502/503/504
 **When** the command fails
 **Then** it is retried with the same `command_id` after 1, 2, 4 and 8 s while the `GlobalNotice` says "The last change was not saved yet. Trying again."; after that, or after a 500, the command is dropped, the plan is refetched and the notice says "The change was not saved. Try again." (AD-12, UX-DR15)
-**And** another 4xx drops the command, shows its `message` in a toast and refetches, and `plan_not_found` uses the shared handling from Story 1.7.
+**And** another 4xx drops the command, shows its `message` in a toast and refetches, and `plan_not_found` uses the shared handling from Story 1.9.
 
 **Given** the save status
 **When** it changes
@@ -1004,7 +1034,7 @@ So that the planning copy can never drift from the moves and the import stays un
 
 **Acceptance Criteria:**
 
-**Given** `PlanState` from Story 1.5
+**Given** `PlanState` from Story 1.7
 **When** the step type is defined in `domain/state.py`
 **Then** a step holds its move number, part, from-location, to-location, rule (`rule_1 | rule_2 | rule_3 | manual`), round, recommendation id (or none) and `swap_id` (or none), and `next_move_number` starts at 1 (AD-5)
 **And** if the stored shape changes, the next upcaster and a fixture `state_v<n>.json` are added in `domain/state_migrations.py` in the same change (AD-4).

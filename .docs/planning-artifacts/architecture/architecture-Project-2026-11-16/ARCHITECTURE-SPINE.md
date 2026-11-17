@@ -7,7 +7,7 @@ paradigm: 'functional core, imperative shell (pure domain, thin service/API shel
 scope: 'The whole app for the core (milestones 1–2: FR-1–FR-40, FR-42, FR-50, FR-51) and the hooks stage 2 builds on'
 status: final
 created: '2026-11-16'
-updated: '2026-11-16'
+updated: '2026-11-17'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, FR-38, FR-39, FR-40, FR-42, FR-50, FR-51, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12]
 sources:
   - .docs/planning-artifacts/prds/prd-Project-2026-11-01/prd.md
@@ -80,7 +80,7 @@ flowchart LR
   - **Views.** Every plan view response carries the plan `version` it was computed from. After each confirmed command the client refetches every `['plan', planId]` query. It renders a set of plan queries together only when their versions agree; otherwise it refetches the stale ones (at most 2 times).
   - **Import-scoped data** (the wall layout from AD-15 and the static location columns) is served under `['import', importId]` with an immutable cache, and the refetch after a command leaves it alone.
   - **Plan summary.** `GET /api/plans/{id}` is the plan summary: the plate data, each step's check state and counts, `apply_all_count`, `undo_preview` (AD-5) and the current round. The toolbar, flow bar and launcher read only this view.
-  - **Previews and search.** `GET /api/plans/{id}/moves/preview?part=&from=&to=` returns `{allowed, refusal_message?, effect: new | adds_to_stock | combines_with(n) | removes_move(n)}` from `domain.planning` and writes nothing. The Manual move dialog and the drop targets use it, and the command checks again on submit. Search is `GET /api/plans/{id}/search?q=`: partial match, Python `casefold`, results in AD-14 order.
+  - **Previews and search.** `GET /api/plans/{id}/moves/preview?part=&from=&to=` returns `{allowed, refusal_message?, effect: new | adds_to_stock | combines_with(n) | removes_move(n), target: empty | occupied | none, target_parts[]}` from `domain.planning` and writes nothing. `target_parts` lists the parts stored at `to` (number, description, class, picks, stock, kept in place), so the drop dialog never computes them. The Manual move dialog and the drop targets use it, and the command checks again on submit. Search is `GET /api/plans/{id}/search?q=`: partial match, Python `casefold`, results in AD-14 order.
   - The backend has no cross-request cache of plan state. A request runs `replay` once and builds everything it returns from that one fold.
 
 ### AD-4: Plan aggregate as versioned documents
@@ -463,7 +463,7 @@ The first story (the walking skeleton) deploys `GET /api/health` and one page to
 | Move list (FR-38) | `domain/move_list`, `frontend/app/plans/[id]/print` | AD-17, AD-14 |
 | Accounts, login, Demo version (FR-39, FR-40, FR-50) | `app/auth`, `modules/auth` | AD-10, AD-18, AD-19 |
 | Warehouse wall (FR-42) | `domain/layout`, `modules/locations` | AD-15, AD-3, AD-20 |
-| Drag to move or swap (FR-51) | `modules/locations`, `domain.apply` | AD-16, AD-5, AD-3 (preview) |
+| Drag to move or swap (FR-51) | `modules/locations`, `domain/drag` (handlers for `move_parts`, `put_together`, `swap`, dispatched by `domain.apply`) | AD-16, AD-5, AD-3 (preview) |
 | Stage 2: category check, labels (FR-43–FR-48) | new `domain` modules plus global tables | Deferred |
 
 ## Deferred
@@ -471,7 +471,7 @@ The first story (the walking skeleton) deploys `GET /api/health` and one page to
 - **Endpoint fields and view payloads.** Each story sets its own. AD-3, AD-6, AD-11 and AD-13 bind their shape, and the generated types keep both sides in step.
 - **How the wall is drawn** (SVG or DOM) and the component breakdown. DESIGN.md and EXPERIENCE.md govern the look; AD-15 governs the data.
 - **FR-41 concurrent-edit warning** (if time allows). It warns when `base_version` is behind, then applies the command on top of the current state. There is no whole-plan overwrite.
-- **Stage 2** storage for keyword rules and aisle categories (global tables) and the QR library. Decided after the milestone 2 gate.
+- **Stage 2** storage for keyword rules and aisle categories (global tables) and the QR library. Decided after the milestone 2 gate. The stories that build them update this spine in the same change: Story 13.1 (global category tables), Story 13.4 (starter categories become a second seed, next to the demo account), Story 14.1 (QR library in the Stack table) and Story 15.1 (error code `plan_changed` added to AD-11).
 - **Operations the demo doesn't need:** backups, monitoring beyond the keep-alive, Redis, file storage, email, payments, maintenance page. The data is synthetic and the scale is NFR-7.
 - **IP-based rate limiting.** Serverless instances share no memory. AD-18's per-username throttle is enough for the demo.
 
