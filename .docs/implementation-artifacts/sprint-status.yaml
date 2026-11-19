@@ -1,0 +1,156 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 11-19-2026 19:11
+last_updated: 11-19-2026 19:11
+project: Smart Warehouse Planner
+project_key: NOKEY
+tracking_system: file-system
+story_location: .docs/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-local-walking-skeleton: backlog
+  1-2-ci-on-every-push: backlog
+  1-3-live-on-the-public-vercel-url: backlog
+  1-4-app-shell-and-design-foundation: backlog
+  1-5-read-the-files-and-check-their-columns-and-values: backlog
+  1-6-check-locations-normalize-the-data-and-find-the-data-as-of-d: backlog
+  1-7-create-and-store-a-plan-from-three-files: backlog
+  1-8-new-plan-screen-with-upload-progress-and-import-errors: backlog
+  1-9-plan-overview-settings-and-the-milestone-1-start: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-count-picks-and-classify-every-part: backlog
+  2-2-find-pick-groups: backlog
+  2-3-parts-roster: backlog
+  2-4-locations-table-with-occupancy: backlog
+  2-5-pick-groups-table: backlog
+  2-6-part-panel-and-search: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-best-location-marks-in-the-domain: backlog
+  3-2-the-command-endpoint-with-best-location-mark-commands: backlog
+  3-3-client-command-flow-and-autosave: backlog
+  3-4-best-locations-step-mark-and-unmark-from-the-table: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-step-log-replay-and-the-planning-copy: backlog
+  4-2-make-a-manual-move-command-and-preview: backlog
+  4-3-manual-move-dialog-from-the-part-panel: backlog
+  4-4-views-follow-the-planning-copy: backlog
+  4-5-before-after-counts-in-the-domain: backlog
+  4-6-before-after-page: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-run-rule-1-and-store-the-run: backlog
+  5-2-apply-a-recommendation: backlog
+  5-3-rule-2-and-rounds: backlog
+  5-4-rule-3-with-its-limits: backlog
+  5-5-reasons-and-outdated-recommendations: backlog
+  5-6-apply-all: backlog
+  5-7-recommendations-page: backlog
+  5-8-milestone-1-gate: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-saved-plans-list-as-the-start-page: backlog
+  6-2-reopen-a-plan-exactly-as-it-was-left: backlog
+  6-3-start-a-new-plan-from-an-existing-plan-s-import: backlog
+  6-4-delete-a-plan: backlog
+  6-5-launcher-jump-to-any-step-action-or-saved-plan: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-keep-a-part-in-place: backlog
+  7-2-apply-a-recommendation-with-another-location: backlog
+  7-3-undo-the-last-move: backlog
+  7-4-reset-the-planning-copy: backlog
+  7-5-answer-key-scenario-through-run-3: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-move-list-order-and-header-in-the-domain: backlog
+  8-2-mark-the-lines-of-a-swap: backlog
+  8-3-move-list-print-view: backlog
+  8-4-paper-layout-and-print-check-in-every-browser: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-create-an-account: backlog
+  9-2-log-in-log-out-and-the-page-guard: backlog
+  9-3-plans-record-the-logged-in-user-the-user-menu-and-session-ex: backlog
+  9-4-login-throttle-and-account-limits: backlog
+  9-5-seeded-demo-account-and-demo-version: backlog
+  9-6-demo-front-page: backlog
+  9-7-switch-milestone-2-auth-on-in-production-with-readme-and-sec: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog
+  10-1-wall-layout-as-an-import-scoped-domain-view: backlog
+  10-2-draw-one-aisle-as-a-bin-wall-with-its-key: backlog
+  10-3-navigate-the-wall-by-keyboard-and-read-its-tooltips: backlog
+  10-4-see-recommendations-and-moves-on-the-wall: backlog
+  10-5-wall-crops-in-the-recommendation-detail: backlog
+  10-6-whole-warehouse-view: backlog
+  10-7-mark-best-locations-on-the-wall: backlog
+  epic-10-retrospective: optional
+
+  epic-11: backlog
+  11-1-colour-maths-and-presets: backlog
+  11-2-key-colours-as-live-css-variables-kept-in-the-browser: backlog
+  11-3-change-a-colour-from-the-key: backlog
+  epic-11-retrospective: optional
+
+  epic-12: backlog
+  12-1-drag-commands-expand-into-manual-moves-on-the-server: backlog
+  12-2-drag-a-bin-on-the-wall-and-drop-it-on-an-empty-location: backlog
+  12-3-drop-on-an-occupied-location-to-swap-or-put-together: backlog
+  12-4-swaps-through-undo-outdated-recommendations-and-the-move-lis: backlog
+  12-5-milestone-2-gate: backlog
+  epic-12-retrospective: optional
+
+  epic-13: backlog
+  13-1-keyword-rules-are-stored-globally-and-give-each-part-a-categ: backlog
+  13-2-manage-keyword-rules-and-aisle-categories: backlog
+  13-3-run-the-category-check-on-the-planning-copy: backlog
+  13-4-starter-categories-for-the-demo-data: backlog
+  epic-13-retrospective: optional
+
+  epic-14: backlog
+  14-1-print-location-labels-for-an-aisle: backlog
+  epic-14-retrospective: optional
+
+  epic-15: backlog
+  15-1-warn-when-someone-else-saved-the-plan: backlog
+  epic-15-retrospective: optional
