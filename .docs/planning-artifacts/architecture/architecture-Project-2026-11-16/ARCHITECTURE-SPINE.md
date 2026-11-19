@@ -7,7 +7,7 @@ paradigm: 'functional core, imperative shell (pure domain, thin service/API shel
 scope: 'The whole app for the core (milestones 1–2: FR-1–FR-40, FR-42, FR-50, FR-51) and the hooks stage 2 builds on'
 status: final
 created: '2026-11-16'
-updated: '2026-11-17'
+updated: '2026-11-19'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, FR-38, FR-39, FR-40, FR-42, FR-50, FR-51, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12]
 sources:
   - .docs/planning-artifacts/prds/prd-Project-2026-11-01/prd.md
@@ -442,7 +442,7 @@ Environments:
 | `local` | SQLite. `bootstrap` (migrate and seed) runs in the lifespan. `FEATURE_DEMO` off. `FEATURE_AUTH` follows the milestone. |
 | `production` (Vercel) | `APP_ENV=production`; `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `JWT_SECRET` scoped to Production. Milestone 1: `FEATURE_AUTH` and `FEATURE_DEMO` off, so the app opens with no front page. Milestone 2: both on. Before deploying a schema change, run `uv run swp db upgrade` by hand. |
 
-The first story (the walking skeleton) deploys `GET /api/health` and one page to Vercel. Preview deployments are turned off for the whole project. CI (GitHub Actions) runs on every push: ruff, import-linter, pytest on SQLite, `tests/app` against Postgres 17, the frontend typecheck, Vitest, and the schema diff (AD-13). Playwright runs locally before each milestone gate.
+The walking skeleton runs `GET /api/health` and one page locally. Deployment to Vercel is deferred until the user has approved the website (decision 2026-11-19, epics Story 16.1); preview deployments are then turned off for the whole project. CI (GitHub Actions) runs on every push: ruff, import-linter, pytest on SQLite, `tests/app` against Postgres 17, the frontend typecheck, Vitest, and the schema diff (AD-13). Playwright runs locally before each milestone gate.
 
 ## Capability → Architecture Map
 

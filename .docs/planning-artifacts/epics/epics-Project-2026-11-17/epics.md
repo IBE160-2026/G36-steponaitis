@@ -14,6 +14,7 @@ excludedDocuments:
   - .docs/planning-artifacts/architecture/technology.md (reference from another project; the spine is binding)
   - review-*.md, reconcile-*.md, tilbakemelding-*.md, research/ (already folded into the final documents)
 created: 2026-11-17
+updated: 2026-11-19
 ---
 
 # Smart Warehouse Planner - Epic Breakdown
@@ -24,7 +25,9 @@ This document provides the complete epic and story breakdown for Smart Warehouse
 
 PRD glossary terms (§3) and IDs (FR-n, NFR-n, UJ-n, AD-n) are used verbatim. Where the PRD and the brief's addendum differ, the PRD wins (PRD §10); for example, the addendum's red/green warehouse view and "no self-registration" are superseded.
 
-**Scope tags:** `[M1]` core milestone 1 · `[M2]` core milestone 2 · `[S2]` stage 2 (after the milestone 2 gate) · `[ITA]` if time allows. FR-49 was withdrawn and its ID is not reused.
+**Scope tags:** `[M1]` core milestone 1 · `[M2]` core milestone 2 · `[S2]` stage 2 (after the milestone 2 gate) · `[ITA]` if time allows · `[DEPLOY]` the public deployment, done last. FR-49 was withdrawn and its ID is not reused.
+
+**Deployment deferred (user decision 2026-11-19):** nothing is deployed to Vercel or Supabase while the app is built. The app is built and checked locally through Epics 1–12; the public deployment is Epic 16 and starts only after the user has approved the website. Former Story 1.3 is now Story 16.1, and the production parts of Stories 9.7 and 12.5 are now Story 16.2.
 
 ## Requirements Inventory
 
@@ -141,9 +144,9 @@ PRD glossary terms (§3) and IDs (FR-n, NFR-n, UJ-n, AD-n) are used verbatim. Wh
 
 From `ARCHITECTURE-SPINE.md` (AD-1 to AD-20, conventions, stack, structural seed). Greenfield: no `backend/` or `frontend/` exists yet.
 
-**Starter / scaffold (affects Epic 1 Stories 1.1–1.3)**
+**Starter / scaffold (affects Epic 1 Stories 1.1–1.2 and, deferred, Story 16.1)**
 
-- No third-party starter template. The first story is a **walking skeleton**: scaffold `backend/` (uv, Python 3.12 pinned in `.python-version`, FastAPI, `swp` package with `domain/ app/ store/ api/`, `config.py`, `cli.py`, `main.py`) and `frontend/` (Next.js 16 App Router, React 19, TS 5.9, Tailwind 4, `shadcn init -b radix`, TanStack Query), a root `package.json` whose `npm run dev` starts both with concurrently, `vercel.json` with Vercel Services (frontend + backend `swp.main:app`, `/api/(.*)` → backend), and deploy `GET /api/health` (runs `SELECT 1`) plus one page to Vercel. Preview deployments off for the whole project.
+- No third-party starter template. The first story is a **walking skeleton**: scaffold `backend/` (uv, Python 3.12 pinned in `.python-version`, FastAPI, `swp` package with `domain/ app/ store/ api/`, `config.py`, `cli.py`, `main.py`) and `frontend/` (Next.js 16 App Router, React 19, TS 5.9, Tailwind 4, `shadcn init -b radix`, TanStack Query), a root `package.json` whose `npm run dev` starts both with concurrently, `vercel.json` with Vercel Services (frontend + backend `swp.main:app`, `/api/(.*)` → backend), and `GET /api/health` (runs `SELECT 1`) plus one page. Deploying them to Vercel (preview deployments off for the whole project) is deferred to Story 16.1.
 - The scaffold story checks `.gitignore` against: `backend/var/` (incl. SQLite `-wal/-shm/-journal`), `data/private/*`, `.env*` except examples, test and Playwright outputs.
 - CI (GitHub Actions) on every push: ruff, import-linter, pytest on SQLite, `tests/app` against Postgres 17, frontend typecheck, Vitest, and the OpenAPI schema diff. `keep-alive.yml` does a daily `GET /api/health`. Playwright runs locally before each milestone gate.
 - Exact stack versions are pinned in the spine's Stack table (FastAPI 0.163.1, SQLAlchemy 2.1.8, Alembic 1.20.1, Next.js 16.4.6, React 19.3.1, etc.).
@@ -197,7 +200,7 @@ From `ARCHITECTURE-SPINE.md` (AD-1 to AD-20, conventions, stack, structural seed
 **Environments and deployment**
 
 - `local`: SQLite, bootstrap in lifespan, `FEATURE_DEMO` off, `FEATURE_AUTH` follows the milestone.
-- `production` (Vercel): `APP_ENV=production`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET` scoped to Production. M1: auth and demo flags off (no front page). M2: both on. Run `uv run swp db upgrade` by hand before deploying a schema change.
+- `production` (Vercel, deferred to Epic 16): `APP_ENV=production`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET` scoped to Production. M1: auth and demo flags off (no front page). M2: both on. Run `uv run swp db upgrade` by hand before deploying a schema change.
 
 **Milestone gates (PRD §7.1, SM-1, SM-2)**
 
@@ -373,10 +376,10 @@ User decision 2026-11-17: each epic is a **vertical slice** whose code is as iso
 
 ## Epic List
 
-Epics run in this order. Epics 1–5 are milestone 1 (their last story is the M1 gate), Epics 6–12 are milestone 2 (Epic 12 ends with the M2 gate), Epics 13–14 are stage 2 and Epic 15 is "if time allows". Each epic builds on the earlier ones and never needs a later one.
+Epics run in this order. Epics 1–5 are milestone 1 (their last story is the M1 gate), Epics 6–12 are milestone 2 (Epic 12 ends with the M2 gate), Epics 13–14 are stage 2, Epic 15 is "if time allows", and Epic 16 (the public deployment) runs last, after the user has approved the website. Each epic builds on the earlier ones and never needs a later one.
 
 ### Epic 1: Start a plan from the warehouse's exports `[M1]`
-The planner uploads the three export files, gets either a plan or an exact list of what is wrong with each file, and sees the plan overview with its data-as-of date and settings. Includes the walking skeleton (deployed to Vercel), the design tokens and app shell (toolbar, plan plate, flow bar), the shared kernel and the M1 start redirect.
+The planner uploads the three export files, gets either a plan or an exact list of what is wrong with each file, and sees the plan overview with its data-as-of date and settings. Includes the local walking skeleton with CI (deployment comes in Epic 16), the design tokens and app shell (toolbar, plan plate, flow bar), the shared kernel and the M1 start redirect.
 **FRs covered:** FR-1, FR-3, FR-4, FR-5, FR-6, FR-7, FR-11, FR-18
 **Slice:** `domain/import_`, `app/imports` (readers), `app/plans`, `modules/new-plan`, `modules/overview`, `modules/settings` · **UX-DRs:** 1–6, 9–11, 15, 19–22, 55–58
 
@@ -447,6 +450,10 @@ The planner prints a label with a scannable QR code for every location in an ais
 A planner who changes a plan that someone else saved meanwhile is warned and can reload or continue on top.
 **FRs covered:** FR-41
 
+### Epic 16: Go live on the public URL `[DEPLOY]`
+After the user has approved the website locally, the app is deployed to the public Vercel URL against Supabase Postgres, first as the skeleton check and then with login and the demo on, so examiners can use it there.
+**FRs covered:** none new; it ships FR-40 and FR-50 to production (NFR-5, NFR-6) · **Not part of the autonomous run:** it needs the user's Vercel and Supabase accounts.
+
 ## Epic 1: Start a plan from the warehouse's exports
 
 The planner uploads the three export files and gets either a plan or an exact list of what is wrong with each file. The plan opens on its overview, which shows the data-as-of date and the settings. This epic also lays the walking skeleton, the shared kernel and the app shell that every later slice reuses.
@@ -499,27 +506,7 @@ So that a broken rule, test or schema never reaches `main` unnoticed.
 **Then** CI fails on it, and the branch is deleted afterwards
 **And** the OpenAPI schema diff (AD-13) is added to `ci.yml` by the story that first generates `schema.ts`, not here.
 
-### Story 1.3: Live on the public Vercel URL
-
-As the planner (and the author),
-I want the skeleton deployed to the public Vercel URL against Supabase Postgres,
-So that every later slice is shipped to the same origin it will be judged on.
-
-**Acceptance Criteria:**
-
-**Given** `vercel.json` with Vercel Services (frontend plus `swp.main:app`, `/api/(.*)` → backend) and preview deployments turned off
-**When** `main` is deployed
-**Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
-**And** `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `APP_ENV=production` are set for Production only (`JWT_SECRET` and the auth flags follow in Story 9.7).
-
-**Given** the startup checks (AD-10)
-**When** the backend starts with `VERCEL` set and `APP_ENV` unset
-**Then** it refuses to start, and a test covers it.
-
-**Given** the deployed `/api/health`
-**When** `keep-alive.yml` runs
-**Then** it calls `GET /api/health` on the public URL once a day and can also be started by hand (`workflow_dispatch`)
-**And** the README has the public URL and the steps for the manual `uv run swp db upgrade` before a schema change.
+Story 1.3 (the public Vercel deployment) was moved to Story 16.1 on 2026-11-19; deployment is deferred until the user has approved the website. The story numbers 1.4–1.9 are kept.
 
 ### Story 1.4: App shell and design foundation
 
@@ -2031,18 +2018,18 @@ So that I understand the flow before I log in.
 **When** they log out
 **Then** they return to the demo front page (FR-40).
 
-### Story 9.7: Switch milestone 2 auth on in production, with README and secrets
+### Story 9.7: Production-like auth configuration, README and secrets
 
 As the author,
-I want production to run with login and the demo on, and the README to explain accounts and secrets,
-So that examiners can follow the README locally and on the public URL.
+I want the app to run with login and the demo on in a production-like local build, and the README to explain accounts and secrets,
+So that examiners can follow the README locally, and the later deployment (Story 16.2) only has to set the variables.
 
 **Acceptance Criteria:**
 
 **Given** `APP_ENV=production`
 **When** the backend starts with an empty or default `JWT_SECRET`, or with `VERCEL` set and `APP_ENV` unset
-**Then** it refuses to start with a clear log line (AD-10, NFR-6)
-**And** `JWT_SECRET`, `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `DEMO_PASSWORD` are scoped to Production on Vercel, with `FEATURE_AUTH` and `FEATURE_DEMO` on.
+**Then** it refuses to start with a clear log line, and a test covers each case (AD-10, NFR-6)
+**And** setting `JWT_SECRET`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `DEMO_PASSWORD`, `FEATURE_AUTH` and `FEATURE_DEMO` on Vercel is Story 16.2, not this story.
 
 **Given** the repo
 **When** the story is done
@@ -2052,8 +2039,8 @@ So that examiners can follow the README locally and on the public URL.
 **When** an examiner reads it
 **Then** it explains setting the env vars for a local run with `FEATURE_AUTH` on, lists the demo account `demo`/`demo`, states that the public deployment holds synthetic data only, and links the public URL (FR-40, NFR-2, NFR-5).
 
-**Given** the deployed public URL
-**When** a Playwright run against a local production-like build (both flags on) opens `/`
+**Given** a local production-like build (`next build` plus the backend, both flags on, a test `JWT_SECRET`)
+**When** a Playwright run opens `/`
 **Then** the front page shows, Demo version opens the saved-plans list as `demo`, the avatar reads "DE", and Log out returns to the front page (UJ-5).
 
 ## Epic 10: See and mark the warehouse as a bin wall
@@ -2501,8 +2488,8 @@ So that the colleague knows to set one bin aside and the plan stays easy to reve
 ### Story 12.5: Milestone 2 gate
 
 As the author,
-I want the whole core proven by the answer-key tests, the README demo flow and the public deployment,
-So that milestone 2 is finished and stable before any stage 2 or "if time allows" work starts (SM-C3).
+I want the whole core proven locally by the answer-key tests and the README demo flow,
+So that milestone 2 is finished and stable before any stage 2 or "if time allows" work starts (SM-C3); the public deployment is checked later in Story 16.2.
 
 **Acceptance Criteria:**
 
@@ -2518,11 +2505,7 @@ So that milestone 2 is finished and stable before any stage 2 or "if time allows
 
 **Given** the performance and size checks
 **When** `tests/app/test_nfr8_timing.py` and the max-size import test run
-**Then** importing `data/sample/` with classes and pick groups takes under 10 s, a run under 5 s, a command plus the plan views under 1 s (NFR-8), and a generated import at `MAX_ROWS_PER_FILE` keeps every plan view response under 4 MB (AD-18).
-
-**Given** the production deployment
-**When** `main` is deployed with `FEATURE_AUTH` and `FEATURE_DEMO` on and `uv run swp db upgrade` has been run
-**Then** the public URL opens on the demo front page, Demo version and Log in work, the SM-2 flow runs there on `data/sample/`, and `GET /api/health` is green (NFR-5, FR-50)
+**Then** importing `data/sample/` with classes and pick groups takes under 10 s, a run under 5 s, a command plus the plan views under 1 s (NFR-8), and a generated import at `MAX_ROWS_PER_FILE` keeps every plan view response under 4 MB (AD-18)
 **And** no scaling work beyond NFR-7 (about 10 users, a few at a time) is added; the optimistic-version retry (AD-6) is the only concurrency handling
 **And** the gate is recorded in the session log; a run of the README flow by someone else is noted as still to be done before submission (SM-2).
 
@@ -2680,3 +2663,46 @@ So that I don't build on a picture of the plan that is no longer true.
 **Given** two browser sessions on one plan
 **When** `tests/api/test_fr41_*` and a Playwright test change the plan in session B and then in session A
 **Then** session A sees the warning, Keep going adds A's change after B's, and Reload plan shows B's change without A's.
+
+## Epic 16: Go live on the public URL
+
+Deployment was deferred on 2026-11-19: the app is built and checked locally first, and this epic starts only after the user has approved the website. It needs the user's Vercel and Supabase accounts, so it is not part of the autonomous run. The checks that used to sit in Story 1.3 and the production parts of Stories 9.7 and 12.5 are collected here.
+
+### Story 16.1: Live on the public Vercel URL
+
+As the planner (and the author),
+I want the approved app deployed to the public Vercel URL against Supabase Postgres,
+So that it runs on the same origin it will be judged on.
+
+**Acceptance Criteria:**
+
+**Given** `vercel.json` with Vercel Services (frontend plus `swp.main:app`, `/api/(.*)` → backend) and preview deployments turned off
+**When** `main` is deployed
+**Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
+**And** `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `APP_ENV=production` are set for Production only (`JWT_SECRET` and the auth flags follow in Story 16.2).
+
+**Given** the startup checks (AD-10)
+**When** the backend starts with `VERCEL` set and `APP_ENV` unset
+**Then** it refuses to start, and a test covers it.
+
+**Given** the deployed `/api/health`
+**When** `keep-alive.yml` runs
+**Then** it calls `GET /api/health` on the public URL once a day and can also be started by hand (`workflow_dispatch`)
+**And** the README has the public URL and the steps for the manual `uv run swp db upgrade` before a schema change.
+
+### Story 16.2: Production with login and the demo on
+
+As the author,
+I want the public deployment to run with login and the demo on,
+So that examiners can use the app on the public URL with the demo account.
+
+**Acceptance Criteria:**
+
+**Given** Story 16.1 is live and Story 9.7's production-like build passes locally
+**When** `JWT_SECRET`, `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `DEMO_PASSWORD` are scoped to Production on Vercel, with `FEATURE_AUTH` and `FEATURE_DEMO` on, and `uv run swp db upgrade` has been run
+**Then** the backend starts (the AD-10 checks pass) and no real secret is committed (NFR-6, NFR-4).
+
+**Given** the production deployment of `main`
+**When** the public URL is opened
+**Then** it opens on the demo front page, Demo version and Log in work, the SM-2 flow runs there on `data/sample/`, and `GET /api/health` is green (NFR-5, FR-50)
+**And** the result is recorded in the session log.
