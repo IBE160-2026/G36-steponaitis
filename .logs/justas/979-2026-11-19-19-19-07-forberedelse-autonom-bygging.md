@@ -24,11 +24,35 @@ Brukeren vil bygge alle epics og stories autonomt med goal-kommandoen, med én s
   - `gh` har scopene `repo` og `workflow`.
   - Actions-status på org-repoet kunne ikke leses (403, ikke admin).
 - Listen er gitt brukeren i tre deler: A) bare brukeren kan gjøre, B) beslutninger, C) det Claude forbereder.
-- Ingen kode eller konfig er endret.
+
+**Oppfølging kl. 19:32.** Brukeren valgte alle anbefalingene i B og utsatte deployment til nettsiden er godkjent:
+- Beslutningene:
+  - omfang epic 1–12
+  - loopen fører milepælsportene selv
+  - `main` med push etter hver story
+  - stopp og varsel ved blokkert story
+  - retrospektiv med `-H` etter hver epic
+  - én logg per story
+- **Deployment utsatt** (`53af420`):
+  - Ny Epic 16 «Go live on the public URL» `[DEPLOY]`.
+  - Story 1.3 er flyttet til 16.1.
+  - Vercel-delene av 9.7 og 12.5 er flyttet til 16.2.
+  - 9.7 heter nå «Production-like auth configuration, README and secrets».
+  - Spinen har fått en merknad.
+  - `sprint-status.yaml` er regenerert: 16 epics og 76 stories. Det gamle 1.3-punktet og den gamle 9.7-nøkkelen falt bort, begge sto på `backlog`.
+- **Oppsett for loopen** (`018addb`):
+  - `.claude/settings.json`: tillatelsesliste for uv, npm, npx, git, gh og docker. Den nekter force-push, `reset --hard`, rebase, Vercel CLI, `.env` og `data/private`, og redigering av `data/sample` og `data/answer-key`.
+  - `.claude/settings.local.json` (git-ignorert) har `autoContinueAtUsageLimit: true`.
+  - `_bmad/custom/bmad-build-auto.toml`: `persistent_facts` om `main`, utsatt deployment, syntetiske data, vertikale slices, spinen, FR-navn i tester og subagent-oppførsel.
+  - `.claude/scripts/preflight-autonom.sh` sjekker maskin, git, CI og sprint-status.
+  - `.docs/implementation-artifacts/autonomous-run.md` er runbooken goal-kommandoen følger.
+- **Funn:** subagenter kan starte egne subagenter, men disse kjører alltid asynkront, og resultatet kommer som varsel. Det står som et faktum i build-auto-overstyringen og må prøves i testkjøringen av Story 1.1.
+- `uv python install 3.12` er kjørt, og Docker Desktop er startet.
+- Preflight: alt OK unntatt ren arbeidskopi før commit, og varsel om manglende Edge og manglende CI.
 
 ### Åpne punkter
-- Supabase-prosjekt og Vercel-oppsett (preview av, Production-variabler, eventuelt `VERCEL_TOKEN`) må gjøres av brukeren før Story 1.3.
 - Bekreft at GitHub Actions kjører på org-repoet før Story 1.2.
-- Installer Microsoft Edge (Playwright `msedge` i 5.8, 8.4 og 12.5) og `uv python install 3.12`.
-- Beslutninger før den autonome kjøringen: omfang (epic 1–12 eller alle), milepælsporter, branch- og push-strategi, hva som skjer ved blokkert story, retrospektiver, logg per story.
-- Claude forbereder etter beslutningene: tillatelsesliste i `.claude/settings.json`, `persistent_facts` for `bmad-build-auto`, synk av `sprint-status.yaml`, goal-prompten, preflight-sjekk og testkjøring av Story 1.1.
+- Installer Microsoft Edge før Story 5.8 (Playwright `msedge`).
+- Testkjør Story 1.1 med runbooken mens brukeren ser på, før hele loopen settes i gang.
+- Start Claude Code på nytt før kjøringen, slik at `.claude/settings.json` lastes.
+- Epic 16 (deployment) kjøres etter at brukeren har godkjent nettsiden: Supabase, Vercel-variabler og eventuelt `VERCEL_TOKEN`.
