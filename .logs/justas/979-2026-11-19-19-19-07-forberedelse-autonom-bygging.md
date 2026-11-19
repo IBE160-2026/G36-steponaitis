@@ -52,7 +52,7 @@ Brukeren vil bygge alle epics og stories autonomt med goal-kommandoen, med én s
 
 ### Åpne punkter
 - Bekreft at GitHub Actions kjører på org-repoet før Story 1.2.
-- Installer Microsoft Edge før Story 5.8 (Playwright `msedge`).
+- ~~Installer Microsoft Edge før Story 5.8~~ (løst: Edge 157.0.4341.60 installert av brukeren, preflight READY uten advarsler utover manglende CI).
 - Testkjør Story 1.1 med runbooken mens brukeren ser på, før hele loopen settes i gang.
 - Start Claude Code på nytt før kjøringen, slik at `.claude/settings.json` lastes.
 - Epic 16 (deployment) kjøres etter at brukeren har godkjent nettsiden: Supabase, Vercel-variabler og eventuelt `VERCEL_TOKEN`.
