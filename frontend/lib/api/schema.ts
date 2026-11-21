@@ -90,6 +90,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/pick-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Pick Groups */
+        get: operations["get_plan_pick_groups_api_plans__plan_id__pick_groups_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/session": {
         parameters: {
             query?: never;
@@ -299,6 +316,31 @@ export interface components {
         PartsView: {
             /** Parts */
             parts: components["schemas"]["PartRow"][];
+            /** Version */
+            version: number;
+        };
+        /** PickGroupPart */
+        PickGroupPart: {
+            /** Aisle */
+            aisle: string | null;
+            /** Description */
+            description: string;
+            /** Part */
+            part: string;
+        };
+        /** PickGroupRow */
+        PickGroupRow: {
+            part_a: components["schemas"]["PickGroupPart"];
+            part_b: components["schemas"]["PickGroupPart"];
+            /** Same Aisle */
+            same_aisle: boolean;
+            /** Shared Jobs */
+            shared_jobs: number;
+        };
+        /** PickGroupsView */
+        PickGroupsView: {
+            /** Pick Groups */
+            pick_groups: components["schemas"]["PickGroupRow"][];
             /** Version */
             version: number;
         };
@@ -616,6 +658,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PartsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_pick_groups_api_plans__plan_id__pick_groups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PickGroupsView"];
                 };
             };
             /** @description Error */

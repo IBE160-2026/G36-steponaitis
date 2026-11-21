@@ -1,8 +1,8 @@
 "use client";
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
-// used by the `/` redirect, the parts roster (Story 2.3) and the locations table (Story 2.4). All
-// are GETs and never change the plan (FR-9).
+// used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4) and the
+// pick groups table (Story 2.5). All are GETs and never change the plan (FR-9).
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,6 +20,9 @@ export type LocationRow = components["schemas"]["LocationRow"];
 export type LocationContent = components["schemas"]["LocationContent"];
 export type Occupancy = components["schemas"]["Occupancy"];
 export type AisleOccupancy = components["schemas"]["AisleOccupancy"];
+export type PickGroupsView = components["schemas"]["PickGroupsView"];
+export type PickGroupRow = components["schemas"]["PickGroupRow"];
+export type PickGroupPart = components["schemas"]["PickGroupPart"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -33,6 +36,10 @@ export function planPartsKey(planId: string) {
 
 export function planLocationsKey(planId: string) {
   return ["plan", planId, "locations"] as const;
+}
+
+export function planPickGroupsKey(planId: string) {
+  return ["plan", planId, "pick-groups"] as const;
 }
 
 async function getJson<T>(url: string): Promise<T> {
@@ -68,6 +75,14 @@ export function fetchPlanLocations(planId: string): Promise<LocationsView> {
 
 export function usePlanLocations(planId: string) {
   return useQuery({ queryKey: planLocationsKey(planId), queryFn: () => fetchPlanLocations(planId) });
+}
+
+export function fetchPlanPickGroups(planId: string): Promise<PickGroupsView> {
+  return getJson<PickGroupsView>(`/api/plans/${encodeURIComponent(planId)}/pick-groups`);
+}
+
+export function usePlanPickGroups(planId: string) {
+  return useQuery({ queryKey: planPickGroupsKey(planId), queryFn: () => fetchPlanPickGroups(planId) });
 }
 
 export function fetchPlans(): Promise<SavedPlanRow[]> {

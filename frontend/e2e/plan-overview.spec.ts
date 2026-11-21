@@ -198,14 +198,14 @@ test.describe("uj1 plan overview", () => {
     const plan = await createPlan(request, `Steps ${randomUUID().slice(0, 8)}`);
     await page.goto(`/plans/${plan.id}/overview`);
     const nav = page.getByRole("navigation", { name: "Plan steps" });
-    await nav.getByRole("link", { name: /^\d*Pick groups/ }).click();
+    await nav.getByRole("link", { name: /^\d*Best locations/ }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/pick-groups$`));
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/best-locations$`));
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { name: "Pick groups", level: 1 })).toBeVisible();
+    await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
     await expect(main.getByText("This step is not built yet.")).toBeVisible();
     await expect(nav.locator('[aria-current="step"]')).toHaveCount(1);
-    await expect(nav.locator('[aria-current="step"]')).toContainText("Pick groups");
+    await expect(nav.locator('[aria-current="step"]')).toContainText("Best locations");
 
     const response = await page.goto(`/plans/${plan.id}/nope`);
     expect(response?.status()).toBe(404);
