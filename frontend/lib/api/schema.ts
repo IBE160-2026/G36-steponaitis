@@ -56,6 +56,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Parts */
+        get: operations["get_plan_parts_api_plans__plan_id__parts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/session": {
         parameters: {
             query?: never;
@@ -162,6 +179,58 @@ export interface components {
         /** ErrorEnvelope */
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
+        };
+        /**
+         * LocationRef
+         * @description A location on the wire (AD-3).
+         */
+        LocationRef: {
+            /** Aisle */
+            aisle: string;
+            /** Code */
+            code: string;
+            /** Is Best */
+            is_best: boolean;
+            /** Level */
+            level: string;
+            /** Position */
+            position: string | null;
+            /** Section */
+            section: string | null;
+        };
+        /** PartRow */
+        PartRow: {
+            current_location: components["schemas"]["LocationRef"] | null;
+            /** Description */
+            description: string;
+            /** Kept In Place */
+            kept_in_place: boolean;
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Other Locations */
+            other_locations: components["schemas"]["LocationRef"][];
+            /** Part */
+            part: string;
+            /** Pick Group Count */
+            pick_group_count: number;
+            /** Picks */
+            picks: number;
+            /** Rank */
+            rank: number;
+            /** Total Stock */
+            total_stock: string;
+            /** Total Stock Sort Rank */
+            total_stock_sort_rank: number;
+        };
+        /** PartsView */
+        PartsView: {
+            /** Parts */
+            parts: components["schemas"]["PartRow"][];
+            /** Version */
+            version: number;
         };
         /** PlanSummary */
         PlanSummary: {
@@ -397,6 +466,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanSummary"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_parts_api_plans__plan_id__parts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartsView"];
                 };
             };
             /** @description Error */

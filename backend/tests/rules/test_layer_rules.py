@@ -130,6 +130,7 @@ SLICE_IMPORTS = {
     "classify imports import_": ("domain/classify.py", "import swp.domain.import_\n"),
     "import_ imports classify": ("domain/import_.py", "import swp.domain.classify\n"),
     "pick_groups imports classify": ("domain/pick_groups.py", "import swp.domain.classify\n"),
+    "views.parts imports classify": ("domain/views/parts.py", "import swp.domain.classify\n"),
 }
 DOMAIN_SLICES_CONTRACT = "Domain slices never import each other"
 
@@ -155,6 +156,7 @@ KERNEL_MODULES = {
     "swp.domain.errors",
     "swp.domain.import_data",
     "swp.domain.ordering",
+    "swp.domain.planning",
     "swp.domain.state",
     "swp.domain.state_migrations",
     "swp.domain.values",

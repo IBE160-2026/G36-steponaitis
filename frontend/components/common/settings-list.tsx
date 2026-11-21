@@ -1,6 +1,7 @@
 // The plan's analysis settings, read-only (FR-18, UX-DR22). Used by the overview and settings
 // modules. Every number comes from the plan's stored snapshot, never from the config file.
 
+import { CLASS_LABELS } from "@/components/common/class-glyph";
 import type { AnalysisSettings } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 
@@ -19,10 +20,10 @@ export function settingsRows(settings: AnalysisSettings): SettingsRow[] {
   const months = settings.period_months;
   return [
     { term: "Period", value: `${formatNumber(months)} ${months === 1 ? "month" : "months"}` },
-    { term: "Fast-moving", value: `${formatNumber(settings.fast_min_picks)} or more picks` },
-    { term: "Medium-moving", value: pickRange(settings.medium_min_picks, settings.fast_min_picks - 1) },
-    { term: "Slow-moving", value: pickRange(settings.slow_min_picks, settings.medium_min_picks - 1) },
-    { term: "Dead stock", value: pickRange(0, settings.slow_min_picks - 1) },
+    { term: CLASS_LABELS.fast, value: `${formatNumber(settings.fast_min_picks)} or more picks` },
+    { term: CLASS_LABELS.medium, value: pickRange(settings.medium_min_picks, settings.fast_min_picks - 1) },
+    { term: CLASS_LABELS.slow, value: pickRange(settings.slow_min_picks, settings.medium_min_picks - 1) },
+    { term: CLASS_LABELS.dead, value: pickRange(0, settings.slow_min_picks - 1) },
     { term: "Pick group", value: `${formatNumber(settings.pick_group_min_shared_jobs)} or more shared jobs` },
   ];
 }

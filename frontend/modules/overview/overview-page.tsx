@@ -5,19 +5,16 @@
 
 import Link from "next/link";
 
-import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
+import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SettingsList } from "@/components/common/settings-list";
 import { type PlanSummary, usePlanSummary } from "@/lib/api/plans";
 import { formatDate, formatNumber } from "@/lib/format";
 import { planSettingsHref } from "@/lib/view-state/urls";
 
-const CLASS_ROWS: { key: MovementClass; label: string }[] = [
-  { key: "fast", label: "Fast-moving" },
-  { key: "medium", label: "Medium-moving" },
-  { key: "slow", label: "Slow-moving" },
-  { key: "dead", label: "Dead stock" },
-];
+const CLASS_ROWS: { key: MovementClass; label: string }[] = (["fast", "medium", "slow", "dead"] as const).map(
+  (key) => ({ key, label: CLASS_LABELS[key] }),
+);
 
 export function OverviewView({ summary }: { summary: PlanSummary }) {
   const facts = [

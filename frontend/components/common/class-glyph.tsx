@@ -3,6 +3,14 @@
 
 export type MovementClass = "fast" | "medium" | "slow" | "dead";
 
+/** Glossary names of the movement classes. */
+export const CLASS_LABELS: Record<MovementClass, string> = {
+  fast: "Fast-moving",
+  medium: "Medium-moving",
+  slow: "Slow-moving",
+  dead: "Dead stock",
+};
+
 type ClassGlyphProps = {
   movementClass: MovementClass;
   size?: number;

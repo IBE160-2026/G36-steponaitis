@@ -106,3 +106,4 @@ modules =
     swp.domain.classify
     swp.domain.pick_groups
     swp.domain.views.summary
+    swp.domain.views.parts

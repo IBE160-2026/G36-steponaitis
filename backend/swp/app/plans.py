@@ -109,11 +109,17 @@ def get(plan_id: uuid.UUID) -> StoredPlan | None:
     return store.get_plan(plan_id)
 
 
-def summary(plan_id: uuid.UUID) -> PlanSummary:
-    """The plan summary (read-only, FR-9); raise `plan_not_found` for an unknown id."""
+def require(plan_id: uuid.UUID) -> StoredPlan:
+    """The stored plan with its import; raise `plan_not_found` for an unknown id."""
     plan = store.get_plan(plan_id)
     if plan is None:
         raise DomainError("plan_not_found", PLAN_NOT_FOUND)
+    return plan
+
+
+def summary(plan_id: uuid.UUID) -> PlanSummary:
+    """The plan summary (read-only, FR-9); raise `plan_not_found` for an unknown id."""
+    plan = require(plan_id)
     return build_summary(
         id=plan.id,
         name=plan.name,
