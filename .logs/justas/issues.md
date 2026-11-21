@@ -84,3 +84,5 @@
 - [ ] 2026-11-21 [2-1-count-picks-and-classify-every-part](967-2026-11-21-22-07-35-2-1-count-picks-and-classify-every-part.md) — import: delenummer med ledende nuller i én fil og som tall i en annen (`0100` mot `100`) kan gi 0 plukk — uverifisert (Story 2.1, utsatt)
 - [ ] 2026-11-21 [2-2-find-pick-groups](966-2026-11-21-22-17-21-2-2-find-pick-groups.md) — pick groups: nulltransaksjonskode skrevet som tekst («00»/«0.0») danner en jobb — uverifisert (Story 2.2, utsatt)
 - [ ] 2026-11-21 [2-2-find-pick-groups](966-2026-11-21-22-17-21-2-2-find-pick-groups.md) — pick groups: én veldig stor jobb gjør partellingen kvadratisk — uverifisert (Story 2.2, utsatt)
+- [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — Parts-siden tegner alle 1 545 rader på én gang; vurder virtualisering hvis den blir treg (Story 2.3)
+- [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — visuell sammenligning av Parts-siden mot design-mockupene er ikke gjort (Story 2.3)
