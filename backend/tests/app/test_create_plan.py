@@ -1,6 +1,7 @@
 """FR-1/FR-11/FR-18/AD-4/AD-9: a plan and its import are stored in one transaction."""
 
 import json
+import time
 import uuid
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -206,6 +207,31 @@ def test_fr18_create_stores_classes(empty_tables: str) -> None:
     stored = plans.get(created.id)
     assert stored is not None
     assert stored.analysis.parts == created.analysis.parts
+
+
+def test_fr19_create_stores_pick_groups(empty_tables: str) -> None:
+    created = plans.create("Key", read_import(_data_files("answer-key", "csv")), now=NOW)
+
+    with get_engine().connect() as conn:
+        row = conn.execute(select(PlanRow).where(PlanRow.id == created.id)).one()
+    assert row.analysis["pick_groups"] == [
+        {"part_a": e["parts"][0], "part_b": e["parts"][1], "shared_jobs": e["shared_jobs"]}
+        for e in expected()["pick_groups_in_order"]
+    ]
+    stored = plans.get(created.id)
+    assert stored is not None
+    assert [g.model_dump() for g in stored.analysis.pick_groups] == row.analysis["pick_groups"]
+
+
+def test_nfr8_sample_plan_within_import_budget(empty_tables: str) -> None:
+    files = _data_files("sample", "xlsx")
+
+    started = time.perf_counter()
+    created = plans.create("Sample", read_import(files), now=NOW)
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 10, f"import plus analysis took {elapsed:.2f} s"
+    assert created.analysis.pick_groups
 
 
 def test_fr18_reopen_keeps_classes_after_settings_change(

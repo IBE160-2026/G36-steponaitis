@@ -52,7 +52,8 @@ def test_fr7_summary_from_sample_files(empty_tables: str) -> None:
     counts = {s["key"]: s["count"] for s in body["steps"]}
     assert counts["locations"] == 2_000
     assert counts["parts"] > 0
-    assert counts["pick-groups"] == 0
+    # find_pick_groups on the sample import (minimum 5 shared jobs) gives 127 groups.
+    assert counts["pick-groups"] == 127
     assert body["settings"]["fast_min_picks"] == 24
 
 

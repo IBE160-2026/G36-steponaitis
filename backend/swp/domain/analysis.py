@@ -1,7 +1,7 @@
 """Kernel: analysis settings and the per-plan analysis snapshot (FR-18, AD-4).
 
-`parts` (picks and class) is filled by the classify slice when the plan is created;
-pick groups arrive in Story 2.2.
+`parts` (picks and class) and `pick_groups` are filled by the classify and pick_groups
+slices when the plan is created.
 """
 
 import calendar
@@ -65,7 +65,8 @@ def period_for(data_as_of: date, months: int) -> tuple[date, date]:
 def build_analysis(data_as_of: date, settings: AnalysisSettings) -> Analysis:
     """The analysis of a new plan: settings snapshot and period.
 
-    `parts` is filled by the classify slice at plan creation; pick groups arrive in Story 2.2.
+    `parts` and `pick_groups` are filled by the classify and pick_groups slices at plan
+    creation.
     """
     start, end = period_for(data_as_of, settings.period_months)
     return Analysis(settings=settings, period_start=start, period_end=end)

@@ -104,4 +104,5 @@ type = independence
 modules =
     swp.domain.import_
     swp.domain.classify
+    swp.domain.pick_groups
     swp.domain.views.summary
