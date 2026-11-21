@@ -23,11 +23,11 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-16">
-      <h1 className="text-3xl font-semibold">Smart Warehouse Planner</h1>
-      <p role="status" aria-live="polite">
+    <div className="flex flex-col gap-4 px-page-gutter py-5">
+      <h1 className="type-page-title">Smart Warehouse Planner</h1>
+      <p role="status" aria-live="polite" className="type-body text-ink-secondary">
         {status}
       </p>
-    </main>
+    </div>
   );
 }

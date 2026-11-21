@@ -2,126 +2,327 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/*
+ * Design foundation (Story 1.4, UX-DR1): every token from DESIGN.md as the Tailwind 4 theme.
+ * Values are copied exactly from the DESIGN.md front matter; tests/design-tokens.test.ts checks them.
+ * Light theme only.
+ */
+
+/* Light theme only: no `.dark` class is ever set, so `dark:` utilities never apply. */
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+/* Toolbar is sticky only when the viewport is tall enough (UX-DR58). */
+@custom-variant tall (@media (min-height: 500px));
+
+@theme {
+  /* Colours: paper side */
+  --color-ground: #EEEDE8;
+  --color-surface: #FFFFFF;
+  --color-surface-disabled: #F3F2EE;
+  --color-band: #E4E2DB;
+  --color-row-quiet: #FAFAF7;
+  --color-selected-tint: #F3EFFD;
+  --color-ink: #1B1E22;
+  --color-ink-secondary: #4A5058;
+  --color-ink-muted: #6B717A;
+  --color-ink-disabled: #8A9097;
+  --color-border: #D6D4CD;
+  --color-input-border: #8A9097;
+  --color-hairline: #E6E4DE;
+  --color-hatch-stripe: #D9D7D0;
+  /* Colours: graphite side */
+  --color-shell: #262A2E;
+  --color-shell-slat: #2F3439;
+  --color-shell-edge: #121416;
+  --color-flow-track: #16191C;
+  --color-flow-track-edge: #3A4046;
+  --color-wall: #30353A;
+  --color-wall-slat: #3A4046;
+  --color-wall-edge: #1A1D20;
+  --color-beam: #1F2326;
+  --color-upright: #454B52;
+  --color-slot-empty: #141719;
+  --color-slot-line: #2C3136;
+  --color-slot-rim: #8A9097;
+  --color-slot-none-stripe: #646B72;
+  --color-on-dark: #E3E6E9;
+  --color-on-dark-secondary: #C9CED3;
+  --color-on-dark-nav: #D5D9DD;
+  --color-on-dark-muted: #9AA1A8;
+  --color-stage2-outline: #6B727A;
+  --color-stage2-code: #7E858D;
+  --color-stage2-text: #AEB4BA;
+  --color-launcher-rail: #454B52;
+  --color-launcher-rail-edge: #5A6168;
+  /* Colours: movement class */
+  --color-class-fast: #D85144;
+  --color-class-medium: #F0B323;
+  --color-class-slow: #417DDC;
+  --color-class-dead: #8C939A;
+  --color-label-window: #FFFFFF;
+  --color-glyph: #1B1E22;
+  /* Colours: meaning */
+  --color-accent: #9466F0;
+  --color-best: #3DAE6B;
+  --color-best-on-light: #267A4B;
+  /* Colours: focus (fixed) */
+  --color-focus-on-dark: #FFFFFF;
+  --color-focus-on-dark-inner: #141719;
+  --color-focus-on-light: #1B1E22;
+  --color-focus-gap: #FFFFFF;
+  --color-outdated: #8F969D;
+  --color-error: #D33A2C;
+  --color-error-tint: #FBE6E3;
+  /* Colours: print */
+  --color-print-ink: #000000;
+  --color-print-paper: #FFFFFF;
+  /* Product mark: fixed brand yellow, never follows a changed class-medium */
+  --color-brand-mark: #F0B323;
+
+  /* Families */
+  --font-sans: "Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-code: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+
+  /* Typography ramp */
+  --text-display-hero: 66px;
+  --text-display-hero--line-height: 1.06;
+  --text-display-hero--font-weight: 700;
+  --text-plate-code: 36px;
+  --text-plate-code--line-height: 1;
+  --text-plate-code--font-weight: 700;
+  --text-page-title: 28px;
+  --text-page-title--line-height: 1.15;
+  --text-page-title--font-weight: 700;
+  --text-section-title: 22px;
+  --text-section-title--line-height: 1.2;
+  --text-section-title--font-weight: 700;
+  --text-rank: 20px;
+  --text-rank--line-height: 1;
+  --text-rank--font-weight: 700;
+  --text-panel-title: 16px;
+  --text-panel-title--line-height: 1.25;
+  --text-panel-title--font-weight: 700;
+  --text-part-number: 16px;
+  --text-part-number--line-height: 1.2;
+  --text-part-number--font-weight: 700;
+  --text-code: 13.5px;
+  --text-code--line-height: 1.2;
+  --text-code--font-weight: 700;
+  --text-code-table: 13px;
+  --text-code-table--line-height: 1.3;
+  --text-code-table--font-weight: 600;
+  --text-wall-label: 13px;
+  --text-wall-label--line-height: 1;
+  --text-wall-label--font-weight: 700;
+  --text-wall-section: 12px;
+  --text-wall-section--line-height: 1;
+  --text-wall-section--font-weight: 600;
+  --text-tag: 11px;
+  --text-tag--line-height: 1;
+  --text-tag--font-weight: 700;
+  --text-marker: 11.5px;
+  --text-marker--line-height: 1;
+  --text-marker--font-weight: 700;
+  --text-lead: 19px;
+  --text-lead--line-height: 1.37;
+  --text-lead--font-weight: 400;
+  --text-body-strong: 14px;
+  --text-body-strong--line-height: 1.35;
+  --text-body-strong--font-weight: 600;
+  --text-body: 13px;
+  --text-body--line-height: 1.4;
+  --text-body--font-weight: 400;
+  --text-reason: 12.5px;
+  --text-reason--line-height: 1.3;
+  --text-reason--font-weight: 400;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.3;
+  --text-caption--font-weight: 400;
+  --text-meta: 11.5px;
+  --text-meta--line-height: 1.3;
+  --text-meta--font-weight: 500;
+  --text-column-head: 11.5px;
+  --text-column-head--line-height: 1.3;
+  --text-column-head--font-weight: 600;
+  --text-button: 13px;
+  --text-button--line-height: 1;
+  --text-button--font-weight: 600;
+  --text-tab: 13.5px;
+  --text-tab--line-height: 1;
+  --text-tab--font-weight: 500;
+  --text-print-body: 13.5px;
+  --text-print-body--line-height: 1.3;
+  --text-print-body--font-weight: 400;
+  --text-print-code: 16px;
+  --text-print-code--line-height: 1.2;
+  --text-print-code--font-weight: 700;
+  --text-print-round: 18px;
+  --text-print-round--line-height: 1;
+  --text-print-round--font-weight: 700;
+
+  /* Radii */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Spacing scale and fixed sizes */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 24px;
+  --spacing-page-gutter: 24px;
+  --spacing-panel-gap: 16px;
+  --spacing-panel-padding: 16px;
+  --spacing-toolbar-height: 64px;
+  --spacing-control-lg: 36px;
+  --spacing-control-md: 28px;
+  --spacing-control-sm: 24px;
+  --spacing-rule-band: 34px;
+  --spacing-recommendation-row: 58px;
+  --spacing-table-row: 24px;
+  --spacing-bin-width: 27px;
+  --spacing-bin-height: 29px;
+  --spacing-bin-gap: 3px;
+  --spacing-slot-pitch: 30px;
+  --spacing-level-pitch: 40px;
+  --spacing-section-pitch: 96px;
+  --spacing-marker-size: 17px;
+
+  /* Overlay shadow (tooltips, popovers, menus, toasts, dialogs) */
+  --shadow-overlay: 0 8px 20px rgba(27, 30, 34, 0.22);
 }
 
+/* shadcn semantic variables, mapped onto the DESIGN.md tokens so future shadcn components fit. */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  --background: var(--color-ground);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-ink);
+  --primary-foreground: var(--color-surface);
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-surface-disabled);
+  --muted-foreground: var(--color-ink-secondary);
+  --destructive: var(--color-ink);
+  --border: var(--color-border);
+  --input: var(--color-input-border);
+  --ring: var(--color-focus-on-light);
 }
 
-.dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* One utility per typography entry: family, size, weight and line height. */
+@utility type-display-hero { font-family: var(--font-code); font-size: var(--text-display-hero); font-weight: var(--text-display-hero--font-weight); line-height: var(--text-display-hero--line-height); }
+@utility type-plate-code { font-family: var(--font-code); font-size: var(--text-plate-code); font-weight: var(--text-plate-code--font-weight); line-height: var(--text-plate-code--line-height); }
+@utility type-page-title { font-family: var(--font-code); font-size: var(--text-page-title); font-weight: var(--text-page-title--font-weight); line-height: var(--text-page-title--line-height); }
+@utility type-section-title { font-family: var(--font-code); font-size: var(--text-section-title); font-weight: var(--text-section-title--font-weight); line-height: var(--text-section-title--line-height); }
+@utility type-rank { font-family: var(--font-code); font-size: var(--text-rank); font-weight: var(--text-rank--font-weight); line-height: var(--text-rank--line-height); }
+@utility type-panel-title { font-family: var(--font-code); font-size: var(--text-panel-title); font-weight: var(--text-panel-title--font-weight); line-height: var(--text-panel-title--line-height); }
+@utility type-part-number { font-family: var(--font-code); font-size: var(--text-part-number); font-weight: var(--text-part-number--font-weight); line-height: var(--text-part-number--line-height); }
+@utility type-code { font-family: var(--font-code); font-size: var(--text-code); font-weight: var(--text-code--font-weight); line-height: var(--text-code--line-height); }
+@utility type-code-table { font-family: var(--font-code); font-size: var(--text-code-table); font-weight: var(--text-code-table--font-weight); line-height: var(--text-code-table--line-height); }
+@utility type-wall-label { font-family: var(--font-code); font-size: var(--text-wall-label); font-weight: var(--text-wall-label--font-weight); line-height: var(--text-wall-label--line-height); }
+@utility type-wall-section { font-family: var(--font-code); font-size: var(--text-wall-section); font-weight: var(--text-wall-section--font-weight); line-height: var(--text-wall-section--line-height); }
+@utility type-tag { font-family: var(--font-code); font-size: var(--text-tag); font-weight: var(--text-tag--font-weight); line-height: var(--text-tag--line-height); }
+@utility type-marker { font-family: var(--font-code); font-size: var(--text-marker); font-weight: var(--text-marker--font-weight); line-height: var(--text-marker--line-height); }
+@utility type-lead { font-family: var(--font-sans); font-size: var(--text-lead); font-weight: var(--text-lead--font-weight); line-height: var(--text-lead--line-height); }
+@utility type-body-strong { font-family: var(--font-sans); font-size: var(--text-body-strong); font-weight: var(--text-body-strong--font-weight); line-height: var(--text-body-strong--line-height); }
+@utility type-body { font-family: var(--font-sans); font-size: var(--text-body); font-weight: var(--text-body--font-weight); line-height: var(--text-body--line-height); }
+@utility type-reason { font-family: var(--font-sans); font-size: var(--text-reason); font-weight: var(--text-reason--font-weight); line-height: var(--text-reason--line-height); }
+@utility type-caption { font-family: var(--font-sans); font-size: var(--text-caption); font-weight: var(--text-caption--font-weight); line-height: var(--text-caption--line-height); }
+@utility type-meta { font-family: var(--font-sans); font-size: var(--text-meta); font-weight: var(--text-meta--font-weight); line-height: var(--text-meta--line-height); }
+@utility type-column-head { font-family: var(--font-sans); font-size: var(--text-column-head); font-weight: var(--text-column-head--font-weight); line-height: var(--text-column-head--line-height); }
+@utility type-button { font-family: var(--font-sans); font-size: var(--text-button); font-weight: var(--text-button--font-weight); line-height: var(--text-button--line-height); }
+@utility type-tab { font-family: var(--font-sans); font-size: var(--text-tab); font-weight: var(--text-tab--font-weight); line-height: var(--text-tab--line-height); }
+@utility type-print-body { font-family: var(--font-sans); font-size: var(--text-print-body); font-weight: var(--text-print-body--font-weight); line-height: var(--text-print-body--line-height); }
+@utility type-print-code { font-family: var(--font-code); font-size: var(--text-print-code); font-weight: var(--text-print-code--font-weight); line-height: var(--text-print-code--line-height); }
+@utility type-print-round { font-family: var(--font-code); font-size: var(--text-print-round); font-weight: var(--text-print-round--font-weight); line-height: var(--text-print-round--line-height); }
+
+/* Louvre-panel toolbar: shell with shell-slat slats 11 x 3 (radius 1.5) on an 18 x 12 tile. */
+@utility bg-louvre-shell {
+  background-color: var(--color-shell);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E%3Crect x='3.5' y='4.5' width='11' height='3' rx='1.5' fill='%232F3439'/%3E%3C/svg%3E");
+  background-size: 18px 12px;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
+    @apply border-border;
+  }
   html {
-    @apply font-sans;
-    }
+    color-scheme: light;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+  body {
+    @apply bg-ground text-ink type-body;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Keep scrolled-to and focused content clear of the sticky toolbar (WCAG 2.4.11). */
+@media (min-height: 500px) {
+  html {
+    scroll-padding-top: var(--spacing-toolbar-height);
+  }
+}
+
+/*
+ * Focus ring (UX-DR2): fixed, never recoloured. Unlayered so no utility can override it.
+ * The transparent outline keeps a visible ring in forced-colours mode.
+ */
+:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px var(--color-focus-gap),
+    0 0 0 4px var(--color-focus-on-light);
+}
+[data-surface="graphite"] :focus-visible {
+  box-shadow:
+    0 0 0 2px var(--color-focus-on-dark-inner),
+    0 0 0 4px var(--color-focus-on-dark);
+}
+
+/* Toasts: no transition longer than 200 ms (UX-DR57). */
+[data-sonner-toast],
+[data-sonner-toast] > * {
+  transition-duration: 200ms !important;
+}
+
+/* Reduced motion: nothing slides or animates (UX-DR57). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  [data-sonner-toast],
+  [data-sonner-toast] > * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
