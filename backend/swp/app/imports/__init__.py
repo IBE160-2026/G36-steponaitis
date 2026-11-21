@@ -1,4 +1,4 @@
-"""Import service: read the three exports and check their columns and values (FR-3, FR-4)."""
+"""Import service: read, check and normalize the three exports (FR-3 to FR-7)."""
 
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -9,8 +9,10 @@ from swp.domain.import_ import (
     ROLES,
     CheckedFile,
     FileRole,
+    NormalizedImport,
     check_file,
     check_import,
+    normalize_import,
     unreadable_file,
 )
 
@@ -36,3 +38,8 @@ def check_files(
             continue
         checked.append(check_file(role, upload.file_name, sheet))
     return check_import(checked)
+
+
+def read_import(files: Mapping[FileRole, UploadedFile]) -> NormalizedImport:
+    """Read, check and normalize the three files; raise `import_invalid` or `limit_reached`."""
+    return normalize_import(check_files(files))

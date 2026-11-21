@@ -1,7 +1,9 @@
-"""Import checks (FR-3, FR-4, AD-8): header, required columns and cell values per file.
+"""Import checks and normalization (FR-3 to FR-7, AD-4, AD-8).
 
 Pure: takes a RawSheet of typed cells from the shell readers and returns a CheckedFile
 with a FileCheck report (the `import_invalid` details shape) and the parsed rows.
+`check_import` adds the cross-file checks (one warehouse, location references) and
+`normalize_import` turns three passed files into the NormalizedImport that is stored.
 """
 
 import re
@@ -14,6 +16,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from swp.domain.errors import DomainError
+from swp.domain.values import Dec
 
 type Cell = str | int | Decimal | datetime | date | None
 type Value = str | Decimal | date | None
@@ -52,6 +55,18 @@ COLUMN_KINDS: Mapping[str, ColumnKind] = {
     "Transaction Type": "text",
 }
 NON_NEGATIVE_COLUMNS = frozenset({"Quantity"})
+
+TransactionType = Literal["move_to_repair", "issue_part", "return_to_stock", "receipt"]
+TRANSACTION_TYPES: Mapping[str, TransactionType] = {
+    "move to repair": "move_to_repair",
+    "issue part": "issue_part",
+    "return to stock": "return_to_stock",
+    "receipt": "receipt",
+}
+SHELF_TYPES: frozenset[TransactionType] = frozenset(
+    {"move_to_repair", "return_to_stock", "receipt"}
+)
+ONE_WAREHOUSE = "One import holds one warehouse."
 
 
 @dataclass(frozen=True)
@@ -318,14 +333,112 @@ def row_limit_reached(file_name: str, max_rows: int) -> DomainError:
     )
 
 
+def transaction_type(value: Value) -> TransactionType | None:
+    """The known type of a Transaction Type cell (trimmed, ignoring case), else None."""
+    if not isinstance(value, str):
+        return None
+    return TRANSACTION_TYPES.get(value.strip().casefold())
+
+
+def _warehouses(file: CheckedFile) -> list[str]:
+    """Distinct non-blank Warehouse values in file order."""
+    seen: dict[str, None] = {}
+    for row in file.rows:
+        value = row.values.get("Warehouse")
+        if isinstance(value, str) and value:
+            seen.setdefault(value, None)
+    return list(seen)
+
+
+def _warehouse_errors(
+    ordered: tuple[CheckedFile, CheckedFile, CheckedFile],
+) -> dict[FileRole, list[CellError]]:
+    errors: dict[FileRole, list[CellError]] = {role: [] for role in ROLES}
+    reference: tuple[str, str] | None = None  # (warehouse, file name)
+    for file in ordered:
+        if file.check.status != "passed":
+            continue
+        name = file.check.file_name
+        values = _warehouses(file)
+        if len(values) > 1:
+            message = f"{name} holds more than one warehouse. {ONE_WAREHOUSE}"
+        elif len(values) == 1 and reference is None:
+            reference = (values[0], name)
+            continue
+        elif len(values) == 1 and reference is not None and values[0] != reference[0]:
+            message = f"{name} holds a different warehouse than {reference[1]}. {ONE_WAREHOUSE}"
+        else:
+            continue
+        errors[file.check.file_role].append(
+            CellError(row=None, column="Warehouse", message=message)
+        )
+    return errors
+
+
+def _location_errors(file: CheckedFile, codes: frozenset[str]) -> list[CellError]:
+    errors: list[CellError] = []
+    name = file.check.file_name
+    for row in file.rows:
+        if file.check.file_role == "transactions":
+            kind = transaction_type(row.values["Transaction Type"])
+            if kind not in SHELF_TYPES:
+                continue
+        code = row.values["Location"]
+        assert isinstance(code, str)
+        if code not in codes:
+            errors.append(
+                CellError(
+                    row=row.row,
+                    column="Location",
+                    message=(
+                        f"{name} · row {row.row:,} · column Location: “{code}” "
+                        "is not in the Locations file."
+                    ),
+                )
+            )
+    return errors
+
+
+def _cross_checked(
+    ordered: tuple[CheckedFile, CheckedFile, CheckedFile],
+) -> tuple[CheckedFile, CheckedFile, CheckedFile]:
+    """Add the warehouse and location-reference checks to the files that passed alone."""
+    locations = ordered[0]
+    references_checked = locations.check.status == "passed"
+    codes = frozenset(
+        value for row in locations.rows if isinstance(value := row.values["Location"], str)
+    )
+    warehouse_errors = _warehouse_errors(ordered)
+    result: list[CheckedFile] = []
+    for file in ordered:
+        role = file.check.file_role
+        if file.check.status != "passed":
+            result.append(file)
+            continue
+        errors = list(warehouse_errors[role])
+        if role != "locations" and references_checked:
+            errors.extend(_location_errors(file, codes))
+        if errors:
+            result.append(_failed(role, file.check.file_name, errors))
+        elif role != "locations" and not references_checked:
+            check = file.check.model_copy(update={"status": "not_checked"})
+            result.append(CheckedFile(check=check, rows=file.rows))
+        else:
+            result.append(file)
+    return (result[0], result[1], result[2])
+
+
 def check_import(
     files: Sequence[CheckedFile],
 ) -> tuple[CheckedFile, CheckedFile, CheckedFile]:
-    """Order the three files by role; raise `import_invalid` with every report if any fails."""
+    """Order the three files by role and run the cross-file checks.
+
+    Raise `import_invalid` with every report (role order) if any file did not pass.
+    """
     by_role = {file.check.file_role: file for file in files}
     if len(files) != len(ROLES) or set(by_role) != set(ROLES):
         raise ValueError("check_import needs exactly one file per role")
-    ordered = (by_role["locations"], by_role["inventory"], by_role["transactions"])
+    ordered = _cross_checked((by_role["locations"], by_role["inventory"], by_role["transactions"]))
     if any(file.check.status != "passed" for file in ordered):
         raise DomainError(
             "import_invalid",
@@ -333,3 +446,113 @@ def check_import(
             [file.check.model_dump(mode="json") for file in ordered],
         )
     return ordered
+
+
+class LocationData(BaseModel):
+    walk_path: Dec
+    aisle: str
+    level: str
+    section: str | None
+    position: str | None
+
+
+class InventoryLine(BaseModel):
+    part: str
+    location: str
+    quantity: Dec
+
+
+class TransactionLine(BaseModel):
+    type: TransactionType
+    part: str
+    transaction_code: str
+    date: date
+
+
+class ImportData(BaseModel):
+    schema_version: int = 1
+    locations: dict[str, LocationData]
+    inventory: list[InventoryLine]
+    parts: dict[str, str]
+    transactions: list[TransactionLine]
+
+
+class NormalizedImport(BaseModel):
+    data_as_of: date
+    data: ImportData
+
+
+def _text(value: Value) -> str:
+    assert isinstance(value, str)
+    return value
+
+
+def _optional_text(value: Value) -> str | None:
+    assert value is None or isinstance(value, str)
+    return value
+
+
+def _number(value: Value) -> Decimal:
+    assert isinstance(value, Decimal)
+    return value
+
+
+def _date(value: Value) -> date:
+    assert isinstance(value, date)
+    return value
+
+
+def normalize_import(
+    files: tuple[CheckedFile, CheckedFile, CheckedFile],
+) -> NormalizedImport:
+    """Build the normalized import from three passed files ordered by role (FR-6, FR-7)."""
+    locations_file, inventory_file, transactions_file = files
+    locations = {
+        _text(row.values["Location"]): LocationData(
+            walk_path=_number(row.values["Walk Path"]),
+            aisle=_text(row.values["Aisle"]),
+            level=_text(row.values["Level"]),
+            section=_optional_text(row.values["Section"]),
+            position=_optional_text(row.values["Position"]),
+        )
+        for row in locations_file.rows
+    }
+
+    quantities: dict[tuple[str, str], Decimal] = {}
+    parts: dict[str, str] = {}
+    for row in inventory_file.rows:
+        part = _text(row.values["Part"])
+        key = (part, _text(row.values["Location"]))
+        quantities[key] = quantities.get(key, Decimal(0)) + _number(row.values["Quantity"])
+        description = row.values["Part Description"]
+        if isinstance(description, str) and description and part not in parts:
+            parts[part] = description
+    inventory = [
+        InventoryLine(part=part, location=location, quantity=quantity)
+        for (part, location), quantity in quantities.items()
+    ]
+
+    transactions: list[TransactionLine] = []
+    for row in transactions_file.rows:
+        kind = transaction_type(row.values["Transaction Type"])
+        if kind is None:
+            continue
+        transactions.append(
+            TransactionLine(
+                type=kind,
+                part=_text(row.values["Part"]),
+                transaction_code=_text(row.values["Transaction Code"]),
+                date=_date(row.values["Date"]),
+            )
+        )
+    data_as_of = max(_date(row.values["Date"]) for row in transactions_file.rows)
+
+    return NormalizedImport(
+        data_as_of=data_as_of,
+        data=ImportData(
+            locations=locations,
+            inventory=inventory,
+            parts=parts,
+            transactions=transactions,
+        ),
+    )
