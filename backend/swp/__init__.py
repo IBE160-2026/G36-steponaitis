@@ -1,0 +1,1 @@
+"""Smart Warehouse Planner backend."""

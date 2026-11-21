@@ -23,3 +23,27 @@ Første gang: velg **New Plan** og last opp de tre filene fra `data/sample/`. En
 ## Medlemmer
 
 - Justas Steponaitis
+
+## Run locally
+
+Prerequisites: Node.js 24, [uv](https://docs.astral.sh/uv/) and Python 3.12 (`uv python install 3.12`). No environment variables, accounts or Docker are needed.
+
+```sh
+npm install   # installs the frontend workspace and runs `uv sync` for the backend
+npm run dev   # FastAPI on http://127.0.0.1:8000, Next.js on http://localhost:3000
+```
+
+Open http://localhost:3000. The browser calls `/api/*` on port 3000, which Next.js forwards to the backend. The local SQLite database is created at `backend/var/swp.db`.
+
+Checks:
+
+| Check | Command |
+| --- | --- |
+| Python lint (ruff) | `npm run lint:py` |
+| Layer rules (import-linter) | `npm run lint:imports` |
+| Frontend lint and module boundaries (ESLint) | `npm run lint` |
+| TypeScript typecheck | `npm run typecheck` |
+| Tests (pytest and Vitest) | `npm test` |
+| End-to-end (Playwright, Chromium) | `npm run e2e -- --project=chromium` |
+
+Before the first end-to-end run, install the browser once: `npx --workspace frontend playwright install chromium`.

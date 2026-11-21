@@ -37,6 +37,8 @@ htmlcov/
 coverage.xml
 test-results/
 playwright-report/
+blob-report/
+playwright/.cache/
 
 # Secrets and local environment; keep example files
 .env
@@ -61,7 +63,11 @@ Thumbs.db
 *~
 
 # Saved plans: local database and uploaded warehouse data (never commit)
+backend/var/
 *.db
+*.db-wal
+*.db-shm
+*.db-journal
 *.sqlite
 *.sqlite3
 uploads/

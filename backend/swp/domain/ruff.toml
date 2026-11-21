@@ -1,0 +1,13 @@
+# Domain-only bans (AD-1): no clock, no random IDs, no randomness in the pure domain.
+extend = "../../pyproject.toml"
+
+[lint.flake8-tidy-imports.banned-api]
+"uuid.uuid4".msg = "Domain is pure (AD-1): derive IDs with uuid5 from the command id."
+"datetime.datetime.now".msg = "Domain is pure (AD-1): take the time from CommandContext.now."
+"datetime.datetime.utcnow".msg = "Domain is pure (AD-1): take the time from CommandContext.now."
+"datetime.datetime.today".msg = "Domain is pure (AD-1): take the time from CommandContext.now."
+"time.time".msg = "Domain is pure (AD-1): take the time from CommandContext.now."
+"uuid.uuid1".msg = "Domain is pure (AD-1): derive IDs with uuid5 from the command id."
+"secrets".msg = "Domain is pure (AD-1): no randomness."
+"datetime.date.today".msg = "Domain is pure (AD-1): take the time from CommandContext.now."
+"random".msg = "Domain is pure (AD-1): no randomness."

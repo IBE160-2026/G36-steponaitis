@@ -1,0 +1,87 @@
+[importlinter]
+root_packages =
+    swp
+include_external_packages = True
+
+[importlinter:contract:layers]
+name = Layers: api > app > store > domain (AD-1, AD-9)
+type = layers
+layers =
+    swp.api
+    swp.app
+    swp.store
+    swp.domain
+
+[importlinter:contract:api-not-store]
+name = swp.api never imports swp.store (AD-1)
+type = forbidden
+source_modules =
+    swp.api
+forbidden_modules =
+    swp.store
+# Direct imports only: api reaches the store through swp.app services.
+allow_indirect_imports = True
+
+[importlinter:contract:domain-pure]
+name = swp.domain imports only stdlib and pydantic (AD-1)
+# Every installed third-party distribution except pydantic. When a dependency is
+# added, add its top-level module here (test_nfr1_domain_imports_only_stdlib_and_pydantic
+# also guards this with an AST scan).
+type = forbidden
+source_modules =
+    swp.domain
+forbidden_modules =
+    swp.config
+    swp.cli
+    swp.main
+    alembic
+    annotated_doc
+    annotated_types
+    anyio
+    click
+    dotenv
+    fastapi
+    grimp
+    h11
+    httpcore2
+    httpx2
+    idna
+    importlinter
+    iniconfig
+    mako
+    markdown_it
+    markupsafe
+    mdurl
+    opentelemetry
+    packaging
+    pluggy
+    pydantic_core
+    pydantic_settings
+    pygments
+    pytest
+    _pytest
+    py
+    rich
+    ruff
+    sqlalchemy
+    starlette
+    truststore
+    typing_extensions
+    typing_inspection
+    uvicorn
+
+[importlinter:contract:only-store-sqlalchemy]
+name = Only swp.store imports SQLAlchemy or Alembic (AD-9)
+type = forbidden
+source_modules =
+    swp.domain
+    swp.app
+    swp.api
+    swp.config
+    swp.cli
+    swp.main
+forbidden_modules =
+    sqlalchemy
+    alembic
+# Direct imports only: other layers use SQLAlchemy through swp.store.
+allow_indirect_imports = True

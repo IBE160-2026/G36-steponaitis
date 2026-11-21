@@ -1,0 +1,28 @@
+{
+  "name": "smart-warehouse-planner",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "postinstall": "uv sync --directory backend --locked",
+    "dev": "concurrently --kill-others --names backend,frontend --prefix-colors blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "uv run --directory backend --locked uvicorn swp.main:app --host 127.0.0.1 --port 8000 --reload --reload-dir swp",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "lint:py": "uv run --directory backend --locked ruff check .",
+    "lint:imports": "uv run --directory backend --locked lint-imports",
+    "lint": "npm run lint --workspace frontend",
+    "typecheck": "npm run typecheck --workspace frontend",
+    "test:py": "uv run --directory backend --locked pytest",
+    "test:web": "npm run test --workspace frontend",
+    "test": "npm run test:py && npm run test:web",
+    "e2e": "npm run e2e --workspace frontend --"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.7"
+  }
+}
