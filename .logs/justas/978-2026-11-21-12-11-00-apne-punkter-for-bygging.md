@@ -44,6 +44,7 @@ Committe brukerens endringer i `GOAL.md`.
 - Senere: motsigelsen om blokkerte stories er rettet i `GOAL.md` (brukerens valg): opptil 5 fiksforsøk på samme story, hvert logget i `issues.md`, aldri hopp over; deretter stopp. Unntak lagt inn i regelen om at runbooken vinner. «5 stories på rad blokkert» er erstattet av «fortsatt blokkert etter 5 forsøk». Committet som `ce7a5c3` og pushet.
 - Senere: runbooken `autonomous-run.md` er oppdatert tilsvarende: ny seksjon *Unblock* (opptil 5 fiksforsøk i ferske subagenter, hvert forsøk logget i `issues.md`, ingen forsøk ved behov for ny konto/kjøp/nytt produkt), steg 6 og regelen om blokkert story peker dit, og feilet milepælssjekk regnes som blokkert story i stedet for direkte stopp. Committet som `6df2738` og pushet.
 - Senere: antall fiksforsøk for blokkert story er økt fra 5 til 20 i både `GOAL.md` og runbooken (brukerens ønske). Committet som `da7a83e` og pushet.
+- Senere: CI-fiksregelen er endret fra ett til opptil 20 forsøk i både `GOAL.md` og runbookens steg 2, hvert forsøk logget i `issues.md` (brukerens ønske). Ukommittert.
 
 ### Åpne punkter
 Ingen.
