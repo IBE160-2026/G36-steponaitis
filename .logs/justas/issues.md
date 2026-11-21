@@ -87,3 +87,5 @@
 - [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — Parts-siden tegner alle 1 545 rader på én gang; vurder virtualisering hvis den blir treg (Story 2.3)
 - [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — visuell sammenligning av Parts-siden mot design-mockupene er ikke gjort (Story 2.3)
 - [ ] 2026-11-21 [2-5-pick-groups-table](963-2026-11-21-23-02-32-2-5-pick-groups-table.md) — Pick groups tom-tilstand sier alltid «5 or more jobs» uavhengig av `pick_group_min_shared_jobs` (Story 2.5)
+- [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delpanelet (400 px) legger seg ikke over siden under 1280 px bredde (Story 2.6)
+- [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delsøket sender en forespørsel per tastetrykk, ingen debounce (Story 2.6)
