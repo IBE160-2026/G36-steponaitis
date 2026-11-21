@@ -109,3 +109,4 @@ modules =
     swp.domain.views.parts
     swp.domain.views.locations
     swp.domain.views.pick_groups
+    swp.domain.views.search

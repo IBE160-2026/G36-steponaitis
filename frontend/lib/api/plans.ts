@@ -1,10 +1,11 @@
 "use client";
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
-// used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4) and the
-// pick groups table (Story 2.5). All are GETs and never change the plan (FR-9).
+// used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
+// pick groups table (Story 2.5), and the part detail and search (Story 2.6). All are GETs and
+// never change the plan (FR-9).
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { internalError, parseErrorBody } from "@/lib/api/errors";
 import type { components } from "@/lib/api/schema";
@@ -23,6 +24,13 @@ export type AisleOccupancy = components["schemas"]["AisleOccupancy"];
 export type PickGroupsView = components["schemas"]["PickGroupsView"];
 export type PickGroupRow = components["schemas"]["PickGroupRow"];
 export type PickGroupPart = components["schemas"]["PickGroupPart"];
+export type PartDetail = components["schemas"]["PartDetail"];
+export type ClassThreshold = components["schemas"]["ClassThreshold"];
+export type StockedLocation = components["schemas"]["StockedLocation"];
+export type PartPickGroup = components["schemas"]["PartPickGroup"];
+export type SearchView = components["schemas"]["SearchView"];
+export type PartMatch = components["schemas"]["PartMatch"];
+export type LocationMatch = components["schemas"]["LocationMatch"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -40,6 +48,14 @@ export function planLocationsKey(planId: string) {
 
 export function planPickGroupsKey(planId: string) {
   return ["plan", planId, "pick-groups"] as const;
+}
+
+export function planPartKey(planId: string, part: string) {
+  return ["plan", planId, "part", part] as const;
+}
+
+export function planSearchKey(planId: string, q: string) {
+  return ["plan", planId, "search", q] as const;
 }
 
 async function getJson<T>(url: string): Promise<T> {
@@ -83,6 +99,32 @@ export function fetchPlanPickGroups(planId: string): Promise<PickGroupsView> {
 
 export function usePlanPickGroups(planId: string) {
   return useQuery({ queryKey: planPickGroupsKey(planId), queryFn: () => fetchPlanPickGroups(planId) });
+}
+
+export function fetchPlanPart(planId: string, part: string): Promise<PartDetail> {
+  return getJson<PartDetail>(`/api/plans/${encodeURIComponent(planId)}/parts/${encodeURIComponent(part)}`);
+}
+
+export function usePlanPart(planId: string, part: string) {
+  return useQuery({ queryKey: planPartKey(planId, part), queryFn: () => fetchPlanPart(planId, part) });
+}
+
+export function fetchPlanSearch(planId: string, q: string): Promise<SearchView> {
+  return getJson<SearchView>(`/api/plans/${encodeURIComponent(planId)}/search?${new URLSearchParams({ q })}`);
+}
+
+/**
+ * Runs only for a non-blank query, keyed and fetched on the trimmed query (the server strips it);
+ * the previous results stay shown while the next one loads.
+ */
+export function usePlanSearch(planId: string, q: string) {
+  const trimmed = q.trim();
+  return useQuery({
+    queryKey: planSearchKey(planId, trimmed),
+    queryFn: () => fetchPlanSearch(planId, trimmed),
+    enabled: trimmed !== "",
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function fetchPlans(): Promise<SavedPlanRow[]> {

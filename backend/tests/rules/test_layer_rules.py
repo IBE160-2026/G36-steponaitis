@@ -139,6 +139,10 @@ SLICE_IMPORTS = {
         "domain/views/pick_groups.py",
         "import swp.domain.pick_groups\n",
     ),
+    "views.search imports views.parts": (
+        "domain/views/search.py",
+        "import swp.domain.views.parts\n",
+    ),
 }
 DOMAIN_SLICES_CONTRACT = "Domain slices never import each other"
 

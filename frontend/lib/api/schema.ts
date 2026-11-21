@@ -90,6 +90,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/parts/{part}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Part */
+        get: operations["get_plan_part_api_plans__plan_id__parts__part__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/pick-groups": {
         parameters: {
             query?: never;
@@ -99,6 +116,23 @@ export interface paths {
         };
         /** Get Plan Pick Groups */
         get: operations["get_plan_pick_groups_api_plans__plan_id__pick_groups_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/{plan_id}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Search */
+        get: operations["get_plan_search_api_plans__plan_id__search_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -183,6 +217,16 @@ export interface components {
             slow: number;
         };
         /**
+         * ClassThreshold
+         * @description The pick limits of a movement class; `max_picks` is None for the open-ended class.
+         */
+        ClassThreshold: {
+            /** Max Picks */
+            max_picks: number | null;
+            /** Min Picks */
+            min_picks: number;
+        };
+        /**
          * CreatedPlan
          * @description The response of POST /api/plans.
          */
@@ -236,6 +280,10 @@ export interface components {
             /** Stock */
             stock: string;
         };
+        /** LocationMatch */
+        LocationMatch: {
+            location: components["schemas"]["LocationRef"];
+        };
         /**
          * LocationRef
          * @description A location on the wire (AD-3).
@@ -285,6 +333,48 @@ export interface components {
             /** Occupied Percent */
             occupied_percent: string;
         };
+        /** PartDetail */
+        PartDetail: {
+            class_threshold: components["schemas"]["ClassThreshold"];
+            current_location: components["schemas"]["LocationRef"] | null;
+            /** Description */
+            description: string;
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Other Locations */
+            other_locations: components["schemas"]["StockedLocation"][];
+            /** Part */
+            part: string;
+            /** Pick Groups */
+            pick_groups: components["schemas"]["PartPickGroup"][];
+            /** Picks */
+            picks: number;
+            /** Total Stock */
+            total_stock: string;
+            /** Version */
+            version: number;
+        };
+        /** PartMatch */
+        PartMatch: {
+            /** Description */
+            description: string;
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Part */
+            part: string;
+        };
+        /** PartPickGroup */
+        PartPickGroup: {
+            partner: components["schemas"]["PartnerPart"];
+            /** Shared Jobs */
+            shared_jobs: number;
+        };
         /** PartRow */
         PartRow: {
             current_location: components["schemas"]["LocationRef"] | null;
@@ -311,6 +401,15 @@ export interface components {
             total_stock: string;
             /** Total Stock Sort Rank */
             total_stock_sort_rank: number;
+        };
+        /** PartnerPart */
+        PartnerPart: {
+            /** Aisle */
+            aisle: string | null;
+            /** Description */
+            description: string;
+            /** Part */
+            part: string;
         };
         /** PartsView */
         PartsView: {
@@ -435,6 +534,21 @@ export interface components {
              */
             uploaded_at: string;
         };
+        /** SearchView */
+        SearchView: {
+            /** Location Count */
+            location_count: number;
+            /** Locations */
+            locations: components["schemas"]["LocationMatch"][];
+            /** Part Count */
+            part_count: number;
+            /** Parts */
+            parts: components["schemas"]["PartMatch"][];
+            /** Query */
+            query: string;
+            /** Version */
+            version: number;
+        };
         /** Session */
         Session: {
             /** Feature Auth */
@@ -457,6 +571,12 @@ export interface components {
              * @enum {string}
              */
             key: "overview" | "parts" | "locations" | "pick-groups" | "best-locations" | "recommendations" | "before-after" | "move-list";
+        };
+        /** StockedLocation */
+        StockedLocation: {
+            location: components["schemas"]["LocationRef"];
+            /** Stock */
+            stock: string;
         };
     };
     responses: never;
@@ -680,6 +800,47 @@ export interface operations {
             };
         };
     };
+    get_plan_part_api_plans__plan_id__parts__part__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+                part: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartDetail"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     get_plan_pick_groups_api_plans__plan_id__pick_groups_get: {
         parameters: {
             query?: never;
@@ -698,6 +859,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PickGroupsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_search_api_plans__plan_id__search_get: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchView"];
                 };
             };
             /** @description Error */

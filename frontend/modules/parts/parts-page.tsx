@@ -2,22 +2,26 @@
 
 // Parts roster (FR-13, UX-DR18/23/24): every Inventory part in server order (most picks first),
 // with its class, picks, current location, total stock, other locations and pick groups. The
-// server decides current and other locations; this view only filters by class and sorts.
+// server decides current and other locations; this view only filters by class and sorts. A row
+// (click or `Enter`) or a part search result opens the part panel (`?part=`, UX-DR24).
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
 import { Icon } from "@/components/common/icons";
+import { NO_CURRENT_LOCATION, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
+import { SearchField } from "@/components/common/search-field";
 import { type PartRow, type PartsView as PartsData, usePlanParts } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { LocationParams } from "@/lib/view-state/urls";
 
 const CLASS_ORDER: readonly MovementClass[] = ["fast", "medium", "slow", "dead"];
 
-export const NO_CURRENT_LOCATION = "No current location (no stock above zero)";
+export { NO_CURRENT_LOCATION };
 
 function plural(count: number, one: string, many: string): string {
   return `${formatNumber(count)} ${count === 1 ? one : many}`;
@@ -140,7 +144,17 @@ function ClassChip({
   );
 }
 
-export function PartsView({ view }: { view: PartsData }) {
+export function PartsView({
+  view,
+  search,
+  onOpen,
+}: {
+  view: PartsData;
+  /** The header's search field. */
+  search?: ReactNode;
+  /** Opens a part's panel (row click or `Enter`). */
+  onOpen?: (row: PartRow) => void;
+}) {
   const [pressed, setPressed] = useState<ReadonlySet<MovementClass>>(new Set());
   const rows = filterByClass(view.parts, pressed);
 
@@ -155,11 +169,14 @@ export function PartsView({ view }: { view: PartsData }) {
 
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="type-page-title">Parts</h1>
-        <p className="type-body text-ink-secondary" aria-live="polite">
-          {countLine(rows.length, view.parts.length, pressed.size > 0)}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="type-page-title">Parts</h1>
+          <p className="type-body text-ink-secondary" aria-live="polite">
+            {countLine(rows.length, view.parts.length, pressed.size > 0)}
+          </p>
+        </div>
+        {search}
       </div>
       <div role="group" aria-label="Filter by movement class" className="flex flex-wrap gap-2">
         {CLASS_ORDER.map((movementClass) => (
@@ -171,14 +188,32 @@ export function PartsView({ view }: { view: PartsData }) {
           />
         ))}
       </div>
-      <DataTable label="Parts" columns={COLUMNS} rows={rows} rowKey={(row) => row.part} className="bg-surface" />
+      <DataTable
+        label="Parts"
+        columns={COLUMNS}
+        rows={rows}
+        rowKey={(row) => row.part}
+        onOpen={onOpen}
+        className="bg-surface"
+      />
     </div>
   );
 }
 
-export function PartsPage({ planId }: { planId: string }) {
+export function PartsPage({ planId, params = {} }: { planId: string; params?: LocationParams }) {
   const parts = usePlanParts(planId);
-  if (parts.data) return <PartsView view={parts.data} />;
+  const panel = usePartPanel(planId, "parts", params);
+  if (parts.data) {
+    return (
+      <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
+        <PartsView
+          view={parts.data}
+          search={<SearchField planId={planId} onOpenPart={panel.open} />}
+          onOpen={(row) => panel.open(row.part)}
+        />
+      </WithPartPanel>
+    );
+  }
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
       {showsLoadError(parts.error) ? <PlanLoadError message={parts.error.message} /> : <PlanOpening planId={planId} />}

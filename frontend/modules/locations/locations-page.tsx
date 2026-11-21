@@ -4,13 +4,16 @@
 // level, Walk Path, occupied or empty, best or not, and the parts stored there; the whole-warehouse
 // and per-aisle occupancy lines from the server. Filters only read server flags; occupancy is
 // always words and counts, never colour alone. `?aisle=&loc=` sets the aisle filter and focuses
-// the row (UX-DR9, through lib/view-state).
+// the row (UX-DR9, through lib/view-state). The header's search field opens a part's panel
+// (`?part=`, UX-DR24) or another location.
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
+import { usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
+import { SearchField } from "@/components/common/search-field";
 import { type LocationRow, type LocationsView as LocationsData, type Occupancy, usePlanLocations } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -147,10 +150,13 @@ export function LocationsView({
   view,
   params = {},
   onAisleChange,
+  search,
 }: {
   view: LocationsData;
   params?: LocationParams;
   onAisleChange?: (aisle: string) => void;
+  /** The header's search field. */
+  search?: ReactNode;
 }) {
   const fromUrl = aisleFromParams(params, view.aisles);
   const [filters, setFilters] = useState<LocationFilters>({ ...NO_FILTERS, aisle: fromUrl });
@@ -174,7 +180,10 @@ export function LocationsView({
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
       <div className="flex flex-col gap-1">
-        <h1 className="type-page-title">Locations</h1>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <h1 className="type-page-title">Locations</h1>
+          {search}
+        </div>
         <p className="type-body text-ink" data-occupancy-line="warehouse">
           {occupancyLine("Whole warehouse", view.warehouse)}
         </p>
@@ -236,15 +245,19 @@ export function LocationsView({
 export function LocationsPage({ planId, params = {} }: { planId: string; params?: LocationParams }) {
   const router = useRouter();
   const locations = usePlanLocations(planId);
+  const panel = usePartPanel(planId, "locations", params);
   if (locations.data) {
     return (
-      <LocationsView
-        view={locations.data}
-        params={params}
-        onAisleChange={(aisle) =>
-          router.replace(planStepHref(planId, "locations", { aisle }), { scroll: false })
-        }
-      />
+      <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
+        <LocationsView
+          view={locations.data}
+          params={params}
+          search={<SearchField planId={planId} onOpenPart={panel.open} />}
+          onAisleChange={(aisle) =>
+            router.replace(planStepHref(planId, "locations", { aisle, part: params.part }), { scroll: false })
+          }
+        />
+      </WithPartPanel>
     );
   }
   return (

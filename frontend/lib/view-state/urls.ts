@@ -1,10 +1,13 @@
-// Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9) are
-// built and read here and nowhere else.
+// Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
+// the open part panel `?part=`, UX-DR24) are built and read here and nowhere else.
 
 import type { StepKey } from "@/lib/view-state/steps";
 
-/** The Locations view state carried in the URL: an aisle filter and a location to focus. */
-export type LocationParams = { aisle?: string; loc?: string };
+/**
+ * The view state carried in the URL: the Locations aisle filter and a location to focus, and the
+ * part whose panel is open.
+ */
+export type LocationParams = { aisle?: string; loc?: string; part?: string };
 
 /** `/plans/<id>/<step>`, with only the non-empty `params` appended as a query. */
 export function planStepHref(planId: string, step: StepKey, params?: LocationParams): string {
@@ -25,13 +28,13 @@ function firstValue(searchParams: SearchParamsInput, key: string): string | unde
   return first ? first : undefined;
 }
 
-/** `?aisle=&loc=` → `{aisle?, loc?}`: the first value of each; empty values are dropped. */
+/** `?aisle=&loc=&part=` → `{aisle?, loc?, part?}`: the first value of each; empty values are dropped. */
 export function parseLocationParams(searchParams: SearchParamsInput): LocationParams {
   const params: LocationParams = {};
-  const aisle = firstValue(searchParams, "aisle");
-  const loc = firstValue(searchParams, "loc");
-  if (aisle !== undefined) params.aisle = aisle;
-  if (loc !== undefined) params.loc = loc;
+  for (const key of ["aisle", "loc", "part"] as const) {
+    const value = firstValue(searchParams, key);
+    if (value !== undefined) params[key] = value;
+  }
   return params;
 }
 

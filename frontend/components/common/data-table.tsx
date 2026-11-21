@@ -3,10 +3,11 @@
 // DataTable (UX-DR18): column heads in ink-secondary, hairline row dividers, numbers right-aligned
 // and tabular. Rows show in the order given (server order) until the user picks a sort; sorts are
 // stable, so ties keep server order (AD-14). The rows are one tab stop (roving tabindex):
-// `↑`/`↓` move between rows, `Home`/`End` jump, `Enter` opens a row when `onOpen` is given.
+// `↑`/`↓` move between rows, `Home`/`End` jump, `Enter` or a click opens a row when `onOpen` is
+// given (a click on a link or button inside the row keeps its own action).
 // `focusKey` (UX-DR9) focuses a shown row and scrolls it into view, once per key value.
 
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/common/icons";
 import { type SortDirection, type SortValue, sortRows } from "@/lib/sort";
@@ -107,6 +108,15 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
     body.current?.querySelector<HTMLElement>(`tr[data-row-index="${index}"]`)?.focus();
   }
 
+  function onClick(event: MouseEvent<HTMLTableRowElement>, index: number) {
+    if (!onOpen) return;
+    const target = event.target as Element | null;
+    if (target?.closest("a, button, input, select, textarea, label")) return;
+    // Selecting text in a row (e.g. to copy a part number) does not open it.
+    if (window.getSelection()?.toString()) return;
+    onOpen(shown[index]);
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLTableRowElement>, index: number) {
     if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
     const next = nextRowIndex(event.key, index, shown.length);
@@ -173,7 +183,8 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
             tabIndex={index === activeIndex ? 0 : -1}
             onFocus={() => setActive(index)}
             onKeyDown={(event) => onKeyDown(event, index)}
-            className="border-b border-hairline align-top"
+            onClick={onOpen ? (event) => onClick(event, index) : undefined}
+            className={cn("border-b border-hairline align-top", onOpen && "cursor-pointer")}
           >
             {columns.map((column) => (
               <td
