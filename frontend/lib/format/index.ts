@@ -77,3 +77,35 @@ export function formatNumber(value: number | string): string {
   const isZero = /^0+$/.test(integer) && (!fraction || /^0+$/.test(fraction));
   return `${sign && !isZero ? "-" : ""}${grouped}${fraction !== undefined ? `.${fraction}` : ""}`;
 }
+
+// Megabytes (UX-DR19): 1 MB = 1,000,000 bytes. Integer arithmetic, so no floating-point drift.
+const BYTES_PER_TENTH_MB = 100_000;
+const BYTES_PER_MB = 1_000_000;
+
+function checkBytes(bytes: number): void {
+  if (!Number.isInteger(bytes) || bytes < 0) throw new RangeError(`Not a byte count: ${bytes}`);
+}
+
+function fromTenths(tenths: number): string {
+  return `${formatNumber(Math.floor(tenths / 10))}.${tenths % 10}`;
+}
+
+/** Megabytes rounded up to one decimal, without a trailing `.0`: 5,200,000 → "5.2", 4,000,001 → "4.1". */
+export function megabytesRoundedUp(bytes: number): string {
+  checkBytes(bytes);
+  return fromTenths(Math.ceil(bytes / BYTES_PER_TENTH_MB)).replace(/\.0$/, "");
+}
+
+/** Megabytes to the nearest tenth, always one decimal: 1,234,567 → "1.2", 0 → "0.0". */
+export function megabytesOneDecimal(bytes: number): string {
+  checkBytes(bytes);
+  return fromTenths(Math.round(bytes / BYTES_PER_TENTH_MB));
+}
+
+/** Exact megabytes with as many decimals as needed: 4,000,000 → "4", 1,500,000 → "1.5". */
+export function megabytesExact(bytes: number): string {
+  checkBytes(bytes);
+  const whole = formatNumber(Math.floor(bytes / BYTES_PER_MB));
+  const fraction = String(bytes % BYTES_PER_MB).padStart(6, "0").replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : whole;
+}

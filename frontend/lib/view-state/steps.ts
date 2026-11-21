@@ -1,4 +1,4 @@
-// The eight steps of the plan flow, in order (UX-DR6). URL helpers arrive beside this in Story 1.9.
+// The eight steps of the plan flow, in order (UX-DR6). URL helpers live beside this in urls.ts.
 
 export const FLOW_STEPS = [
   { key: "overview", number: 1, name: "Overview" },
