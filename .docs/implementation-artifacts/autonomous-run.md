@@ -8,6 +8,7 @@ The runbook for the unattended build loop started with the goal command. Decisio
 - **Branch:** work directly on `main`. Commit after each story and push to `origin main` once the story is done and its local checks pass.
 - **Milestone gates:** Story 5.8 (M1) and Story 12.5 (M2) are recorded in the session log by the loop itself when every check in the story passes. If any check fails, the story is blocked (see *Unblock*).
 - **Blocked story:** try to unblock the same story up to 20 times (see *Unblock*). If it is still blocked, stop the whole run and notify the user. Never skip a story, because later stories build on it.
+- **End-to-end tests:** every user-visible story adds or extends a Playwright test for its user journey, and CI runs Playwright in Chromium on every push (rules in `_bmad/custom/bmad-build-auto.toml`). Before the epic 12 retrospective, every user journey UJ-1–UJ-8 must have a passing Playwright test (see step 8).
 - **Retrospectives:** after the last story of each epic, run `bmad-retrospective` headless (`-H`).
 - **Session log:** one `sesjonslogg` log per story, in Norwegian like the existing logs. The skill commits it; the loop pushes.
 - **Never:** deploy or run the Vercel CLI; touch Vercel or Supabase; use `data/private/` or real company data; edit `data/sample/` or `data/answer-key/`; force-push, `reset --hard` or rebase; change planning artifacts unless the story itself says so.
@@ -37,8 +38,13 @@ The runbook for the unattended build loop started with the goal command. Decisio
    - Push: `git push origin main`.
 8. **Special stories.**
    - After **1-1**: run `bmad-project-context` in a fresh subagent so `AGENTS.md` lists the real install, dev, lint and test commands. Commit and push it. Then add `"file:AGENTS.md"` to `persistent_facts` in `_bmad/custom/bmad-build-auto.toml`, and commit and push that too.
-   - After **1-2**: CI must be green on `main` before the next story starts (step 2). A throwaway branch for the deliberate violation must be deleted again.
+   - After **1-2**: CI must be green on `main` before the next story starts (step 2). A throwaway branch for the deliberate violation must be deleted again. Also confirm that `ci.yml` has the Playwright `e2e` job (Chromium) and that it ran green in that run. If the job is missing, treat 1-2 as blocked with the condition "CI has no Playwright e2e job" (see *Unblock*).
    - **5-8 and 12-5 (gates):** the story's checks include Playwright in `chromium`, `firefox` and `msedge`. If Microsoft Edge is missing, stop with the blocking condition "Microsoft Edge is not installed". After the story is done, the session log states "Milestone N gate passed" with the test summary. For 12-5, the log adds the open point "Someone else must run the README flow before submission (SM-2)."
+   - **User-journey coverage, after 12-5 and before the epic 12 retrospective:** launch a fresh `general-purpose` subagent with:
+
+     > Invoke the skill `bmad-build-auto` with this intent: "Playwright coverage of user journeys UJ-1–UJ-8 from `.docs/planning-artifacts/ux-designs/ux-Project-2026-11-11/EXPERIENCE.md` (sprint key `e2e-user-journeys`). For each journey, find the Playwright test in `frontend/e2e/` that walks it through the UI and asserts the visible results; write the missing ones and extend incomplete ones. Steps that need Epics 13–16 (category check, QR labels, concurrent-edit warning, deployment) are out of scope and are listed as skipped in the spec. Verify with `npx playwright test` in `chromium`, `firefox` and `msedge`, all green." Follow the skill exactly until it HALTs. Then reply with only: the final status, the spec file path, the full hashes of the commits made in this run, a table of UJ-1–UJ-8 with the covering test file and its result, and the blocking condition if any.
+
+     Check and record the result as in steps 6 and 7 (there is no key in `sprint-status.yaml` to update; the session log is titled `e2e-user-journeys` and holds the coverage table). If any journey has no passing test, it is blocked: use *Unblock* with the key `e2e-user-journeys`. Only then run the epic 12 retrospective.
 9. **End of epic.** When an epic turns `done`, launch a fresh subagent with: "Invoke the skill `bmad-retrospective` with `-H` for epic <N>." Commit its output, then push. Open action items stay in `sprint-status.yaml` and are not worked on unless a later story needs them.
 10. **Next.** Continue with step 1 for the next story.
 
@@ -68,7 +74,7 @@ Do not attempt a fix when the blocking condition needs a new account, a purchase
 
 ## Finish
 
-When Epics 1–12 are `done` and the epic 12 retrospective is committed:
+When Epics 1–12 are `done`, the user-journey coverage step has passed and the epic 12 retrospective is committed:
 
 - Run the preflight once more, and confirm CI is green on `main`.
 - Write a final session log, titled `autonom-kjoring-epic-1-12`, with the story count, the gates and the open points.
