@@ -40,7 +40,7 @@ Committe brukerens endringer i `GOAL.md`.
   - DONE krever nå Playwright-tester for alle brukerreiser.
   - Nye stoppvilkår: når noe krever ny konto, kjøp eller et produkt som ikke er listet, eller når 5 stories på rad ender som «blocked».
   - Fjernet seksjonene «Before you start» og «Following the run» og kodeblokken rundt kommandoen.
-- Rettet etterpå: kommandolinja startet med `goal` uten `/`; skråstreken er lagt til (ukommittert).
+- Rettet etterpå: kommandolinja startet med `goal` uten `/`; skråstreken er lagt til, committet som `19fd9a7` og pushet.
 
 ### Åpne punkter
 Ingen.
