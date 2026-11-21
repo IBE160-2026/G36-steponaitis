@@ -41,7 +41,7 @@ Committe brukerens endringer i `GOAL.md`.
   - Nye stoppvilkår: når noe krever ny konto, kjøp eller et produkt som ikke er listet, eller når 5 stories på rad ender som «blocked».
   - Fjernet seksjonene «Before you start» og «Following the run» og kodeblokken rundt kommandoen.
 - Rettet etterpå: kommandolinja startet med `goal` uten `/`; skråstreken er lagt til, committet som `19fd9a7` og pushet.
-- Senere: motsigelsen om blokkerte stories er rettet i `GOAL.md` (brukerens valg): opptil 5 fiksforsøk på samme story, hvert logget i `issues.md`, aldri hopp over; deretter stopp. Unntak lagt inn i regelen om at runbooken vinner. «5 stories på rad blokkert» er erstattet av «fortsatt blokkert etter 5 forsøk». Ukommittert.
+- Senere: motsigelsen om blokkerte stories er rettet i `GOAL.md` (brukerens valg): opptil 5 fiksforsøk på samme story, hvert logget i `issues.md`, aldri hopp over; deretter stopp. Unntak lagt inn i regelen om at runbooken vinner. «5 stories på rad blokkert» er erstattet av «fortsatt blokkert etter 5 forsøk». Committet som `ce7a5c3` og pushet.
 
 ### Åpne punkter
 Ingen.
