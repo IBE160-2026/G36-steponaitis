@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-21-2026 18:02
+last_updated: 11-21-2026 18:08
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -44,7 +44,7 @@ development_status:
   1-7-create-and-store-a-plan-from-three-files: done
   1-8-new-plan-screen-with-upload-progress-and-import-errors: done
   1-9-plan-overview-settings-and-the-milestone-1-start: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-count-picks-and-classify-every-part: backlog
@@ -158,3 +158,80 @@ development_status:
   16-1-live-on-the-public-vercel-url: backlog
   16-2-production-with-login-and-the-demo-on: backlog
   epic-16-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-reject-ambiguous-one-group-numbers-like"
+    epic: 1
+    action: "Reject ambiguous one-group numbers like 1,234 or 1.500 in _parse_number
+      (or record in AD-8 that they are decimals), with test_fr4 coverage"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-2-bound-parsed-dates-in-_parse_date-and-re"
+    epic: 1
+    action: "Bound parsed dates in _parse_date and report out-of-range dates as cell
+      errors so period_for cannot raise 500"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-3-make-the-new-plan-size-pre-check-and-the"
+    epic: 1
+    action: "Make the New Plan size pre-check and the server UploadLimit use the same
+      rule and test the exact-limit case end to end"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-4-map-a-non-uuid-plan-id-on-get-api-plans"
+    epic: 1
+    action: "Map a non-UUID plan id on GET /api/plans/{id} to plan_not_found so the
+      shared hook redirects"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-5-give-a-retry-and-a-new-plan-link-when-ge"
+    epic: 1
+    action: "Give / a retry and a New Plan link when GET /api/plans fails"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-6-add-playwright-tests-for-toast-pause-on"
+    epic: 1
+    action: "Add Playwright tests for toast pause on hover/focus, Input Esc, plan-plate
+      Escape and leaving New Plan mid-upload"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-7-pass-no-access-log-to-uvicorn-in-dev-bac"
+    epic: 1
+    action: "Pass --no-access-log to uvicorn in dev:backend so each request logs one
+      line"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-8-add-an-import-linter-independence-contra"
+    epic: 1
+    action: "Add an import-linter independence contract for domain slices in Story
+      2.1"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-9-decide-whether-unknown-transaction-types"
+    epic: 1
+    action: "Decide whether unknown Transaction Types are reported and whether data_as_of
+      uses only kept rows; update FR-5/FR-7 if so"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-10-add-a-runbook-step-that-acts-on-followup"
+    epic: 1
+    action: "Add a runbook step that acts on followup_review_recommended: true before
+      the next story"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-1-retro-item-11-make-each-story-build-read-earlier-specs"
+    epic: 1
+    action: "Make each story build read earlier specs deferred items and open issues.md
+      items naming it, and close or re-defer them"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
