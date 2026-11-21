@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import PositiveInt, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -16,6 +16,9 @@ class Settings(BaseSettings):
 
     app_env: str = "local"
     database_url: str = DEFAULT_DATABASE_URL
+    # AD-12 limits (env MAX_UPLOAD_BYTES, MAX_ROWS_PER_FILE); read through swp.app.limits.
+    max_upload_bytes: PositiveInt = 4_000_000
+    max_rows_per_file: PositiveInt = 25_000
 
     @field_validator("database_url")
     @classmethod

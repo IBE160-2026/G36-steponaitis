@@ -39,7 +39,9 @@ forbidden_modules =
     annotated_types
     anyio
     click
+    defusedxml
     dotenv
+    et_xmlfile
     fastapi
     grimp
     h11
@@ -52,6 +54,7 @@ forbidden_modules =
     markdown_it
     markupsafe
     mdurl
+    openpyxl
     opentelemetry
     packaging
     pluggy

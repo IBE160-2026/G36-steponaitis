@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from swp import config
 
@@ -63,3 +64,12 @@ def test_nfr12_postgresql_url_uses_psycopg_driver(
 )
 def test_nfr12_explicit_driver_and_sqlite_urls_are_unchanged(url: str) -> None:
     assert config.Settings(database_url=url).database_url == url
+
+
+def test_nfr_max_rows_per_file_must_be_positive(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("MAX_ROWS_PER_FILE", "0")
+
+    with pytest.raises(ValidationError):
+        config.Settings()
