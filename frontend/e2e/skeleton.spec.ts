@@ -1,17 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-// No user journey covers the walking skeleton page; these tests name NFR-2 (local install).
+// No user journey covers the walking skeleton; these tests name NFR-2 (local install). `/` now
+// redirects to a plan (Story 1.9), so the frontend is checked on New Plan.
 
-test("nfr2 walking skeleton page shows backend ok", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Smart Warehouse Planner" })).toBeVisible();
-  await expect(page.getByText("Backend: ok")).toBeVisible();
-});
-
-test("nfr2 walking skeleton page shows backend unreachable", async ({ page }) => {
-  await page.route("**/api/health", (route) => route.abort());
-  await page.goto("/");
-  await expect(page.getByText("Backend: unreachable")).toBeVisible();
+test("nfr2 frontend serves the app shell", async ({ page }) => {
+  await page.goto("/plans/new");
+  await expect(page.getByRole("link", { name: "Smart Warehouse Planner" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
 });
 
 test("nfr2 health is rewritten from the frontend origin to the backend", async ({ request }) => {

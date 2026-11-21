@@ -4,6 +4,8 @@ import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 
+from sqlalchemy import select
+
 from swp.domain.analysis import Analysis
 from swp.domain.import_ import ImportData
 from swp.domain.state import PlanState
@@ -33,6 +35,20 @@ class StoredPlan:
     analysis: Analysis
     state: PlanState
     imported: StoredImport
+
+
+@dataclass(frozen=True)
+class PlanListItem:
+    """One saved plan as listed: plan and import columns only, no JSON documents."""
+
+    id: uuid.UUID
+    name: str
+    data_as_of: date
+    uploaded_at: datetime
+    created_by: str
+    created_at: datetime
+    last_edited_by: str
+    last_edited_at: datetime
 
 
 def insert_plan_with_import(plan: StoredPlan) -> None:
@@ -91,3 +107,23 @@ def get_plan(plan_id: uuid.UUID) -> StoredPlan | None:
             state=PlanState.model_validate(upcast("state", row.state)),
             imported=imported,
         )
+
+
+def list_plans() -> list[PlanListItem]:
+    """Every saved plan, most recently edited first (then newest created, then id)."""
+    query = (
+        select(
+            PlanRow.id,
+            PlanRow.name,
+            ImportRow.data_as_of,
+            ImportRow.uploaded_at,
+            PlanRow.created_by,
+            PlanRow.created_at,
+            PlanRow.last_edited_by,
+            PlanRow.last_edited_at,
+        )
+        .join(ImportRow, ImportRow.id == PlanRow.import_id)
+        .order_by(PlanRow.last_edited_at.desc(), PlanRow.created_at.desc(), PlanRow.id)
+    )
+    with transaction() as session:
+        return [PlanListItem(**row._asdict()) for row in session.execute(query)]

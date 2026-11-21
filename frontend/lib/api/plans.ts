@@ -1,0 +1,46 @@
+"use client";
+
+// Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface and the saved-plans
+// list used by the `/` redirect. Both are GETs and never change the plan (FR-9).
+
+import { useQuery } from "@tanstack/react-query";
+
+import { internalError, parseErrorBody } from "@/lib/api/errors";
+import type { components } from "@/lib/api/schema";
+
+export type PlanSummary = components["schemas"]["PlanSummary"];
+export type AnalysisSettings = components["schemas"]["AnalysisSettings"];
+export type SavedPlanRow = components["schemas"]["SavedPlanRow"];
+
+export const PLANS_KEY = ["plans"] as const;
+
+export function planSummaryKey(planId: string) {
+  return ["plan", planId, "summary"] as const;
+}
+
+async function getJson<T>(url: string): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch {
+    throw internalError();
+  }
+  if (!response.ok) throw parseErrorBody(response.status, await response.text());
+  return (await response.json()) as T;
+}
+
+export function fetchPlanSummary(planId: string): Promise<PlanSummary> {
+  return getJson<PlanSummary>(`/api/plans/${encodeURIComponent(planId)}`);
+}
+
+export function usePlanSummary(planId: string) {
+  return useQuery({ queryKey: planSummaryKey(planId), queryFn: () => fetchPlanSummary(planId) });
+}
+
+export function fetchPlans(): Promise<SavedPlanRow[]> {
+  return getJson<SavedPlanRow[]>("/api/plans");
+}
+
+export function usePlans() {
+  return useQuery({ queryKey: PLANS_KEY, queryFn: fetchPlans });
+}

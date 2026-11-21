@@ -153,6 +153,12 @@ describe("nfr11 flow bar steps", () => {
     expect(markup).toContain('<span class="sr-only">, step 1, done</span>');
   });
 
+  it("announces a checked current step as done", () => {
+    const markup = html(<FlowBar currentStep="overview" doneSteps={["overview", "parts"]} />);
+    expect(markup).toMatch(/aria-current="step"[^>]*>.*?Overview<\/span><span class="sr-only">, step 1, done<\/span>/);
+    expect(markup.match(/, done/g)).toHaveLength(2);
+  });
+
   it("links steps only when hrefFor is given", () => {
     const markup = html(<FlowBar hrefFor={(step) => `/plans/p1/${step}`} />);
     expect(markup.match(/<a /g)).toHaveLength(8);

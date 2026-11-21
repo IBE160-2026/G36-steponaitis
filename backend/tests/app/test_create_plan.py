@@ -2,7 +2,6 @@
 
 import json
 import uuid
-from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
 import pytest
@@ -12,7 +11,6 @@ from sqlalchemy.exc import IntegrityError
 
 from swp.api.app import create_app
 from swp.app import plans
-from swp.app.bootstrap import bootstrap
 from swp.app.imports import UploadedFile, read_import
 from swp.domain.errors import DomainError
 from swp.domain.state import PlanState
@@ -24,16 +22,6 @@ from tests.conftest import _clear_caches
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 NOW = datetime(2026, 11, 21, 12, 30, tzinfo=UTC)
-
-
-@pytest.fixture
-def empty_tables(app_database: str) -> Iterator[str]:
-    """Migrated database with no plans or imports (Postgres tests share one database)."""
-    bootstrap(upgrade=True, seed=False)
-    with get_engine().begin() as conn:
-        conn.execute(delete(PlanRow))
-        conn.execute(delete(ImportRow))
-    yield app_database
 
 
 def _counts() -> tuple[int, int]:

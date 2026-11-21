@@ -1,33 +1,41 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+// The milestone 1 start (AD-20): `/` opens the most recently edited plan, or New Plan when there
+// is none. Epic 6 replaces this with the saved-plans list.
 
-type Health = { status: string };
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
-async function fetchHealth(): Promise<Health> {
-  const response = await fetch("/api/health");
-  if (!response.ok) {
-    throw new Error(`Health check failed with HTTP ${response.status}`);
-  }
-  return (await response.json()) as Health;
-}
+import { usePlans } from "@/lib/api/plans";
+import { NEW_PLAN_HREF } from "@/lib/api/query-errors";
+import { planStepHref } from "@/lib/view-state/urls";
 
 export default function HomePage() {
-  const health = useQuery({ queryKey: ["health"], queryFn: fetchHealth });
+  const router = useRouter();
+  const plans = usePlans();
+  const redirected = useRef(false);
+  // Only fresh data counts: a cached list from earlier in the session may miss a new plan or
+  // still hold a deleted one. Redirect once.
+  const fresh = plans.isFetchedAfterMount && !plans.isFetching && plans.isSuccess;
 
-  let status = "Checking backend…";
-  if (health.isSuccess) {
-    status = `Backend: ${health.data.status}`;
-  } else if (health.isError) {
-    status = "Backend: unreachable";
-  }
+  useEffect(() => {
+    if (!fresh || !plans.data || redirected.current) return;
+    redirected.current = true;
+    const latest = plans.data[0];
+    router.replace(latest ? planStepHref(latest.id, "overview") : NEW_PLAN_HREF);
+  }, [fresh, plans.data, router]);
 
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
-      <h1 className="type-page-title">Smart Warehouse Planner</h1>
-      <p role="status" aria-live="polite" className="type-body text-ink-secondary">
-        {status}
-      </p>
+      {plans.isError ? (
+        <p role="alert" className="type-body text-ink">
+          {plans.error.message}
+        </p>
+      ) : (
+        <p role="status" className="type-body text-ink-secondary">
+          Opening the latest plan…
+        </p>
+      )}
     </div>
   );
 }

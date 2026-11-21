@@ -28,10 +28,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Plans */
+        get: operations["list_plans_api_plans_get"];
         put?: never;
         /** Create Plan */
         post: operations["create_plan_api_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/{plan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Summary */
+        get: operations["get_plan_summary_api_plans__plan_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -59,6 +77,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AnalysisSettings
+         * @description The values from `backend/settings/analysis.toml`; a snapshot is stored per plan.
+         */
+        AnalysisSettings: {
+            /** Fast Min Picks */
+            fast_min_picks: number;
+            /** Medium Min Picks */
+            medium_min_picks: number;
+            /** Period Months */
+            period_months: number;
+            /** Pick Group Min Shared Jobs */
+            pick_group_min_shared_jobs: number;
+            /** Slow Min Picks */
+            slow_min_picks: number;
+        };
         /** Body_create_plan_api_plans_post */
         Body_create_plan_api_plans_post: {
             /** Inventory */
@@ -72,6 +106,17 @@ export interface components {
             name: string;
             /** Transactions */
             transactions: string;
+        };
+        /** ClassCounts */
+        ClassCounts: {
+            /** Dead */
+            dead: number;
+            /** Fast */
+            fast: number;
+            /** Medium */
+            medium: number;
+            /** Slow */
+            slow: number;
         };
         /**
          * CreatedPlan
@@ -118,6 +163,97 @@ export interface components {
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
         };
+        /** PlanSummary */
+        PlanSummary: {
+            class_counts: components["schemas"]["ClassCounts"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Current Round */
+            current_round: number;
+            /**
+             * Data As Of
+             * Format: date
+             */
+            data_as_of: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Import Id
+             * Format: uuid
+             */
+            import_id: string;
+            /**
+             * Last Edited At
+             * Format: date-time
+             */
+            last_edited_at: string;
+            /** Last Edited By */
+            last_edited_by: string;
+            /** Name */
+            name: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            settings: components["schemas"]["AnalysisSettings"];
+            /** Steps */
+            steps: components["schemas"]["StepSummary"][];
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+            /** Version */
+            version: number;
+        };
+        /** SavedPlanRow */
+        SavedPlanRow: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /**
+             * Data As Of
+             * Format: date
+             */
+            data_as_of: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Last Edited At
+             * Format: date-time
+             */
+            last_edited_at: string;
+            /** Last Edited By */
+            last_edited_by: string;
+            /** Name */
+            name: string;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
         /** Session */
         Session: {
             /** Feature Auth */
@@ -128,6 +264,18 @@ export interface components {
             max_upload_bytes: number;
             /** User */
             user: string | null;
+        };
+        /** StepSummary */
+        StepSummary: {
+            /** Checked */
+            checked: boolean;
+            /** Count */
+            count: number | null;
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "overview" | "parts" | "locations" | "pick-groups" | "best-locations" | "recommendations" | "before-after" | "move-list";
         };
     };
     responses: never;
@@ -156,6 +304,26 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    list_plans_api_plans_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedPlanRow"][];
                 };
             };
         };
@@ -193,6 +361,46 @@ export interface operations {
             };
             /** @description Error */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_summary_api_plans__plan_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanSummary"];
+                };
+            };
+            /** @description Error */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
-// UJ-1: the planner opens the app before any plan exists (Story 1.4, UX-DR1/2/4/6/57/58).
+// UJ-1: the planner opens the app shell with no plan open (Story 1.4, UX-DR1/2/4/6/57/58).
+// `/` redirects to a plan since Story 1.9, so these open New Plan, which has no plan.
 
 const STEPS = [
   "Overview",
@@ -26,7 +27,7 @@ async function toolbarPosition(page: Page): Promise<string> {
 test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
   test("uj1 shows the toolbar, product name and eight steps with no plan", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/plans/new");
 
     const banner = page.getByRole("banner");
     const box = await banner.boundingBox();
@@ -45,7 +46,7 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
     await expect(page.getByText("Data as of")).toHaveCount(0);
 
     expect(await toolbarPosition(page)).toBe("sticky");
-    await expect(page.getByText("Backend: ok")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
   });
 
   test("uj1 loads self-hosted fonts with tabular numbers and no text below 11px", async ({ page }) => {
@@ -57,8 +58,8 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
       }
     });
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await expect(page.getByText("Backend: ok")).toBeVisible();
+    await page.goto("/plans/new");
+    await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
 
     const fonts = await page.evaluate(async () => {
       await document.fonts.ready;
@@ -92,8 +93,8 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
 
   test("uj1 shows the fixed focus ring on paper and on graphite", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await expect(page.getByText("Backend: ok")).toBeVisible();
+    await page.goto("/plans/new");
+    await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
 
     await page.keyboard.press("Tab");
     const skip = page.getByRole("link", { name: "Skip to content" });
@@ -117,7 +118,7 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
 
   test("uj1 toolbar scrolls with the page on a short viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 450 });
-    await page.goto("/");
+    await page.goto("/plans/new");
     expect(await toolbarPosition(page)).toBe("static");
   });
 
@@ -125,7 +126,7 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
     test(`uj1 flow bar collapses below 1024px (reduced motion: ${reducedMotion})`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion });
       await page.setViewportSize({ width: 900, height: 800 });
-      await page.goto("/");
+      await page.goto("/plans/new");
 
       const nav = page.getByRole("navigation", { name: "Plan steps" });
       await expect(nav.getByRole("list")).toBeHidden();
@@ -150,7 +151,7 @@ test.describe("uj1 opens the app shell with the eight-step flow bar", () => {
 
   test("uj1 page never scrolls sideways at 320px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto("/");
+    await page.goto("/plans/new");
     await expect(page.getByRole("button", { name: "Plan steps" })).toBeVisible();
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(scrollWidth).toBeLessThanOrEqual(320);

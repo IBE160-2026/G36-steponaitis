@@ -4,7 +4,7 @@
 // primary New Plan button. The upload runs in two stages (upload with Cancel, then the server
 // step without) and is never retried. On success the planner lands on the plan's overview.
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 
@@ -13,6 +13,7 @@ import { Icon } from "@/components/common/icons";
 import { Input, InputError } from "@/components/common/input";
 import { showToast } from "@/components/common/toast";
 import { ApiError, internalError } from "@/lib/api/errors";
+import { PLANS_KEY } from "@/lib/api/plans";
 import { useSession } from "@/lib/api/session";
 import { planStepHref } from "@/lib/view-state/urls";
 
@@ -48,6 +49,7 @@ function without<V>(record: Partial<Record<FileRole, V>>, role: FileRole): Parti
 
 export function NewPlanPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const session = useSession();
   const nameId = useId();
   const nameErrorId = useId();
@@ -86,6 +88,8 @@ export function NewPlanPage() {
       });
     },
     onSuccess: (plan) => {
+      // The `/` redirect reads the saved-plans list; a new plan must show up there.
+      void queryClient.invalidateQueries({ queryKey: PLANS_KEY });
       if (unmounted.current) return;
       setNavigating(true);
       showToast(createdToast(plan.name, plan.data_as_of));

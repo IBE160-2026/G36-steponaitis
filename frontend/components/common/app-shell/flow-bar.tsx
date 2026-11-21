@@ -62,14 +62,15 @@ function StepMarker({ step, state, tone }: { step: FlowStep; state: StepState; t
   );
 }
 
-function StepContent({ step, state, tone }: { step: FlowStep; state: StepState; tone: Tone }) {
+// A checked step stays announced as done while it is the current step ("Overview, step 1, done").
+function StepContent({ step, state, done, tone }: { step: FlowStep; state: StepState; done: boolean; tone: Tone }) {
   return (
     <>
       <StepMarker step={step} state={state} tone={tone} />
       <span>{step.name}</span>
       <span className="sr-only">
         , step {step.number}
-        {state === "done" ? ", done" : ""}
+        {done ? ", done" : ""}
       </span>
     </>
   );
@@ -78,11 +79,13 @@ function StepContent({ step, state, tone }: { step: FlowStep; state: StepState; 
 function StepItem({
   step,
   state,
+  done,
   tone,
   hrefFor,
 }: {
   step: FlowStep;
   state: StepState;
+  done: boolean;
   tone: Tone;
   hrefFor?: (step: StepKey) => string;
 }) {
@@ -104,17 +107,17 @@ function StepItem({
         tone === "paper" ? (
           <Popover.Close asChild>
             <Link href={hrefFor(step.key)} className={className} aria-current={ariaCurrent}>
-              <StepContent step={step} state={state} tone={tone} />
+              <StepContent step={step} state={state} done={done} tone={tone} />
             </Link>
           </Popover.Close>
         ) : (
           <Link href={hrefFor(step.key)} className={className} aria-current={ariaCurrent}>
-            <StepContent step={step} state={state} tone={tone} />
+            <StepContent step={step} state={state} done={done} tone={tone} />
           </Link>
         )
       ) : (
         <span className={className} aria-current={ariaCurrent}>
-          <StepContent step={step} state={state} tone={tone} />
+          <StepContent step={step} state={state} done={done} tone={tone} />
         </span>
       )}
     </li>
@@ -127,7 +130,14 @@ const POPOVER_FADE =
 export function FlowBar({ currentStep, doneSteps = [], hrefFor }: FlowBarProps) {
   const items = (tone: Tone) =>
     FLOW_STEPS.map((step) => (
-      <StepItem key={step.key} step={step} state={stepState(step, currentStep, doneSteps)} tone={tone} hrefFor={hrefFor} />
+      <StepItem
+        key={step.key}
+        step={step}
+        state={stepState(step, currentStep, doneSteps)}
+        done={doneSteps.includes(step.key)}
+        tone={tone}
+        hrefFor={hrefFor}
+      />
     ));
 
   return (

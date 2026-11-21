@@ -12,11 +12,13 @@ from swp.domain.analysis import AnalysisSettings, build_analysis
 from swp.domain.errors import DomainError
 from swp.domain.import_ import NormalizedImport
 from swp.domain.state import PlanState
+from swp.domain.views.summary import PlanSummary, build_summary
 from swp.store import plans as store
-from swp.store.plans import StoredImport, StoredPlan
+from swp.store.plans import PlanListItem, StoredImport, StoredPlan
 
 ANALYSIS_SETTINGS_PATH = BACKEND_DIR / "settings" / "analysis.toml"
 NAME_REQUIRED = "Give the plan a name."
+PLAN_NOT_FOUND = "This plan does not exist."
 DEFAULT_USER = "planner"  # M1 runs with auth off (FR-11); Epic 9 uses the logged-in user.
 
 
@@ -92,3 +94,31 @@ def created(plan: StoredPlan) -> CreatedPlan:
 def get(plan_id: uuid.UUID) -> StoredPlan | None:
     """The stored plan with its import, or None."""
     return store.get_plan(plan_id)
+
+
+def summary(plan_id: uuid.UUID) -> PlanSummary:
+    """The plan summary (read-only, FR-9); raise `plan_not_found` for an unknown id."""
+    plan = store.get_plan(plan_id)
+    if plan is None:
+        raise DomainError("plan_not_found", PLAN_NOT_FOUND)
+    return build_summary(
+        id=plan.id,
+        name=plan.name,
+        import_id=plan.import_id,
+        data_as_of=plan.imported.data_as_of,
+        uploaded_at=plan.imported.uploaded_at,
+        created_by=plan.created_by,
+        created_at=plan.created_at,
+        last_edited_by=plan.last_edited_by,
+        last_edited_at=plan.last_edited_at,
+        version=plan.version,
+        analysis=plan.analysis,
+        state=plan.state,
+        location_count=len(plan.imported.data.locations),
+        part_count=len(plan.imported.data.parts),
+    )
+
+
+def list_saved() -> list[PlanListItem]:
+    """The saved plans, most recently edited first (FR-8); reads columns only."""
+    return store.list_plans()
