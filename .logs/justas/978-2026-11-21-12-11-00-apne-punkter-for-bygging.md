@@ -35,7 +35,7 @@ Committe brukerens endringer i `GOAL.md`.
 - Se gjennom diffen og committe bare `GOAL.md`.
 
 ### Resultat
-- Committet som `8e830f8`, ikke pushet. Brukerens endringer:
+- Committet som `8e830f8` og pushet til `origin/main`. Brukerens endringer:
   - Nye regler: commit og push etter hver story, merge epics til `main` når CI er grønn, løse blokkerte stories selv og logge løsningen i issues-fila.
   - DONE krever nå Playwright-tester for alle brukerreiser.
   - Nye stoppvilkår: når noe krever ny konto, kjøp eller et produkt som ikke er listet, eller når 5 stories på rad ender som «blocked».
