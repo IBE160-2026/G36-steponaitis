@@ -65,7 +65,7 @@ deferred:
 - `backend/tests/test_config.py` -- `fresh_settings` fixture; add the rewrite tests here.
 - `backend/.importlinter` -- `domain-pure` deny-list of every installed third-party module.
 - Tooling present locally: `gh` (authenticated), Docker 29 (for a local Postgres 17 and `rhysd/actionlint`); no `act`.
-- Action majors (latest releases, 2026-11-21): `actions/checkout@v7`, `actions/setup-node@v7`, `astral-sh/setup-uv@v10`, `actions/upload-artifact@v7`.
+- Action refs (checked with `gh api repos/<owner>/<repo>/tags`, 2026-11-21): `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7` (floating major tags exist); `astral-sh/setup-uv@v10.4.0` (setup-uv publishes no floating major tag — `@v10` does not resolve; pin the full release tag).
 
 ## Tasks & Acceptance
 
@@ -93,6 +93,12 @@ deferred:
 - Matrix audit: the "Health on Postgres" row is satisfied by CI delegation — `test_nfr12_health_select_one_on_selected_database` runs in the `postgres` job against a `postgres:17` service container. It has NOT passed locally; proof is a green `postgres` job after the orchestrator's push.
 - Known-bad state avoided: re-trying Docker pulls or local installs (a 30-minute `docker pull postgres:17` produced nothing).
 - KEEP: the uncommitted attempt-1 implementation (baseline `97bff3c39ed85456446ae3cd0329472ca3e98826`) is complete and verified locally; do not rewrite it.
+
+### 2026-11-21 — Unblock: setup-uv has no floating major tag
+- Trigger: CI run 44909080067 on `main` failed in "Set up job" for all four jobs: `Unable to resolve action astral-sh/setup-uv@v10, unable to find version v10`. The Code Map listed `astral-sh/setup-uv@v10` as an existing major tag, which was wrong.
+- Amended (outside `<intent-contract>`): Code Map "Action refs" line now says setup-uv publishes only full release tags and names `v10.4.0`; the other three actions' `@v7` tags were confirmed with `gh api`. `ci.yml` pins every setup-uv use to `v10.4.0`; its `version`/`python-version` inputs exist at that tag.
+- Known-bad state avoided: assuming a `vN` floating tag exists for every action without checking the tag list.
+- KEEP: everything else in `ci.yml` and the attempt-1 implementation; Postgres 17 and workflow validity stay orchestrator-verified-in-CI.
 
 ## Review Triage Log
 
@@ -129,6 +135,28 @@ deferred:
   - `[low]` `[reject]` (blind) Minor CI gaps (uv cache, Playwright browser cache, redundant `uv sync`, postgres job not using an npm script) — speed only, no wrong outcome; no npm script exists for the Postgres command and the spec prescribes that command.
   - `[low]` `[patch]` (blind) README's local Postgres steps omit readiness wait and cleanup — patched: wait until `docker exec swp-pg pg_isready` succeeds; remove with `docker rm -f swp-pg`.
 
+### 2026-11-21 — Review pass (follow-up, run 4: setup-uv unblock)
+- verdicts: 18 findings — high 0, medium 0, low 8, false 5, maybe-false 0
+- findings:
+  - `[false]` `[reject]` (verification-gap other) Residual-risks line still names `setup-uv@v10` — the fix is to edit this build's spec; the Auto Run Result is rewritten at finalize in this run, and the new text names `v10.4.0`.
+  - `[low]` `[reject]` (verification-gap other) `SWP_EXPECT_DIALECT` guard is an env var; a misspelt key plus a dropped `--database-url` would pass on SQLite — needs two simultaneous mistakes in one CI step (unlikely); fix adds a new option or guard.
+  - `[false]` `[reject]` (intent-alignment) Remote success (GitHub resolving `setup-uv@v10.4.0`) is not proven locally — `gh api` listed tag `v10.4.0` in this run, and the intent explicitly delegates the remote run to the orchestrating session.
+  - `[false]` `[reject]` (intent-alignment) setup-uv v10.4.0 accepting `version`/`python-version` is only asserted — checked in this run: `action.yml` at `v10.4.0` declares both inputs; `checkout`, `setup-node` and `upload-artifact` `action.yml` at `v7` declare every input `ci.yml` uses; uv release `0.13.8` exists.
+  - `[low]` `[reject]` (intent-alignment) Not committed yet, status `in-review`, Auto Run Result stale — the finalize step commits, sets `done` and rewrites the result; a fix that edits this build's spec is rejected.
+  - `[low]` `[reject]` (blind) Residual risks names `setup-uv@v10` — same as the first row; spec edit, handled at finalize.
+  - `[low]` `[reject]` (blind) Auto Run Result leaves out this run — spec edit; handled at finalize.
+  - `[false]` `[reject]` (blind) Frontmatter and Auto Run Result status disagree — both say `done` after finalize; the story's done state with CI delegation is the orchestrator's recorded decision.
+  - `[low]` `[reject]` (blind) Code Map still says local Docker works — fix edits this build's spec.
+  - `[low]` `[reject]` (blind) Acceptance criteria still name actionlint and local `docker run postgres:17` — fix edits this build's spec; the Spec Change Log records the CI delegation.
+  - `[low]` `[defer]` (blind) issues.md 1-2 entries lack the log link, superseded attempts stay open — carried: same location and claim as the logged deferred row; orchestrator-owned session logs. Not deferred again.
+  - `[low]` `[reject]` (blind) `SWP_EXPECT_DIALECT` env var contradicts the Design Notes — same as the second row; two simultaneous mistakes, fix adds a guard.
+  - `[low]` `[reject]` (blind) Actions pinned to mutable tags, no Dependabot — no wrong outcome in everyday use; the intent asks for a tag pin (`v10.4.0`); the fix adds new config.
+  - `[false]` `[reject]` (blind) Health test gives a misleading "expected sqlite" failure for `postgres://` — carried: same claim as the logged `postgres://` rows (outside the contract); in CI the URL is `postgresql://`, so the branch is never hit.
+  - `[low]` `[reject]` (edge-case) `postgres://`/upper-case scheme not rewritten in `backend/swp/config.py` — carried: same location and claim as the logged reject row.
+  - `[low]` `[patch]` (edge-case) `workflow_dispatch` on a non-main branch cancels that branch's in-progress push run (shared concurrency group) — patched: `group: ci-${{ github.event_name }}-${{ github.ref }}`.
+  - `[low]` `[patch]` (edge-case) Re-running a failed e2e job uploads an artifact with the same name, which upload-artifact v4+ rejects — patched: `name: playwright-report-${{ github.run_attempt }}`.
+  - `[false]` `[reject]` (edge-case) Teardown `get_engine().dispose()` could hide the real failure — `create_engine` is lazy (no connection), and pytest reports a teardown error separately from the test failure, so the failure is not hidden.
+
 ## Design Notes
 
 A pytest option instead of an env var: if the CI step misspells an env var name, pytest silently runs on SQLite and the Postgres job is green while testing nothing; a misspelt option is an "unrecognized arguments" error. The dialect assertion closes the remaining gap (option given but rewritten to SQLite by mistake).
@@ -153,10 +181,10 @@ Status: done
 
 **Summary:** `.github/workflows/ci.yml` runs on every push (and `workflow_dispatch`) with four jobs: `python` (ruff, import-linter, pytest on SQLite), `postgres` (`tests/app` against a `postgres:17` service, `--database-url` plus `SWP_EXPECT_DIALECT=postgresql`), `frontend` (ESLint, typecheck, Vitest) and `e2e` (Playwright Chromium, artifacts uploaded on failure or cancel). psycopg 3.3.9 added; `postgresql://` rewritten to `postgresql+psycopg://` (AD-9); `tests/app` selects its database with the `--database-url` pytest option.
 
-**Unblock (run 3):** the earlier `matrix test audit failed` block (Postgres 17 test and actionlint could not run locally: Docker pulls hang behind `http.docker.internal:3128`; local installs not permitted) is resolved by the orchestrating session's decision: both checks are **orchestrator-verified-in-CI**, not passed locally. The "Health on Postgres" matrix row is satisfied by CI delegation (`test_nfr12_health_select_one_on_selected_database` in the `postgres` job); proof is a green `postgres` job and green CI overall after the orchestrator's push, plus the throwaway-branch red-CI check. No Docker pulls or local installs were attempted in this run.
+**Unblock (run 4):** CI run 44909080067 failed in "Set up job" for all four jobs because `astral-sh/setup-uv@v10` does not exist: setup-uv publishes only full release tags. Every setup-uv use is now pinned to `astral-sh/setup-uv@v10.4.0`. The other refs were checked with `gh api repos/<owner>/<repo>/tags`: `actions/checkout@v7`, `actions/setup-node@v7` and `actions/upload-artifact@v7` exist. Every `with:` input `ci.yml` passes exists in those tags' `action.yml`, and uv release `0.13.8` exists. Earlier unblock (run 3): the Postgres 17 test and workflow validity are **orchestrator-verified-in-CI**.
 
-**Files changed:**
-- `.github/workflows/ci.yml` -- new CI workflow (4 jobs, concurrency cancels only non-`main` runs, timeouts, read-only permissions).
+**Files changed (whole story):**
+- `.github/workflows/ci.yml` -- CI workflow (4 jobs, setup-uv pinned to `v10.4.0`, concurrency grouped per event and ref and cancelling only non-`main` runs, per-attempt artifact name, timeouts, read-only permissions).
 - `backend/pyproject.toml`, `backend/uv.lock` -- `psycopg[binary]==3.3.9`.
 - `backend/.importlinter` -- psycopg/psycopg_binary forbidden in `domain-pure` and in `only-store-sqlalchemy`.
 - `backend/swp/config.py` -- `postgresql://` → `postgresql+psycopg://` validator.
@@ -164,12 +192,12 @@ Status: done
 - `backend/tests/app/{__init__,conftest,test_health_database}.py` -- `app_database` fixture and the health-on-selected-database test with `SWP_EXPECT_DIALECT` guard.
 - `backend/tests/test_config.py` -- URL rewrite tests.
 - `backend/tests/rules/test_layer_rules.py` -- "app imports psycopg" violation case.
-- `README.md` -- CI note and local Postgres instructions (readiness wait, cleanup).
+- `README.md` -- CI note and local Postgres instructions.
 
-**Review:** 29 findings (high 0, medium 6, low 15, false 8). Patches applied: 5 entries — silent-SQLite fallback in the `postgres` job (medium, 4 member rows), cancel-in-progress on `main` (low), artifact upload on cancel/timeout (low), psycopg store-only contract + test (low), README Postgres steps (low). Deferred: 1 (issues.md entry format, orchestrator-owned). Rejected with reasons in the Review Triage Log: `postgres://`/upper-case/psycopg2 URL forms (outside contract, unlikely, adds branches); no migration DDL on Postgres (none exists); stale `alembic_version`/no teardown (upgrade failure raises; idempotent write); GitHub-side evidence unproven and actionlint AC wording (forbidden push / spec edit — delegated to CI); broad store coverage (intent names the health test); extra changes (no harm); no `pull_request` trigger (intent is push); fixture duplication (shared `_clear_caches`, refactor not direct); stale spec text (spec edit); remote red-CI owner (orchestrator owns it); CI speed gaps (no wrong outcome).
+**Review (run 4, follow-up pass):** 18 findings (high 0, medium 0, low 8, false 5). Patches applied: 2 (low): concurrency group now includes the event name, so a manual run no longer cancels a push run; the Playwright artifact name now includes the run attempt, so re-runs do not clash. Deferred: none new (the issues.md row is carried from the earlier deferral). Rejected, with reasons in the Review Triage Log: stale spec text, status wording, Code Map Docker line and AC wording (fixes edit this build's spec; the result text is rewritten here); the `SWP_EXPECT_DIALECT` env-var guard (needs two mistakes at once, fix adds a guard); remote proof and action inputs (delegated; inputs checked with `gh api`); mutable tag pins and no Dependabot (no wrong outcome, new config); `postgres://` forms (carried, outside the contract); teardown dispose (pytest reports teardown errors separately).
 
-**Follow-up review recommendation:** false — first pass patched 0 high and 1 medium entry (patched counts: high 0, medium 1, low 4).
+**Follow-up review recommendation:** false — follow-up pass patched no `high` (patched counts: high 0, medium 0, low 2).
 
-**Verification (run 3, all local, all as expected):** `npm ci` exit 0; `npm run lint:py` exit 0; `npm run lint:imports` 4 kept, 0 broken; `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` 36 pytest + 5 Vitest passed; `uv run --directory backend --locked pytest tests/app` 1 passed (SQLite); same with `--database-url postgresql://u:p@localhost:1/none` → `psycopg.OperationalError` (rewrite + driver wired); misspelt `--databse-url` → exit 4; `SWP_EXPECT_DIALECT=postgresql` on SQLite → 1 failed (guard works); temporary `import sqlalchemy` in `backend/swp/domain/__init__.py` → `lint:imports` exit 1 (reverted); temporary failing test → `npm run test:py` exit 1 (removed); `CI=true npm run e2e -- --project=chromium` 3 passed; `ci.yml` parses as YAML (triggers `push`, `workflow_dispatch`; jobs `python`, `postgres`, `frontend`, `e2e`). Not run locally (orchestrator-verified-in-CI): actionlint, `tests/app` on real Postgres 17.
+**Verification (run 4, local, after patches):** `gh api` tag lists: setup-uv has `v10.4.0` (no `v10`); checkout, setup-node and upload-artifact have `v7`. `npm ci` exit 0; `npm run lint:py` exit 0; `npm run lint:imports` exit 0 (4 kept, 0 broken); `npm run lint` exit 0; `npm run typecheck` exit 0; `npm test` exit 0 (36 pytest + 5 Vitest passed); `uv run --directory backend --locked pytest tests/app` 1 passed (SQLite); `--database-url postgresql://u:p@localhost:1/none` → `psycopg.OperationalError`; misspelt `--databse-url` → exit 4; `CI=true npm run e2e -- --project=chromium` 3 passed; `ci.yml` parses as YAML (jobs `python`, `postgres`, `frontend`, `e2e`; refs `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`, `astral-sh/setup-uv@v10.4.0`). Not run locally (orchestrator-verified-in-CI): actionlint/workflow validity, `tests/app` on real Postgres 17.
 
-**Residual risks:** action tags (`checkout@v7`, `setup-node@v7`, `setup-uv@v10`, `upload-artifact@v7`) and the workflow syntax are unvalidated until GitHub runs it; the Postgres 17 path has never executed against a real server.
+**Residual risks:** the workflow is unproven until GitHub runs it after the orchestrator's push. The Postgres 17 path has never run against a real server. `setup-uv@v10.4.0` is an exact pin, so it will not pick up setup-uv updates without a manual bump.
