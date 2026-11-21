@@ -55,6 +55,8 @@ forbidden_modules =
     opentelemetry
     packaging
     pluggy
+    psycopg
+    psycopg_binary
     pydantic_core
     pydantic_settings
     pygments
@@ -71,7 +73,7 @@ forbidden_modules =
     uvicorn
 
 [importlinter:contract:only-store-sqlalchemy]
-name = Only swp.store imports SQLAlchemy or Alembic (AD-9)
+name = Only swp.store imports SQLAlchemy, Alembic or psycopg (AD-9)
 type = forbidden
 source_modules =
     swp.domain
@@ -83,5 +85,7 @@ source_modules =
 forbidden_modules =
     sqlalchemy
     alembic
+    psycopg
+    psycopg_binary
 # Direct imports only: other layers use SQLAlchemy through swp.store.
 allow_indirect_imports = True

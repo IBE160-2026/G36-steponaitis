@@ -47,3 +47,19 @@ def test_nfr2_custom_sqlite_parent_dir_is_created(
     config.get_settings()
 
     assert missing.is_dir()
+
+
+def test_nfr12_postgresql_url_uses_psycopg_driver(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@h/db")
+
+    assert config.get_settings().database_url == "postgresql+psycopg://u:p@h/db"
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["postgresql+psycopg://u:p@h/db", "sqlite:///relative.db"],
+)
+def test_nfr12_explicit_driver_and_sqlite_urls_are_unchanged(url: str) -> None:
+    assert config.Settings(database_url=url).database_url == url

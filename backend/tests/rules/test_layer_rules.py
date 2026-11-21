@@ -86,6 +86,7 @@ LAYER_VIOLATIONS = {
     "app imports sqlalchemy": ("app/violation.py", "import sqlalchemy\n"),
     "api imports sqlalchemy": ("api/violation.py", "from sqlalchemy import text\n"),
     "app imports alembic": ("app/violation.py", "import alembic\n"),
+    "app imports psycopg": ("app/violation.py", "import psycopg\n"),
     "store imports swp.app": ("store/violation.py", "import swp.app.health\n"),
 }
 

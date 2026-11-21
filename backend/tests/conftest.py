@@ -9,6 +9,16 @@ from swp.config import get_settings
 from swp.store.db import get_engine
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    # An option, not an env var: a misspelt option fails pytest instead of silently
+    # falling back to SQLite (CI runs tests/app against Postgres 17, AD-9).
+    parser.addoption(
+        "--database-url",
+        default="",
+        help="Database URL for tests/app (default: a fresh temporary SQLite file).",
+    )
+
+
 def _clear_caches() -> None:
     get_settings.cache_clear()
     get_engine.cache_clear()
