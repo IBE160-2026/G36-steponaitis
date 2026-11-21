@@ -7,7 +7,7 @@ from datetime import date, datetime
 from sqlalchemy import select
 
 from swp.domain.analysis import Analysis
-from swp.domain.import_ import ImportData
+from swp.domain.import_data import ImportData
 from swp.domain.state import PlanState
 from swp.domain.state_migrations import upcast
 from swp.store.db import transaction

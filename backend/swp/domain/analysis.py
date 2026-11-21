@@ -1,6 +1,7 @@
 """Kernel: analysis settings and the per-plan analysis snapshot (FR-18, AD-4).
 
-Classes and pick groups stay empty until Epic 2 computes them.
+`parts` (picks and class) is filled by the classify slice when the plan is created;
+pick groups arrive in Story 2.2.
 """
 
 import calendar
@@ -62,6 +63,9 @@ def period_for(data_as_of: date, months: int) -> tuple[date, date]:
 
 
 def build_analysis(data_as_of: date, settings: AnalysisSettings) -> Analysis:
-    """The analysis of a new plan: settings snapshot and period (classes arrive in Epic 2)."""
+    """The analysis of a new plan: settings snapshot and period.
+
+    `parts` is filled by the classify slice at plan creation; pick groups arrive in Story 2.2.
+    """
     start, end = period_for(data_as_of, settings.period_months)
     return Analysis(settings=settings, period_start=start, period_end=end)

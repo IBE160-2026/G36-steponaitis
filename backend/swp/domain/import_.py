@@ -16,7 +16,14 @@ from typing import Literal
 from pydantic import BaseModel
 
 from swp.domain.errors import DomainError
-from swp.domain.values import Dec
+from swp.domain.import_data import (
+    ImportData,
+    InventoryLine,
+    LocationData,
+    NormalizedImport,
+    TransactionLine,
+    TransactionType,
+)
 
 type Cell = str | int | Decimal | datetime | date | None
 type Value = str | Decimal | date | None
@@ -56,7 +63,6 @@ COLUMN_KINDS: Mapping[str, ColumnKind] = {
 }
 NON_NEGATIVE_COLUMNS = frozenset({"Quantity"})
 
-TransactionType = Literal["move_to_repair", "issue_part", "return_to_stock", "receipt"]
 TRANSACTION_TYPES: Mapping[str, TransactionType] = {
     "move to repair": "move_to_repair",
     "issue part": "issue_part",
@@ -446,40 +452,6 @@ def check_import(
             [file.check.model_dump(mode="json") for file in ordered],
         )
     return ordered
-
-
-class LocationData(BaseModel):
-    walk_path: Dec
-    aisle: str
-    level: str
-    section: str | None
-    position: str | None
-
-
-class InventoryLine(BaseModel):
-    part: str
-    location: str
-    quantity: Dec
-
-
-class TransactionLine(BaseModel):
-    type: TransactionType
-    part: str
-    transaction_code: str
-    date: date
-
-
-class ImportData(BaseModel):
-    schema_version: int = 1
-    locations: dict[str, LocationData]
-    inventory: list[InventoryLine]
-    parts: dict[str, str]
-    transactions: list[TransactionLine]
-
-
-class NormalizedImport(BaseModel):
-    data_as_of: date
-    data: ImportData
 
 
 def _text(value: Value) -> str:

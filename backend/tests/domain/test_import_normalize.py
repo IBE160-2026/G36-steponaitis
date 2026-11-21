@@ -10,12 +10,12 @@ from swp.domain.errors import DomainError
 from swp.domain.import_ import (
     Cell,
     CheckedFile,
-    NormalizedImport,
     RawSheet,
     check_file,
     check_import,
     normalize_import,
 )
+from swp.domain.import_data import NormalizedImport
 from swp.domain.values import Dec, dec_text
 
 LOC_HEADER: tuple[Cell, ...] = ("Location", "Walk Path", "Aisle", "Level")

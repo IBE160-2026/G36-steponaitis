@@ -3,6 +3,7 @@
 import json
 import uuid
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,6 +20,7 @@ from swp.store.db import get_engine
 from swp.store.models import ImportRow, PlanRow
 from tests.app.test_import_readers import DATA_DIR, INV_CSV, LOC_CSV, TX_CSV, _data_files
 from tests.conftest import _clear_caches
+from tests.domain.answer_key import CLASS_NAMES, expected
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 NOW = datetime(2026, 11, 21, 12, 30, tzinfo=UTC)
@@ -185,3 +187,50 @@ def test_nfr12_import_delete_restricted_by_plan(empty_tables: str) -> None:
         conn.execute(delete(ImportRow).where(ImportRow.id == created.import_id))
 
     assert _counts() == (1, 1)
+
+
+def _expected_parts() -> dict[str, dict[str, object]]:
+    return {
+        part: {"picks": e["picks"], "movement_class": CLASS_NAMES[e["class"]]}
+        for part, e in expected()["parts"].items()
+    }
+
+
+def test_fr18_create_stores_classes(empty_tables: str) -> None:
+    created = plans.create("Key", read_import(_data_files("answer-key", "csv")), now=NOW)
+
+    with get_engine().connect() as conn:
+        row = conn.execute(select(PlanRow).where(PlanRow.id == created.id)).one()
+    assert row.analysis["parts"] == _expected_parts()
+    assert list(row.analysis["parts"]) == sorted(row.analysis["parts"])
+    stored = plans.get(created.id)
+    assert stored is not None
+    assert stored.analysis.parts == created.analysis.parts
+
+
+def test_fr18_reopen_keeps_classes_after_settings_change(
+    empty_tables: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    files = _data_files("answer-key", "csv")
+    first = plans.create("Before", read_import(files), now=NOW)
+    before = plans.summary(first.id).class_counts
+
+    changed = tmp_path / "analysis.toml"
+    changed.write_text(
+        "period_months = 12\nfast_min_picks = 10\nmedium_min_picks = 3\n"
+        "slow_min_picks = 2\npick_group_min_shared_jobs = 5\n",
+        encoding="utf-8",
+    )
+    load = plans.load_analysis_settings
+    monkeypatch.setattr(plans, "load_analysis_settings", lambda: load(changed))
+    second = plans.create("After", read_import(files), now=NOW)
+
+    assert plans.summary(first.id).class_counts == before
+    assert before.model_dump() == {"fast": 6, "medium": 15, "slow": 3, "dead": 3}
+    # expected.json picks under limits 10/3/2: >=10 is 17 parts, 3-9 is 6, 2 is none, <2 is 4.
+    assert plans.summary(second.id).class_counts.model_dump() == {
+        "fast": 17,
+        "medium": 6,
+        "slow": 0,
+        "dead": 4,
+    }

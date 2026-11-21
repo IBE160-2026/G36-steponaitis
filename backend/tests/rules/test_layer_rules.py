@@ -1,6 +1,7 @@
 """NFR-1 maintainability: the layer rules of AD-1/AD-9 reject violations."""
 
 import ast
+import configparser
 import os
 import shutil
 import subprocess
@@ -123,3 +124,51 @@ def test_nfr1_import_linter_rejects_layer_violations(tmp_path: Path, case: str) 
     assert result.returncode != 0, result.stdout
     assert "BROKEN" in result.stdout
     assert f"swp.{relative.removesuffix('.py').replace('/', '.')}" in result.stdout
+
+
+SLICE_IMPORTS = {
+    "classify imports import_": ("domain/classify.py", "import swp.domain.import_\n"),
+    "import_ imports classify": ("domain/import_.py", "import swp.domain.classify\n"),
+}
+DOMAIN_SLICES_CONTRACT = "Domain slices never import each other"
+
+
+@pytest.mark.parametrize("case", sorted(SLICE_IMPORTS))
+def test_nfr1_import_linter_rejects_slice_imports(tmp_path: Path, case: str) -> None:
+    workdir = _copy_package(tmp_path)
+    relative, code = SLICE_IMPORTS[case]
+    target = workdir / "swp" / relative
+    target.write_text(target.read_text(encoding="utf-8") + code, encoding="utf-8")
+
+    result = _lint_imports(workdir)
+
+    assert result.returncode != 0, result.stdout
+    assert "BROKEN" in result.stdout
+    assert f"{DOMAIN_SLICES_CONTRACT} (AD-1) BROKEN" in result.stdout
+
+
+KERNEL_MODULES = {
+    "swp.domain",
+    "swp.domain.views",
+    "swp.domain.analysis",
+    "swp.domain.errors",
+    "swp.domain.import_data",
+    "swp.domain.state",
+    "swp.domain.state_migrations",
+    "swp.domain.values",
+}
+
+
+def test_nfr1_every_domain_module_is_kernel_or_independent_slice() -> None:
+    config = configparser.ConfigParser()
+    config.read(BACKEND_DIR / ".importlinter", encoding="utf-8")
+    slices = set(config["importlinter:contract:domain-slices"]["modules"].split())
+    modules = {
+        ".".join(file.relative_to(SWP_DIR.parent).with_suffix("").parts).removesuffix(".__init__")
+        for file in DOMAIN_DIR.rglob("*.py")
+    }
+
+    unlisted = sorted(modules - KERNEL_MODULES - slices)
+
+    assert unlisted == [], "add each new domain slice to the domain-slices contract"
+    assert not KERNEL_MODULES & slices

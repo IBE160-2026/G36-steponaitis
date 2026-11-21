@@ -9,8 +9,9 @@ from pydantic import AwareDatetime, BaseModel
 
 from swp.config import BACKEND_DIR
 from swp.domain.analysis import AnalysisSettings, build_analysis
+from swp.domain.classify import classify_parts
 from swp.domain.errors import DomainError
-from swp.domain.import_ import NormalizedImport
+from swp.domain.import_data import NormalizedImport
 from swp.domain.state import PlanState
 from swp.domain.views.summary import PlanSummary, build_summary
 from swp.store import plans as store
@@ -57,9 +58,14 @@ def create(
     user: str = DEFAULT_USER,
     settings: AnalysisSettings | None = None,
 ) -> StoredPlan:
-    """Create and store a plan with its import in one transaction."""
+    """Create and store a plan with its import in one transaction.
+
+    The picks and class of every part are computed once here and stored (AD-4).
+    """
     name = plan_name(name)
     settings = settings if settings is not None else load_analysis_settings()
+    analysis = build_analysis(imported.data_as_of, settings)
+    analysis = analysis.model_copy(update={"parts": classify_parts(imported.data, analysis)})
     stored_import = StoredImport(
         id=uuid.uuid4(), uploaded_at=now, data_as_of=imported.data_as_of, data=imported.data
     )
@@ -72,7 +78,7 @@ def create(
         last_edited_by=user,
         last_edited_at=now,
         version=1,
-        analysis=build_analysis(imported.data_as_of, settings),
+        analysis=analysis,
         state=PlanState.new(),
         imported=stored_import,
     )

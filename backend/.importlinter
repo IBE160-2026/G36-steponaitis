@@ -94,3 +94,14 @@ forbidden_modules =
     psycopg_binary
 # Direct imports only: other layers use SQLAlchemy through swp.store.
 allow_indirect_imports = True
+
+[importlinter:contract:domain-slices]
+name = Domain slices never import each other (AD-1)
+# A slice imports only the kernel (analysis, import_data, values, errors, state, ...).
+# Add each new domain slice here. An allowed exception named in the epics (e.g. Epic 5's
+# rules reading classify and pick_groups) goes in ignore_imports.
+type = independence
+modules =
+    swp.domain.import_
+    swp.domain.classify
+    swp.domain.views.summary

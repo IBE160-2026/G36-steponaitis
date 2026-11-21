@@ -1,7 +1,7 @@
 "use client";
 
 // Overview (FR-7, FR-18, UX-DR21/22): the plan's dates, period, parts per movement class and the
-// settings it was computed with. Class counts stay 0 until Epic 2 computes classes.
+// settings it was computed with.
 
 import Link from "next/link";
 

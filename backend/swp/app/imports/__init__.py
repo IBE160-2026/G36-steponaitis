@@ -9,12 +9,12 @@ from swp.domain.import_ import (
     ROLES,
     CheckedFile,
     FileRole,
-    NormalizedImport,
     check_file,
     check_import,
     normalize_import,
     unreadable_file,
 )
+from swp.domain.import_data import NormalizedImport
 
 
 @dataclass(frozen=True)

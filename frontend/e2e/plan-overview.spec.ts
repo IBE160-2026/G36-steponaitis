@@ -69,8 +69,8 @@ test.describe("uj1 plan overview", () => {
     await expect(main.getByText("2025-10-01 to 2026-09-30", { exact: true })).toBeVisible();
     const classes = main.locator("li[data-class]");
     await expect(classes).toHaveCount(4);
-    for (const [index, label] of ["Fast-moving", "Medium-moving", "Slow-moving", "Dead stock"].entries()) {
-      await expect(classes.nth(index)).toHaveText(`${label}0`);
+    for (const [index, text] of ["Fast-moving80", "Medium-moving249", "Slow-moving580", "Dead stock636"].entries()) {
+      await expect(classes.nth(index)).toHaveText(text);
     }
     await expect(main.getByText("24 or more picks")).toBeVisible();
     await expect(main.getByText("5 or more shared jobs")).toBeVisible();

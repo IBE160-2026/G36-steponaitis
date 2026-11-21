@@ -47,7 +47,7 @@ def test_fr7_summary_from_sample_files(empty_tables: str) -> None:
     assert body["uploaded_at"].endswith("Z")
     assert body["current_round"] == 0
     assert body["version"] == 1
-    assert body["class_counts"] == {"fast": 0, "medium": 0, "slow": 0, "dead": 0}
+    assert body["class_counts"] == {"fast": 80, "medium": 249, "slow": 580, "dead": 636}
     assert [s["checked"] for s in body["steps"]] == [True] * 4 + [False] * 4
     counts = {s["key"]: s["count"] for s in body["steps"]}
     assert counts["locations"] == 2_000

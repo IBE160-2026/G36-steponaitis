@@ -212,7 +212,7 @@ action_items:
     action: "Add an import-linter independence contract for domain slices in Story
       2.1"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-9-decide-whether-unknown-transaction-types"
     epic: 1
