@@ -1,4 +1,4 @@
-goal Build Epics 1–12 of Smart Warehouse Planner unattended by following the runbook .docs/implementation-artifacts/autonomous-run.md exactly.
+/goal Build Epics 1–12 of Smart Warehouse Planner unattended by following the runbook .docs/implementation-artifacts/autonomous-run.md exactly.
 
 Rules:
 - Re-read autonomous-run.md at the start of every iteration and after every context compaction. It wins over anything in this goal.
