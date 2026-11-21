@@ -7,7 +7,7 @@ The runbook for the unattended build loop started with the goal command. Decisio
 - **Scope:** Epics 1–12 (milestones 1 and 2), in the order of `.docs/implementation-artifacts/sprint-status.yaml`. Epics 13, 14, 15 and 16 are **out of scope**. Epic 16 is the deployment and waits for the user's approval of the website.
 - **Branch:** work directly on `main`. Commit after each story and push to `origin main` once the story is done and its local checks pass.
 - **Milestone gates:** Story 5.8 (M1) and Story 12.5 (M2) are recorded in the session log by the loop itself when every check in the story passes. If any check fails, the story is blocked (see *Unblock*).
-- **Blocked story:** try to unblock the same story up to 5 times (see *Unblock*). If it is still blocked, stop the whole run and notify the user. Never skip a story, because later stories build on it.
+- **Blocked story:** try to unblock the same story up to 20 times (see *Unblock*). If it is still blocked, stop the whole run and notify the user. Never skip a story, because later stories build on it.
 - **Retrospectives:** after the last story of each epic, run `bmad-retrospective` headless (`-H`).
 - **Session log:** one `sesjonslogg` log per story, in Norwegian like the existing logs. The skill commits it; the loop pushes.
 - **Never:** deploy or run the Vercel CLI; touch Vercel or Supabase; use `data/private/` or real company data; edit `data/sample/` or `data/answer-key/`; force-push, `reset --hard` or rebase; change planning artifacts unless the story itself says so.
@@ -44,7 +44,7 @@ The runbook for the unattended build loop started with the goal command. Decisio
 
 ## Unblock
 
-Up to 5 fix attempts on the same story, one at a time. Never move on to another story while one is blocked.
+Up to 20 fix attempts on the same story, one at a time. Never move on to another story while one is blocked.
 
 1. Commit what the previous attempt left, but only files under `.docs/implementation-artifacts/`, with the message `Sprint: <story-key> blocked (attempt <n>)`. `bmad-build-auto` needs a clean tree.
 2. Launch one fresh `general-purpose` subagent with this prompt:
@@ -54,7 +54,7 @@ Up to 5 fix attempts on the same story, one at a time. Never move on to another 
    Wait for the result notification before doing anything else.
 3. Add the attempt to `issues.md` as one line: the story key, the attempt number, the blocking condition, what was tried and the outcome. If the attempt resolved the story, close the line with `[x]`.
 4. Check the result as in step 6 of *One iteration*. If the story is done, continue with step 7. If it is still blocked, start the next attempt with the new blocking condition.
-5. If the story is still blocked after the 5th attempt, go to *Stop*.
+5. If the story is still blocked after the 20th attempt, go to *Stop*.
 
 Do not attempt a fix when the blocking condition needs a new account, a purchase or a product that is not already in the project; go to *Stop* directly.
 
