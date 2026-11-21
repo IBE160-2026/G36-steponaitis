@@ -25,3 +25,22 @@ Brukeren ville lukke de åpne punktene fra [forberedelse-autonom-bygging](979-20
 ### Åpne punkter
 - Start Claude Code på nytt og testkjør Story 1.1 med runbooken mens brukeren ser på. Dette kan ikke gjøres fra denne økten, og punktet står allerede åpent i `issues.md`.
 - Epic 16 (deployment) venter fortsatt på at nettsiden blir godkjent. Punktet står allerede åpent.
+
+## 2026-11-21 kl. 13:05 — Justas
+
+### Oppgave
+Committe brukerens endringer i `GOAL.md`.
+
+### Plan
+- Se gjennom diffen og committe bare `GOAL.md`.
+
+### Resultat
+- Committet som `8e830f8`, ikke pushet. Brukerens endringer:
+  - Nye regler: commit og push etter hver story, merge epics til `main` når CI er grønn, løse blokkerte stories selv og logge løsningen i issues-fila.
+  - DONE krever nå Playwright-tester for alle brukerreiser.
+  - Nye stoppvilkår: når noe krever ny konto, kjøp eller et produkt som ikke er listet, eller når 5 stories på rad ender som «blocked».
+  - Fjernet seksjonene «Before you start» og «Following the run» og kodeblokken rundt kommandoen.
+- Merk: kommandolinja starter nå med `goal` uten `/`.
+
+### Åpne punkter
+Ingen.
