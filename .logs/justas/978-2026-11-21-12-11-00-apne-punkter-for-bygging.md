@@ -17,6 +17,10 @@ Brukeren ville lukke de åpne punktene fra [forberedelse-autonom-bygging](979-20
   - Run `44897847406` gikk til `completed success`. **GitHub Actions kjører på repoet.**
   - Branchen er slettet på GitHub og lokalt; `origin` har bare `main`.
 - Punktet om GitHub Actions i `issues.md` er lukket.
+- `GOAL.md` i prosjektroten inneholder:
+  - stegene før start
+  - `/goal`-kommandoen for den autonome kjøringen av Epic 1–12 (følger runbooken; ferdig ved DONE eller STOPPED)
+  - hvor kjøringen kan følges
 
 ### Åpne punkter
 - Start Claude Code på nytt og testkjør Story 1.1 med runbooken mens brukeren ser på. Dette kan ikke gjøres fra denne økten, og punktet står allerede åpent i `issues.md`.
