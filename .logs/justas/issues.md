@@ -81,3 +81,4 @@
 - [ ] 2026-11-21 [epic-1-retrospektiv](968-2026-11-21-18-08-58-epic-1-retrospektiv.md) — retro Epic 1, action item 9: avgjør om ukjente Transaction Types rapporteres og om data_as_of bare bruker beholdte rader (FR-5/FR-7)
 - [ ] 2026-11-21 [epic-1-retrospektiv](968-2026-11-21-18-08-58-epic-1-retrospektiv.md) — retro Epic 1, action item 10: runbooken mangler steg for `followup_review_recommended: true` (5 av 8 storyer ba om oppfølgingsreview)
 - [ ] 2026-11-21 [epic-1-retrospektiv](968-2026-11-21-18-08-58-epic-1-retrospektiv.md) — retro Epic 1, action item 11: storybygg leser ikke tidligere specs' utsatte punkter eller `issues.md` (testhull fra 1.4 ble ikke dekket i 1.8)
+- [ ] 2026-11-21 [2-1-count-picks-and-classify-every-part](967-2026-11-21-22-07-35-2-1-count-picks-and-classify-every-part.md) — import: delenummer med ledende nuller i én fil og som tall i en annen (`0100` mot `100`) kan gi 0 plukk — uverifisert (Story 2.1, utsatt)
