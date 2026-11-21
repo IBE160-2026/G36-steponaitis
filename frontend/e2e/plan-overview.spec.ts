@@ -1,34 +1,21 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+import {
+  type CreatedPlan as Summary,
+  createSamplePlan as createPlan,
+  SAMPLE,
+  SAMPLE_FILES as FILES,
+} from "./support/sample-plan";
 
 // UJ-1: after New Plan the planner lands on the overview, opens the settings and comes back to
 // the latest plan from `/` (Story 1.9; FR-7, FR-8, FR-9, FR-18, AD-12, AD-20, UX-DR5/6/21/22).
 
 test.skip(({ browserName }) => browserName !== "chromium", "The overview journey runs in Chromium.");
 
-const SAMPLE = join(__dirname, "..", "..", "data", "sample");
-const FILES = { locations: "Locations.xlsx", inventory: "Inventory.xlsx", transactions: "transactions.xlsx" };
-const XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const STEP_COUNT = 8;
-
-type Summary = { id: string; name: string; uploaded_at: string };
-
-async function createPlan(request: APIRequestContext, name: string): Promise<Summary> {
-  const multipart: Record<string, string | { name: string; mimeType: string; buffer: Buffer }> = { name };
-  for (const [role, file] of Object.entries(FILES)) {
-    multipart[role] = { name: file, mimeType: XLSX, buffer: readFileSync(join(SAMPLE, file)) };
-  }
-  const response = await request.post("/api/plans", {
-    multipart,
-    headers: { "Sec-Fetch-Site": "same-origin" },
-    timeout: 30_000,
-  });
-  expect(response.status()).toBe(201);
-  return (await response.json()) as Summary;
-}
 
 async function localDate(page: Page, instant: string): Promise<string> {
   return page.evaluate((value) => {
@@ -211,14 +198,14 @@ test.describe("uj1 plan overview", () => {
     const plan = await createPlan(request, `Steps ${randomUUID().slice(0, 8)}`);
     await page.goto(`/plans/${plan.id}/overview`);
     const nav = page.getByRole("navigation", { name: "Plan steps" });
-    await nav.getByRole("link", { name: /^\d*Locations/ }).click();
+    await nav.getByRole("link", { name: /^\d*Pick groups/ }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/locations$`));
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/pick-groups$`));
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { name: "Locations", level: 1 })).toBeVisible();
+    await expect(main.getByRole("heading", { name: "Pick groups", level: 1 })).toBeVisible();
     await expect(main.getByText("This step is not built yet.")).toBeVisible();
     await expect(nav.locator('[aria-current="step"]')).toHaveCount(1);
-    await expect(nav.locator('[aria-current="step"]')).toContainText("Locations");
+    await expect(nav.locator('[aria-current="step"]')).toContainText("Pick groups");
 
     const response = await page.goto(`/plans/${plan.id}/nope`);
     expect(response?.status()).toBe(404);

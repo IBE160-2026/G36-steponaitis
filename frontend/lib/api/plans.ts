@@ -1,8 +1,8 @@
 "use client";
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
-// used by the `/` redirect and the parts roster (Story 2.3). All are GETs and never change the
-// plan (FR-9).
+// used by the `/` redirect, the parts roster (Story 2.3) and the locations table (Story 2.4). All
+// are GETs and never change the plan (FR-9).
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -15,6 +15,11 @@ export type SavedPlanRow = components["schemas"]["SavedPlanRow"];
 export type PartsView = components["schemas"]["PartsView"];
 export type PartRow = components["schemas"]["PartRow"];
 export type LocationRef = components["schemas"]["LocationRef"];
+export type LocationsView = components["schemas"]["LocationsView"];
+export type LocationRow = components["schemas"]["LocationRow"];
+export type LocationContent = components["schemas"]["LocationContent"];
+export type Occupancy = components["schemas"]["Occupancy"];
+export type AisleOccupancy = components["schemas"]["AisleOccupancy"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -24,6 +29,10 @@ export function planSummaryKey(planId: string) {
 
 export function planPartsKey(planId: string) {
   return ["plan", planId, "parts"] as const;
+}
+
+export function planLocationsKey(planId: string) {
+  return ["plan", planId, "locations"] as const;
 }
 
 async function getJson<T>(url: string): Promise<T> {
@@ -51,6 +60,14 @@ export function fetchPlanParts(planId: string): Promise<PartsView> {
 
 export function usePlanParts(planId: string) {
   return useQuery({ queryKey: planPartsKey(planId), queryFn: () => fetchPlanParts(planId) });
+}
+
+export function fetchPlanLocations(planId: string): Promise<LocationsView> {
+  return getJson<LocationsView>(`/api/plans/${encodeURIComponent(planId)}/locations`);
+}
+
+export function usePlanLocations(planId: string) {
+  return useQuery({ queryKey: planLocationsKey(planId), queryFn: () => fetchPlanLocations(planId) });
 }
 
 export function fetchPlans(): Promise<SavedPlanRow[]> {

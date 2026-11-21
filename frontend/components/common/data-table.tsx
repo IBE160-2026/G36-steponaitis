@@ -4,8 +4,9 @@
 // and tabular. Rows show in the order given (server order) until the user picks a sort; sorts are
 // stable, so ties keep server order (AD-14). The rows are one tab stop (roving tabindex):
 // `↑`/`↓` move between rows, `Home`/`End` jump, `Enter` opens a row when `onOpen` is given.
+// `focusKey` (UX-DR9) focuses a shown row and scrolls it into view, once per key value.
 
-import { type KeyboardEvent, type ReactNode, useRef, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/common/icons";
 import { type SortDirection, type SortValue, sortRows } from "@/lib/sort";
@@ -31,6 +32,8 @@ export type DataTableProps<T> = {
   rows: readonly T[];
   rowKey: (row: T) => string;
   onOpen?: (row: T) => void;
+  /** The key of a row to make active, focus and scroll into view (once per value) when shown. */
+  focusKey?: string;
   className?: string;
 };
 
@@ -72,14 +75,32 @@ function toValue<T>(column: DataTableColumn<T>): (row: T) => SortValue {
   return (row) => Number(value(row));
 }
 
-export function DataTable<T>({ label, columns, rows, rowKey, onOpen, className }: DataTableProps<T>) {
+export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, className }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
   const [active, setActive] = useState(0);
   const body = useRef<HTMLTableSectionElement>(null);
+  const focused = useRef<string | undefined>(undefined);
 
   const sortColumn = sort ? columns.find((column) => column.key === sort.key && column.sortValue) : undefined;
   const shown = sort && sortColumn ? sortRows(rows, toValue(sortColumn), sort.direction) : [...rows];
   const activeIndex = Math.min(active, Math.max(shown.length - 1, 0));
+  const focusIndex = focusKey === undefined ? -1 : shown.findIndex((row) => rowKey(row) === focusKey);
+
+  useEffect(() => {
+    if (focusKey === undefined) {
+      focused.current = undefined;
+      return;
+    }
+    if (focused.current === focusKey) return;
+    // Handled on the first run for this value, shown or not: a row shown later never steals focus.
+    focused.current = focusKey;
+    if (focusIndex < 0) return;
+    const element = body.current?.querySelector<HTMLElement>(`tr[data-row-index="${focusIndex}"]`);
+    if (!element) return;
+    // Focusing the row makes it active through its onFocus handler.
+    element.focus({ preventScroll: true });
+    element.scrollIntoView({ block: "center" });
+  }, [focusKey, focusIndex]);
 
   function focusRow(index: number) {
     setActive(index);

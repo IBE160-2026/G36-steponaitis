@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
-import { type APIRequestContext, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-7: the planner opens the Parts step and reads the roster: class filter, a user sort on Picks
 // with ties in server order, and one tab stop with arrow-key row movement (Story 2.3; FR-13,
@@ -10,9 +10,6 @@ import { type APIRequestContext, expect, test } from "@playwright/test";
 
 test.skip(({ browserName }) => browserName !== "chromium", "The parts journey runs in Chromium.");
 
-const SAMPLE = join(__dirname, "..", "..", "data", "sample");
-const FILES = { locations: "Locations.xlsx", inventory: "Inventory.xlsx", transactions: "transactions.xlsx" };
-const XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const CLASS_LABELS = { fast: "Fast-moving", medium: "Medium-moving", slow: "Slow-moving", dead: "Dead stock" };
 
 type Row = {
@@ -23,20 +20,6 @@ type Row = {
   current_location: { code: string } | null;
 };
 
-async function createPlan(request: APIRequestContext, name: string): Promise<string> {
-  const multipart: Record<string, string | { name: string; mimeType: string; buffer: Buffer }> = { name };
-  for (const [role, file] of Object.entries(FILES)) {
-    multipart[role] = { name: file, mimeType: XLSX, buffer: readFileSync(join(SAMPLE, file)) };
-  }
-  const response = await request.post("/api/plans", {
-    multipart,
-    headers: { "Sec-Fetch-Site": "same-origin" },
-    timeout: 30_000,
-  });
-  expect(response.status()).toBe(201);
-  return ((await response.json()) as { id: string }).id;
-}
-
 function whyLine(row: Row): string {
   const where = row.current_location ? row.current_location.code : "No current location (no stock above zero)";
   return `${CLASS_LABELS[row.movement_class]} · ${row.picks.toLocaleString("en-US")} ${row.picks === 1 ? "pick" : "picks"} · ${where}`;
@@ -45,7 +28,7 @@ function whyLine(row: Row): string {
 test("uj7 reads the parts roster, filters by class, sorts by picks and moves by keyboard", async ({ page, request }) => {
   test.setTimeout(90_000);
   await page.setViewportSize({ width: 1280, height: 800 });
-  const planId = await createPlan(request, `Parts ${randomUUID().slice(0, 8)}`);
+  const planId = (await createSamplePlan(request, `Parts ${randomUUID().slice(0, 8)}`)).id;
   const api = await request.get(`/api/plans/${planId}/parts`);
   expect(api.status()).toBe(200);
   const rows = ((await api.json()) as { parts: Row[] }).parts;

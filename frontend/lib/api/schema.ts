@@ -56,6 +56,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Locations */
+        get: operations["get_plan_locations_api_plans__plan_id__locations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/parts": {
         parameters: {
             query?: never;
@@ -94,6 +111,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AisleOccupancy */
+        AisleOccupancy: {
+            /** Aisle */
+            aisle: string;
+            /** Empty */
+            empty: number;
+            /** Locations */
+            locations: number;
+            /** Occupied */
+            occupied: number;
+            /** Occupied Percent */
+            occupied_percent: string;
+        };
         /**
          * AnalysisSettings
          * @description The values from `backend/settings/analysis.toml`; a snapshot is stored per plan.
@@ -180,6 +210,15 @@ export interface components {
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
         };
+        /** LocationContent */
+        LocationContent: {
+            /** Description */
+            description: string;
+            /** Part */
+            part: string;
+            /** Stock */
+            stock: string;
+        };
         /**
          * LocationRef
          * @description A location on the wire (AD-3).
@@ -197,6 +236,37 @@ export interface components {
             position: string | null;
             /** Section */
             section: string | null;
+        };
+        /** LocationRow */
+        LocationRow: {
+            /** Contents */
+            contents: components["schemas"]["LocationContent"][];
+            location: components["schemas"]["LocationRef"];
+            /** Occupied */
+            occupied: boolean;
+            /** Walk Path */
+            walk_path: string;
+        };
+        /** LocationsView */
+        LocationsView: {
+            /** Aisles */
+            aisles: components["schemas"]["AisleOccupancy"][];
+            /** Locations */
+            locations: components["schemas"]["LocationRow"][];
+            /** Version */
+            version: number;
+            warehouse: components["schemas"]["Occupancy"];
+        };
+        /** Occupancy */
+        Occupancy: {
+            /** Empty */
+            empty: number;
+            /** Locations */
+            locations: number;
+            /** Occupied */
+            occupied: number;
+            /** Occupied Percent */
+            occupied_percent: string;
         };
         /** PartRow */
         PartRow: {
@@ -466,6 +536,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanSummary"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_locations_api_plans__plan_id__locations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocationsView"];
                 };
             };
             /** @description Error */

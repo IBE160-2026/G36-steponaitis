@@ -1,9 +1,38 @@
-// Plan URLs (AD-20): `/plans/{id}/{view}` is built and read here and nowhere else.
+// Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9) are
+// built and read here and nowhere else.
 
 import type { StepKey } from "@/lib/view-state/steps";
 
-export function planStepHref(planId: string, step: StepKey): string {
-  return `/plans/${encodeURIComponent(planId)}/${step}`;
+/** The Locations view state carried in the URL: an aisle filter and a location to focus. */
+export type LocationParams = { aisle?: string; loc?: string };
+
+/** `/plans/<id>/<step>`, with only the non-empty `params` appended as a query. */
+export function planStepHref(planId: string, step: StepKey, params?: LocationParams): string {
+  const path = `/plans/${encodeURIComponent(planId)}/${step}`;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value) query.append(key, value);
+  }
+  const search = query.toString();
+  return search ? `${path}?${search}` : path;
+}
+
+export type SearchParamsInput = URLSearchParams | Record<string, string | string[] | undefined>;
+
+function firstValue(searchParams: SearchParamsInput, key: string): string | undefined {
+  const value = searchParams instanceof URLSearchParams ? searchParams.get(key) : searchParams[key];
+  const first = Array.isArray(value) ? value[0] : value;
+  return first ? first : undefined;
+}
+
+/** `?aisle=&loc=` → `{aisle?, loc?}`: the first value of each; empty values are dropped. */
+export function parseLocationParams(searchParams: SearchParamsInput): LocationParams {
+  const params: LocationParams = {};
+  const aisle = firstValue(searchParams, "aisle");
+  const loc = firstValue(searchParams, "loc");
+  if (aisle !== undefined) params.aisle = aisle;
+  if (loc !== undefined) params.loc = loc;
+  return params;
 }
 
 /** Settings is not a flow step, so it has its own link. */
