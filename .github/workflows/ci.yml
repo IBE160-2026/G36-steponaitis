@@ -70,7 +70,7 @@ jobs:
           --database-url postgresql://postgres:postgres@localhost:5432/swp_test
 
   frontend:
-    name: Frontend (ESLint, typecheck, Vitest)
+    name: Frontend (OpenAPI schema diff, ESLint, typecheck, Vitest)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -85,6 +85,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
+      # AD-13: frontend/lib/api/schema.ts must match the backend's OpenAPI schema.
+      - run: npm run gen:api
+      - run: git diff --exit-code -- frontend/lib/api/schema.ts
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:web

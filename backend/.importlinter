@@ -54,6 +54,7 @@ forbidden_modules =
     markdown_it
     markupsafe
     mdurl
+    multipart
     openpyxl
     opentelemetry
     packaging
@@ -64,6 +65,7 @@ forbidden_modules =
     pydantic_settings
     pygments
     pytest
+    python_multipart
     _pytest
     py
     rich

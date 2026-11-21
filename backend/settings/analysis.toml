@@ -1,0 +1,14 @@
+# Analysis settings (FR-18). Every new plan stores a snapshot of these values;
+# change them here, not in the app. Values match data/answer-key/expected.json.
+
+# Length of the analysis period in months, ending on the data-as-of date.
+period_months = 12
+
+# Movement classes by picks in the period: fast >= fast_min_picks,
+# medium >= medium_min_picks, slow >= slow_min_picks, otherwise dead.
+fast_min_picks = 24
+medium_min_picks = 6
+slow_min_picks = 1
+
+# Two parts form a pick group when they share at least this many jobs.
+pick_group_min_shared_jobs = 5

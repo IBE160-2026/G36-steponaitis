@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from pathlib import Path
 
@@ -11,4 +12,14 @@ def _tables(path: Path) -> set[str]:
 
 def test_nfr2_cli_db_upgrade_runs_migrations(database_path: Path) -> None:
     assert main(["db", "upgrade"]) == 0
-    assert "alembic_version" in _tables(database_path)
+    assert {"alembic_version", "imports", "plans"} <= _tables(database_path)
+
+
+def test_nfr1_openapi_lists_plans_and_session(capsys) -> None:
+    assert main(["openapi"]) == 0
+
+    schema = json.loads(capsys.readouterr().out)
+    assert "post" in schema["paths"]["/api/plans"]
+    assert set(schema["paths"]["/api/plans"]["post"]["responses"]) >= {"201", "403", "413", "422"}
+    assert "get" in schema["paths"]["/api/session"]
+    assert "ErrorEnvelope" in schema["components"]["schemas"]

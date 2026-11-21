@@ -1,0 +1,109 @@
+"""FR-18 period and settings, NFR-12 stored-state upcasting (AD-4)."""
+
+import json
+from datetime import date
+from pathlib import Path
+
+import pytest
+from pydantic import ValidationError
+
+from swp.domain.analysis import AnalysisSettings, build_analysis, period_for
+from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState
+from swp.domain.state_migrations import CURRENT_VERSIONS, upcast
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+SETTINGS = {
+    "period_months": 12,
+    "fast_min_picks": 24,
+    "medium_min_picks": 6,
+    "slow_min_picks": 1,
+    "pick_group_min_shared_jobs": 5,
+}
+
+
+@pytest.mark.parametrize(
+    ("data_as_of", "months", "start"),
+    [
+        (date(2026, 9, 30), 12, date(2025, 10, 1)),
+        (date(2024, 2, 29), 12, date(2023, 3, 1)),
+        (date(2026, 3, 31), 1, date(2026, 3, 1)),
+        (date(2026, 1, 15), 24, date(2024, 1, 16)),
+        (date(2026, 12, 31), 12, date(2026, 1, 1)),
+    ],
+)
+def test_fr18_period_ends_on_data_as_of(data_as_of: date, months: int, start: date) -> None:
+    assert period_for(data_as_of, months) == (start, data_as_of)
+
+
+def test_fr18_period_rejects_non_positive_months() -> None:
+    with pytest.raises(ValueError):
+        period_for(date(2026, 9, 30), 0)
+
+
+def test_fr18_period_in_built_analysis() -> None:
+    analysis = build_analysis(date(2026, 9, 30), AnalysisSettings.model_validate(SETTINGS))
+
+    dumped = analysis.model_dump(mode="json")
+    assert dumped == {
+        "schema_version": 1,
+        "settings": SETTINGS,
+        "period_start": "2025-10-01",
+        "period_end": "2026-09-30",
+        "parts": {},
+        "pick_groups": [],
+    }
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"period_months": 0},
+        {"slow_min_picks": -1},
+        {"fast_min_picks": 6},
+        {"medium_min_picks": 1},
+        {"fast_min_picks": "x"},
+    ],
+)
+def test_fr18_settings_validation(override: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        AnalysisSettings.model_validate({**SETTINGS, **override})
+
+
+def test_fr18_settings_validation_accepts_answer_key_values() -> None:
+    assert AnalysisSettings.model_validate(SETTINGS).model_dump() == SETTINGS
+
+
+def test_nfr12_state_v1_fixture_upcasts_to_new() -> None:
+    doc = json.loads((FIXTURES / "state_v1.json").read_text(encoding="utf-8"))
+
+    upcast_doc = upcast("state", doc)
+
+    assert upcast_doc == doc
+    assert PlanState.model_validate(upcast_doc) == PlanState.new()
+    assert PlanState.new().model_dump(mode="json") == doc
+
+
+def test_nfr12_missing_schema_version_is_version_1() -> None:
+    assert upcast("analysis", {"a": 1}) == {"a": 1, "schema_version": 1}
+
+
+@pytest.mark.parametrize("kind", sorted(CURRENT_VERSIONS))
+def test_nfr12_future_version_rejected(kind: str) -> None:
+    with pytest.raises(ValueError):
+        upcast(kind, {"schema_version": CURRENT_VERSIONS[kind] + 1})  # type: ignore[arg-type]
+
+
+def test_nfr12_best_marks_discriminated_by_kind() -> None:
+    state = PlanState.model_validate(
+        {
+            "best_marks": [
+                {"kind": "aisle", "aisle": "A"},
+                {"kind": "level", "level": "1", "aisle": None},
+                {"kind": "location", "location": "A-01-01-01"},
+            ]
+        }
+    )
+
+    assert [type(mark) for mark in state.best_marks] == [AisleMark, LevelMark, LocationMark]
+    with pytest.raises(ValidationError):
+        PlanState.model_validate({"best_marks": [{"kind": "shelf", "aisle": "A"}]})

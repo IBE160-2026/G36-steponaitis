@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # AD-12 limits (env MAX_UPLOAD_BYTES, MAX_ROWS_PER_FILE); read through swp.app.limits.
     max_upload_bytes: PositiveInt = 4_000_000
     max_rows_per_file: PositiveInt = 25_000
+    # Feature flags (env FEATURE_AUTH, FEATURE_DEMO); both off in M1, shown by GET /api/session.
+    feature_auth: bool = False
+    feature_demo: bool = False
 
     @field_validator("database_url")
     @classmethod

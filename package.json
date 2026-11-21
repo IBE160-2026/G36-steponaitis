@@ -20,7 +20,8 @@
     "test:py": "uv run --directory backend --locked pytest",
     "test:web": "npm run test --workspace frontend",
     "test": "npm run test:py && npm run test:web",
-    "e2e": "npm run e2e --workspace frontend --"
+    "e2e": "npm run e2e --workspace frontend --",
+    "gen:api": "uv run --directory backend --locked swp openapi | npm exec --workspace frontend -- openapi-typescript -o lib/api/schema.ts"
   },
   "devDependencies": {
     "concurrently": "10.0.7"
