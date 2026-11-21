@@ -2,7 +2,7 @@
 title: 'Story 1.2: CI on every push'
 type: 'chore'
 created: '2026-11-21'
-status: 'in-progress'
+status: 'blocked'
 baseline_revision: '97bff3c39ed85456446ae3cd0329472ca3e98826'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -98,3 +98,12 @@ Remote proof (green run on GitHub, throwaway branch with a violation turning CI 
 - `docker run -d --name swp-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=swp_test -p 55432:5432 postgres:17` then `uv run --directory backend --locked pytest tests/app --database-url postgresql://postgres:postgres@localhost:55432/swp_test` -- pass; remove container after.
 - `CI=true npm run e2e -- --project=chromium` (no dev server running) -- pass.
 - Temporary violation (`import sqlalchemy` in `backend/swp/domain/__init__.py`) → `npm run lint:imports` exits non-zero; revert.
+
+## Auto Run Result
+
+Status: blocked
+Blocking condition: matrix test audit failed — the "Health on Postgres" row is covered by `backend/tests/app/test_health_database.py::test_nfr12_health_select_one_on_selected_database` run with `--database-url postgresql://…`, but that test could not be run against a real Postgres 17. Docker Desktop hangs on every image pull (`postgres:17`, `rhysd/actionlint:latest`; no output after 120 s; daemon behind `http.docker.internal:3128`), and installing Postgres 17 or actionlint outside Docker was denied by the permission classifier. For the same reason the actionlint check in Verification did not run.
+
+Run 2 (resume of attempt 1, baseline `97bff3c39ed85456446ae3cd0329472ca3e98826`): the implementation subagent checked the uncommitted attempt-1 changes against this spec and found them complete; no code changed in run 2. Verified locally, all passing: `npm ci`; `npm run lint:py`; `npm run lint:imports` (4 kept); `npm run lint`; `npm run typecheck`; `npm test` (35 pytest + 5 Vitest); `uv run --directory backend --locked pytest tests/app` on SQLite (1 passed); `CI=true npm run e2e -- --project=chromium` (3 passed); temporary `import sqlalchemy` in `swp/domain/__init__.py` → `lint:imports` exit 1 (reverted); misspelt `--databse-url` → pytest exit 4; `--database-url postgresql://u:p@localhost:1/none` → `psycopg.OperationalError` (rewrite and psycopg driver are wired). `ci.yml` parses as YAML with triggers `push`, `workflow_dispatch` and jobs `python`, `postgres`, `frontend`, `e2e`.
+
+To unblock: make Docker pulls work (or allow a local Postgres 17 + actionlint), then run the two Docker commands in Verification; or push and treat a green `postgres` job on GitHub (plus GitHub accepting the workflow) as the proof, then resume at the review step. Hung `docker run` clients from attempt 1 (PIDs 56502, 57417) were killed. Review has not run.
