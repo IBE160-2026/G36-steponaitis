@@ -58,8 +58,9 @@ RecommendationRule = Literal["rule_1", "rule_2", "rule_3"]
 """The rule that made a recommendation or a "no space" entry."""
 
 
-OutdatedCause = Literal["moved", "filled", "marks", "partner_aisle"]
-"""A stored cause that made an open recommendation outdated, in AD-7's check order."""
+OutdatedCause = Literal["moved", "filled", "marks", "partner_aisle", "undo"]
+"""A stored cause that made an open recommendation outdated, in AD-7's check order. `undo`
+comes last: the undo command stores it itself and `revalidate` never produces it (AD-5)."""
 
 
 class Outdated(BaseModel):

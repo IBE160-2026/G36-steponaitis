@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
@@ -12,7 +13,8 @@ import {
   PartPanel,
   PartPanelFrame,
 } from "@/components/common/part-panel";
-import type { LocationRef, PartDetail } from "@/lib/api/plans";
+import { type LocationRef, type PartDetail, type PlanSummary, planSummaryKey } from "@/lib/api/plans";
+import { CommandsProvider } from "@/lib/commands";
 import { picksLine, sharedJobsText, thresholdText } from "@/lib/copy";
 import { parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 import { NO_CURRENT_LOCATION as PARTS_NO_CURRENT_LOCATION } from "@/modules/parts/parts-page";
@@ -216,5 +218,36 @@ describe("fr32 keep in place in the part panel", () => {
     await sendKeep(async () => ({ outcome: "confirmed", events: [] }), "0500", true, noop);
     await sendKeep(async () => ({ outcome: "dropped", events: [] }), "0500", true, noop);
     expect(noop).not.toHaveBeenCalled();
+  });
+});
+
+describe("fr35 undo last move in the part panel", () => {
+  function panel(summary: Partial<PlanSummary>) {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
+    queryClient.setQueryData(planSummaryKey("p1"), { version: 1, current_round: 1, ...summary } as PlanSummary);
+    return text(
+      renderToStaticMarkup(
+        <QueryClientProvider client={queryClient}>
+          <CommandsProvider effects={{ notify: vi.fn(), navigate: vi.fn() }}>
+            <PartPanel planId="p1" part="2400" detail={DETAIL} detailError={null} onClose={() => {}} />
+          </CommandsProvider>
+        </QueryClientProvider>,
+      ),
+    );
+  }
+
+  it("uxdr38_part_panel_undo_beside_manual_move", () => {
+    const none = panel({ undo_preview: null });
+    expect(none).toMatch(/Undo last move No moves to undo Manual move…/);
+    const named = panel({
+      undo_preview: {
+        move_number: 4,
+        part: "2400",
+        from_location: "C-01-01-02",
+        to_location: "A-01-03-02",
+        effect: { kind: "reverts_move", move_number: 4 },
+      },
+    });
+    expect(named).toContain("Undo move 4: 2400 C-01-01-02 → A-01-03-02");
   });
 });

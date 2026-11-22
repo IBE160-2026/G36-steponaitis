@@ -1,7 +1,8 @@
 "use client";
 
 // Button (UX-DR10). A disabled button keeps its label, stays focusable and says why it is
-// disabled: aria-disabled plus a reason linked by aria-describedby, shown on hover and focus.
+// disabled: aria-disabled plus a reason linked by aria-describedby, shown on hover and focus. An
+// enabled button can carry a `description` the same way (e.g. what Undo last move would do).
 
 import { type ComponentProps, type KeyboardEvent, type MouseEvent, useId, useState } from "react";
 
@@ -53,12 +54,15 @@ export type ButtonProps = ComponentProps<"button"> & {
   size?: ButtonSize;
   /** Disables the button and explains why. The button stays focusable; never sets native `disabled`. */
   disabledReason?: string;
+  /** The enabled button's tooltip and accessible description; the reason replaces it while disabled. */
+  description?: string;
 };
 
 export function Button({
   variant = "primary",
   size = "lg",
   disabledReason,
+  description,
   className,
   onClick,
   onKeyDown,
@@ -69,13 +73,14 @@ export function Button({
   "aria-describedby": describedBy,
   ...rest
 }: ButtonProps) {
-  const reasonId = useId();
-  const [reasonDismissed, setReasonDismissed] = useState(false);
+  const tipId = useId();
+  const [tipDismissed, setTipDismissed] = useState(false);
   const isDisabled = disabledReason !== undefined;
+  const tip = disabledReason ?? description;
 
   const classes = buttonClassName(variant, size, isDisabled, className);
 
-  if (!isDisabled) {
+  if (tip === undefined) {
     return (
       <button
         type={type}
@@ -98,36 +103,37 @@ export function Button({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === "Escape") setReasonDismissed(true);
+    if (event.key === "Escape") setTipDismissed(true);
     onKeyDown?.(event);
   }
 
   return (
-    <span className="group relative inline-flex" onMouseLeave={() => setReasonDismissed(false)}>
+    <span className="group relative inline-flex" onMouseLeave={() => setTipDismissed(false)}>
       <button
         type={type}
         className={classes}
-        aria-disabled="true"
-        aria-describedby={[describedBy, reasonId].filter(Boolean).join(" ")}
+        aria-disabled={isDisabled ? "true" : undefined}
+        disabled={isDisabled ? undefined : disabled}
+        aria-describedby={[describedBy, tipId].filter(Boolean).join(" ")}
         {...rest}
-        onClick={suppress}
+        onClick={isDisabled ? suppress : onClick}
         onKeyDown={handleKeyDown}
         onBlur={(event) => {
-          setReasonDismissed(false);
+          setTipDismissed(false);
           onBlur?.(event);
         }}
       >
         {children}
       </button>
       <span
-        id={reasonId}
+        id={tipId}
         role="tooltip"
         className={cn(
           "hidden absolute top-full left-0 z-40 mt-1 w-max max-w-64 rounded-lg border border-border bg-surface px-2 py-1 text-ink shadow-overlay type-caption",
-          !reasonDismissed && "group-hover:block group-has-[:focus-visible]:block",
+          !tipDismissed && "group-hover:block group-has-[:focus-visible]:block",
         )}
       >
-        {disabledReason}
+        {tip}
       </span>
     </span>
   );

@@ -44,7 +44,7 @@ test("uj1 sees recommendations outdated by a mark change", async ({ page, reques
   await expect(toast).toHaveText(
     `Best-location marks changed · ${outdated.toLocaleString("en-US")} ${noun} now outdated`,
   );
-  await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(0);
 
   await page.getByRole("button", { name: "View", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/recommendations\\?tab=outdated$`));

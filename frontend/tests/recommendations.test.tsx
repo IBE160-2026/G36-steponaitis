@@ -101,7 +101,7 @@ function view(
 }
 
 function summary(fields: Partial<PlanSummary> = {}): PlanSummary {
-  return { version: 5, apply_all_count: 3, best_locations: 12, ...fields } as PlanSummary;
+  return { version: 5, current_round: 1, apply_all_count: 3, best_locations: 12, undo_preview: null, ...fields } as PlanSummary;
 }
 
 function render(
@@ -612,7 +612,34 @@ describe("fr31 other location", () => {
     seen[0].onApply("A-01-02-02");
     await vi.waitFor(() => expect(notify).toHaveBeenCalled());
     expect(sent).toEqual([{ type: "apply_other_location", recommendation_id: row.id, to_location: "A-01-02-02" }]);
-    expect(notify).toHaveBeenCalledWith("Applied · move 3, round 1 · 1100 C-01-01-01 → A-01-02-02");
+    expect(notify).toHaveBeenCalledWith("Applied · move 3, round 1 · 1100 C-01-01-01 → A-01-02-02", {
+      action: expect.objectContaining({ label: "Undo" }),
+    });
+  });
+
+  it("uxdr14_apply_toast_undo_sends_undo_with_the_move_number", async () => {
+    const { seen, sent, notify } = renderOther(view([rec({ part: "1100" })]));
+    seen[0].onApply("A-01-02-02");
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled());
+    const [, options] = notify.mock.calls[0] as [string, { action: { label: string; onClick: () => void } }];
+    options.action.onClick();
+    await vi.waitFor(() => expect(sent).toHaveLength(2));
+    expect(sent[1]).toEqual({ type: "undo", expected_move_number: 3 });
+  });
+
+  it("uxdr38_header_undo_last_move_names_the_move_or_is_disabled", () => {
+    const disabled = render(view([rec()]));
+    expect(text(disabled)).toContain("Undo last move");
+    expect(text(disabled)).toContain("No moves to undo");
+    const preview = {
+      move_number: 2,
+      part: "1100",
+      from_location: "C-01-01-01",
+      to_location: "A-01-01-03",
+      effect: { kind: "reverts_move" as const, move_number: 2 },
+    };
+    const enabled = render(view([rec()]), "open", { summary: summary({ undo_preview: preview }) });
+    expect(text(enabled)).toContain("Undo move 2: 1100 C-01-01-01 → A-01-01-03");
   });
 
   it("uxdr36_alt_o_opens_never_in_a_text_field", () => {

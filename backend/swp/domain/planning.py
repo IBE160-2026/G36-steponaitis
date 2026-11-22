@@ -115,6 +115,39 @@ class StepOutcome:
     move_number: int
 
 
+class UndoEffect(BaseModel):
+    """What undoing the last step does (AD-5): `reverts_move` takes back move `move_number`
+    (the step's own), `splits_combined_move` takes the step out of combined move
+    `move_number`, `restores_removed_move` brings back removed move `move_number`."""
+
+    kind: UndoKind
+    move_number: int
+
+
+class UndoPreview(BaseModel):
+    """The last step of the log and what undoing it would do (AD-5); never stored."""
+
+    move_number: int
+    part: str
+    from_location: str
+    to_location: str
+    effect: UndoEffect
+
+
+def undo_preview(last: StepOutcome | None) -> UndoPreview | None:
+    """The undo preview of the log's last step as the replay folded it; None without steps."""
+    if last is None:
+        return None
+    step = last.step
+    return UndoPreview(
+        move_number=step.move_number,
+        part=step.part,
+        from_location=step.from_location,
+        to_location=step.to_location,
+        effect=UndoEffect(kind=last.kind, move_number=last.move_number),
+    )
+
+
 @dataclass(frozen=True)
 class Replay:
     """The result of replaying the step log on the import. `last` is how the fold took the

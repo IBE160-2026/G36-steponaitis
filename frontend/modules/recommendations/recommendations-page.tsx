@@ -28,7 +28,8 @@ import { Icon } from "@/components/common/icons";
 import { KeepInPlaceButton, KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
 import { MANUAL_MOVE_LABEL, manualMoveReason } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
-import { showToast } from "@/components/common/toast";
+import { showToast, type ToastOptions } from "@/components/common/toast";
+import { UndoLastMove } from "@/components/common/undo-last-move";
 import {
   type CommandEvent,
   type PlanSummary,
@@ -39,6 +40,7 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import { moveUndoAction } from "@/lib/commands/undo";
 import {
   appliedText,
   appliedToast,
@@ -516,7 +518,7 @@ export type RecommendationsViewProps = {
   manualMove?: (part: string) => ReactNode;
   /** The Other location ▾ action (the page wires `OtherLocationAction` with the server's set). */
   otherLocation?: (props: OtherLocationActionProps) => ReactNode;
-  notify?: (message: string) => void;
+  notify?: (message: string, options?: ToastOptions) => void;
 };
 
 export function RecommendationsView({
@@ -637,7 +639,7 @@ export function RecommendationsView({
     const result = await onSend(body);
     if (result.outcome !== "confirmed") return;
     const moved = findEvent(result.events, "move_made");
-    if (moved) notify(appliedToast(moved));
+    if (moved) notify(appliedToast(moved), { action: moveUndoAction(moved, onSend, notify) });
     // The applied row leaves the tab: when focus was in the list or detail (or already fell to the
     // page), it moves to the selected row of the refreshed view.
     const active = typeof document === "undefined" ? null : document.activeElement;
@@ -724,6 +726,13 @@ export function RecommendationsView({
           )}
         </div>
         <div className="flex flex-wrap gap-2">
+          <UndoLastMove
+            preview={summary.undo_preview}
+            round={summary.current_round}
+            savingReason={savingReason}
+            send={onSend}
+            notify={notify}
+          />
           <Button ref={runButton} variant="secondary" size="md" disabledReason={savingReason} onClick={() => void run()}>
             {running ? RUNNING_LABEL : RUN_LABEL}
           </Button>

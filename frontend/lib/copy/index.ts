@@ -15,6 +15,8 @@ import type {
   RecommendationReason,
   RecommendationRow,
   RunMeta,
+  StepUndoneEvent,
+  UndoPreview,
 } from "@/lib/api/plans";
 import { formatDate, formatNumber, formatTime } from "@/lib/format";
 
@@ -134,6 +136,8 @@ export function outdatedText(part: string, outdated: OutdatedInfo): string {
       return `Partner ${outdated.partner ?? ""} is no longer in aisle ${outdated.aisle ?? ""}.`;
     case "moved_back":
       return `${part} was moved back, so move ${outdated.move_number ?? ""} was removed.`;
+    case "undo":
+      return "Outdated after undo.";
   }
 }
 
@@ -255,4 +259,48 @@ export function otherLocationBestText(isBest: boolean): string {
 /** An option's accessible name: "A-01-01-03, Aisle A · Level 1, BEST". */
 export function otherLocationOptionName(location: LocationRef): string {
   return `${location.code}, ${otherLocationOptionMeta(location)}, ${otherLocationBestText(location.is_best)}`;
+}
+
+// Undo last move (Story 7.3, FR-35, UX-DR38): every Undo surface words the server's `undo_preview`
+// and `step_undone` here, and nothing else (AD-3). Mark, run, keep and Apply all toasts never offer
+// Undo.
+
+/** The control's label, the launcher action's label when there is nothing to undo. */
+export const UNDO_LAST_MOVE = "Undo last move";
+/** Why Undo last move is disabled when the plan has no steps. */
+export const NO_MOVES_TO_UNDO = "No moves to undo";
+/** The toast action that undoes the move the toast is about. */
+export const UNDO_ACTION = "Undo";
+
+/**
+ * What Undo last move would do (UX-DR38): "Undo move 3: 9723950 A-03-04-02 → A-05-01-03",
+ * "Undo splits move 3: 9723950 returns to A-05-01-03" or
+ * "Undo restores move 4: 4410281 G-14-04-02 → A-02-01-01" (a move-back step reversed).
+ */
+export function undoLabel(preview: UndoPreview): string {
+  const number = formatNumber(preview.effect.move_number);
+  switch (preview.effect.kind) {
+    case "reverts_move":
+      return `Undo move ${number}: ${preview.part} ${preview.from_location} → ${preview.to_location}`;
+    case "splits_combined_move":
+      return `Undo splits move ${number}: ${preview.part} returns to ${preview.from_location}`;
+    case "restores_removed_move":
+      return `Undo restores move ${number}: ${preview.part} ${preview.to_location} → ${preview.from_location}`;
+  }
+}
+
+/**
+ * The toast after an undo (UX-DR38): "Undid move 3.", "Split move 3." or "Restored move 4.", plus
+ * " Unapplied recommendations of round 1 are now outdated. Run recommendations to continue." when
+ * the undo outdated any.
+ */
+export function undoneToast(event: StepUndoneEvent, outdatedCount: number, round: number): string {
+  const number = formatNumber(event.undone.effect.move_number);
+  const first = {
+    reverts_move: `Undid move ${number}.`,
+    splits_combined_move: `Split move ${number}.`,
+    restores_removed_move: `Restored move ${number}.`,
+  }[event.undone.effect.kind];
+  if (outdatedCount <= 0) return first;
+  return `${first} Unapplied recommendations of round ${formatNumber(round)} are now outdated. Run recommendations to continue.`;
 }

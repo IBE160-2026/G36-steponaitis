@@ -1,10 +1,10 @@
 """Milestone 1 gate: the answer key (`data/answer-key/expected.json`) in one place (domain only).
 
 Classes (FR-17), pick groups (FR-19), the merged inventory (FR-6), occupancy (FR-14) and one
-replay of answer-key steps 1-14 (FR-23 to FR-30, FR-32 to FR-34). Every step goes through
-`domain.apply`, step 6 as `set_keep 0500`. Steps 15-20, the move list, the final current
-locations, the final before/after and the settled check need Epic 7/8 commands and are skipped
-with the story that will un-skip them.
+replay of answer-key steps 1-16 (FR-23 to FR-30, FR-32 to FR-35). Every step goes through
+`domain.apply` and `revalidate`, step 6 as `set_keep 0500`, steps 15-16 as `undo`. Steps
+17-20, the move list, the final current locations, the final before/after and the settled
+check need Epic 7/8 work and are skipped with the story that will un-skip them.
 
 The six rule modules never import `swp.store` or `swp.app` (checked below by scanning their
 source); the import-linter layers contract also runs on the real package in
@@ -20,9 +20,10 @@ import pytest
 
 from swp.domain.analysis import Analysis
 from swp.domain.before_after import build_before_after
+from swp.domain.commands import RecommendationsOutdated, StepUndone
 from swp.domain.import_data import ImportData
-from swp.domain.planning import replay
-from swp.domain.state import PlanState, Rule
+from swp.domain.planning import current_round, replay
+from swp.domain.state import Outdated, PlanState, Rule
 from swp.domain.views.locations import build_locations_view
 from tests.domain.answer_key import (
     CLASS_NAMES,
@@ -32,12 +33,12 @@ from tests.domain.answer_key import (
     expected_run_outcome,
     keep_step,
     manual_step,
+    play_steps,
     run_command,
     run_outcome,
 )
 
 RULES: dict[str | int, Rule] = {1: "rule_1", 2: "rule_2", 3: "rule_3", "Manual": "manual"}
-UNDO = 'Story 7.3 "Undo the last move"'
 RUN_3 = 'Story 7.5 "Answer-key scenario through run 3"'
 MOVE_LIST = 'Story 8.1 "Move list order and header in the domain"'
 
@@ -190,19 +191,72 @@ def test_fr32_kept_part_skipped_in_run_2(
     assert "0500" not in {n.part for n in run.no_space}
 
 
+UNDONE = Outdated(cause="undo")
+
+
+def _step_15(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
+    before, _ = play_steps(data, analysis, 14)
+    assert key["steps"][14]["action"] == "undo"
+    assert before.steps[-1].move_number == 11  # 1200's apply; step 6 is a mark
+
+    state, events = play_steps(data, analysis, 15)
+
+    assert replay(data, state.steps).current_locations["1200"] == "B-01-01-02"
+    run_2 = state.runs[-1]
+    assert run_2.round == 2
+    assert [(r.part, r.status, r.outdated) for r in run_2.recommendations] == [
+        (part, "outdated", UNDONE) for part in ["1200", "10240", "2400", "8400"]
+    ]
+    assert isinstance(events[0], StepUndone)
+    assert events[0].undone.move_number == 11
+    assert events[1:] == [RecommendationsOutdated(count=4, cause="undo")]
+
+
+def _step_16(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
+    before, _ = play_steps(data, analysis, 15)
+    assert key["steps"][15]["action"] == "undo"
+    assert (before.steps[-1].move_number, before.steps[-1].part) == (10, "0100")
+
+    state, events = play_steps(data, analysis, 16)
+
+    assert replay(data, state.steps).current_locations["0100"] == "A-01-01-01"
+    [rec] = [r for r in state.runs[0].recommendations if r.part == "0100"]
+    assert (rec.status, rec.outdated) == ("outdated", UNDONE)
+    assert [e.type for e in events] == ["step_undone"]
+    assert current_round(state) == 2
+    assert state.next_move_number == 12
+
+
 @pytest.mark.parametrize(
     "number",
     [
-        pytest.param(15, marks=pytest.mark.skip(reason=f"undo: {UNDO}")),
-        pytest.param(16, marks=pytest.mark.skip(reason=f"undo: {UNDO}")),
+        15,
+        16,
         pytest.param(17, marks=pytest.mark.skip(reason=f"after undo: {RUN_3}")),
         pytest.param(18, marks=pytest.mark.skip(reason=f"after undo: {RUN_3}")),
         pytest.param(19, marks=pytest.mark.skip(reason=f"run 3: {RUN_3}")),
         pytest.param(20, marks=pytest.mark.skip(reason=f"apply all in run 3: {RUN_3}")),
     ],
 )
-def test_fr23_fr30_answer_key_steps_15_to_20(number: int) -> None:
-    raise AssertionError(f"step {number} is deferred")
+def test_fr23_fr30_answer_key_steps_15_to_20(
+    number: int, key: dict[str, Any], data: ImportData, analysis: Analysis
+) -> None:
+    {15: _step_15, 16: _step_16}[number](key, data, analysis)
+
+
+def test_fr35_undo_after_later_run(
+    key: dict[str, Any], data: ImportData, analysis: Analysis
+) -> None:
+    state, _ = play_steps(data, analysis, 18)
+
+    moves = [m for m in replay(data, state.steps).moves if m.part == "0100"]
+    assert [(m.from_location, m.to_location, m.rule, m.round) for m in moves] == [
+        ("A-01-01-01", "B-01-03-02", "manual", 2)
+    ]
+    assert current_round(state) == 2
+    assert all(
+        (r.status, r.outdated) == ("outdated", UNDONE) for r in state.runs[-1].recommendations
+    )
 
 
 @pytest.mark.skip(reason=f"move list: {MOVE_LIST}")

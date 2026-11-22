@@ -5,7 +5,7 @@ Pure: returns a new state and its events and never mutates the input state.
 
 from typing import assert_never
 
-from swp.domain import keep, marks, moves, recommendations, rules
+from swp.domain import history, keep, marks, moves, recommendations, rules
 from swp.domain.analysis import Analysis
 from swp.domain.commands import (
     Applied,
@@ -20,6 +20,7 @@ from swp.domain.commands import (
     RunRecommendations,
     SetBestMark,
     SetKeep,
+    Undo,
 )
 from swp.domain.import_data import ImportData
 from swp.domain.planning import current_round
@@ -103,5 +104,7 @@ def _dispatch(
             return keep.set_keep(state, command, ctx, data, analysis)
         case RemoveKeep():
             return keep.remove_keep(state, command, ctx, data, analysis)
+        case Undo():
+            return history.undo(state, command, ctx, data, analysis)
         case _:
             assert_never(command)

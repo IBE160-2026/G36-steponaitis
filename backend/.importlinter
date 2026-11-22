@@ -107,6 +107,7 @@ modules =
     swp.domain.pick_groups
     swp.domain.marks
     swp.domain.keep
+    swp.domain.history
     swp.domain.moves
     swp.domain.views.summary
     swp.domain.views.parts

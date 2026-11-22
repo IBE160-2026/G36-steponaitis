@@ -103,7 +103,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   await page.keyboard.press("ArrowUp");
   await expect(eyebrow).toHaveText(eyebrowOf(shown[0]));
 
-  // Apply: the toast names the move (no Undo), the row moves to Applied, the Open count drops.
+  // Apply: the toast names the move and offers Undo (Story 7.3), the row moves to Applied, the Open count drops.
   const first = shown[0];
   const detail = main.getByRole("region", { name: "Selected recommendation" });
   await detail.getByRole("button", { name: "Apply", exact: true }).click();
@@ -112,7 +112,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(1);
   await expect(main.getByRole("tab", { name: /^Open, / })).toHaveAccessibleName(
     `Open, ${plural(openCount - 1, "recommendation", "recommendations")}`,
   );

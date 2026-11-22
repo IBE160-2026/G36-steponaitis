@@ -44,7 +44,7 @@ test("uj7 keeps a part in place from the part panel", async ({ page, request }) 
   const panel = page.getByRole("complementary", { name: part });
   await panel.getByRole("button", { name: "Keep in place" }).click();
   await expect(toasts(page).getByText(keptToast(part), { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "Remove keep in place" })).toBeVisible();
   await expect(panel.getByText("kept in place", { exact: true })).toBeVisible();
   await expect(row.getByText("kept in place", { exact: true })).toBeVisible();
@@ -94,7 +94,7 @@ test("uj1 keeps a recommendation in place", async ({ page, request }) => {
   // Alt+K keeps the selected row: it leaves Open and is counted on the Kept in place tab.
   await page.keyboard.press("Alt+KeyK");
   await expect(toasts(page).getByText(keptToast(rec.part), { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(0);
   await expect(openTab).toHaveAccessibleName(`Open, ${plural(openCount - 1, "recommendation", "recommendations")}`);
   await expect(keptTab).toHaveAccessibleName("Kept in place, 1 part");
   await expect(main.getByRole("button", { name: `Apply all (${before.apply_all_count - 1})` })).toBeVisible();

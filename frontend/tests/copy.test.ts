@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { OutdatedInfo, RecommendationReason, RunMeta } from "@/lib/api/plans";
+import type { OutdatedInfo, RecommendationReason, RunMeta, StepUndoneEvent, UndoPreview } from "@/lib/api/plans";
 import {
   appliedText,
   appliedToast,
@@ -27,6 +27,8 @@ import {
   runLine,
   sharedJobsText,
   thresholdText,
+  undoLabel,
+  undoneToast,
 } from "@/lib/copy";
 
 // Story 5.5 (AD-11, UX-DR39): lib/copy is the one place reasons, "no space" causes, outdated
@@ -214,5 +216,59 @@ describe("fr31 other location copy", () => {
         round: 1,
       }),
     ).toBe("Applied · move 3, round 1 · 4400 A-01-03-02 → C-01-03-02");
+  });
+});
+
+// Story 7.3 (FR-35, UX-DR38): the undo preview and the undone toast are worded only here.
+
+function preview(kind: UndoPreview["effect"]["kind"], fields: Partial<UndoPreview> = {}): UndoPreview {
+  return {
+    move_number: 3,
+    part: "9723950",
+    from_location: "A-03-04-02",
+    to_location: "A-05-01-03",
+    effect: { kind, move_number: 3 },
+    ...fields,
+  };
+}
+
+function undone(kind: UndoPreview["effect"]["kind"], moveNumber = 3): StepUndoneEvent {
+  return { type: "step_undone", undone: preview(kind, { effect: { kind, move_number: moveNumber } }) };
+}
+
+describe("fr35 undo copy", () => {
+  it("uxdr38_undo_label_per_effect", () => {
+    expect(undoLabel(preview("reverts_move"))).toBe("Undo move 3: 9723950 A-03-04-02 → A-05-01-03");
+    expect(
+      undoLabel(preview("splits_combined_move", { move_number: 8, from_location: "A-05-01-03", to_location: "B-01-01-01" })),
+    ).toBe("Undo splits move 3: 9723950 returns to A-05-01-03");
+    expect(
+      undoLabel({
+        move_number: 9,
+        part: "4410281",
+        from_location: "A-02-01-01",
+        to_location: "G-14-04-02",
+        effect: { kind: "restores_removed_move", move_number: 4 },
+      }),
+    ).toBe("Undo restores move 4: 4410281 G-14-04-02 → A-02-01-01");
+  });
+
+  it("uxdr38_undone_toast_first_sentence_per_effect", () => {
+    expect(undoneToast(undone("reverts_move"), 0, 1)).toBe("Undid move 3.");
+    expect(undoneToast(undone("splits_combined_move"), 0, 1)).toBe("Split move 3.");
+    expect(undoneToast(undone("restores_removed_move", 4), 0, 1)).toBe("Restored move 4.");
+  });
+
+  it("uxdr38_undone_toast_with_outdated", () => {
+    const tail = " Unapplied recommendations of round 1 are now outdated. Run recommendations to continue.";
+    expect(undoneToast(undone("reverts_move"), 4, 1)).toBe(`Undid move 3.${tail}`);
+    expect(undoneToast(undone("splits_combined_move"), 1, 1)).toBe(`Split move 3.${tail}`);
+    expect(undoneToast(undone("restores_removed_move", 4), 2, 2)).toBe(
+      "Restored move 4. Unapplied recommendations of round 2 are now outdated. Run recommendations to continue.",
+    );
+  });
+
+  it("fr35_outdated_text_for_undo", () => {
+    expect(outdatedText("1200", outdated("undo"))).toBe("Outdated after undo.");
   });
 });

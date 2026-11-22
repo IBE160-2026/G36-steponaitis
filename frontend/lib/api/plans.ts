@@ -72,6 +72,10 @@ export type ApplyAllDoneEvent = components["schemas"]["ApplyAllDone"];
 export type ApplyAllSkipped = components["schemas"]["ApplyAllSkipped"];
 /** FR-31's allowed set for one recommendation, in location-code order; empty when it cannot be applied. */
 export type OtherLocationsView = components["schemas"]["OtherLocationsView"];
+/** The last step and what undoing it would do (AD-5): `reverts_move`, `splits_combined_move` or `restores_removed_move`. */
+export type UndoPreview = components["schemas"]["UndoPreview"];
+/** `step_undone{undone}`: the last step was undone; `undone` is the undo preview it had (FR-35). */
+export type StepUndoneEvent = components["schemas"]["StepUndone"];
 
 export const PLANS_KEY = ["plans"] as const;
 

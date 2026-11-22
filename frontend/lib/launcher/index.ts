@@ -6,7 +6,15 @@
 
 import type { CommandEvent, PlanSummary } from "@/lib/api/plans";
 import type { CommandBody, SendResult } from "@/lib/commands/client";
-import { applyAllQuestion, applyAllToast, NO_OPEN_TO_APPLY, runAnnouncement } from "@/lib/copy";
+import { sendUndo, undoReason } from "@/lib/commands/undo";
+import {
+  applyAllQuestion,
+  applyAllToast,
+  NO_OPEN_TO_APPLY,
+  runAnnouncement,
+  UNDO_LAST_MOVE,
+  undoLabel,
+} from "@/lib/copy";
 import { formatDate, formatNumber } from "@/lib/format";
 import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
 import {
@@ -114,8 +122,22 @@ const APPLY_ALL: LauncherAction = {
   },
 };
 
+/** Undo last move (FR-35, UX-DR38): the server's `undo_preview` worded, or "Undo last move" with nothing to undo. */
+export const UNDO_LAST_MOVE_ACTION: LauncherAction = {
+  id: "undo-last-move",
+  column: "recommendations",
+  label: (ctx) => (ctx.summary.undo_preview === null ? UNDO_LAST_MOVE : undoLabel(ctx.summary.undo_preview)),
+  keywords: ["undo last move"],
+  disabledReason: (ctx) => undoReason(ctx.summary.undo_preview, ctx.savingReason),
+  async run(ctx) {
+    const preview = ctx.summary.undo_preview;
+    if (preview === null) return;
+    await sendUndo(ctx.send, preview.move_number, ctx.summary.current_round, ctx.notify);
+  },
+};
+
 /** The registered actions, in list order. Append here to add one; the launcher needs no change. */
-export const LAUNCHER_ACTIONS: readonly LauncherAction[] = [RUN_RECOMMENDATIONS, APPLY_ALL];
+export const LAUNCHER_ACTIONS: readonly LauncherAction[] = [RUN_RECOMMENDATIONS, APPLY_ALL, UNDO_LAST_MOVE_ACTION];
 
 /** A plan-level entry of the band (SAV, NEW, SET). */
 export type BandEntry = {

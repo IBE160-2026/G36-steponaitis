@@ -94,7 +94,7 @@ test("uj1 applies a recommendation with another location", async ({ page, reques
   );
   await expect(toast).toBeVisible();
   const moveNumber = /move (\d+),/.exec((await toast.textContent()) ?? "")?.[1];
-  await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(1);
 
   await main.getByRole("tab", { name: /^Applied, / }).click();
   const applied = list.getByRole("option", { name: new RegExp(`^#${rec.number}, ${rec.part}, `) });

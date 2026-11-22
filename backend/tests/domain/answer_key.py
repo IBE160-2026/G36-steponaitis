@@ -15,13 +15,16 @@ from swp.domain.commands import (
     ApplyRecommendation,
     Command,
     CommandContext,
+    Event,
     ManualMove,
     RunRecommendations,
     SetKeep,
+    Undo,
 )
 from swp.domain.import_ import Cell, FileRole, RawSheet, check_file, check_import, normalize_import
 from swp.domain.import_data import ImportData, NormalizedImport
 from swp.domain.pick_groups import find_pick_groups
+from swp.domain.recommendations import revalidate
 from swp.domain.state import AisleMark, PlanState, Run
 
 ANSWER_KEY_DIR = Path(__file__).resolve().parents[3] / "data" / "answer-key"
@@ -82,17 +85,28 @@ def answer_key_analysis() -> Analysis:
     )
 
 
-# Answer-key step helpers (retro item 37): every command goes through `domain.apply`.
+# Answer-key step helpers (retro items 37 and epic-5 #43): every command goes through
+# `domain.apply` and then `revalidate`, the same as `app/commands.py`.
 
 RunOutcome = tuple[list[tuple[int, str, str, str, str]], list[tuple[str, str]]]
+
+
+def command(state: PlanState, cmd: Command, data: ImportData, analysis: Analysis) -> Applied:
+    """`cmd` applied to `state`, then `revalidate` on the result, with the combined events
+    (the write path of `app/commands.py`; a no-op is not revalidated)."""
+    applied = apply(state, cmd, CTX, data, analysis)
+    if not applied.events:
+        return applied
+    revalidated = revalidate(data, analysis, applied.state)
+    return Applied(state=revalidated.state, events=[*applied.events, *revalidated.events])
 
 
 def run_command(
     data: ImportData, analysis: Analysis, state: PlanState, command_id: uuid.UUID | None = None
 ) -> Applied:
     """The `run` command on `state`."""
-    command = RunRecommendations(command_id=command_id or uuid.uuid4(), base_version=1)
-    return apply(state, command, CTX, data, analysis)
+    cmd = RunRecommendations(command_id=command_id or uuid.uuid4(), base_version=1)
+    return command(state, cmd, data, analysis)
 
 
 def apply_recommendation(
@@ -100,28 +114,62 @@ def apply_recommendation(
 ) -> PlanState:
     """Apply the latest run's recommendation for `part`."""
     [rec] = [r for r in state.runs[-1].recommendations if r.part == part]
-    command = ApplyRecommendation(command_id=uuid.uuid4(), base_version=1, recommendation_id=rec.id)
-    return apply(state, command, CTX, data, analysis).state
+    cmd = ApplyRecommendation(command_id=uuid.uuid4(), base_version=1, recommendation_id=rec.id)
+    return command(state, cmd, data, analysis).state
 
 
 def manual_step(
     state: PlanState, part: str, source: str, target: str, data: ImportData, analysis: Analysis
 ) -> PlanState:
     """A manual move of `part` from `source` to `target`."""
-    command = ManualMove(
+    cmd = ManualMove(
         command_id=uuid.uuid4(),
         base_version=1,
         part=part,
         from_location=source,
         to_location=target,
     )
-    return apply(state, command, CTX, data, analysis).state
+    return command(state, cmd, data, analysis).state
 
 
 def keep_step(state: PlanState, part: str, data: ImportData, analysis: Analysis) -> PlanState:
     """Keep `part` in place with the `set_keep` command (FR-32)."""
-    command = SetKeep(command_id=uuid.uuid4(), base_version=1, part=part)
-    return apply(state, command, CTX, data, analysis).state
+    cmd = SetKeep(command_id=uuid.uuid4(), base_version=1, part=part)
+    return command(state, cmd, data, analysis).state
+
+
+def undo_command(move_number: int) -> Undo:
+    """An `undo` command expecting `move_number` to be the last step (FR-35)."""
+    return Undo(command_id=uuid.uuid4(), base_version=1, expected_move_number=move_number)
+
+
+def undo_step(state: PlanState, data: ImportData, analysis: Analysis) -> Applied:
+    """Undo the last step of `state` (FR-35)."""
+    return command(state, undo_command(state.steps[-1].move_number), data, analysis)
+
+
+def play_steps(data: ImportData, analysis: Analysis, through: int) -> tuple[PlanState, list[Event]]:
+    """Answer-key steps 1 to `through` of `expected.json` through the helpers, from aisle A
+    marked; the state and the last step's events (only an undo step reports them)."""
+    state = PlanState(best_marks=MARKS)
+    events: list[Event] = []
+    for step in expected()["steps"][:through]:
+        events = []
+        match step["action"]:
+            case "run":
+                state = run_command(data, analysis, state).state
+            case "keep_in_place":
+                state = keep_step(state, step["part"], data, analysis)
+            case "apply":
+                state = apply_recommendation(state, step["part"], data, analysis)
+            case "manual_move":
+                state = manual_step(state, step["part"], step["from"], step["to"], data, analysis)
+            case "undo":
+                applied = undo_step(state, data, analysis)
+                state, events = applied.state, applied.events
+            case action:
+                raise AssertionError(f"step {step['step']}: unexpected action {action}")
+    return state, events
 
 
 def run_outcome(run: Run) -> RunOutcome:

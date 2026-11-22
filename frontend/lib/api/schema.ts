@@ -369,7 +369,7 @@ export interface components {
              * Cause
              * @enum {string}
              */
-            cause: "moved" | "filled" | "marks" | "partner_aisle" | "kept";
+            cause: "moved" | "filled" | "marks" | "partner_aisle" | "undo" | "kept";
             /** Number */
             number: number;
         };
@@ -508,7 +508,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"] | components["schemas"]["StepUndone"])[];
             /** Version */
             version: number;
         };
@@ -909,7 +909,7 @@ export interface components {
              * Cause
              * @enum {string}
              */
-            cause: "moved" | "filled" | "marks" | "partner_aisle" | "moved_back";
+            cause: "moved" | "filled" | "marks" | "partner_aisle" | "undo" | "moved_back";
             /** Location */
             location: string | null;
             /** Move Number */
@@ -1167,7 +1167,7 @@ export interface components {
              * Cause
              * @enum {string}
              */
-            cause: "moved" | "filled" | "marks" | "partner_aisle";
+            cause: "moved" | "filled" | "marks" | "partner_aisle" | "undo";
             /** Count */
             count: number;
             /**
@@ -1406,6 +1406,18 @@ export interface components {
              */
             key: "overview" | "parts" | "locations" | "pick-groups" | "best-locations" | "recommendations" | "before-after" | "move-list";
         };
+        /**
+         * StepUndone
+         * @description The last step was undone; `undone` is the undo preview it had (FR-35, AD-5).
+         */
+        StepUndone: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "step_undone";
+            undone: components["schemas"]["UndoPreview"];
+        };
         /** StockedLocation */
         StockedLocation: {
             location: components["schemas"]["LocationRef"];
@@ -1426,6 +1438,26 @@ export interface components {
             picks: number | null;
             /** Stock */
             stock: string;
+        };
+        /**
+         * Undo
+         * @description Undo the last step when its move number is `expected_move_number` (FR-35, AD-5).
+         */
+        Undo: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Expected Move Number */
+            expected_move_number: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "undo";
         };
         /**
          * UndoEffect
@@ -1724,7 +1756,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"] | components["schemas"]["Undo"];
             };
         };
         responses: {

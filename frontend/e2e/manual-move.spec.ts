@@ -130,6 +130,8 @@ test("uj1 makes a manual move from the part panel and moves it back", async ({ p
   // Enter confirms: the toast names the move, the panel shows the new current location.
   await page.keyboard.press("Enter");
   await expect(toasts(page).getByText(`Moved ${part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
+  // Story 7.3 (UX-DR14): a move toast offers Undo.
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(1);
   await expect(dialog).toHaveCount(0);
   await expect(moveButton).toBeFocused();
   await expect(panel.locator(`[data-location-chip="${target.code}"]`)).toBeVisible();
@@ -188,7 +190,15 @@ test("uj1 moves a part from a chosen other location", async ({ page, request }) 
   await page.keyboard.press("Enter");
   await expect(toasts(page).getByText(`Moved ${part}: ${chosen} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByRole("complementary", { name: part }).locator(`[data-location-chip="${target.code}"]`)).toBeVisible();
+  const panel = page.getByRole("complementary", { name: part });
+  await expect(panel.locator(`[data-location-chip="${target.code}"]`)).toBeVisible();
+
+  // Story 7.3 (FR-35, UX-DR14): the toast's Undo takes back exactly that move.
+  await toasts(page).getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(toasts(page).getByText("Undid move 1.", { exact: true })).toBeVisible();
+  await expect(panel.locator(`[data-location-chip="${target.code}"]`)).toHaveCount(0);
+  const summary = await getJson<{ undo_preview: unknown }>(request, `/api/plans/${planId}`);
+  expect(summary.undo_preview).toBeNull();
 });
 
 test("uj7 a part with no stock cannot be moved", async ({ page, request }) => {

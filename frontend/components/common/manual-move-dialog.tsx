@@ -32,6 +32,7 @@ import {
   usePlanLocations,
 } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
+import { moveEventStep, moveUndoAction } from "@/lib/commands/undo";
 import { cn } from "@/lib/utils";
 
 export const TO_LABEL = "To-location";
@@ -356,7 +357,8 @@ function ManualMoveForm({
     if (result.outcome === "confirmed") {
       onDone();
       const message = moveToast(result.events);
-      if (message) showToast(message);
+      const moved = result.events.find((event) => moveEventStep(event) !== undefined);
+      if (message) showToast(message, { action: moved && moveUndoAction(moved, sendWithEvents, showToast) });
     } else {
       // The flow already toasted and refetched; the dialog stays open on the new preview.
       setSentWith(null);

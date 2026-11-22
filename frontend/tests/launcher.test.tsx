@@ -42,6 +42,7 @@ function summary(fields: Partial<PlanSummary> = {}): PlanSummary {
     apply_all_count: 4,
     best_locations: 120,
     empty_best_locations: 9,
+    undo_preview: null,
     class_counts: { fast: 312, medium: 400, slow: 500, dead: 333 },
     steps: [
       { key: "overview", checked: true, count: null },
@@ -193,8 +194,10 @@ describe("ux_dr8 launcher search", () => {
     expect(groups[2].items.map((item) => item.id)).toEqual(["plan:3"]);
 
     const mov = launcherResults("  mov ", { actions, plans }) ?? [];
-    expect(mov.map((group) => group.label)).toEqual(["Steps"]);
+    expect(mov.map((group) => group.label)).toEqual(["Steps", "Actions"]);
     expect(mov[0].items[0]).toMatchObject({ kind: "step", step: { code: "MOV", name: "Move list" } });
+    // "Undo last move" (Story 7.3) matches through its keyword.
+    expect(mov[1].items.map((item) => item.id)).toEqual(["action:undo-last-move"]);
   });
 
   it("ux_dr8_actions_then_band_entries_by_code_and_name", () => {

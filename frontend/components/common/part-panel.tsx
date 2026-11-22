@@ -23,6 +23,7 @@ import { KeepInPlaceButton, KeptInPlaceMark, useKeepInPlace } from "@/components
 import { LocationChip } from "@/components/common/location-chip";
 import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
+import { UndoLastMoveButton } from "@/components/common/undo-last-move";
 import { type PartDetail, usePlanPart } from "@/lib/api/plans";
 import { type PlanQueryLike, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
 import { CLASS_LABELS, picksLine, sharedJobsText } from "@/lib/copy";
@@ -246,13 +247,15 @@ function PartKeepAction({ planId, detail }: { planId: string; detail: PartDetail
   );
 }
 
-/** Manual move… and its dialog, under the facts (Story 4.3). Opening the dialog keeps the panel. */
+/** Undo last move (Story 7.3), then Manual move… and its dialog, under the facts (Story 4.3).
+ * Opening the dialog keeps the panel. */
 function PartMoveAction({ planId, detail }: { planId: string; detail: PartDetail }) {
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const { disabledReason } = usePlanCommands(planId);
   return (
-    <>
+    <div className="flex flex-wrap items-center gap-2">
+      <UndoLastMoveButton planId={planId} />
       <ManualMoveButton
         detail={detail}
         savingReason={disabledReason}
@@ -260,7 +263,7 @@ function PartMoveAction({ planId, detail }: { planId: string; detail: PartDetail
         buttonRef={button}
       />
       <ManualMoveDialog planId={planId} detail={detail} open={open} onOpenChange={setOpen} returnFocusRef={button} />
-    </>
+    </div>
   );
 }
 

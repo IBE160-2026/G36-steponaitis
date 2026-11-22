@@ -9,6 +9,7 @@ from typing import Annotated, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
+from swp.domain.planning import UndoPreview
 from swp.domain.state import BestMark, OutdatedCause, PlanState, Rule
 from swp.domain.values import CODE_MAX_LENGTH
 
@@ -103,6 +104,15 @@ class RemoveKeep(BaseModel):
     part: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
 
 
+class Undo(BaseModel):
+    """Undo the last step when its move number is `expected_move_number` (FR-35, AD-5)."""
+
+    type: Literal["undo"] = "undo"
+    command_id: uuid.UUID
+    base_version: int
+    expected_move_number: int = Field(ge=1)
+
+
 Command = Annotated[
     SetBestMark
     | RemoveBestMark
@@ -112,7 +122,8 @@ Command = Annotated[
     | ApplyOtherLocation
     | ApplyAll
     | SetKeep
-    | RemoveKeep,
+    | RemoveKeep
+    | Undo,
     Field(discriminator="type"),
 ]
 """Every command a plan accepts (closed union)."""
@@ -173,6 +184,13 @@ class MoveRemoved(BaseModel):
     step_move_number: int
 
 
+class StepUndone(BaseModel):
+    """The last step was undone; `undone` is the undo preview it had (FR-35, AD-5)."""
+
+    type: Literal["step_undone"] = "step_undone"
+    undone: UndoPreview
+
+
 class RunDone(BaseModel):
     """A run made round `round` with this many recommendations and "no space" entries."""
 
@@ -215,7 +233,8 @@ Event = Annotated[
     | RecommendationsOutdated
     | ApplyAllDone
     | KeepSet
-    | KeepRemoved,
+    | KeepRemoved
+    | StepUndone,
     Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""
