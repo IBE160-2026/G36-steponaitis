@@ -1,4 +1,5 @@
-// The steps not built yet (until their epics build them); an unknown step is a 404.
+// The steps not built yet (until their epics build them); a built step has its own route, which
+// takes precedence over this one. An unknown step is a 404.
 
 import { notFound } from "next/navigation";
 

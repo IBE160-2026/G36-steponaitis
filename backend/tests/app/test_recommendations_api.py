@@ -102,3 +102,22 @@ def test_fr28_recommendations_unknown_plan(empty_tables: str) -> None:
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "plan_not_found"
+
+
+def test_fr28_view_rows_carry_display_facts(empty_tables: str) -> None:
+    with TestClient(create_app()) as client:
+        plan_id, _ = _answer_key_after_run(client)
+        body = client.get(f"/api/plans/{plan_id}/recommendations").json()
+
+    one = body["recommendations"][0]
+    assert {k: one[k] for k in ("part", "description", "movement_class", "to_best")} == {
+        "part": "1100",
+        "description": "Brake pad set, front - VW Golf",
+        "movement_class": "fast",
+        "to_best": True,
+    }
+    assert one["from_best"] is False and isinstance(one["picks"], int)
+    spark = body["no_space"][0]
+    assert spark["part"] == "1200" and spark["description"] == "Spark plug - Ford Focus"
+    assert (spark["from_location"], spark["from_best"]) == ("B-01-01-02", False)
+    assert spark["movement_class"] == "fast" and isinstance(spark["picks"], int)

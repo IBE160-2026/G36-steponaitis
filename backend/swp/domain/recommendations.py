@@ -33,6 +33,7 @@ from swp.domain.planning import (
     append_step,
     applied_step,
     current_aisle,
+    current_location,
     is_best,
     is_empty,
     latest_run,
@@ -318,12 +319,21 @@ Reason = Annotated[ClassReason | PickGroupReason, Field(discriminator="kind")]
 
 
 class RecommendationRow(BaseModel):
+    """One recommendation with its status, reason data and the display facts the page
+    shows (description, class, picks, BEST of from/to in the replayed copy), so the client
+    never computes them (AD-3)."""
+
     id: str
     number: int
     rule: RecommendationRule
     part: str
+    description: str
+    movement_class: MovementClass | None
+    picks: int | None
     from_location: str
     to_location: str
+    from_best: bool
+    to_best: bool
     status: Literal["open", "applied", "outdated"]
     applied: AppliedInfo | None
     outdated: OutdatedInfo | None
@@ -340,8 +350,16 @@ class NoSpaceCause(BaseModel):
 
 
 class NoSpaceRow(BaseModel):
+    """A "no space" entry with the part's display facts and its current location in the
+    replayed copy (None when it holds no stock), plus whether that location is best."""
+
     part: str
     rule: RecommendationRule
+    description: str
+    movement_class: MovementClass | None
+    picks: int | None
+    from_location: str | None
+    from_best: bool
     reason: Reason | None
     cause: NoSpaceCause
 
@@ -423,7 +441,24 @@ def _status(
     return "open", None, None
 
 
-def _no_space_row(analysis: Analysis, entry: NoSpace) -> NoSpaceRow:
+class _PartFacts(BaseModel):
+    description: str
+    movement_class: MovementClass | None
+    picks: int | None
+
+
+def _part_facts(data: ImportData, analysis: Analysis, part: str) -> _PartFacts:
+    facts = analysis.parts.get(part)
+    return _PartFacts(
+        description=data.parts.get(part, ""),
+        movement_class=facts.movement_class if facts is not None else None,
+        picks=facts.picks if facts is not None else None,
+    )
+
+
+def _no_space_row(
+    data: ImportData, analysis: Analysis, state: PlanState, replayed: Replay, entry: NoSpace
+) -> NoSpaceRow:
     match entry.rule:
         case "rule_1":
             cause = NoSpaceCause(rule="rule_1", aisle=None, outside_best=False)
@@ -435,9 +470,13 @@ def _no_space_row(analysis: Analysis, entry: NoSpace) -> NoSpaceRow:
             cause = NoSpaceCause(rule="rule_3", aisle=entry.aisle, outside_best=slow)
         case _:
             assert_never(entry.rule)
+    location = current_location(replayed.copy, entry.part)
     return NoSpaceRow(
         part=entry.part,
         rule=entry.rule,
+        **_part_facts(data, analysis, entry.part).model_dump(),
+        from_location=location,
+        from_best=location is not None and is_best(replayed.copy, location, state.best_marks),
         reason=_reason(analysis, entry.rule, entry.part, entry.partner, entry.aisle),
         cause=cause,
     )
@@ -462,8 +501,11 @@ def build_recommendations_view(
                 number=rec.number,
                 rule=rec.rule,
                 part=rec.part,
+                **_part_facts(data, analysis, rec.part).model_dump(),
                 from_location=rec.from_location,
                 to_location=rec.to_location,
+                from_best=is_best(replayed.copy, rec.from_location, state.best_marks),
+                to_best=is_best(replayed.copy, rec.to_location, state.best_marks),
                 status=status,
                 applied=applied,
                 outdated=outdated,
@@ -479,5 +521,7 @@ def build_recommendations_view(
             created_by=latest.created_by,
         ),
         recommendations=rows,
-        no_space=[_no_space_row(analysis, entry) for entry in latest.no_space],
+        no_space=[
+            _no_space_row(data, analysis, state, replayed, entry) for entry in latest.no_space
+        ],
     )

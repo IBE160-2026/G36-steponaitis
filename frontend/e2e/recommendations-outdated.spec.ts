@@ -50,4 +50,8 @@ test("uj1 sees recommendations outdated by a mark change", async ({ page, reques
 
   await page.getByRole("button", { name: "View", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/recommendations\\?tab=outdated$`));
+  // Story 5.7: the page opens on the Outdated tab and lists the outdated rows.
+  await expect(main.getByRole("tab", { name: /^Outdated, / })).toHaveAttribute("aria-selected", "true");
+  const options = main.getByRole("listbox", { name: "Recommendations" }).getByRole("option");
+  await expect(options.first()).toHaveAccessibleName(/, outdated, The best-location marks changed\.$/);
 });

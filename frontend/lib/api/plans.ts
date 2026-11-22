@@ -3,8 +3,8 @@
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
 // used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
-// preview (Story 4.3) and before/after (Story 4.6), plus the recommendations view's types
-// (Story 5.5). All are GETs and never change the plan (FR-9).
+// preview (Story 4.3), before/after (Story 4.6) and the recommendations view (Stories 5.5,
+// 5.7). All are GETs and never change the plan (FR-9).
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -95,6 +95,10 @@ export function planBeforeAfterKey(planId: string) {
   return [...planRootKey(planId), "before-after"] as const;
 }
 
+export function planRecommendationsKey(planId: string) {
+  return [...planRootKey(planId), "recommendations"] as const;
+}
+
 export function planPartKey(planId: string, part: string) {
   return [...planRootKey(planId), "part", part] as const;
 }
@@ -157,6 +161,15 @@ export function fetchPlanBeforeAfter(planId: string): Promise<BeforeAfterView> {
 /** Under `['plan', planId]`, so a confirmed command refetches it. */
 export function usePlanBeforeAfter(planId: string) {
   return useQuery({ queryKey: planBeforeAfterKey(planId), queryFn: () => fetchPlanBeforeAfter(planId) });
+}
+
+export function fetchPlanRecommendations(planId: string): Promise<RecommendationsView> {
+  return getJson<RecommendationsView>(`/api/plans/${encodeURIComponent(planId)}/recommendations`);
+}
+
+/** The latest run's recommendations (FR-28); under `['plan', planId]`, so a confirmed command refetches it. */
+export function usePlanRecommendations(planId: string) {
+  return useQuery({ queryKey: planRecommendationsKey(planId), queryFn: () => fetchPlanRecommendations(planId) });
 }
 
 export function fetchPlanPart(planId: string, part: string): Promise<PartDetail> {

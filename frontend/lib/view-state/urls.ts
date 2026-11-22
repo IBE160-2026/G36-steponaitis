@@ -1,6 +1,6 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
 // the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
-// recommendations tab link (`?tab=`) is built here too; Story 5.7 reads it.
+// recommendations tab (`?tab=`, Story 5.7) is built and parsed here too.
 
 import type { StepKey } from "@/lib/view-state/steps";
 
@@ -27,6 +27,14 @@ export type RecommendationsTab = "open" | "applied" | "outdated" | "no-space";
 /** `/plans/<id>/recommendations?tab=<tab>`: the Recommendations step on one tab. */
 export function recommendationsTabHref(planId: string, tab: RecommendationsTab): string {
   return `${planStepHref(planId, "recommendations")}?${new URLSearchParams({ tab })}`;
+}
+
+const RECOMMENDATIONS_TABS: readonly RecommendationsTab[] = ["open", "applied", "outdated", "no-space"];
+
+/** `?tab=` → the Recommendations tab; Open when missing or unknown. */
+export function parseRecommendationsTab(searchParams: SearchParamsInput): RecommendationsTab {
+  const value = firstValue(searchParams, "tab");
+  return RECOMMENDATIONS_TABS.find((tab) => tab === value) ?? "open";
 }
 
 export type SearchParamsInput = URLSearchParams | Record<string, string | string[] | undefined>;

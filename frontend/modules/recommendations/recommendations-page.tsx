@@ -1,0 +1,745 @@
+"use client";
+
+// Recommendations step (FR-23–FR-30, UX-DR8, UX-DR13, UX-DR31–35, UX-DR57, Story 5.7): run the
+// rules, read the rows per state tab under their rule bands, and apply one or all. Everything shown
+// comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
+// version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
+// command goes through lib/commands; a 409 is the command client's (server message + refetch).
+
+import { useSearchParams } from "next/navigation";
+import { Popover, Tabs } from "radix-ui";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+
+import { BinSwatch } from "@/components/common/bin-swatch";
+import { Button } from "@/components/common/button";
+import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
+import { Icon } from "@/components/common/icons";
+import { MANUAL_MOVE_LABEL, manualMoveReason } from "@/components/common/part-panel";
+import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
+import { showToast } from "@/components/common/toast";
+import {
+  type CommandEvent,
+  type PlanSummary,
+  type RecommendationRow,
+  type RecommendationsView as RecommendationsData,
+  usePlanPart,
+  usePlanRecommendations,
+  usePlanSummary,
+} from "@/lib/api/plans";
+import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import {
+  appliedText,
+  appliedToast,
+  applyAllQuestion,
+  applyAllToast,
+  noSpaceText,
+  outdatedText,
+  reasonSegments,
+  runAnnouncement,
+  runLine,
+} from "@/lib/copy";
+import { formatNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { parseRecommendationsTab, type RecommendationsTab, recommendationsTabHref } from "@/lib/view-state/urls";
+import {
+  type BandView,
+  bandViews,
+  collapseNoSpace,
+  EMPTY_TAB,
+  groupByRule,
+  isApplyShortcut,
+  itemId,
+  type ListItem,
+  moreLikeThisText,
+  nextOptionIndex,
+  optionName,
+  type Rule,
+  RULE_BANDS,
+  ROWS_PER_RULE,
+  ruleNumber,
+  showMoreText,
+  TABS,
+  tabCounts,
+  tabItems,
+  tabName,
+} from "./list";
+
+export const RUN_LABEL = "Run recommendations";
+export const RUNNING_LABEL = "Running…";
+export const NO_OPEN_TO_APPLY = "No open recommendations to apply.";
+export const LOADING_PART = "Loading the part…";
+export const NO_BEST_NOTE = "Rule 1 and rule 2 need best locations. Rule 3 runs without them.";
+export const NO_RUN = "No run yet. Run recommendations to start round 1 on the planning copy as it is now.";
+
+export function nextRunText(round: number): string {
+  return `The next run starts round ${formatNumber(round + 1)} and uses the planning copy as it is then.`;
+}
+
+export function failedRunText(round: number): string {
+  return `The run stopped before it finished. Nothing changed: still round ${formatNumber(round)}. Run recommendations to try again.`;
+}
+
+export function emptyRunText(round: number): string {
+  return `Round ${formatNumber(round)} found no recommendations and no “no space” parts. The rules have nothing more to suggest for these best-location marks.`;
+}
+
+/** The detail eyebrow: "SELECTED · #1 · RULE 1" or "SELECTED · NO SPACE · RULE 3". */
+export function eyebrowText(item: ListItem): string {
+  const rule = `RULE ${ruleNumber(item.row.rule)}`;
+  return item.kind === "rec" ? `SELECTED · #${formatNumber(item.row.number)} · ${rule}` : `SELECTED · NO SPACE · ${rule}`;
+}
+
+/** Why Apply is disabled: the outdated cause, else the saving reason; undefined when it can apply. */
+export function applyReason(row: RecommendationRow, savingReason: string | undefined): string | undefined {
+  if (row.status === "outdated" && row.outdated) return outdatedText(row.part, row.outdated);
+  return savingReason;
+}
+
+function findEvent<T extends CommandEvent["type"]>(events: readonly CommandEvent[], type: T) {
+  return events.find((event): event is Extract<CommandEvent, { type: T }> => event.type === type);
+}
+
+function BestTag() {
+  return (
+    <span className="rounded-xs border border-best-on-light px-1 py-0.5 text-best-on-light type-tag">BEST</span>
+  );
+}
+
+function NoSpaceChip() {
+  return <span className="rounded-xs bg-ink px-1 py-0.5 text-surface type-tag">NO SPACE</span>;
+}
+
+const HATCH = {
+  backgroundImage:
+    "repeating-linear-gradient(135deg, var(--color-hatch-stripe) 0 1px, transparent 1px 7px)",
+};
+
+function RowLine({ item }: { item: ListItem }) {
+  if (item.kind === "no-space") {
+    return <span className="type-reason text-ink-secondary">{noSpaceText(item.row.cause)}</span>;
+  }
+  const row = item.row;
+  if (row.status === "applied" && row.applied) {
+    return (
+      <span className="inline-flex items-center gap-1 type-reason text-ink-secondary">
+        <Icon name="check" size={14} />
+        {appliedText(row.applied)}
+      </span>
+    );
+  }
+  if (row.status === "outdated" && row.outdated) {
+    return (
+      <span className="inline-flex items-center gap-1 type-reason text-ink-secondary">
+        <Icon name="clock" size={14} />
+        <span className="font-semibold">Outdated</span>
+        <span>· {outdatedText(row.part, row.outdated)}</span>
+      </span>
+    );
+  }
+  return null;
+}
+
+function OptionRow({ item }: { item: ListItem }) {
+  const row = item.row;
+  const outdated = item.kind === "rec" && item.row.status === "outdated";
+  return (
+    <div aria-hidden="true" className="grid grid-cols-[28px_16px_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
+      <span className="type-code-table text-ink-secondary">
+        {item.kind === "rec" ? `#${formatNumber(item.row.number)}` : ""}
+      </span>
+      <span className="pt-0.5">{row.movement_class && <BinSwatch movementClass={row.movement_class} />}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className="type-part-number text-ink">{row.part}</span>
+        <span className="truncate type-caption text-ink-secondary">{row.description}</span>
+      </span>
+      <span className="type-code-table text-right text-ink">{row.picks === null ? "" : formatNumber(row.picks)}</span>
+      <span />
+      <span />
+      <span className="col-span-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="inline-flex flex-wrap items-center gap-1 type-code-table text-ink">
+          <span>{row.from_location ?? "—"}</span>
+          {row.from_best && <BestTag />}
+          <span aria-hidden="true">→</span>
+          {item.kind === "rec" ? (
+            <>
+              <span className={cn(outdated && "line-through")}>{item.row.to_location}</span>
+              {item.row.to_best && <BestTag />}
+            </>
+          ) : (
+            <NoSpaceChip />
+          )}
+        </span>
+        <RowLine item={item} />
+      </span>
+    </div>
+  );
+}
+
+function Detail({
+  id,
+  item,
+  savingReason,
+  onApply,
+  manualMove,
+}: {
+  id: string;
+  item: ListItem | undefined;
+  savingReason: string | undefined;
+  onApply: (row: RecommendationRow) => void;
+  manualMove: (part: string) => ReactNode;
+}) {
+  if (!item) {
+    return <section id={id} aria-label="Selected recommendation" className="min-w-0" />;
+  }
+  const row = item.row;
+  return (
+    <section
+      id={id}
+      aria-label="Selected recommendation"
+      className="flex min-w-0 flex-col gap-3 self-start rounded-lg border border-border bg-surface p-panel-padding"
+    >
+      <p className="type-marker tracking-wide text-ink-secondary" data-testid="detail-eyebrow">
+        {eyebrowText(item)}
+      </p>
+      <div className="flex items-center gap-2">
+        {row.movement_class && <BinSwatch movementClass={row.movement_class} />}
+        <h2 className="type-section-title text-ink">{row.part}</h2>
+      </div>
+      {row.description && <p className="-mt-2 type-body text-ink-secondary">{row.description}</p>}
+      {row.reason && (
+        <p className="type-body text-ink" data-testid="detail-reason">
+          {reasonSegments(row.reason).map((segment, index) =>
+            segment.strong ? <strong key={index}>{segment.text}</strong> : <span key={index}>{segment.text}</span>,
+          )}
+        </p>
+      )}
+      <p className="inline-flex flex-wrap items-center gap-2 type-code text-ink">
+        <span>{row.from_location ?? "No current location"}</span>
+        {row.from_best && <BestTag />}
+        <span aria-hidden="true">→</span>
+        <span className="sr-only">to</span>
+        {item.kind === "rec" ? (
+          <>
+            <span className={cn(item.row.status === "outdated" && "line-through")}>{item.row.to_location}</span>
+            {item.row.to_best && <BestTag />}
+          </>
+        ) : (
+          <NoSpaceChip />
+        )}
+      </p>
+      {item.kind === "no-space" ? (
+        <>
+          <p className="type-body text-ink">{noSpaceText(item.row.cause)}</p>
+          <div className="flex flex-wrap gap-2">{manualMove(row.part)}</div>
+        </>
+      ) : item.row.status === "applied" && item.row.applied ? (
+        <p className="inline-flex items-center gap-1 type-body text-ink">
+          <Icon name="check" />
+          {appliedText(item.row.applied)}
+        </p>
+      ) : (
+        <>
+          {item.row.status === "outdated" && item.row.outdated && (
+            <p className="inline-flex items-center gap-1 type-body text-ink">
+              <Icon name="clock" />
+              Outdated · {outdatedText(item.row.part, item.row.outdated)}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="primary"
+              size="md"
+              aria-keyshortcuts="Alt+A"
+              disabledReason={applyReason(item.row, savingReason)}
+              onClick={() => onApply(item.row)}
+            >
+              Apply
+            </Button>
+            {manualMove(row.part)}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function ApplyAll({
+  count,
+  round,
+  savingReason,
+  onConfirm,
+}: {
+  count: number;
+  round: number;
+  savingReason: string | undefined;
+  onConfirm: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const cancel = useRef<HTMLButtonElement>(null);
+  const reason = count === 0 ? NO_OPEN_TO_APPLY : savingReason;
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Anchor asChild>
+        <span className="inline-flex">
+          <Button
+            ref={trigger}
+            variant="secondary"
+            size="md"
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            disabledReason={reason}
+            onClick={() => setOpen(true)}
+          >
+            Apply all ({formatNumber(count)})
+          </Button>
+        </span>
+      </Popover.Anchor>
+      <Popover.Portal>
+        <Popover.Content
+          role="dialog"
+          aria-label="Apply all"
+          align="end"
+          sideOffset={6}
+          collisionPadding={16}
+          className="z-50 flex w-[min(360px,calc(100vw-32px))] flex-col gap-3 rounded-lg border border-border bg-surface p-4 text-ink shadow-overlay"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            cancel.current?.focus();
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            trigger.current?.focus();
+          }}
+        >
+          <p className="type-body text-ink">{applyAllQuestion(count, round)}</p>
+          <div className="flex justify-end gap-2">
+            <Button ref={cancel} variant="tertiary" size="md" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              disabledReason={reason}
+              onClick={() => {
+                setOpen(false);
+                onConfirm();
+              }}
+            >
+              Apply all
+            </Button>
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+
+function RecommendationList({
+  bands,
+  detailId,
+  selectedId,
+  onSelect,
+  onShowMore,
+  onMoreLikeThis,
+  optionRefs,
+}: {
+  bands: readonly BandView[];
+  detailId: string;
+  selectedId: string | undefined;
+  onSelect: (id: string) => void;
+  onShowMore: (rule: Rule) => void;
+  onMoreLikeThis: (key: string) => void;
+  optionRefs: RefObject<Map<string, HTMLElement>>;
+}) {
+  const bandId = useId();
+  const visible = bands.flatMap((band) => band.rows.map((row) => row.item));
+
+  function onOptionKeyDown(event: KeyboardEvent<HTMLDivElement>, index: number) {
+    // Only the option's own keys: never steal keys from a button inside the list (retro item 15).
+    if (event.target !== event.currentTarget) return;
+    const next = nextOptionIndex(event.key, index, visible.length);
+    if (next === null) return;
+    event.preventDefault();
+    onSelect(itemId(visible[next]));
+  }
+
+  return (
+    <div role="listbox" aria-label="Recommendations" aria-controls={detailId} className="flex min-w-0 flex-col gap-3">
+      {bands.map((band) => {
+        const meta = RULE_BANDS.find((candidate) => candidate.rule === band.rule);
+        const labelId = `${bandId}-${band.rule}`;
+        return (
+          <div key={band.rule} role="group" aria-labelledby={labelId} className="flex flex-col">
+            <div
+              id={labelId}
+              className="flex min-h-rule-band flex-wrap items-center gap-x-3 gap-y-1 rounded-t-lg bg-band px-3 py-1"
+            >
+              <span className="rounded-xs bg-ink px-1.5 py-0.5 text-surface type-tag">{meta?.tag}</span>
+              <span className="type-body-strong text-ink">{meta?.name}</span>
+              <span className="type-meta text-ink-secondary">{meta?.note}</span>
+            </div>
+            <div className="flex flex-col divide-y divide-hairline rounded-b-lg border border-t-0 border-border bg-surface">
+              {band.rows.map(({ item, moreLikeThis }) => {
+                const id = itemId(item);
+                const index = visible.indexOf(item);
+                const selected = id === selectedId;
+                const outdated = item.kind === "rec" && item.row.status === "outdated";
+                return (
+                  <div key={id} className="flex flex-col">
+                    <div
+                      role="option"
+                      aria-selected={selected}
+                      aria-label={optionName(item)}
+                      tabIndex={selected ? 0 : -1}
+                      data-item-id={id}
+                      ref={(element) => {
+                        if (element) optionRefs.current.set(id, element);
+                        else optionRefs.current.delete(id);
+                      }}
+                      onClick={() => onSelect(id)}
+                      onKeyDown={(event) => onOptionKeyDown(event, index)}
+                      style={outdated ? HATCH : undefined}
+                      className={cn(
+                        "relative min-h-recommendation-row cursor-pointer py-2 pr-3 pl-4 outline-offset-[-2px]",
+                        selected && "bg-selected-tint outline-1 outline-ink outline-solid",
+                      )}
+                    >
+                      {selected && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-accent" />}
+                      <OptionRow item={item} />
+                    </div>
+                    {moreLikeThis && (
+                      <div className="pr-3 pb-2 pl-[60px]">
+                        <Button variant="link" size="sm" onClick={() => onMoreLikeThis(moreLikeThis.key)}>
+                          {moreLikeThisText(moreLikeThis.count)}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {band.more && (
+                <div className="px-4 py-2">
+                  <Button variant="link" size="sm" onClick={() => onShowMore(band.rule)}>
+                    {showMoreText(band.more.count, band.rule)}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export type RecommendationsViewProps = {
+  summary: PlanSummary;
+  view: RecommendationsData;
+  tab: RecommendationsTab;
+  onTabChange: (tab: RecommendationsTab) => void;
+  /** "Saving the last change…" while a command is unconfirmed (lib/commands). */
+  disabledReason?: string;
+  onSend: (body: CommandBody) => Promise<SendResult>;
+  /** The Manual move… action for a part (the page wires the shared ManualMoveDialog). */
+  manualMove?: (part: string) => ReactNode;
+  notify?: (message: string) => void;
+};
+
+export function RecommendationsView({
+  summary,
+  view,
+  tab,
+  onTabChange,
+  disabledReason,
+  onSend,
+  manualMove = () => null,
+  notify = showToast,
+}: RecommendationsViewProps) {
+  const [running, setRunning] = useState(false);
+  const [failedRound, setFailedRound] = useState<number | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const [chosenId, setChosenId] = useState<string | undefined>(undefined);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const [focusRequest, setFocusRequest] = useState(0);
+  // A focus request waits for its row: it is kept until its tab shows a view of at least
+  // `minVersion`, then focuses the selected row there, or is dropped when that view has none.
+  const pendingFocus = useRef<{ minVersion: number; tab: RecommendationsTab } | null>(null);
+  const region = useRef<HTMLDivElement>(null);
+  const runButton = useRef<HTMLButtonElement>(null);
+  // Set when a run failed: the Run button is focused once it renders enabled again (the disabled
+  // Button is a different element, so focusing before that render would be lost).
+  const refocusRun = useRef(false);
+  const optionRefs = useRef(new Map<string, HTMLElement>());
+  const detailId = useId();
+
+  const round = view.run?.round ?? 0;
+  const counts = tabCounts(view);
+  const items = tabItems(view, tab);
+  const bands = bandViews(
+    tab,
+    items,
+    new Set(RULE_BANDS.map((band) => band.rule).filter((rule) => expanded.has(`${tab}:${rule}`))),
+    expanded,
+  );
+  const visible = bands.flatMap((band) => band.rows.map((row) => row.item));
+  // Selection is kept by id while the row is visible in this tab, else the first visible row.
+  const selected = visible.find((item) => itemId(item) === chosenId) ?? visible[0];
+  const selectedId = selected ? itemId(selected) : undefined;
+  const savingReason = running ? (disabledReason ?? RUNNING_LABEL) : disabledReason;
+
+  useEffect(() => {
+    const pending = pendingFocus.current;
+    if (pending === null || pending.tab !== tab || view.version < pending.minVersion) return;
+    const element = selectedId === undefined ? undefined : optionRefs.current.get(selectedId);
+    element?.focus();
+    pendingFocus.current = null;
+  }, [focusRequest, selectedId, view.version, tab]);
+
+  const requestFocus = useCallback((minVersion: number, onTab: RecommendationsTab) => {
+    pendingFocus.current = { minVersion, tab: onTab };
+    setFocusRequest((n) => n + 1);
+  }, []);
+
+  const select = useCallback(
+    (id: string) => {
+      setChosenId(id);
+      requestFocus(view.version, tab);
+    },
+    [requestFocus, view.version, tab],
+  );
+
+  /** Expands `key` and selects the first row it shows, so focus does not fall off the removed button. */
+  function expandTo(key: string, first: ListItem | undefined) {
+    setExpanded((prev) => new Set(prev).add(key));
+    if (first) select(itemId(first));
+  }
+
+  function showMore(rule: Rule) {
+    const ruleItems = items.filter((item) => item.row.rule === rule);
+    expandTo(`${tab}:${rule}`, ruleItems[ROWS_PER_RULE]);
+  }
+
+  function showMoreLikeThis(key: string) {
+    const runs = groupByRule(items).flatMap((group) => collapseNoSpace(group.items));
+    expandTo(key, runs.find((candidate) => itemId(candidate.first) === key)?.rest[0]);
+  }
+
+  async function run() {
+    setFailedRound(null);
+    setRunning(true);
+    const before = view.version;
+    let result: SendResult;
+    try {
+      result = await onSend({ type: "run" });
+    } finally {
+      setRunning(false);
+    }
+    if (result.outcome === "confirmed") {
+      const done = findEvent(result.events, "run_done");
+      if (done) setAnnouncement(runAnnouncement(done));
+      setChosenId(undefined);
+      setExpanded(new Set());
+      onTabChange("open");
+      requestFocus(before + 1, "open");
+    } else if (result.outcome === "dropped") {
+      setFailedRound(round);
+      refocusRun.current = true;
+    }
+  }
+
+  async function apply(row: RecommendationRow) {
+    const before = view.version;
+    const result = await onSend({ type: "apply", recommendation_id: row.id });
+    if (result.outcome !== "confirmed") return;
+    const moved = findEvent(result.events, "move_made");
+    if (moved) notify(appliedToast(moved));
+    // The applied row leaves the tab: when focus was in the list or detail (or already fell to the
+    // page), it moves to the selected row of the refreshed view.
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    if (!active || active === document.body || region.current?.contains(active)) requestFocus(before + 1, tab);
+  }
+
+  async function applyAll() {
+    const result = await onSend({ type: "apply_all" });
+    if (result.outcome !== "confirmed") return;
+    const done = findEvent(result.events, "apply_all_done");
+    if (done) notify(applyAllToast(done, round));
+  }
+
+  function onRegionKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    // React portal events (the ManualMoveDialog) bubble here too; only keys from this region count.
+    if (!event.currentTarget.contains(event.target as Node)) return;
+    if (!isApplyShortcut({ altKey: event.altKey, code: event.code, target: event.target as HTMLElement })) return;
+    if (selected?.kind !== "rec" || selected.row.status !== "open") return;
+    event.preventDefault();
+    if (applyReason(selected.row, savingReason) !== undefined) return;
+    void apply(selected.row);
+  }
+
+  useEffect(() => {
+    if (!refocusRun.current || savingReason !== undefined) return;
+    runButton.current?.focus();
+    refocusRun.current = false;
+  }, [failedRound, savingReason]);
+  const hasRun = view.run !== null;
+  const emptyRun = hasRun && view.recommendations.length === 0 && view.no_space.length === 0;
+
+  return (
+    <div className="flex flex-col gap-4 px-page-gutter py-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="type-page-title">Recommendations</h1>
+            <span className="rounded-full border border-ink px-2.5 py-1 type-marker text-ink" data-testid="round-chip">
+              Round {formatNumber(round)}
+            </span>
+          </div>
+          {view.run && (
+            <>
+              <p className="type-body text-ink" data-testid="run-line">
+                {runLine(view.run, view.recommendations.length, view.no_space.length)}
+              </p>
+              <p className="type-caption text-ink-secondary">{nextRunText(view.run.round)}</p>
+            </>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button ref={runButton} variant="secondary" size="md" disabledReason={savingReason} onClick={() => void run()}>
+            {running ? RUNNING_LABEL : RUN_LABEL}
+          </Button>
+          <ApplyAll
+            count={summary.apply_all_count}
+            round={round}
+            savingReason={savingReason}
+            onConfirm={() => void applyAll()}
+          />
+        </div>
+      </div>
+      <p role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+      {failedRound !== null && (
+        <p role="alert" className="type-body text-ink">
+          {failedRunText(failedRound)}
+        </p>
+      )}
+      {summary.best_locations === 0 && <p className="type-body text-ink-secondary">{NO_BEST_NOTE}</p>}
+      <div
+        inert={running}
+        className={cn("flex min-w-0 flex-col gap-4 transition-opacity", running && "opacity-50")}
+        data-testid="recommendations-area"
+      >
+        {!hasRun ? (
+          <p className="type-body text-ink-secondary">{NO_RUN}</p>
+        ) : emptyRun ? (
+          <p className="type-body text-ink-secondary">{emptyRunText(round)}</p>
+        ) : (
+          <Tabs.Root value={tab} onValueChange={(value) => onTabChange(value as RecommendationsTab)}>
+            <Tabs.List aria-label="Recommendation states" className="flex flex-wrap gap-1 border-b border-border">
+              {TABS.map(({ value, label }) => (
+                <Tabs.Trigger
+                  key={value}
+                  value={value}
+                  aria-label={tabName(value, counts[value])}
+                  className="-mb-px inline-flex h-control-lg items-center gap-2 border-b-2 border-transparent px-3 type-tab text-ink-secondary data-[state=active]:border-ink data-[state=active]:text-ink"
+                >
+                  {label}
+                  <span className="rounded-full bg-band px-1.5 py-0.5 type-meta text-ink">{formatNumber(counts[value])}</span>
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+            {TABS.map(({ value }) => (
+              <Tabs.Content key={value} value={value} className="pt-4 outline-none">
+                {items.length === 0 ? (
+                  <p className="type-body text-ink-secondary">{EMPTY_TAB[value]}</p>
+                ) : (
+                  <div
+                    className="grid min-w-0 gap-4 xl:grid-cols-[640px_minmax(0,1fr)]"
+                    ref={region}
+                    onKeyDown={onRegionKeyDown}
+                  >
+                    <RecommendationList
+                      bands={bands}
+                      detailId={detailId}
+                      selectedId={selectedId}
+                      onSelect={select}
+                      onShowMore={showMore}
+                      onMoreLikeThis={showMoreLikeThis}
+                      optionRefs={optionRefs}
+                    />
+                    <Detail
+                      id={detailId}
+                      item={selected}
+                      savingReason={savingReason}
+                      onApply={(row) => void apply(row)}
+                      manualMove={manualMove}
+                    />
+                  </div>
+                )}
+              </Tabs.Content>
+            ))}
+          </Tabs.Root>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ManualMoveAction({ planId, part, savingReason }: { planId: string; part: string; savingReason?: string }) {
+  const detail = usePlanPart(planId, part);
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const reason = detail.data && detail.data.part === part ? manualMoveReason(detail.data, savingReason) : LOADING_PART;
+  return (
+    <>
+      <Button ref={button} variant="tertiary" size="md" disabledReason={reason} onClick={() => setOpen(true)}>
+        {MANUAL_MOVE_LABEL}
+      </Button>
+      {detail.data && (
+        <ManualMoveDialog planId={planId} detail={detail.data} open={open} onOpenChange={setOpen} returnFocusRef={button} />
+      )}
+    </>
+  );
+}
+
+export function RecommendationsPage({ planId }: { planId: string }) {
+  const summary = usePlanSummary(planId);
+  const recommendations = usePlanRecommendations(planId);
+  const data = useConsistentPlanQueries([summary, recommendations]);
+  const { sendWithEvents, disabledReason } = usePlanCommands(planId);
+  const tab = parseRecommendationsTab(useSearchParams());
+  const changeTab = useCallback(
+    (next: RecommendationsTab) => window.history.replaceState(null, "", recommendationsTabHref(planId, next)),
+    [planId],
+  );
+  if (data) {
+    const [summaryData, view] = data;
+    return (
+      <RecommendationsView
+        summary={summaryData}
+        view={view}
+        tab={tab}
+        onTabChange={changeTab}
+        disabledReason={disabledReason}
+        onSend={sendWithEvents}
+        manualMove={(part) => <ManualMoveAction key={part} planId={planId} part={part} savingReason={disabledReason} />}
+      />
+    );
+  }
+  const error = summary.error ?? recommendations.error;
+  return (
+    <div className="flex flex-col gap-4 px-page-gutter py-5">
+      {showsLoadError(error) ? <PlanLoadError message={error.message} /> : <PlanOpening planId={planId} />}
+    </div>
+  );
+}

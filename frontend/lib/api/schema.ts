@@ -753,11 +753,25 @@ export interface components {
              */
             rule: "rule_1" | "rule_2" | "rule_3";
         };
-        /** NoSpaceRow */
+        /**
+         * NoSpaceRow
+         * @description A "no space" entry with the part's display facts and its current location in the
+         *     replayed copy (None when it holds no stock), plus whether that location is best.
+         */
         NoSpaceRow: {
             cause: components["schemas"]["NoSpaceCause"];
+            /** Description */
+            description: string;
+            /** From Best */
+            from_best: boolean;
+            /** From Location */
+            from_location: string | null;
+            /** Movement Class */
+            movement_class: ("fast" | "medium" | "slow" | "dead") | null;
             /** Part */
             part: string;
+            /** Picks */
+            picks: number | null;
             /** Reason */
             reason: (components["schemas"]["ClassReason"] | components["schemas"]["PickGroupReason"]) | null;
             /**
@@ -993,18 +1007,31 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** RecommendationRow */
+        /**
+         * RecommendationRow
+         * @description One recommendation with its status, reason data and the display facts the page
+         *     shows (description, class, picks, BEST of from/to in the replayed copy), so the client
+         *     never computes them (AD-3).
+         */
         RecommendationRow: {
             applied: components["schemas"]["AppliedInfo"] | null;
+            /** Description */
+            description: string;
+            /** From Best */
+            from_best: boolean;
             /** From Location */
             from_location: string;
             /** Id */
             id: string;
+            /** Movement Class */
+            movement_class: ("fast" | "medium" | "slow" | "dead") | null;
             /** Number */
             number: number;
             outdated: components["schemas"]["OutdatedInfo"] | null;
             /** Part */
             part: string;
+            /** Picks */
+            picks: number | null;
             /** Reason */
             reason: (components["schemas"]["ClassReason"] | components["schemas"]["PickGroupReason"]) | null;
             /**
@@ -1017,6 +1044,8 @@ export interface components {
              * @enum {string}
              */
             status: "open" | "applied" | "outdated";
+            /** To Best */
+            to_best: boolean;
             /** To Location */
             to_location: string;
         };

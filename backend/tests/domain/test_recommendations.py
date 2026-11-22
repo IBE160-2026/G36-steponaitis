@@ -157,6 +157,24 @@ def test_fr28_no_space_rule_2_cause(data: ImportData, analysis: Analysis) -> Non
     assert rule_2[0].cause.model_dump() == {"rule": "rule_2", "aisle": None, "outside_best": True}
 
 
+def test_fr28_view_rows_carry_display_facts(
+    run_1: PlanState, data: ImportData, analysis: Analysis
+) -> None:
+    view = _view(run_1, data, analysis)
+
+    one, two = view.recommendations[0], view.recommendations[1]
+    assert (one.part, one.to_location) == ("1100", "A-01-01-03")
+    assert one.description == "Brake pad set, front - VW Golf"
+    assert (one.movement_class, one.picks) == ("fast", analysis.parts["1100"].picks)
+    assert (one.from_best, one.to_best) == (False, True)
+    assert (two.part, two.movement_class, two.picks) == ("4400", "dead", 0)
+    assert (two.from_best, two.to_best) == (True, False)
+    spark = view.no_space[0]
+    assert (spark.part, spark.description) == ("1200", "Spark plug - Ford Focus")
+    assert (spark.movement_class, spark.picks) == ("fast", analysis.parts["1200"].picks)
+    assert (spark.from_location, spark.from_best) == ("B-01-01-02", False)
+
+
 def test_fr28_no_run_view(data: ImportData, analysis: Analysis) -> None:
     view = _view(PlanState.new(), data, analysis)
 
