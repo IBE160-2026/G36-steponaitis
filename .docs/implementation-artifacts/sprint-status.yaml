@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 00:08
+last_updated: 11-23-2026 00:20
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -96,7 +96,7 @@ development_status:
   7-3-undo-the-last-move: done
   7-4-reset-the-planning-copy: done
   7-5-answer-key-scenario-through-run-3: done
-  epic-7-retrospective: optional
+  epic-7-retrospective: done
 
   epic-8: backlog
   8-1-move-list-order-and-header-in-the-domain: backlog
@@ -585,3 +585,73 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-7-retro-item-59-stop-the-flow-bar-showing-recommendation"
+    epic: 7
+    action: "Stop the flow bar showing Recommendations as done after an undo outdates
+      the run; add a summary test and update the EXPERIENCE.md check rule (R1)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-60-make-the-toast-undo-safe-handle-the-busy"
+    epic: 7
+    action: "Make the toast Undo safe: handle the busy outcome in sendUndo and drop
+      the move toast Undo after a confirmed page Run, with Vitest coverage (R2, R3)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-61-align-the-no-op-reset-with-ac1-after-the"
+    epic: 7
+    action: "Align the no-op reset with AC1 after the item-7 decision: emit plan_reset
+      with 0 or stop toasting Plan reset. 0 moves removed without an event (A5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-62-fix-epic-7-ui-gaps-7-1-button-remount-fo"
+    epic: 7
+    action: "Fix epic-7 UI gaps: 7.1 Button remount focus loss, No moves to undo while
+      the summary loads, and an e2e test undoing a combined and a moved-back move
+      (P4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-63-run-the-7-1-and-7-2-follow-up-reviews-wi"
+    epic: 7
+    action: "Run the 7.1 and 7.2 follow-up reviews with the six outstanding ones and
+      add the runbook step that blocks the next story while followup_review_recommended
+      is unhandled (P3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-64-clean-up-epic-7-duplication-e2e-command"
+    epic: 7
+    action: "Clean up epic-7 duplication: e2e command poster into e2e/support, shared
+      backend test helpers, rename one other_locations, share the allowed-location
+      filter, fix the other-location.tsx comment, include recommendations.py in the
+      item-46 split (A2-A4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-65-reconcile-epics-md-and-the-architecture"
+    epic: 7
+    action: "Reconcile epics.md and the architecture with epic 7 as built: other_locations
+      signature, undo_preview shape, outdated(undo) set by undo, no-op reset, effective-move
+      counts, kept_parts band and tab order, tooltip pin to Epic 10, 7.5 HTTP test
+      in tests/app (A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-66-decide-whether-to-enforce-base_version-o"
+    epic: 7
+    action: "Decide whether to enforce base_version or add a reset epoch to undo before
+      Epic 15, and record it in AD-6 (R4)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-7-retro-item-67-confirm-the-nine-landed-retro-items-as-d"
+    epic: 7
+    action: "Confirm the nine landed retro items as done and tick issues.md, document
+      LAUNCHER_ACTIONS and PlanSummary as the launcher extension point in AGENTS.md,
+      and require commits and logs to name only items that advanced (A1, P2, P4)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
