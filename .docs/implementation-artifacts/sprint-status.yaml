@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 03:05
+last_updated: 11-22-2026 04:55
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -55,8 +55,8 @@ development_status:
   2-6-part-panel-and-search: done
   epic-2-retrospective: done
 
-  epic-3: backlog
-  3-1-best-location-marks-in-the-domain: backlog
+  epic-3: in-progress
+  3-1-best-location-marks-in-the-domain: in-progress
   3-2-the-command-endpoint-with-best-location-mark-commands: backlog
   3-3-client-command-flow-and-autosave: backlog
   3-4-best-locations-step-mark-and-unmark-from-the-table: backlog
