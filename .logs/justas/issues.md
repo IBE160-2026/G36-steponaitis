@@ -86,10 +86,10 @@
 - [ ] 2026-11-21 [2-2-find-pick-groups](966-2026-11-21-22-17-21-2-2-find-pick-groups.md) — pick groups: én veldig stor jobb gjør partellingen kvadratisk — uverifisert (Story 2.2, utsatt)
 - [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — Parts-siden tegner alle 1 545 rader på én gang; vurder virtualisering hvis den blir treg (Story 2.3)
 - [ ] 2026-11-21 [2-3-parts-roster](965-2026-11-21-22-33-27-2-3-parts-roster.md) — visuell sammenligning av Parts-siden mot design-mockupene er ikke gjort (Story 2.3)
-- [ ] 2026-11-21 [2-5-pick-groups-table](963-2026-11-21-23-02-32-2-5-pick-groups-table.md) — Pick groups tom-tilstand sier alltid «5 or more jobs» uavhengig av `pick_group_min_shared_jobs` (Story 2.5)
+- [x] 2026-11-21 [2-5-pick-groups-table](963-2026-11-21-23-02-32-2-5-pick-groups-table.md) — Pick groups tom-tilstand sier alltid «5 or more jobs» uavhengig av `pick_group_min_shared_jobs` (Story 2.5) (løst 2026-11-22: Story 4.4 `4a367ca` bruker planens `min_shared_jobs`, retro-punkt 13)
 - [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delpanelet (400 px) legger seg ikke over siden under 1280 px bredde (Story 2.6)
 - [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delsøket sender en forespørsel per tastetrykk, ingen debounce (Story 2.6)
-- [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — feil: bytte av gang i Locations nullstiller Occupancy- og Best-filtrene (fra review-rettelse i Story 2.4; retro Epic 2, punkt 1)
+- [x] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — feil: bytte av gang i Locations nullstiller Occupancy- og Best-filtrene (fra review-rettelse i Story 2.4; retro Epic 2, punkt 1) (løst 2026-11-22: Story 4.4 `4a367ca`, retro-punkt 12)
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 5: plan-visningene laster `transactions` unødig — endre lesingen eller AD-4
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 6: krev test av brukerstien når en review-rettelse endrer når delt tilstand nullstilles
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 7: avgjør når de åpne action items fra Epic 1 skal planlegges (10 av 11 åpne)
@@ -104,3 +104,5 @@
 - [ ] 2026-11-22 [4-1-step-log-replay-and-the-planning-copy](954-2026-11-22-10-04-01-4-1-step-log-replay-and-the-planning-copy.md) — oppfølgingsreview Story 4.1: FR-34-rettelsen i `replay` (siste flytt etter tid) dekkes bare av én test
 - [ ] 2026-11-22 [4-2-make-a-manual-move-command-and-preview](953-2026-11-22-10-28-13-4-2-make-a-manual-move-command-and-preview.md) — bekreft at feilkoden `unavailable` (503) som Story 4.2 la til i AD-11 i arkitektur-spinen er ønsket (planleggingsartefakt endret via retro-punkt 22)
 - [ ] 2026-11-22 [4-2-make-a-manual-move-command-and-preview](953-2026-11-22-10-28-13-4-2-make-a-manual-move-command-and-preview.md) — Postgres: andre skriver venter på låsen i stedet for 503 (ingen lock timeout); busy-feil etter at låsen er tatt gir 500 (Story 4.2)
+- [ ] 2026-11-22 [4-4-views-follow-the-planning-copy](951-2026-11-22-11-36-21-4-4-views-follow-the-planning-copy.md) — oppfølgingsreview Story 4.4: rettelsen for feilet del-lasting i delpanelet har ingen egen test
+- [ ] 2026-11-22 [4-4-views-follow-the-planning-copy](951-2026-11-22-11-36-21-4-4-views-follow-the-planning-copy.md) — ustabile e2e-tester under last: «ad12 retries a command after a proxy 500» og `createSamplePlan` uten 201 (sett lokalt i Story 4.4)
