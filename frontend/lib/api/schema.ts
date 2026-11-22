@@ -276,6 +276,26 @@ export interface components {
             /** Slow Min Picks */
             slow_min_picks: number;
         };
+        /**
+         * ApplyRecommendation
+         * @description Apply one recommendation of the latest run as a move (FR-30, AD-7).
+         */
+        ApplyRecommendation: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Recommendation Id */
+            recommendation_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "apply";
+        };
         /** BeforeAfterTotal */
         BeforeAfterTotal: {
             empty: components["schemas"]["Count"];
@@ -528,7 +548,7 @@ export interface components {
         };
         /**
          * MoveMade
-         * @description A manual move became a new effective move (FR-33).
+         * @description A manual move or an applied recommendation became a new effective move (FR-30, FR-33).
          */
         MoveMade: {
             /** From Location */
@@ -1178,7 +1198,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"];
             };
         };
         responses: {

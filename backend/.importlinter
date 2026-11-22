@@ -115,3 +115,4 @@ modules =
     swp.domain.views.move_preview
     swp.domain.before_after
     swp.domain.rules
+    swp.domain.recommendations

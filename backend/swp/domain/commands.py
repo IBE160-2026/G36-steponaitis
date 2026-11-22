@@ -57,8 +57,18 @@ class RunRecommendations(BaseModel):
     base_version: int
 
 
+class ApplyRecommendation(BaseModel):
+    """Apply one recommendation of the latest run as a move (FR-30, AD-7)."""
+
+    type: Literal["apply"] = "apply"
+    command_id: uuid.UUID
+    base_version: int
+    recommendation_id: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
+
+
 Command = Annotated[
-    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations, Field(discriminator="type")
+    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations | ApplyRecommendation,
+    Field(discriminator="type"),
 ]
 """Every command a plan accepts (closed union)."""
 
@@ -74,7 +84,7 @@ class MarkRemoved(BaseModel):
 
 
 class MoveMade(BaseModel):
-    """A manual move became a new effective move (FR-33)."""
+    """A manual move or an applied recommendation became a new effective move (FR-30, FR-33)."""
 
     type: Literal["move_made"] = "move_made"
     move_number: int

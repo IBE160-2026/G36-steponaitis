@@ -5,10 +5,11 @@ Pure: returns a new state and its events and never mutates the input state.
 
 from typing import assert_never
 
-from swp.domain import marks, moves, rules
+from swp.domain import marks, moves, recommendations, rules
 from swp.domain.analysis import Analysis
 from swp.domain.commands import (
     Applied,
+    ApplyRecommendation,
     Command,
     CommandContext,
     ManualMove,
@@ -88,5 +89,7 @@ def _dispatch(
             return moves.manual_move(state, command, ctx, data)
         case RunRecommendations():
             return rules.run(state, command, ctx, data, analysis)
+        case ApplyRecommendation():
+            return recommendations.apply_recommendation(state, command, ctx, data, analysis)
         case _:
             assert_never(command)

@@ -104,7 +104,7 @@ def test_fr10_command_union_is_closed() -> None:
     command_types = {model.model_fields["type"].default for model in get_args(get_args(Command)[0])}
     event_types = {model.model_fields["type"].default for model in get_args(get_args(Event)[0])}
 
-    assert command_types == {"set_best_mark", "remove_best_mark", "manual_move", "run"}
+    assert command_types == {"set_best_mark", "remove_best_mark", "manual_move", "run", "apply"}
     assert event_types == {
         "mark_set",
         "mark_removed",

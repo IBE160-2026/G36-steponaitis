@@ -3,8 +3,6 @@
 import uuid
 from datetime import UTC, datetime
 
-import pytest
-
 from swp.domain.analysis import Analysis
 from swp.domain.apply import apply
 from swp.domain.commands import (
@@ -28,20 +26,10 @@ from swp.domain.state import (
     Run,
     Step,
 )
-from tests.domain.answer_key import answer_key_analysis, answer_key_import, expected
+from tests.domain.answer_key import expected
 
 CTX = CommandContext(now=datetime(2026, 11, 22, 12, 0, tzinfo=UTC), user="planner")
 MARKS = [AisleMark(aisle="A")]
-
-
-@pytest.fixture(scope="module")
-def data() -> ImportData:
-    return answer_key_import().data
-
-
-@pytest.fixture(scope="module")
-def analysis() -> Analysis:
-    return answer_key_analysis()
 
 
 def _rule_1(
