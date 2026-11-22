@@ -20,6 +20,11 @@ def part_order(parts: Mapping[str, PartAnalysis]) -> list[str]:
     return sorted(parts, key=lambda part: (-parts[part].picks, part))
 
 
+def fewest_picks_order(parts: Mapping[str, PartAnalysis]) -> list[str]:
+    """Fewest picks first, ties in part-number (`str`) order (rule 2's order)."""
+    return sorted(parts, key=lambda part: (parts[part].picks, part))
+
+
 def level_key(levels: Iterable[str]) -> Callable[[str], tuple[int, str] | tuple[str]]:
     """The sort key for Level values: numeric when every value in `levels` is all decimal
     digits (`isdecimal`, which `int` always accepts), else `str` order."""

@@ -1,4 +1,4 @@
-"""FR-23/NFR-8: the `run` command over HTTP (SQLite here, Postgres in CI)."""
+"""FR-23/FR-25/NFR-8: the `run` command over HTTP (SQLite here, Postgres in CI)."""
 
 import time
 import uuid
@@ -57,6 +57,7 @@ def test_fr23_run_over_http(empty_tables: str) -> None:
 
 
 def test_fr24_answer_key_round1_over_http(empty_tables: str) -> None:
+    """FR-24 + FR-25: rule 1 then rule 2 over the stored analysis."""
     with TestClient(create_app()) as client:
         created = client.post(
             "/api/plans",
@@ -84,14 +85,20 @@ def test_fr24_answer_key_round1_over_http(empty_tables: str) -> None:
     assert response.status_code == 200, response.text
     assert response.json() == {
         "version": 3,
-        "events": [{"type": "run_done", "round": 1, "recommendations": 1, "no_space": 3}],
+        "events": [{"type": "run_done", "round": 1, "recommendations": 5, "no_space": 3}],
     }
     stored = get_plan(uuid.UUID(plan_id))
     assert stored is not None
     [run] = stored.state.runs
     assert [
         (r.number, r.part, r.from_location, r.to_location, r.rule) for r in run.recommendations
-    ] == [(1, "1100", "C-01-01-01", "A-01-01-03", "rule_1")]
+    ] == [
+        (1, "1100", "C-01-01-01", "A-01-01-03", "rule_1"),
+        (2, "4400", "A-01-03-02", "B-01-03-03", "rule_2"),
+        (3, "9000", "A-01-01-02", "B-01-04-01", "rule_2"),
+        (4, "0100", "A-01-01-01", "B-01-04-02", "rule_2"),
+        (5, "0500", "A-01-03-01", "B-01-04-03", "rule_2"),
+    ]
     assert [(n.part, n.rule) for n in run.no_space] == [
         ("1200", "rule_1"),
         ("10240", "rule_1"),

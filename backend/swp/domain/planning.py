@@ -209,6 +209,12 @@ def replay(data: ImportData, steps: Sequence[Step]) -> Replay:
     )
 
 
+def run_baseline(data: ImportData, steps: Sequence[Step], k: int) -> Replay:
+    """The run baseline of run `k` (AD-5): the replay of the steps with round < `k`, i.e.
+    the planning copy as it was when run `k` was made."""
+    return replay(data, [step for step in steps if step.round < k])
+
+
 def planning_copy(data: ImportData, state: PlanState) -> PlanningCopy:
     """The plan as it is now: the import with the plan's steps replayed."""
     return replay(data, state.steps).copy
