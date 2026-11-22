@@ -71,7 +71,12 @@ export function aisleFromParams(params: LocationParams, aisles: readonly { aisle
   return params.aisle !== undefined && aisles.some((entry) => entry.aisle === params.aisle) ? params.aisle : ALL_AISLES;
 }
 
-export const LOCATION_COLUMNS: readonly DataTableColumn<LocationRow>[] = [
+/** Opens a part's panel; `opener` gets the focus back when the panel closes. */
+export type OpenPart = (part: string, opener: HTMLElement | null) => void;
+
+/** The standard columns; with `onOpenPart`, each part number in the Parts cell opens its panel. */
+export function locationColumns(onOpenPart?: OpenPart): readonly DataTableColumn<LocationRow>[] {
+  return [
   {
     key: "location",
     header: "Location",
@@ -94,7 +99,18 @@ export const LOCATION_COLUMNS: readonly DataTableColumn<LocationRow>[] = [
         <ul className="flex flex-col gap-0.5">
           {row.contents.map((content) => (
             <li key={content.part} className="flex flex-wrap items-baseline gap-x-2">
-              <span className="type-code-table text-ink">{content.part}</span>
+              {onOpenPart ? (
+                <button
+                  type="button"
+                  data-open-part={content.part}
+                  onClick={(event) => onOpenPart(content.part, event.currentTarget)}
+                  className="rounded-sm type-code-table text-ink underline underline-offset-2"
+                >
+                  {content.part}
+                </button>
+              ) : (
+                <span className="type-code-table text-ink">{content.part}</span>
+              )}
               <span className="text-ink">{content.description}</span>
               <span className="type-meta text-ink-secondary">stock {formatNumber(content.stock)}</span>
             </li>
@@ -104,7 +120,10 @@ export const LOCATION_COLUMNS: readonly DataTableColumn<LocationRow>[] = [
         <span className="text-ink-secondary">None</span>
       ),
   },
-];
+  ];
+}
+
+export const LOCATION_COLUMNS = locationColumns();
 
 export function ToggleGroup<V extends string>({
   label,
@@ -147,6 +166,7 @@ export function LocationsTable({
   onFiltersChange,
   extraColumns = [],
   focusKey,
+  onOpenPart,
 }: {
   view: LocationsView;
   filters: LocationFilters;
@@ -155,6 +175,8 @@ export function LocationsTable({
   extraColumns?: readonly DataTableColumn<LocationRow>[];
   /** A row to focus and scroll into view (UX-DR9). */
   focusKey?: string;
+  /** When set, each part number in the Parts cell is a button that opens the part panel (UX-DR24). */
+  onOpenPart?: OpenPart;
 }) {
   const rows = filterLocations(view.locations, filters);
   const aisleSelect = useId();
@@ -197,7 +219,7 @@ export function LocationsTable({
       </p>
       <DataTable
         label="Locations"
-        columns={extraColumns.length > 0 ? [...LOCATION_COLUMNS, ...extraColumns] : LOCATION_COLUMNS}
+        columns={[...(onOpenPart ? locationColumns(onOpenPart) : LOCATION_COLUMNS), ...extraColumns]}
         rows={rows}
         rowKey={(row) => row.location.code}
         focusKey={focusKey}

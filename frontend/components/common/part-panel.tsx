@@ -12,13 +12,16 @@
 // static route would need a `<Suspense>` boundary around the page.
 
 import { useSearchParams } from "next/navigation";
-import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef } from "react";
+import { type KeyboardEvent, type ReactNode, type Ref, useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { CLASS_LABELS, ClassGlyph } from "@/components/common/class-glyph";
+import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
 import { LocationChip } from "@/components/common/location-chip";
+import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
 import { type ClassThreshold, type PartDetail, usePlanPart } from "@/lib/api/plans";
+import { usePlanCommands } from "@/lib/commands";
 import { formatNumber } from "@/lib/format";
 import type { StepKey } from "@/lib/view-state/steps";
 import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
@@ -26,6 +29,39 @@ import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/vi
 export const NO_CURRENT_LOCATION = "No current location (no stock above zero)";
 export const NO_PICK_GROUPS = "No pick groups";
 export const CLOSE_LABEL = "Close part panel";
+export const MANUAL_MOVE_LABEL = "Manual move…";
+
+/** Why Manual move… cannot open: no current location first, else the command flow's reason. */
+export function manualMoveReason(detail: Pick<PartDetail, "current_location">, savingReason?: string): string | undefined {
+  return detail.current_location === null ? NO_CURRENT_LOCATION : savingReason;
+}
+
+/** The panel's Manual move… button (FR-33, UX-DR24): disabled with its reason, never hidden. */
+export function ManualMoveButton({
+  detail,
+  savingReason,
+  onClick,
+  buttonRef,
+}: {
+  detail: Pick<PartDetail, "current_location">;
+  savingReason?: string;
+  onClick: () => void;
+  buttonRef?: Ref<HTMLButtonElement>;
+}) {
+  return (
+    <Button
+      ref={buttonRef}
+      variant="tertiary"
+      size="md"
+      className="w-fit"
+      data-manual-move=""
+      disabledReason={manualMoveReason(detail, savingReason)}
+      onClick={onClick}
+    >
+      {MANUAL_MOVE_LABEL}
+    </Button>
+  );
+}
 
 /** "24 or more", "6–23", "1–5" or "0", from the server's limits (never hard-coded). */
 export function thresholdText(threshold: ClassThreshold): string {
@@ -195,12 +231,33 @@ export function PartPanelFrame({
   );
 }
 
+/** Manual move… and its dialog, under the facts (Story 4.3). Opening the dialog keeps the panel. */
+function PartMoveAction({ planId, detail }: { planId: string; detail: PartDetail }) {
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const { disabledReason } = usePlanCommands(planId);
+  return (
+    <>
+      <ManualMoveButton
+        detail={detail}
+        savingReason={disabledReason}
+        onClick={() => setOpen(true)}
+        buttonRef={button}
+      />
+      <ManualMoveDialog planId={planId} detail={detail} open={open} onOpenChange={setOpen} returnFocusRef={button} />
+    </>
+  );
+}
+
 export function PartPanel({ planId, part, onClose }: { planId: string; part: string; onClose: () => void }) {
   const detail = usePlanPart(planId, part);
   return (
     <PartPanelFrame part={part} onClose={onClose}>
       {detail.data ? (
-        <PartFacts planId={planId} detail={detail.data} />
+        <>
+          <PartFacts planId={planId} detail={detail.data} />
+          <PartMoveAction planId={planId} detail={detail.data} />
+        </>
       ) : showsLoadError(detail.error) ? (
         <PlanLoadError message={detail.error.message} />
       ) : (

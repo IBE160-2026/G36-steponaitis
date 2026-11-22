@@ -289,7 +289,7 @@ action_items:
       proxy take the AD-12 retry path, with a Playwright test that blocks the command
       route and sees Trying again"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-20-refetch-plan-queries-below-the-highest-v"
     epic: 3
@@ -304,7 +304,7 @@ action_items:
     action: "Build the command inside send try block and add a UUID fallback for non-secure
       contexts so pending cannot stick"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-22-retry-or-map-sqlite-busy-locked-errors-t"
     epic: 3
@@ -318,14 +318,14 @@ action_items:
     action: "Add a Playwright test where a command is applied, its response replaced
       by a 503, and the retry returns the stored result with one version bump"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-24-show-the-best-location-marks-changed-toa"
     epic: 3
     action: "Show the Best-location marks changed toast only when the command response
       has events"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-25-decide-whether-set_best_mark-rejects-mar"
     epic: 3

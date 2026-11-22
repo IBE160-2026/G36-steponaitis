@@ -5,7 +5,8 @@
 // and per-aisle occupancy lines from the server. Filters only read server flags; occupancy is
 // always words and counts, never colour alone (the table is components/common/locations-table).
 // `?aisle=&loc=` sets the aisle filter and focuses the row (UX-DR9, through lib/view-state). The
-// header's search field opens a part's panel (`?part=`, UX-DR24) or another location.
+// header's search field opens a part's panel (`?part=`, UX-DR24) or another location; so does a part
+// number in a row's Parts cell (Story 4.3).
 
 import { useSearchParams } from "next/navigation";
 import { type ReactNode, useState } from "react";
@@ -16,6 +17,7 @@ import {
   LocationsTable,
   NO_FILTERS,
   occupancyLine,
+  type OpenPart,
 } from "@/components/common/locations-table";
 import { usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
@@ -28,12 +30,15 @@ export function LocationsView({
   params = {},
   onAisleChange,
   search,
+  onOpenPart,
 }: {
   view: LocationsData;
   params?: LocationParams;
   onAisleChange?: (aisle: string) => void;
   /** The header's search field. */
   search?: ReactNode;
+  /** Opens a part's panel from a part number in the Parts cell (UX-DR24). */
+  onOpenPart?: OpenPart;
 }) {
   const fromUrl = aisleFromParams(params, view.aisles);
   const [filters, setFilters] = useState<LocationFilters>({ ...NO_FILTERS, aisle: fromUrl });
@@ -69,7 +74,13 @@ export function LocationsView({
           ))}
         </ul>
       </div>
-      <LocationsTable view={view} filters={filters} onFiltersChange={changeFilters} focusKey={params.loc} />
+      <LocationsTable
+        view={view}
+        filters={filters}
+        onFiltersChange={changeFilters}
+        focusKey={params.loc}
+        onOpenPart={onOpenPart}
+      />
     </div>
   );
 }
@@ -87,6 +98,7 @@ export function LocationsPage({ planId }: { planId: string; params?: LocationPar
           view={locations.data}
           params={params}
           search={<SearchField planId={planId} onOpenPart={panel.open} />}
+          onOpenPart={panel.open}
           onAisleChange={(aisle) =>
             window.history.replaceState(null, "", planStepHref(planId, "locations", { aisle, part: panel.part }))
           }

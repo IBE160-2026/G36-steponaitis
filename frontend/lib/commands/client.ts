@@ -6,8 +6,8 @@
 
 import type { Query, QueryClient } from "@tanstack/react-query";
 
-import { ApiError, internalError, parseErrorBody } from "@/lib/api/errors";
-import { type Command, type CommandResult, planRootKey } from "@/lib/api/plans";
+import { ApiError, internalError, isErrorEnvelope, parseErrorBody } from "@/lib/api/errors";
+import { type Command, type CommandEvent, type CommandResult, planRootKey } from "@/lib/api/plans";
 import { handleQueryError, type QueryErrorEffects } from "@/lib/api/query-errors";
 
 /** A command as a caller builds it; the flow adds `command_id` and `base_version`. */
@@ -15,6 +15,8 @@ export type CommandBody = DistributiveOmit<Command, "command_id" | "base_version
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 export type SendOutcome = "confirmed" | "dropped" | "busy";
+/** The outcome plus the confirmed response's events (`[]` unless confirmed). */
+export type SendResult = { outcome: SendOutcome; events: CommandEvent[] };
 export type SaveNotice = null | "retrying" | "failed";
 export type PlanCommandState = { pending: boolean; notice: SaveNotice; saved: boolean };
 
@@ -33,6 +35,22 @@ export function noticeText(notice: SaveNotice): string | null {
   if (notice === "retrying") return RETRYING_TEXT;
   if (notice === "failed") return FAILED_TEXT;
   return null;
+}
+
+function hex(bytes: Uint8Array, from: number, to: number): string {
+  return Array.from(bytes.subarray(from, to), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * A new `command_id`: `crypto.randomUUID()` where it exists (secure contexts only), else an
+ * RFC 4122 version 4 UUID built from `crypto.getRandomValues`.
+ */
+export function newCommandId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10xx
+  return `${hex(bytes, 0, 4)}-${hex(bytes, 4, 6)}-${hex(bytes, 6, 8)}-${hex(bytes, 8, 10)}-${hex(bytes, 10, 16)}`;
 }
 
 export const IDLE_STATE: PlanCommandState = Object.freeze({ pending: false, notice: null, saved: false });
@@ -79,7 +97,7 @@ export class CommandClient {
     this.queryClient = queryClient;
     this.effects = effects;
     this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-    this.randomId = options.randomId ?? (() => crypto.randomUUID());
+    this.randomId = options.randomId ?? newCommandId;
   }
 
   /** Swap the injected effects (the router may change between renders). */
@@ -99,27 +117,38 @@ export class CommandClient {
   }
 
   async send(planId: string, body: CommandBody): Promise<SendOutcome> {
-    if (this.getState(planId).pending) return "busy";
+    return (await this.sendWithEvents(planId, body)).outcome;
+  }
+
+  /** Like `send`, plus the events of the confirmed response (`[]` for any other outcome). */
+  async sendWithEvents(planId: string, body: CommandBody): Promise<SendResult> {
+    if (this.getState(planId).pending) return { outcome: "busy", events: [] };
     // A new send clears a previous "failed" notice when it starts; the change is not saved yet.
     this.update(planId, { pending: true, notice: null, saved: false });
-    const command = {
-      ...body,
-      command_id: this.randomId(),
-      base_version: baseVersion(this.queryClient, planId),
-    } as Command;
     try {
+      // Built inside the `try`: a failing id or version read drops the send instead of leaving it pending.
+      let command: Command;
+      try {
+        command = {
+          ...body,
+          command_id: this.randomId(),
+          base_version: baseVersion(this.queryClient, planId),
+        } as Command;
+      } catch {
+        return { outcome: await this.fail(planId), events: [] };
+      }
       let outcome: PostOutcome;
       for (let attempt = 0; ; attempt++) {
         outcome = await this.post(planId, command);
         if (outcome !== "transient") break;
-        if (attempt === RETRY_DELAYS_MS.length) return await this.fail(planId);
+        if (attempt === RETRY_DELAYS_MS.length) return { outcome: await this.fail(planId), events: [] };
         this.update(planId, { notice: "retrying" });
         await this.sleep(RETRY_DELAYS_MS[attempt]);
       }
-      if (outcome instanceof ApiError) return await this.reject(planId, outcome);
+      if (outcome instanceof ApiError) return { outcome: await this.reject(planId, outcome), events: [] };
       await this.refetchConsistent(planId, outcome.ok.version);
       this.update(planId, { pending: false, notice: null, saved: true });
-      return "confirmed";
+      return { outcome: "confirmed", events: Array.isArray(outcome.ok.events) ? outcome.ok.events : [] };
     } finally {
       // Whatever happened, the plan is no longer waiting on this command.
       if (this.getState(planId).pending) this.update(planId, { pending: false });
@@ -140,7 +169,13 @@ export class CommandClient {
     if (TRANSIENT_STATUSES.has(response.status)) return "transient";
     // A body that cannot be read (or a 2xx that is not JSON) goes the 500 way: drop, refetch, failed.
     try {
-      if (!response.ok) return parseErrorBody(response.status, await response.text());
+      if (!response.ok) {
+        const text = await response.text();
+        // The backend answers every 500 with the AD-11 envelope; a bare 500 is the `/api` proxy
+        // failing to reach it, and is retried like a network error (idempotent per `command_id`).
+        if (response.status === 500 && !isErrorEnvelope(text)) return "transient";
+        return parseErrorBody(response.status, text);
+      }
       const result = (await response.json()) as CommandResult;
       if (typeof result?.version !== "number") return internalError(500);
       return { ok: result };

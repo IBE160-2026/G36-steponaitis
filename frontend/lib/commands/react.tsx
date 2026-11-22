@@ -22,6 +22,7 @@ import {
   type PlanCommandState,
   SAVING_REASON,
   type SendOutcome,
+  type SendResult,
 } from "@/lib/commands/client";
 
 const CommandsContext = createContext<CommandClient | null>(null);
@@ -49,6 +50,8 @@ export function useCommandClient(): CommandClient {
 
 export type PlanCommands = PlanCommandState & {
   send: (body: CommandBody) => Promise<SendOutcome>;
+  /** `send` plus the confirmed response's events (for toasts that name what changed). */
+  sendWithEvents: (body: CommandBody) => Promise<SendResult>;
   /** Pass to every plan-changing `Button` as `disabledReason`. */
   disabledReason: string | undefined;
 };
@@ -59,7 +62,8 @@ export function usePlanCommands(planId: string): PlanCommands {
   const getState = useCallback(() => client.getState(planId), [client, planId]);
   const state = useSyncExternalStore(subscribe, getState, getState);
   const send = useCallback((body: CommandBody) => client.send(planId, body), [client, planId]);
-  return { ...state, send, disabledReason: state.pending ? SAVING_REASON : undefined };
+  const sendWithEvents = useCallback((body: CommandBody) => client.sendWithEvents(planId, body), [client, planId]);
+  return { ...state, send, sendWithEvents, disabledReason: state.pending ? SAVING_REASON : undefined };
 }
 
 type Versioned = { version: number };

@@ -7,7 +7,7 @@ import { AppShell } from "@/components/common/app-shell";
 import { PlanPlate } from "@/components/common/app-shell/plan-plate";
 import { SaveStatusView } from "@/components/common/app-shell/save-status";
 import { Button } from "@/components/common/button";
-import { INTERNAL_MESSAGE } from "@/lib/api/errors";
+import { INTERNAL_MESSAGE, isErrorEnvelope } from "@/lib/api/errors";
 import { planLocationsKey, type PlanSummary, planSummaryKey } from "@/lib/api/plans";
 import { NEW_PLAN_HREF, PLAN_DELETED } from "@/lib/api/query-errors";
 import {
@@ -18,6 +18,7 @@ import {
   IDLE_STATE,
   isConsistent,
   latestConsistent,
+  newCommandId,
   noticeText,
   RETRY_DELAYS_MS,
   RETRYING_TEXT,
@@ -303,6 +304,90 @@ describe("ad12 retries and failures", () => {
     expect(h.summaryFn).toHaveBeenCalledTimes(1);
     expect(h.client.getState(PLAN).notice).toBe("failed");
     expect(h.effects.notify).not.toHaveBeenCalled();
+  });
+
+  it("ad12_proxy_500_without_envelope_is_transient", async () => {
+    // Retro 19: the backend's 500s carry the AD-11 envelope; a bare 500 is the `/api` proxy.
+    const h = setup();
+    const fetchMock = mockFetch(
+      new Response("Internal Server Error", { status: 500, headers: { "Content-Type": "text/plain" } }),
+      json(200, { version: 5, events: [] }),
+    );
+    expect(await h.client.send(PLAN, MARK_A)).toBe("confirmed");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(h.delays).toEqual([1000]);
+    expect(bodyOf(fetchMock, 1)).toEqual(bodyOf(fetchMock, 0));
+    expect(h.notices).toContain("retrying");
+    expect(h.effects.notify).not.toHaveBeenCalled();
+  });
+
+  it("ad12_proxy_500_without_envelope_exhausted_shows_failed", async () => {
+    const h = setup();
+    const bare = () => new Response("", { status: 500 });
+    const fetchMock = mockFetch(bare(), bare(), bare(), bare(), bare());
+    expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(h.delays).toEqual([...RETRY_DELAYS_MS]);
+    expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: "failed", saved: false });
+  });
+
+  it("ad12_envelope_500_is_not_retried", async () => {
+    const h = setup();
+    const fetchMock = mockFetch(envelope(500, "internal", INTERNAL_MESSAGE));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(h.delays).toEqual([]);
+    expect(h.client.getState(PLAN).notice).toBe("failed");
+  });
+
+  it("ad12_is_error_envelope_only_for_the_ad11_shape", () => {
+    expect(isErrorEnvelope(JSON.stringify({ error: { code: "internal", message: "x", details: [] } }))).toBe(true);
+    expect(isErrorEnvelope("Internal Server Error")).toBe(false);
+    expect(isErrorEnvelope("")).toBe(false);
+    expect(isErrorEnvelope(JSON.stringify({ error: "boom" }))).toBe(false);
+    expect(isErrorEnvelope(JSON.stringify({ error: { code: "", message: "x" } }))).toBe(false);
+  });
+
+  it("ad12_command_id_failure_does_not_stick_pending", async () => {
+    // Retro 21: the command is built inside the `try`, so a throwing id generator drops the send.
+    const queryClient = new QueryClient();
+    const fetchMock = mockFetch();
+    const client = new CommandClient(queryClient, { notify: vi.fn(), navigate: vi.fn() }, {
+      randomId: () => {
+        throw new Error("no crypto");
+      },
+    });
+    expect(await client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(client.getState(PLAN)).toEqual({ pending: false, notice: "failed", saved: false });
+    expect(await client.sendWithEvents(PLAN, MARK_A)).toEqual({ outcome: "dropped", events: [] });
+  });
+
+  it("ad12_uuid_fallback_without_random_uuid", () => {
+    const real = globalThis.crypto;
+    // A non-secure context (plain http on a LAN address) has no `crypto.randomUUID`.
+    vi.stubGlobal("crypto", { getRandomValues: real.getRandomValues.bind(real) });
+    const ids = new Set(Array.from({ length: 20 }, () => newCommandId()));
+    expect(ids.size).toBe(20);
+    for (const id of ids) {
+      expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    }
+  });
+
+  it("fr33_send_with_events_returns_events", async () => {
+    const h = setup();
+    const event = {
+      type: "move_made",
+      move_number: 1,
+      part: "9300",
+      from_location: "B-01-03-02",
+      to_location: "C-01-01-01",
+      rule: "manual",
+      round: 0,
+    } as const;
+    mockFetch(json(200, { version: 5, events: [event] }), envelope(409, "command_rejected", "No."));
+    expect(await h.client.sendWithEvents(PLAN, MARK_A)).toEqual({ outcome: "confirmed", events: [event] });
+    expect(await h.client.sendWithEvents(PLAN, MARK_A)).toEqual({ outcome: "dropped", events: [] });
   });
 
   it("ad12_plan_not_found_uses_the_shared_handling_without_refetch", async () => {

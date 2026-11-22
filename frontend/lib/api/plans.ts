@@ -2,8 +2,8 @@
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
 // used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
-// pick groups table (Story 2.5), and the part detail and search (Story 2.6). All are GETs and
-// never change the plan (FR-9).
+// pick groups table (Story 2.5), the part detail and search (Story 2.6), and the manual move
+// preview (Story 4.3). All are GETs and never change the plan (FR-9).
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -38,6 +38,13 @@ export type BestMark = LocationsView["marks"][number];
 export type Command =
   operations["post_command_api_plans__plan_id__commands_post"]["requestBody"]["content"]["application/json"];
 export type CommandResult = components["schemas"]["CommandResult"];
+/** One event of a confirmed command (`mark_set`, `move_made`, `moves_combined`, …). */
+export type CommandEvent = CommandResult["events"][number];
+/** The server's read-only preview of a manual move (Story 4.2, FR-33/FR-34). */
+export type MovePreview = components["schemas"]["MovePreview"];
+/** What the previewed move does: `new`, `adds_to_stock`, `combines_with(n)` or `removes_move(n)`. */
+export type MoveEffect = NonNullable<MovePreview["effect"]>;
+export type TargetPart = components["schemas"]["TargetPart"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -68,6 +75,10 @@ export function planPartKey(planId: string, part: string) {
 
 export function planSearchKey(planId: string, q: string) {
   return [...planRootKey(planId), "search", q] as const;
+}
+
+export function planMovePreviewKey(planId: string, part: string, from: string, to: string) {
+  return [...planRootKey(planId), "move-preview", part, from, to] as const;
 }
 
 async function getJson<T>(url: string): Promise<T> {
@@ -135,6 +146,27 @@ export function usePlanSearch(planId: string, q: string) {
     queryKey: planSearchKey(planId, trimmed),
     queryFn: () => fetchPlanSearch(planId, trimmed),
     enabled: trimmed !== "",
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function fetchMovePreview(planId: string, part: string, from: string, to: string): Promise<MovePreview> {
+  return getJson<MovePreview>(
+    `/api/plans/${encodeURIComponent(planId)}/moves/preview?${new URLSearchParams({ part, from, to })}`,
+  );
+}
+
+/**
+ * The preview of moving `part` from `from` to `to` (FR-33, FR-34). Runs only with a from-location
+ * and a non-blank to-location, keyed and fetched on the trimmed `to`; the previous preview stays
+ * while the next one loads. Under `['plan', planId]`, so a confirmed command refetches it.
+ */
+export function useMovePreview(planId: string, part: string, from: string, to: string) {
+  const trimmed = to.trim();
+  return useQuery({
+    queryKey: planMovePreviewKey(planId, part, from, trimmed),
+    queryFn: () => fetchMovePreview(planId, part, from, trimmed),
+    enabled: trimmed !== "" && from !== "",
     placeholderData: keepPreviousData,
   });
 }

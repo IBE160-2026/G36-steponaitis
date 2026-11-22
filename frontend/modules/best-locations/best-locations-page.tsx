@@ -23,7 +23,7 @@ import {
   usePlanLocations,
   usePlanSummary,
 } from "@/lib/api/plans";
-import { type CommandBody, type SendOutcome, useConsistentPlanData, usePlanCommands } from "@/lib/commands";
+import { type CommandBody, type SendResult, useConsistentPlanData, usePlanCommands } from "@/lib/commands";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
 import { bestCountsLine, hasLocationMark, levelsInAisle, markLabel, sameMark } from "./marks";
 
@@ -73,15 +73,18 @@ export function levelAction(level: string, scope: LevelScope, aisle: string, mar
   return { mark, text: `Mark level ${level} ${where}`, reason: alreadyMarked(marks, mark) };
 }
 
-/** Sends one mark change; only a confirmed change shows the toast ("dropped"/"busy" show none). */
+/**
+ * Sends one mark change; the toast shows only for a confirmed change that produced events
+ * ("dropped"/"busy" and a confirmed no-op show none).
+ */
 export async function sendMarkChange(
-  send: (body: CommandBody) => Promise<SendOutcome>,
+  send: (body: CommandBody) => Promise<SendResult>,
   body: CommandBody,
   notify: (message: string) => void = showToast,
-): Promise<SendOutcome> {
-  const outcome = await send(body);
-  if (outcome === "confirmed") notify(MARKS_CHANGED);
-  return outcome;
+): Promise<SendResult> {
+  const result = await send(body);
+  if (result.outcome === "confirmed" && result.events.length > 0) notify(MARKS_CHANGED);
+  return result;
 }
 
 export function BestLocationsView({
@@ -96,7 +99,7 @@ export function BestLocationsView({
   view: LocationsData;
   /** "Saving the last change…" while a command is unconfirmed (lib/commands). */
   disabledReason?: string;
-  onSend: (body: CommandBody) => Promise<SendOutcome>;
+  onSend: (body: CommandBody) => Promise<SendResult>;
 }) {
   // Mounted only once the views have loaded (client side), so reading storage here is safe.
   const [mode, setMode] = useState<MarkingMode>(() => readMode(planId));
@@ -240,7 +243,7 @@ export function BestLocationsPage({ planId }: { planId: string }) {
   const summary = usePlanSummary(planId);
   const locations = usePlanLocations(planId);
   const data = useConsistentPlanData([summary.data, locations.data]);
-  const { send, disabledReason } = usePlanCommands(planId);
+  const { sendWithEvents, disabledReason } = usePlanCommands(planId);
   if (data) {
     const [summaryData, view] = data;
     return (
@@ -249,7 +252,7 @@ export function BestLocationsPage({ planId }: { planId: string }) {
         summary={summaryData}
         view={view}
         disabledReason={disabledReason}
-        onSend={send}
+        onSend={sendWithEvents}
       />
     );
   }

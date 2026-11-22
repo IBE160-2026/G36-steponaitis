@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { nextRadioIndex, SegmentedControl } from "@/components/common/segmented-control";
-import type { BestMark, LocationRow, LocationsView, PlanSummary } from "@/lib/api/plans";
+import type { BestMark, CommandEvent, LocationRow, LocationsView, PlanSummary } from "@/lib/api/plans";
 import { SAVING_REASON } from "@/lib/commands";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
 import {
@@ -60,7 +60,7 @@ function render(props: { marks?: BestMark[]; locations?: LocationRow[]; disabled
       summary={SUMMARY}
       view={view(props.marks, props.locations)}
       disabledReason={props.disabledReason}
-      onSend={async () => "confirmed"}
+      onSend={async () => ({ outcome: "confirmed", events: [] })}
     />,
   );
 }
@@ -259,14 +259,18 @@ describe("uxdr best locations step", () => {
 
   it("fr21_toast_only_after_a_confirmed_change", async () => {
     const body = { type: "set_best_mark", mark: AISLE_A } as const;
-    for (const [outcome, toasts] of [
-      ["confirmed", [MARKS_CHANGED]],
-      ["dropped", []],
-      ["busy", []],
+    const event: CommandEvent = { type: "mark_set", mark: AISLE_A };
+    for (const [outcome, events, toasts] of [
+      ["confirmed", [event], [MARKS_CHANGED]],
+      // Retro 24: a confirmed no-op (no events) changed nothing, so no toast.
+      ["confirmed", [], []],
+      ["dropped", [], []],
+      ["busy", [], []],
     ] as const) {
       const notify = vi.fn();
-      const send = vi.fn(async () => outcome);
-      expect(await sendMarkChange(send, body, notify)).toBe(outcome);
+      const result = { outcome, events: [...events] };
+      const send = vi.fn(async () => result);
+      expect(await sendMarkChange(send, body, notify)).toBe(result);
       expect(send).toHaveBeenCalledWith(body);
       expect(notify.mock.calls.map(([message]) => message)).toEqual(toasts);
     }

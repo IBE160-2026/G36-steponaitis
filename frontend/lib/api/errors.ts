@@ -28,17 +28,31 @@ export function internalError(status = 0): ApiError {
   return new ApiError(status, "internal", INTERNAL_MESSAGE);
 }
 
-/** Read an error response body; a body that is not the AD-11 envelope becomes `internal`. */
-export function parseErrorBody(status: number, text: string): ApiError {
+type Envelope = { code: string; message: string; details: unknown };
+
+/** The `error` member of an AD-11 envelope body, or null when `text` is not one. */
+function envelopeOf(text: string): Envelope | null {
   let body: unknown;
   try {
     body = JSON.parse(text);
   } catch {
-    return internalError(status);
+    return null;
   }
-  if (!isRecord(body) || !isRecord(body.error)) return internalError(status);
+  if (!isRecord(body) || !isRecord(body.error)) return null;
   const { code, message, details } = body.error;
-  if (typeof code !== "string" || code === "" || typeof message !== "string") return internalError(status);
-  const list = Array.isArray(details) ? details.filter(isRecord) : [];
-  return new ApiError(status, code, message, list);
+  if (typeof code !== "string" || code === "" || typeof message !== "string") return null;
+  return { code, message, details };
+}
+
+/** True when `text` is an AD-11 error envelope (the backend's; a proxy's own page is not). */
+export function isErrorEnvelope(text: string): boolean {
+  return envelopeOf(text) !== null;
+}
+
+/** Read an error response body; a body that is not the AD-11 envelope becomes `internal`. */
+export function parseErrorBody(status: number, text: string): ApiError {
+  const envelope = envelopeOf(text);
+  if (envelope === null) return internalError(status);
+  const list = Array.isArray(envelope.details) ? envelope.details.filter(isRecord) : [];
+  return new ApiError(status, envelope.code, envelope.message, list);
 }
