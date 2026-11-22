@@ -49,7 +49,10 @@ def test_fr30_apply_all_over_http(empty_tables: str) -> None:
     ) == (False, True)
     rows = view["recommendations"]
     assert [r["status"] for r in rows] == ["applied"] * 8
-    assert [r["applied"] for r in rows] == [{"move_number": n, "round": 1} for n in range(1, 9)]
+    assert [r["applied"] for r in rows] == [
+        {"move_number": n, "round": 1, "to_location": r["to_location"], "to_best": r["to_best"]}
+        for n, r in enumerate(rows, start=1)
+    ]
     state = _state(plan_id)
     assert [s.recommendation_id for s in state.steps] == [r["id"] for r in rows]
     assert {s.round for s in state.steps} == {1}

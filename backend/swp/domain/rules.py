@@ -11,7 +11,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, ConfigDict
 
-from swp.domain.analysis import Analysis, PickGroup
+from swp.domain.analysis import SLOW_MOVING_CLASSES, Analysis, PickGroup
 from swp.domain.commands import Applied, CommandContext, RunDone, RunRecommendations
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import (
@@ -115,7 +115,7 @@ def rule_2(
     candidates = {
         part: entry
         for part, entry in listed_parts(data, analysis).items()
-        if entry.movement_class in {"slow", "dead"}
+        if entry.movement_class in SLOW_MOVING_CLASSES
     }
     keep = set(state.keep_marks)
     handled = {move.part for move in earlier_moves} | {entry.part for entry in earlier_no_space}
@@ -197,7 +197,7 @@ def rule_3(
         source = current_location(copy, mover)
         if source is None or _blocked(copy, analysis, state, group, mover, source, partner):
             continue
-        best = False if parts[mover].movement_class in {"slow", "dead"} else None
+        best = False if parts[mover].movement_class in SLOW_MOVING_CLASSES else None
         aisle = current_aisle(copy, partner)
         pool = _empty_pool(data, copy, state, best=best, aisle=aisle)
         target = next((code for code in pool if code not in taken), None)

@@ -3,8 +3,9 @@
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
 // with its delete (Story 6.4), the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
-// preview (Story 4.3), before/after (Story 4.6) and the recommendations view (Stories 5.5,
-// 5.7). The reads are GETs and never change the plan (FR-9); `deletePlan` is the one write here.
+// preview (Story 4.3), before/after (Story 4.6), the recommendations view (Stories 5.5,
+// 5.7) and a recommendation's other locations (Story 7.2). The reads are GETs and never
+// change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -69,6 +70,8 @@ export type RecommendationsOutdatedEvent = components["schemas"]["Recommendation
 /** `apply_all_done{applied, skipped}`: the numbers apply all applied and those it skipped, with the cause. */
 export type ApplyAllDoneEvent = components["schemas"]["ApplyAllDone"];
 export type ApplyAllSkipped = components["schemas"]["ApplyAllSkipped"];
+/** FR-31's allowed set for one recommendation, in location-code order; empty when it cannot be applied. */
+export type OtherLocationsView = components["schemas"]["OtherLocationsView"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -99,6 +102,11 @@ export function planBeforeAfterKey(planId: string) {
 
 export function planRecommendationsKey(planId: string) {
   return [...planRootKey(planId), "recommendations"] as const;
+}
+
+/** Under `planRecommendationsKey`, so the command refetch of `['plan', planId]` refreshes it. */
+export function planOtherLocationsKey(planId: string, recId: string) {
+  return [...planRecommendationsKey(planId), "other-locations", recId] as const;
 }
 
 export function planPartKey(planId: string, part: string) {
@@ -172,6 +180,21 @@ export function fetchPlanRecommendations(planId: string): Promise<Recommendation
 /** The latest run's recommendations (FR-28); under `['plan', planId]`, so a confirmed command refetches it. */
 export function usePlanRecommendations(planId: string) {
   return useQuery({ queryKey: planRecommendationsKey(planId), queryFn: () => fetchPlanRecommendations(planId) });
+}
+
+export function fetchPlanOtherLocations(planId: string, recId: string): Promise<OtherLocationsView> {
+  return getJson<OtherLocationsView>(
+    `/api/plans/${encodeURIComponent(planId)}/recommendations/${encodeURIComponent(recId)}/other-locations`,
+  );
+}
+
+/** FR-31's allowed set for `recId` from the server (AD-3); runs only while `enabled` (the listbox is open). */
+export function usePlanOtherLocations(planId: string, recId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: planOtherLocationsKey(planId, recId),
+    queryFn: () => fetchPlanOtherLocations(planId, recId),
+    enabled,
+  });
 }
 
 export function fetchPlanPart(planId: string, part: string): Promise<PartDetail> {

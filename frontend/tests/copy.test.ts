@@ -9,6 +9,12 @@ import {
   CLASS_LABELS,
   keepRemovedToast,
   keptApplyReason,
+  LOADING_LOCATIONS,
+  noOtherLocationText,
+  OTHER_LOCATION_LABEL,
+  otherLocationBestText,
+  otherLocationOptionMeta,
+  otherLocationOptionName,
   keptToast,
   MARKS_CHANGED,
   marksChangedText,
@@ -172,5 +178,41 @@ describe("fr32 keep in place copy", () => {
     expect(keptToast("0500")).toBe("0500 is kept in place. Remove the mark from the part or the Kept in place tab.");
     expect(keepRemovedToast("0500")).toBe("0500 is no longer kept in place.");
     expect(keptApplyReason("0500")).toBe("0500 is kept in place.");
+  });
+});
+
+describe("fr31 other location copy", () => {
+  it("fr31_other_location_strings", () => {
+    expect(OTHER_LOCATION_LABEL).toBe("Other location");
+    expect(LOADING_LOCATIONS).toBe("Loading locations…");
+    expect(noOtherLocationText("rule_1")).toBe("No other location fits rule 1 right now.");
+    expect(noOtherLocationText("rule_3")).toBe("No other location fits rule 3 right now.");
+    expect(otherLocationOptionMeta({ aisle: "A", level: "1" })).toBe("Aisle A · Level 1");
+    expect(otherLocationBestText(true)).toBe("BEST");
+    expect(otherLocationBestText(false)).toBe("not best");
+    expect(
+      otherLocationOptionName({
+        code: "A-01-01-04",
+        aisle: "A",
+        level: "1",
+        section: "1",
+        position: "4",
+        is_best: true,
+      }),
+    ).toBe("A-01-01-04, Aisle A · Level 1, BEST");
+  });
+
+  it("fr31_applied_toast_names_the_chosen_location", () => {
+    expect(
+      appliedToast({
+        type: "move_made",
+        move_number: 3,
+        part: "4400",
+        from_location: "A-01-03-02",
+        to_location: "C-01-03-02",
+        rule: "rule_2",
+        round: 1,
+      }),
+    ).toBe("Applied · move 3, round 1 · 4400 A-01-03-02 → C-01-03-02");
   });
 });

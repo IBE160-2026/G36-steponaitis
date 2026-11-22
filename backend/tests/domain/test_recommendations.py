@@ -310,7 +310,13 @@ def test_fr29_applied_never_revalidated(
     assert _outdated_events(events) == [(4, "marks")]
     row = _view(state, data, analysis).recommendations[0]
     assert row.status == "applied"
-    assert row.applied is not None and row.applied.model_dump() == {"move_number": 1, "round": 1}
+    assert row.applied is not None
+    assert row.applied.model_dump() == {
+        "move_number": 1,
+        "round": 1,
+        "to_location": "A-01-01-03",
+        "to_best": False,
+    }
     assert row.outdated is None
 
 

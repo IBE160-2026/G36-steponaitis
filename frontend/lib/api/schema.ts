@@ -193,6 +193,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/recommendations/{recommendation_id}/other-locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Recommendation Other Locations */
+        get: operations["get_recommendation_other_locations_api_plans__plan_id__recommendations__recommendation_id__other_locations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/search": {
         parameters: {
             query?: never;
@@ -296,13 +313,19 @@ export interface components {
         };
         /**
          * AppliedInfo
-         * @description The effective move that applied a recommendation.
+         * @description The effective move that applied a recommendation: its number, round and where it
+         *     went (the suggested location, or another one chosen with FR-31), with BEST of that
+         *     location in the replayed copy.
          */
         AppliedInfo: {
             /** Move Number */
             move_number: number;
             /** Round */
             round: number;
+            /** To Best */
+            to_best: boolean;
+            /** To Location */
+            to_location: string;
         };
         /**
          * ApplyAll
@@ -349,6 +372,29 @@ export interface components {
             cause: "moved" | "filled" | "marks" | "partner_aisle" | "kept";
             /** Number */
             number: number;
+        };
+        /**
+         * ApplyOtherLocation
+         * @description Apply one recommendation of the latest run as a move to another allowed location
+         *     (FR-31, AD-7); the recommendation itself is never edited.
+         */
+        ApplyOtherLocation: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Recommendation Id */
+            recommendation_id: string;
+            /** To Location */
+            to_location: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "apply_other_location";
         };
         /**
          * ApplyRecommendation
@@ -835,6 +881,19 @@ export interface components {
             occupied: number;
             /** Occupied Percent */
             occupied_percent: string;
+        };
+        /**
+         * OtherLocationsView
+         * @description FR-31's allowed set for one recommendation, in location-code order; empty when the
+         *     recommendation is unknown or cannot be applied.
+         */
+        OtherLocationsView: {
+            /** Locations */
+            locations: components["schemas"]["LocationRef"][];
+            /** Recommendation Id */
+            recommendation_id: string;
+            /** Version */
+            version: number;
         };
         /**
          * OutdatedInfo
@@ -1665,7 +1724,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"];
             };
         };
         responses: {
@@ -1957,6 +2016,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_recommendation_other_locations_api_plans__plan_id__recommendations__recommendation_id__other_locations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+                recommendation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtherLocationsView"];
                 };
             };
             /** @description Error */

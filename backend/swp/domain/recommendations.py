@@ -1,10 +1,12 @@
-"""Slice: recommendations after a run: applying one or all, revalidating them and their
-view (FR-28, FR-29, FR-30, AD-3, AD-7).
+"""Slice: recommendations after a run: applying one or all, applying one to another allowed
+location, revalidating them and their view (FR-28, FR-29, FR-30, FR-31, AD-3, AD-7).
 
 "Applied" is derived from the step log (a step that references the recommendation, see
 the kernel's `applied_step`, re-exported here with `latest_run`) and is never stored.
 `_check` is the one implementation of AD-7's causes; `outdated_cause`, `revalidate`,
-`apply_recommendation` and `apply_all` share it. Pure: imports only the kernel.
+`apply_recommendation`, `apply_other_location` and `apply_all` share it, and
+`other_locations` is the one implementation of FR-31's allowed set. Pure: imports only
+the kernel.
 """
 
 from collections import Counter
@@ -12,12 +14,19 @@ from typing import Annotated, Literal, assert_never, get_args
 
 from pydantic import AwareDatetime, BaseModel, Field
 
-from swp.domain.analysis import Analysis, ClassThreshold, MovementClass, class_threshold
+from swp.domain.analysis import (
+    SLOW_MOVING_CLASSES,
+    Analysis,
+    ClassThreshold,
+    MovementClass,
+    class_threshold,
+)
 from swp.domain.commands import (
     Applied,
     ApplyAll,
     ApplyAllDone,
     ApplyAllSkipped,
+    ApplyOtherLocation,
     ApplyRecommendation,
     CommandContext,
     Event,
@@ -26,8 +35,9 @@ from swp.domain.commands import (
 )
 from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
-from swp.domain.ordering import part_number_order
+from swp.domain.ordering import location_code_order, part_number_order
 from swp.domain.planning import (
+    LocationRef,
     Replay,
     StepFold,
     aisle_of,
@@ -35,10 +45,13 @@ from swp.domain.planning import (
     applied_step,
     current_aisle,
     current_location,
+    fits_rule_target,
     is_best,
     is_empty,
     latest_run,
+    location_ref,
     replay,
+    run_baseline,
 )
 from swp.domain.state import (
     NoSpace,
@@ -54,19 +67,24 @@ CAUSE_ORDER: tuple[OutdatedCause, ...] = get_args(OutdatedCause)
 """AD-7's check order: the first true cause wins."""
 
 
+def _movement_class(analysis: Analysis, part: str) -> MovementClass | None:
+    facts = analysis.parts.get(part)
+    return facts.movement_class if facts is not None else None
+
+
 def _marks_fail(rec: Recommendation, analysis: Analysis, from_best: bool, to_best: bool) -> bool:
-    """True when a mark condition of the recommendation's rule no longer holds."""
+    """True when a mark condition of the recommendation's rule no longer holds: the part
+    must start outside best locations for rules 1 and 3 and inside them for rule 2, and the
+    to-location must fit the rule (`fits_rule_target`)."""
     match rec.rule:
-        case "rule_1":
-            return not to_best or from_best
+        case "rule_1" | "rule_3":
+            from_fails = from_best
         case "rule_2":
-            return not from_best or to_best
-        case "rule_3":
-            part = analysis.parts.get(rec.part)
-            slow = part is not None and part.movement_class in ("slow", "dead")
-            return from_best or (slow and to_best)
+            from_fails = not from_best
         case _:
             assert_never(rec.rule)
+    movement_class = _movement_class(analysis, rec.part)
+    return from_fails or not fits_rule_target(rec.rule, movement_class, to_best)
 
 
 def _check(
@@ -146,21 +164,21 @@ def revalidate(
     return Applied(state=state.model_copy(update={"runs": runs}), events=events)
 
 
-def apply_recommendation(
-    state: PlanState,
-    command: ApplyRecommendation,
-    _ctx: CommandContext,
+def _applicable(
     data: ImportData,
     analysis: Analysis,
+    state: PlanState,
+    recommendation_id: str,
     replayed: Replay | None = None,
-) -> Applied:
-    """Append the recommendation's move with its rule and its run's round (FR-30), or raise
-    `command_rejected` with the plan unchanged (AD-7). `replayed`, when given, is the
-    replay of the state's steps."""
+) -> tuple[Run, Recommendation]:
+    """The latest run and its recommendation `recommendation_id` when it can be applied, or
+    raise `command_rejected` for the first check that fails, in order: not in the latest
+    run, already applied, outdated (stored, or a cause of AD-7 now holds), kept in place.
+    The one implementation of the checks of `apply` and `apply_other_location`."""
     latest = latest_run(state)
     rec = None
     if latest is not None:
-        rec = next((r for r in latest.recommendations if r.id == command.recommendation_id), None)
+        rec = next((r for r in latest.recommendations if r.id == recommendation_id), None)
     if latest is None or rec is None:
         raise DomainError("command_rejected", "This recommendation is not in the latest run.")
     if applied_step(state, rec.id) is not None:
@@ -174,16 +192,22 @@ def apply_recommendation(
         )
     if rec.part in state.keep_marks:
         raise DomainError("command_rejected", f"{rec.part} is kept in place.")
+    return latest, rec
+
+
+def _append_applied(state: PlanState, run: Run, rec: Recommendation, to_location: str) -> Applied:
+    """Append the recommendation's move to `to_location` with its rule, id and its run's
+    round, and emit `move_made`."""
     new_state = append_step(
         state,
         part=rec.part,
         from_location=rec.from_location,
-        to_location=rec.to_location,
+        to_location=to_location,
         rule=rec.rule,
         recommendation_id=rec.id,
     )
     step = new_state.steps[-1]
-    assert step.round == latest.round, f"Step round {step.round} is not run round {latest.round}."
+    assert step.round == run.round, f"Step round {step.round} is not run round {run.round}."
     event = MoveMade(
         move_number=step.move_number,
         part=step.part,
@@ -193,6 +217,101 @@ def apply_recommendation(
         round=step.round,
     )
     return Applied(state=new_state, events=[event])
+
+
+def apply_recommendation(
+    state: PlanState,
+    command: ApplyRecommendation,
+    _ctx: CommandContext,
+    data: ImportData,
+    analysis: Analysis,
+    replayed: Replay | None = None,
+) -> Applied:
+    """Append the recommendation's move with its rule and its run's round (FR-30), or raise
+    `command_rejected` with the plan unchanged (AD-7). `replayed`, when given, is the
+    replay of the state's steps."""
+    run, rec = _applicable(data, analysis, state, command.recommendation_id, replayed)
+    return _append_applied(state, run, rec, rec.to_location)
+
+
+def _allowed_locations(
+    data: ImportData,
+    analysis: Analysis,
+    state: PlanState,
+    run: Run,
+    rec: Recommendation,
+    replayed: Replay,
+) -> list[str]:
+    """FR-31's allowed set of an applicable `rec` of `run`, in location-code order."""
+    copy = replayed.copy
+    aisle: str | None = None
+    if rec.rule == "rule_3":
+        aisle = (
+            current_aisle(copy, rec.partner)
+            if rec.partner is not None
+            else aisle_of(copy, rec.to_location)
+        )
+        if aisle is None:
+            return []
+    baseline = run_baseline(data, state.steps, run.round).copy
+    virtual = set(data.virtual_locations)
+    movement_class = _movement_class(analysis, rec.part)
+    return location_code_order(
+        code
+        for code in copy.locations
+        if code != rec.to_location
+        and code not in virtual
+        and (aisle is None or aisle_of(copy, code) == aisle)
+        and is_empty(copy, code)
+        and is_empty(baseline, code)
+        and fits_rule_target(rec.rule, movement_class, is_best(copy, code, state.best_marks))
+    )
+
+
+def other_locations(
+    data: ImportData,
+    analysis: Analysis,
+    state: PlanState,
+    recommendation_id: str,
+    replayed: Replay | None = None,
+) -> list[str]:
+    """FR-31's allowed set for `recommendation_id`, in location-code order: the locations
+    that are empty in the planning copy now, were empty when the run was made (its run
+    baseline), are not virtual and not the suggested location, and fit the rule with the
+    best marks judged on the copy now: rule 1 best, rule 2 not best, rule 3 in the
+    partner's current aisle and not best for a slow-moving or dead part. Empty when the
+    recommendation cannot be applied (not in the latest run, applied, outdated or kept).
+    The one implementation: the listbox and `apply_other_location` both use it.
+    `replayed`, when given, is the replay of the state's steps."""
+    if replayed is None:
+        replayed = replay(data, state.steps)
+    try:
+        run, rec = _applicable(data, analysis, state, recommendation_id, replayed)
+    except DomainError:
+        return []
+    return _allowed_locations(data, analysis, state, run, rec, replayed)
+
+
+def apply_other_location(
+    state: PlanState,
+    command: ApplyOtherLocation,
+    _ctx: CommandContext,
+    data: ImportData,
+    analysis: Analysis,
+) -> Applied:
+    """Append the recommendation's move to the chosen allowed location with the
+    recommendation's rule, id and its run's round (FR-31); the stored recommendation is
+    never changed. Raise `command_rejected` with the plan unchanged, with `apply`'s
+    messages, or when the location is not in `other_locations` (AD-7)."""
+    replayed = replay(data, state.steps)
+    run, rec = _applicable(data, analysis, state, command.recommendation_id, replayed)
+    allowed = _allowed_locations(data, analysis, state, run, rec, replayed)
+    if command.to_location not in allowed:
+        raise DomainError(
+            "command_rejected",
+            f"{command.to_location} is not an allowed location for recommendation #{rec.number}.",
+        )
+    return _append_applied(state, run, rec, command.to_location)
 
 
 def apply_all(
@@ -274,10 +393,14 @@ class RunMeta(BaseModel):
 
 
 class AppliedInfo(BaseModel):
-    """The effective move that applied a recommendation."""
+    """The effective move that applied a recommendation: its number, round and where it
+    went (the suggested location, or another one chosen with FR-31), with BEST of that
+    location in the replayed copy."""
 
     move_number: int
     round: int
+    to_location: str
+    to_best: bool
 
 
 RowStatus = Literal["open", "applied", "kept", "outdated"]
@@ -441,7 +564,13 @@ def _status(
     if step is not None:
         move = next((m for m in replayed.moves if m.recommendation_id == rec.id), None)
         if move is not None:
-            return "applied", AppliedInfo(move_number=move.move_number, round=move.round), None
+            applied = AppliedInfo(
+                move_number=move.move_number,
+                round=move.round,
+                to_location=move.to_location,
+                to_best=is_best(replayed.copy, move.to_location, state.best_marks),
+            )
+            return "applied", applied, None
         moved_back = OutdatedInfo(
             cause="moved_back",
             location=None,
@@ -490,8 +619,7 @@ def _no_space_row(
         case "rule_2":
             cause = NoSpaceCause(rule="rule_2", aisle=None, outside_best=True)
         case "rule_3":
-            facts = analysis.parts.get(entry.part)
-            slow = facts is not None and facts.movement_class in ("slow", "dead")
+            slow = _movement_class(analysis, entry.part) in SLOW_MOVING_CLASSES
             cause = NoSpaceCause(rule="rule_3", aisle=entry.aisle, outside_best=slow)
         case _:
             assert_never(entry.rule)
@@ -580,4 +708,29 @@ def build_recommendations_view(
         recommendations=rows,
         no_space=no_space,
         kept_parts=_kept_parts(data, analysis, state, replayed, shown),
+    )
+
+
+# --- Other locations: GET /api/plans/{id}/recommendations/{rec_id}/other-locations (FR-31) ---
+
+
+class OtherLocationsView(BaseModel):
+    """FR-31's allowed set for one recommendation, in location-code order; empty when the
+    recommendation is unknown or cannot be applied."""
+
+    version: int
+    recommendation_id: str
+    locations: list[LocationRef]
+
+
+def build_other_locations_view(
+    data: ImportData, analysis: Analysis, state: PlanState, version: int, recommendation_id: str
+) -> OtherLocationsView:
+    """The allowed set of `other_locations` as wire references (FR-31, AD-3). Read-only."""
+    replayed = replay(data, state.steps)
+    codes = other_locations(data, analysis, state, recommendation_id, replayed)
+    return OtherLocationsView(
+        version=version,
+        recommendation_id=recommendation_id,
+        locations=[location_ref(replayed.copy, code, state.best_marks) for code in codes],
     )

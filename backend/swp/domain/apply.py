@@ -10,6 +10,7 @@ from swp.domain.analysis import Analysis
 from swp.domain.commands import (
     Applied,
     ApplyAll,
+    ApplyOtherLocation,
     ApplyRecommendation,
     Command,
     CommandContext,
@@ -94,6 +95,8 @@ def _dispatch(
             return rules.run(state, command, ctx, data, analysis)
         case ApplyRecommendation():
             return recommendations.apply_recommendation(state, command, ctx, data, analysis)
+        case ApplyOtherLocation():
+            return recommendations.apply_other_location(state, command, ctx, data, analysis)
         case ApplyAll():
             return recommendations.apply_all(state, command, ctx, data, analysis)
         case SetKeep():

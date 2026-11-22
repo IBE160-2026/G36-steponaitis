@@ -111,6 +111,7 @@ def test_fr10_command_union_is_closed() -> None:
         "run",
         "apply",
         "apply_all",
+        "apply_other_location",
         "set_keep",
         "remove_keep",
     }

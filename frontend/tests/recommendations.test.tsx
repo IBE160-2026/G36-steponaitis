@@ -1,15 +1,18 @@
+import { isValidElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { nextListboxIndex, typeaheadIndex } from "@/components/common/listbox";
 import type {
   KeptPartRow,
+  LocationRef,
   NoSpaceRow,
   PlanSummary,
   RecommendationRow,
   RecommendationsView,
   RunMeta,
 } from "@/lib/api/plans";
-import { SAVING_REASON } from "@/lib/commands";
+import { type CommandBody, SAVING_REASON, type SendResult } from "@/lib/commands";
 import { NO_OPEN_TO_APPLY } from "@/lib/copy";
 import { parseRecommendationsTab, type RecommendationsTab } from "@/lib/view-state/urls";
 import {
@@ -18,6 +21,7 @@ import {
   EMPTY_TAB,
   isApplyShortcut,
   isKeepShortcut,
+  isOtherLocationShortcut,
   itemId,
   nextOptionIndex,
   optionName,
@@ -27,6 +31,11 @@ import {
   tabName,
   TABS,
 } from "@/modules/recommendations/list";
+import {
+  OtherLocationList,
+  type OtherLocationActionProps,
+  OtherLocationMenu,
+} from "@/modules/recommendations/other-location";
 import {
   applyReason,
   emptyRunText,
@@ -120,7 +129,10 @@ const OUTDATED = rec({
   status: "outdated",
   outdated: { cause: "filled", location: "A-01-01-03", move_number: 2, partner: null, aisle: null },
 });
-const APPLIED = rec({ status: "applied", applied: { move_number: 16, round: 1 } });
+const APPLIED = rec({
+  status: "applied",
+  applied: { move_number: 16, round: 1, to_location: "A-01-01-03", to_best: true },
+});
 
 describe("ux_dr31 tabs", () => {
   it("ux_dr31_tab_parse_defaults_to_open", () => {
@@ -437,5 +449,211 @@ describe("fr32 kept in place tab", () => {
       expect(isKeepShortcut({ altKey: true, code: "KeyK", target: { tagName } })).toBe(false);
     }
     expect(isKeepShortcut({ altKey: true, code: "KeyK", target: { tagName: "DIV", isContentEditable: true } })).toBe(false);
+  });
+});
+
+// Story 7.2 (FR-31, UX-DR36): Other location ▾. Vitest has no DOM: the popover's body and the
+// action's props are rendered or called directly, the keys are pure helpers.
+
+function loc(code: string, fields: Partial<LocationRef> = {}): LocationRef {
+  const [aisle, , level] = code.split("-");
+  return { code, aisle, level, section: null, position: null, is_best: aisle === "A", ...fields };
+}
+
+const LOCATIONS = [loc("A-01-02-01"), loc("A-01-02-02"), loc("B-01-04-01")];
+
+function renderOther(data: RecommendationsView, tab: RecommendationsTab = "open", disabledReason?: string) {
+  const seen: OtherLocationActionProps[] = [];
+  const sent: CommandBody[] = [];
+  const notify = vi.fn();
+  const onSend = async (body: CommandBody): Promise<SendResult> => {
+    sent.push(body);
+    return {
+      outcome: "confirmed",
+      events: [
+        {
+          type: "move_made",
+          move_number: 3,
+          part: "1100",
+          from_location: "C-01-01-01",
+          to_location: "A-01-02-02",
+          rule: "rule_1",
+          round: 1,
+        },
+      ],
+    };
+  };
+  const markup = renderToStaticMarkup(
+    <View
+      summary={summary()}
+      view={data}
+      tab={tab}
+      onTabChange={() => {}}
+      disabledReason={disabledReason}
+      onSend={onSend}
+      notify={notify}
+      otherLocation={(props) => {
+        seen.push(props);
+        return <OtherLocationMenu {...props} locations={LOCATIONS} />;
+      }}
+    />,
+  );
+  return { markup, seen, sent, notify };
+}
+
+describe("fr31 other location", () => {
+  it("fr31_button_between_apply_and_keep_on_open_rows_only", () => {
+    const { markup, seen } = renderOther(view([rec({ part: "1100" })]));
+    expect(markup).toMatch(/>Apply<\/button>[\s\S]*>Other location<span aria-hidden="true">▾<\/span><\/button>[\s\S]*>Keep in place</);
+    expect(markup).toMatch(/aria-haspopup="listbox" aria-expanded="false" aria-keyshortcuts="Alt\+O"/);
+    expect(seen).toHaveLength(1);
+    expect(seen[0].open).toBe(false);
+    expect(seen[0].disabledReason).toBeUndefined();
+    expect(renderOther(view([APPLIED]), "applied").seen).toHaveLength(0);
+    expect(renderOther(view([], [noSpace("1200")]), "no-space").seen).toHaveLength(0);
+    expect(renderOther(view([], [], RUN, [keptPart("9100")]), "kept").seen).toHaveLength(0);
+  });
+
+  it("fr31_button_disabled_with_the_apply_reason", () => {
+    expect(renderOther(view([OUTDATED]), "outdated").seen[0].disabledReason).toBe(
+      "A-01-01-03 was filled by a manual move.",
+    );
+    expect(renderOther(view([KEPT]), "kept").seen[0].disabledReason).toBe("0500 is kept in place.");
+    const saving = renderOther(view([rec()]), "open", SAVING_REASON);
+    expect(saving.seen[0].disabledReason).toBe(SAVING_REASON);
+    expect(saving.markup).toMatch(/aria-disabled="true"[^>]*>Other location</);
+  });
+
+  it("fr31_listbox_renders_code_aisle_level_and_best", () => {
+    const markup = renderToStaticMarkup(
+      <OtherLocationList rule="rule_1" locations={LOCATIONS} highlighted={undefined} onHighlight={() => {}} onApply={() => {}} />,
+    );
+    expect(markup).toContain('role="listbox" aria-label="Other locations"');
+    expect(markup).toContain('aria-label="A-01-02-01, Aisle A · Level 02, BEST"');
+    expect(markup).toContain('aria-label="B-01-04-01, Aisle B · Level 04, not best"');
+    expect(text(markup)).toContain("A-01-02-02 Aisle A · Level 02 BEST");
+    expect(text(markup)).toContain("B-01-04-01 Aisle B · Level 04 not best");
+    expect(markup.match(/aria-selected="true"/g)).toHaveLength(1);
+    expect(markup).toMatch(/aria-selected="true"[^>]*aria-label="A-01-02-01,/);
+    expect(markup).not.toContain("<input");
+  });
+
+  it("fr31_highlight_follows_the_state_and_loading_and_empty_texts", () => {
+    const markup = renderToStaticMarkup(
+      <OtherLocationList rule="rule_1" locations={LOCATIONS} highlighted="B-01-04-01" onHighlight={() => {}} onApply={() => {}} />,
+    );
+    expect(markup).toMatch(/aria-selected="true"[^>]*aria-label="B-01-04-01,/);
+    const loading = renderToStaticMarkup(
+      <OtherLocationList rule="rule_1" locations={undefined} highlighted={undefined} onHighlight={() => {}} onApply={() => {}} />,
+    );
+    expect(text(loading)).toContain("Loading locations…");
+    const empty = renderToStaticMarkup(
+      <OtherLocationList rule="rule_1" locations={[]} highlighted={undefined} onHighlight={() => {}} onApply={() => {}} />,
+    );
+    expect(text(empty)).toContain("No other location fits rule 1 right now.");
+    expect(empty).not.toContain('role="listbox"');
+  });
+
+  it("fr31_load_error_shows_a_sentence_not_loading", () => {
+    const failed = renderToStaticMarkup(
+      <OtherLocationList rule="rule_1" locations={undefined} failed highlighted={undefined} onHighlight={() => {}} onApply={() => {}} />,
+    );
+    expect(text(failed)).toContain("Could not load the locations. Try again.");
+    expect(text(failed)).not.toContain("Loading locations…");
+    expect(failed).toContain('role="alert"');
+  });
+
+  it("fr31_action_gets_the_view_version", () => {
+    expect(renderOther(view([rec()])).seen[0].version).toBe(5);
+  });
+
+  it("fr31_arrows_and_typing_move_the_highlight_without_sending", () => {
+    const onHighlight = vi.fn();
+    const onApply = vi.fn();
+    const list = OtherLocationList({
+      rule: "rule_1",
+      locations: LOCATIONS,
+      highlighted: undefined,
+      onHighlight,
+      onApply,
+    });
+    expect(isValidElement(list)).toBe(true);
+    const props = (list as ReactElement<{ onSelect: (l: LocationRef) => void }>).props;
+    props.onSelect(LOCATIONS[nextListboxIndex("ArrowDown", 0, LOCATIONS.length)!]);
+    props.onSelect(LOCATIONS[typeaheadIndex(LOCATIONS.map((l) => l.code), "b", 1)!]);
+    expect(onHighlight.mock.calls).toEqual([["A-01-02-02"], ["B-01-04-01"]]);
+    expect(onApply).not.toHaveBeenCalled();
+    expect(nextListboxIndex("End", 0, 3)).toBe(2);
+    expect(nextListboxIndex("Home", 2, 3)).toBe(0);
+    expect(nextListboxIndex("Enter", 0, 3)).toBeNull();
+    const codes = LOCATIONS.map((l) => l.code);
+    expect(typeaheadIndex(codes, "a", 0)).toBe(1);
+    expect(typeaheadIndex(codes, "a", 1)).toBe(0);
+    expect(typeaheadIndex(codes, "aa", 0)).toBe(1);
+    expect(typeaheadIndex(codes, "A-01-02-02", 0)).toBe(1);
+    expect(typeaheadIndex(codes, "b-01", 0)).toBe(2);
+    expect(typeaheadIndex(codes, "z", 0)).toBeNull();
+  });
+
+  it("fr31_enter_and_click_send_apply_other_location", async () => {
+    const onApply = vi.fn();
+    const list = OtherLocationList({
+      rule: "rule_1",
+      locations: LOCATIONS,
+      highlighted: undefined,
+      onHighlight: () => {},
+      onApply,
+    }) as ReactElement<{ onActivate: (l: LocationRef) => void }>;
+    list.props.onActivate(LOCATIONS[1]);
+    expect(onApply).toHaveBeenCalledWith("A-01-02-02");
+
+    const row = rec({ part: "1100" });
+    const { seen, sent, notify } = renderOther(view([row]));
+    seen[0].onApply("A-01-02-02");
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled());
+    expect(sent).toEqual([{ type: "apply_other_location", recommendation_id: row.id, to_location: "A-01-02-02" }]);
+    expect(notify).toHaveBeenCalledWith("Applied · move 3, round 1 · 1100 C-01-01-01 → A-01-02-02");
+  });
+
+  it("uxdr36_alt_o_opens_never_in_a_text_field", () => {
+    const option = { tagName: "DIV" };
+    expect(isOtherLocationShortcut({ altKey: true, code: "KeyO", target: option })).toBe(true);
+    expect(isOtherLocationShortcut({ altKey: false, code: "KeyO", target: option })).toBe(false);
+    expect(isOtherLocationShortcut({ altKey: true, code: "KeyA", target: option })).toBe(false);
+    for (const tagName of ["INPUT", "TEXTAREA", "SELECT"]) {
+      expect(isOtherLocationShortcut({ altKey: true, code: "KeyO", target: { tagName } })).toBe(false);
+    }
+    expect(
+      isOtherLocationShortcut({ altKey: true, code: "KeyO", target: { tagName: "DIV", isContentEditable: true } }),
+    ).toBe(false);
+  });
+
+  it("fr31_applied_row_shows_the_chosen_location", () => {
+    const applied = rec({
+      part: "1100",
+      to_location: "A-01-01-03",
+      to_best: true,
+      status: "applied",
+      applied: { move_number: 4, round: 1, to_location: "B-01-04-01", to_best: false },
+    });
+    const markup = text(render(view([applied]), "applied"));
+    expect(markup).toContain("B-01-04-01");
+    expect(markup).not.toContain("A-01-01-03");
+    expect(markup).not.toContain("BEST");
+    expect(markup).toContain("Applied · move 4, round 1");
+  });
+});
+
+describe("fr31 applied option name", () => {
+  it("fr31_applied_option_name_names_the_chosen_location", () => {
+    const applied = rec({
+      number: 1,
+      part: "1100",
+      status: "applied",
+      applied: { move_number: 4, round: 1, to_location: "B-01-04-01", to_best: false },
+    });
+    expect(optionName({ kind: "rec", row: applied })).toBe(
+      "#1, 1100, from C-01-01-01 to B-01-04-01, Applied · move 4, round 1",
+    );
   });
 });

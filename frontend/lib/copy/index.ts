@@ -9,9 +9,11 @@ import type {
   ApplyAllDoneEvent,
   ClassThreshold,
   CommandEvent,
+  LocationRef,
   NoSpaceCause,
   OutdatedInfo,
   RecommendationReason,
+  RecommendationRow,
   RunMeta,
 } from "@/lib/api/plans";
 import { formatDate, formatNumber, formatTime } from "@/lib/format";
@@ -157,7 +159,7 @@ export function recommendationsCount(count: number): string {
 }
 
 /** "Applied · move 16, round 1": an applied recommendation's row and detail line. */
-export function appliedText(applied: AppliedInfo): string {
+export function appliedText(applied: Pick<AppliedInfo, "move_number" | "round">): string {
   return `Applied · move ${formatNumber(applied.move_number)}, round ${formatNumber(applied.round)}`;
 }
 
@@ -221,4 +223,36 @@ export function keepRemovedToast(part: string): string {
 /** Why Apply is disabled on a kept recommendation (the server's rejection, said first). */
 export function keptApplyReason(part: string): string {
   return `${part} is kept in place.`;
+}
+
+// Other location (Story 7.2, FR-31, UX-DR36): the listbox of the server's allowed set. There is no
+// free-text entry; the toast after an apply is `appliedToast`.
+
+/** The detail action's label (the trigger shows a "▾" glyph after it). */
+export const OTHER_LOCATION_LABEL = "Other location";
+/** The listbox's accessible name. */
+export const OTHER_LOCATIONS_LIST = "Other locations";
+/** While the allowed set loads. */
+export const LOADING_LOCATIONS = "Loading locations…";
+/** When the allowed set could not be loaded. */
+export const LOCATIONS_LOAD_FAILED = "Could not load the locations. Try again.";
+
+/** The empty allowed set: "No other location fits rule 1 right now." */
+export function noOtherLocationText(rule: RecommendationRow["rule"]): string {
+  return `No other location fits rule ${rule.slice("rule_".length)} right now.`;
+}
+
+/** An option's second line: "Aisle A · Level 1". */
+export function otherLocationOptionMeta(location: Pick<LocationRef, "aisle" | "level">): string {
+  return `Aisle ${location.aisle} · Level ${location.level}`;
+}
+
+/** An option's best tag: "BEST" or "not best". */
+export function otherLocationBestText(isBest: boolean): string {
+  return isBest ? "BEST" : "not best";
+}
+
+/** An option's accessible name: "A-01-01-03, Aisle A · Level 1, BEST". */
+export function otherLocationOptionName(location: LocationRef): string {
+  return `${location.code}, ${otherLocationOptionMeta(location)}, ${otherLocationBestText(location.is_best)}`;
 }

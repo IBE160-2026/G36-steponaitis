@@ -66,6 +66,17 @@ class ApplyRecommendation(BaseModel):
     recommendation_id: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
 
 
+class ApplyOtherLocation(BaseModel):
+    """Apply one recommendation of the latest run as a move to another allowed location
+    (FR-31, AD-7); the recommendation itself is never edited."""
+
+    type: Literal["apply_other_location"] = "apply_other_location"
+    command_id: uuid.UUID
+    base_version: int
+    recommendation_id: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
+    to_location: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
+
+
 class ApplyAll(BaseModel):
     """Apply every open, not-kept recommendation of the latest run in number order (FR-30)."""
 
@@ -98,6 +109,7 @@ Command = Annotated[
     | ManualMove
     | RunRecommendations
     | ApplyRecommendation
+    | ApplyOtherLocation
     | ApplyAll
     | SetKeep
     | RemoveKeep,

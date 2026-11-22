@@ -196,6 +196,13 @@ export function moreLikeThisText(count: number): string {
   return `${formatNumber(count)} more like this`;
 }
 
+/** Where the row's move goes: the applied move's to-location (FR-31: it may be another allowed
+ * location than the suggested one), else the suggested one, with BEST as the server judged it. */
+export function effectiveTo(row: RecommendationRow): { location: string; best: boolean } {
+  if (row.status === "applied" && row.applied) return { location: row.applied.to_location, best: row.applied.to_best };
+  return { location: row.to_location, best: row.to_best };
+}
+
 /** An option's accessible name: number, part, from, to and its state words. */
 export function optionName(item: ListItem): string {
   if (item.kind !== "rec") {
@@ -208,7 +215,8 @@ export function optionName(item: ListItem): string {
     return `${item.row.part}, from ${from}, ${noSpaceText(item.row.cause)}${kept}`;
   }
   const row = item.row;
-  const to = `${row.to_location}${row.to_best ? " BEST" : ""}`;
+  const target = effectiveTo(row);
+  const to = `${target.location}${target.best ? " BEST" : ""}`;
   const from = `${row.from_location}${row.from_best ? " BEST" : ""}`;
   const base = `#${formatNumber(row.number)}, ${row.part}, from ${from} to ${to}`;
   if (row.status === "applied" && row.applied) return `${base}, ${appliedText(row.applied)}`;
@@ -246,6 +254,11 @@ export function isTextEntry(target: TargetLike): boolean {
 /** `Alt+A` / `⌥A` (by key code, so ⌥A's "å" counts), never from a text field. */
 export function isApplyShortcut(event: { altKey: boolean; code: string; target: TargetLike }): boolean {
   return event.altKey && event.code === "KeyA" && !isTextEntry(event.target);
+}
+
+/** `Alt+O` / `⌥O` (by key code, so ⌥O's "ø" counts), never from a text field. */
+export function isOtherLocationShortcut(event: { altKey: boolean; code: string; target: TargetLike }): boolean {
+  return event.altKey && event.code === "KeyO" && !isTextEntry(event.target);
 }
 
 /** `Alt+K` / `⌥K` (by key code, so ⌥K's "˚" counts), never from a text field. */

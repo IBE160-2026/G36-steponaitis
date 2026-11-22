@@ -2,7 +2,8 @@
 
 // Recommendations step (FR-23–FR-30, UX-DR8, UX-DR13, UX-DR31–35, UX-DR57, Story 5.7): run the
 // rules, read the rows per state tab under their rule bands, apply one or all, and keep a part in
-// place (Story 7.1, FR-32: the shared Keep in place link and `Alt+K`). Everything shown
+// place (Story 7.1, FR-32: the shared Keep in place link and `Alt+K`), and apply one to another
+// allowed location (Story 7.2, FR-31: Other location ▾ and `Alt+O`). Everything shown
 // comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
 // version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
 // command goes through lib/commands; a 409 is the command client's (server message + refetch).
@@ -59,12 +60,14 @@ import {
   type BandView,
   bandViews,
   collapseNoSpace,
+  effectiveTo,
   EMPTY_TAB,
   groupByRule,
   bandMeta,
   isApplyShortcut,
   isKept,
   isKeepShortcut,
+  isOtherLocationShortcut,
   itemId,
   type ListItem,
   moreLikeThisText,
@@ -81,6 +84,7 @@ import {
   tabItems,
   tabName,
 } from "./list";
+import { OtherLocationAction, type OtherLocationActionProps } from "./other-location";
 
 export const RUN_LABEL = "Run recommendations";
 export const RUNNING_LABEL = "Running…";
@@ -194,8 +198,8 @@ function OptionRow({ item }: { item: ListItem }) {
           {item.kind !== "kept-part" && <span aria-hidden="true">→</span>}
           {item.kind === "rec" ? (
             <>
-              <span className={cn(outdated && "line-through")}>{item.row.to_location}</span>
-              {item.row.to_best && <BestTag />}
+              <span className={cn(outdated && "line-through")}>{effectiveTo(item.row).location}</span>
+              {effectiveTo(item.row).best && <BestTag />}
             </>
           ) : item.kind === "no-space" ? (
             <NoSpaceChip />
@@ -214,6 +218,7 @@ function Detail({
   onApply,
   onKeep,
   manualMove,
+  otherLocation,
 }: {
   id: string;
   item: ListItem | undefined;
@@ -221,6 +226,8 @@ function Detail({
   onApply: (row: RecommendationRow) => void;
   onKeep: (item: ListItem) => void;
   manualMove: (part: string) => ReactNode;
+  /** The Other location ▾ action of an open recommendation (between Apply and Keep in place). */
+  otherLocation: (row: RecommendationRow) => ReactNode;
 }) {
   if (!item) {
     return <section id={id} aria-label="Selected recommendation" className="min-w-0" />;
@@ -267,8 +274,10 @@ function Detail({
         )}
         {item.kind === "rec" ? (
           <>
-            <span className={cn(item.row.status === "outdated" && "line-through")}>{item.row.to_location}</span>
-            {item.row.to_best && <BestTag />}
+            <span className={cn(item.row.status === "outdated" && "line-through")}>
+              {effectiveTo(item.row).location}
+            </span>
+            {effectiveTo(item.row).best && <BestTag />}
           </>
         ) : item.kind === "no-space" ? (
           <NoSpaceChip />
@@ -315,6 +324,7 @@ function Detail({
             >
               Apply
             </Button>
+            {otherLocation(item.row)}
             {keepLink}
             {manualMove(row.part)}
           </div>
@@ -504,6 +514,8 @@ export type RecommendationsViewProps = {
   onSend: (body: CommandBody) => Promise<SendResult>;
   /** The Manual move… action for a part (the page wires the shared ManualMoveDialog). */
   manualMove?: (part: string) => ReactNode;
+  /** The Other location ▾ action (the page wires `OtherLocationAction` with the server's set). */
+  otherLocation?: (props: OtherLocationActionProps) => ReactNode;
   notify?: (message: string) => void;
 };
 
@@ -515,6 +527,7 @@ export function RecommendationsView({
   disabledReason,
   onSend,
   manualMove = () => null,
+  otherLocation = () => null,
   notify = showToast,
 }: RecommendationsViewProps) {
   const [running, setRunning] = useState(false);
@@ -523,6 +536,8 @@ export function RecommendationsView({
   const [chosenId, setChosenId] = useState<string | undefined>(undefined);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [focusRequest, setFocusRequest] = useState(0);
+  // The recommendation whose Other location ▾ listbox is open (Alt+O or the trigger).
+  const [otherOpenId, setOtherOpenId] = useState<string | undefined>(undefined);
   // A focus request waits for its row: it is kept until its tab shows a view of at least
   // `minVersion`, then focuses the selected row there, or is dropped when that view has none.
   const pendingFocus = useRef<{ minVersion: number; tab: RecommendationsTab } | null>(null);
@@ -548,6 +563,13 @@ export function RecommendationsView({
   const selected = visible.find((item) => itemId(item) === chosenId) ?? visible[0];
   const selectedId = selected ? itemId(selected) : undefined;
   const savingReason = running ? (disabledReason ?? RUNNING_LABEL) : disabledReason;
+  // The Other location listbox closes when the tab or the selected row changes, so it never
+  // reopens when that row's detail mounts again.
+  const [otherFor, setOtherFor] = useState({ tab, selectedId });
+  if (otherFor.tab !== tab || otherFor.selectedId !== selectedId) {
+    setOtherFor({ tab, selectedId });
+    setOtherOpenId(undefined);
+  }
 
   useEffect(() => {
     const pending = pendingFocus.current;
@@ -609,9 +631,10 @@ export function RecommendationsView({
     }
   }
 
-  async function apply(row: RecommendationRow) {
+  /** Sends an apply (to the suggested or another location), toasts its `move_made` and moves focus. */
+  async function sendApply(body: CommandBody) {
     const before = view.version;
-    const result = await onSend({ type: "apply", recommendation_id: row.id });
+    const result = await onSend(body);
     if (result.outcome !== "confirmed") return;
     const moved = findEvent(result.events, "move_made");
     if (moved) notify(appliedToast(moved));
@@ -619,6 +642,14 @@ export function RecommendationsView({
     // page), it moves to the selected row of the refreshed view.
     const active = typeof document === "undefined" ? null : document.activeElement;
     if (!active || active === document.body || region.current?.contains(active)) requestFocus(before + 1, tab);
+  }
+
+  function apply(row: RecommendationRow) {
+    return sendApply({ type: "apply", recommendation_id: row.id });
+  }
+
+  function applyOther(row: RecommendationRow, location: string) {
+    return sendApply({ type: "apply_other_location", recommendation_id: row.id, to_location: location });
   }
 
   async function keep(item: ListItem) {
@@ -647,6 +678,13 @@ export function RecommendationsView({
       event.preventDefault();
       if (savingReason !== undefined) return;
       void keep(selected);
+      return;
+    }
+    if (isOtherLocationShortcut(keys)) {
+      if (selected?.kind !== "rec" || selected.row.status !== "open") return;
+      event.preventDefault();
+      if (applyReason(selected.row, savingReason) !== undefined) return;
+      setOtherOpenId(selected.row.id);
       return;
     }
     if (!isApplyShortcut(keys)) return;
@@ -754,6 +792,16 @@ export function RecommendationsView({
                       onApply={(row) => void apply(row)}
                       onKeep={(item) => void keep(item)}
                       manualMove={manualMove}
+                      otherLocation={(row) =>
+                        otherLocation({
+                          row,
+                          version: view.version,
+                          open: otherOpenId === row.id,
+                          onOpenChange: (open) => setOtherOpenId(open ? row.id : undefined),
+                          disabledReason: applyReason(row, savingReason),
+                          onApply: (location) => void applyOther(row, location),
+                        })
+                      }
                     />
                   </div>
                 )}
@@ -804,6 +852,7 @@ export function RecommendationsPage({ planId }: { planId: string }) {
         disabledReason={disabledReason}
         onSend={sendWithEvents}
         manualMove={(part) => <ManualMoveAction key={part} planId={planId} part={part} savingReason={disabledReason} />}
+        otherLocation={(props) => <OtherLocationAction key={props.row.id} planId={planId} {...props} />}
       />
     );
   }

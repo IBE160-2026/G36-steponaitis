@@ -12,6 +12,9 @@ from pydantic import BaseModel, PositiveInt, model_validator
 
 MovementClass = Literal["fast", "medium", "slow", "dead"]
 
+SLOW_MOVING_CLASSES: frozenset[MovementClass] = frozenset({"slow", "dead"})
+"""The slow-moving classes: rule 2 moves them out of best locations, rule 3 never into one."""
+
 
 class AnalysisSettings(BaseModel):
     """The values from `backend/settings/analysis.toml`; a snapshot is stored per plan."""

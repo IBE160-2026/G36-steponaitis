@@ -12,13 +12,21 @@ from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from types import MappingProxyType
-from typing import Annotated, Literal
+from typing import Annotated, Literal, assert_never
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from swp.domain.analysis import Analysis, PartAnalysis
+from swp.domain.analysis import SLOW_MOVING_CLASSES, Analysis, MovementClass, PartAnalysis
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
-from swp.domain.state import BestMark, PlanState, Recommendation, Rule, Run, Step
+from swp.domain.state import (
+    BestMark,
+    PlanState,
+    Recommendation,
+    RecommendationRule,
+    Rule,
+    Run,
+    Step,
+)
 
 ZERO = Decimal(0)
 _NO_STOCK: Mapping[str, Decimal] = MappingProxyType({})
@@ -437,6 +445,24 @@ def covering_marks(copy: PlanningCopy, location: str, marks: Sequence[BestMark])
 def is_best(copy: PlanningCopy, location: str, marks: Sequence[BestMark]) -> bool:
     """A location is best when any mark covers it."""
     return bool(covering_marks(copy, location, marks))
+
+
+def fits_rule_target(
+    rule: RecommendationRule, movement_class: MovementClass | None, to_best: bool
+) -> bool:
+    """Whether a to-location with best mark `to_best` fits the to-location side of `rule`
+    for a part of `movement_class` (FR-24, FR-25, FR-26, FR-31): rule 1 needs a best
+    location, rule 2 one that is not best, rule 3 one that is not best for a slow-moving or
+    dead part (any for the others; the aisle side is checked by the caller)."""
+    match rule:
+        case "rule_1":
+            return to_best
+        case "rule_2":
+            return not to_best
+        case "rule_3":
+            return not (to_best and movement_class in SLOW_MOVING_CLASSES)
+        case _:
+            assert_never(rule)
 
 
 class BestCounts(BaseModel):
