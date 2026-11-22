@@ -6,7 +6,7 @@ older stored document validates after `state_migrations.upcast`.
 
 from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 
 class AisleMark(BaseModel):
@@ -54,6 +54,48 @@ class Step(BaseModel):
     swap_id: str | None = None
 
 
+RecommendationRule = Literal["rule_1", "rule_2", "rule_3"]
+"""The rule that made a recommendation or a "no space" entry."""
+
+
+class Recommendation(BaseModel):
+    """One recommendation of a run (FR-24): move `part` from `from_location` to
+    `to_location`. `id` is `"<run_id>:<number>"`; numbers are never reassigned (AD-14)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    number: int = Field(ge=1)
+    rule: RecommendationRule
+    part: str
+    from_location: str
+    to_location: str
+    status: Literal["open"] = "open"
+
+
+class NoSpace(BaseModel):
+    """A part a rule found no free location for; keyed by (run id, part), no number."""
+
+    model_config = ConfigDict(frozen=True)
+
+    part: str
+    rule: RecommendationRule
+
+
+class Run(BaseModel):
+    """One run of the rules (FR-23): a round, its metadata, its recommendations and its
+    "no space" entries. The id is `uuid5(command_id, "run:<round>")`."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    round: int = Field(ge=1)
+    created_at: AwareDatetime
+    created_by: str
+    recommendations: list[Recommendation] = Field(default_factory=list)
+    no_space: list[NoSpace] = Field(default_factory=list)
+
+
 BestMark = Annotated[AisleMark | LevelMark | LocationMark, Field(discriminator="kind")]
 """A best-location mark: a whole aisle, a level (optionally in one aisle) or one location."""
 
@@ -62,8 +104,7 @@ class PlanState(BaseModel):
     schema_version: int = 1
     best_marks: list[BestMark] = Field(default_factory=list)
     keep_marks: list[str] = Field(default_factory=list)
-    # `runs` stays untyped until Epic 5 types it (with an upcaster if the shape changes).
-    runs: list[dict[str, object]] = Field(default_factory=list)
+    runs: list[Run] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
     next_move_number: int = 1
     recent_commands: list[dict[str, object]] = Field(default_factory=list)

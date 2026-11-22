@@ -10,7 +10,7 @@ from swp.domain.analysis import (
     build_analysis,
 )
 from swp.domain.planning import planning_copy
-from swp.domain.state import AisleMark, PlanState
+from swp.domain.state import AisleMark, PlanState, Run
 from swp.domain.views.summary import STEP_KEYS, PlanSummary, build_summary
 from tests.domain.answer_key import answer_key_import
 
@@ -126,10 +126,10 @@ def test_fr7_class_counts_and_pick_groups_from_analysis() -> None:
 
 
 def test_fr7_current_round_is_highest_run_round() -> None:
-    state = PlanState(runs=[{"round": 1}, {"round": 3}, {"round": 2}, {"round": "x"}, {}])
+    runs = [Run(id=f"run-{n}", round=n, created_at=NOW, created_by="planner") for n in (1, 3, 2)]
 
-    assert _summary(state).current_round == 3
-    assert _summary(PlanState(runs=[{"other": 1}])).current_round == 0
+    assert _summary(PlanState(runs=runs)).current_round == 3
+    assert _summary(PlanState()).current_round == 0
 
 
 def test_fr22_summary_carries_best_and_empty_best_counts() -> None:

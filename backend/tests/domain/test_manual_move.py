@@ -7,9 +7,8 @@ from decimal import Decimal
 import pytest
 from pydantic import TypeAdapter
 
-from swp.domain.analysis import Analysis, AnalysisSettings, build_analysis
+from swp.domain.analysis import Analysis
 from swp.domain.apply import apply
-from swp.domain.classify import classify_parts
 from swp.domain.commands import (
     Applied,
     Command,
@@ -21,7 +20,6 @@ from swp.domain.commands import (
 )
 from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
-from swp.domain.pick_groups import find_pick_groups
 from swp.domain.planning import (
     AddsToStock,
     CombinesWith,
@@ -33,11 +31,17 @@ from swp.domain.planning import (
     replay,
     stock_at,
 )
-from swp.domain.state import PlanState, Step
+from swp.domain.state import PlanState, Run, Step
 from swp.domain.views.move_preview import MovePreview, build_move_preview
-from tests.domain.answer_key import answer_key_import, expected
+from tests.domain.answer_key import (
+    answer_key_analysis,
+    answer_key_import,
+    empty_analysis,
+)
 
 CTX = CommandContext(now=datetime(2026, 11, 22, 12, 0, tzinfo=UTC), user="planner")
+# A manual move never reads the analysis; `apply` takes the plan's analysis for every command.
+EMPTY_ANALYSIS = empty_analysis()
 
 
 @pytest.fixture(scope="module")
@@ -46,16 +50,12 @@ def data() -> ImportData:
 
 
 @pytest.fixture(scope="module")
-def analysis(data: ImportData) -> Analysis:
-    imported = answer_key_import()
-    settings = AnalysisSettings.model_validate(expected()["settings"])
-    base = build_analysis(imported.data_as_of, settings)
-    return base.model_copy(
-        update={
-            "parts": classify_parts(data, base),
-            "pick_groups": find_pick_groups(data, base),
-        }
-    )
+def analysis() -> Analysis:
+    return answer_key_analysis()
+
+
+def _run(round_: int) -> Run:
+    return Run(id=f"run-{round_}", round=round_, created_at=CTX.now, created_by="planner")
 
 
 def _move(part: str, a: str, b: str) -> ManualMove:
@@ -65,7 +65,7 @@ def _move(part: str, a: str, b: str) -> ManualMove:
 
 
 def _do(data: ImportData, state: PlanState, part: str, a: str, b: str) -> Applied:
-    return apply(state, _move(part, a, b), CTX, data)
+    return apply(state, _move(part, a, b), CTX, data, EMPTY_ANALYSIS)
 
 
 def _preview(
@@ -124,7 +124,7 @@ def test_fr33_answer_key_9300_into_location_left_by_1100(data: ImportData) -> No
         rule="rule_1",
         round=1,
     )
-    state = PlanState(runs=[{"round": 1}], steps=[rule_step], next_move_number=2)
+    state = PlanState(runs=[_run(1)], steps=[rule_step], next_move_number=2)
 
     applied = _do(data, state, "9300", "B-01-03-02", "C-01-01-01")
 

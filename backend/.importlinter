@@ -114,3 +114,4 @@ modules =
     swp.domain.views.search
     swp.domain.views.move_preview
     swp.domain.before_after
+    swp.domain.rules

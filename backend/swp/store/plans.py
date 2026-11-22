@@ -129,20 +129,34 @@ class PlanBusy(Exception):
     """The database is busy: another writer holds the lock (SQLite busy/locked, pg 55P03)."""
 
 
-def get_plan_import(plan_id: uuid.UUID) -> ImportData | None:
-    """The import of the plan, upcast and validated; None if there is no such plan.
+@dataclass(frozen=True)
+class PlanInputs:
+    """The plan's import and analysis, upcast and validated: what a command reads besides
+    the state."""
 
-    An import never changes and a plan never changes its `import_id`, so this may be read
-    before the plan is locked.
+    data: ImportData
+    analysis: Analysis
+
+
+def get_plan_inputs(plan_id: uuid.UUID) -> PlanInputs | None:
+    """The import and analysis of the plan; None if there is no such plan.
+
+    An import never changes, a plan never changes its `import_id` and its analysis is
+    written once at creation, so these may be read before the plan is locked.
     """
     query = (
-        select(ImportRow.data)
+        select(ImportRow.data, PlanRow.analysis)
         .join(PlanRow, PlanRow.import_id == ImportRow.id)
         .where(PlanRow.id == plan_id)
     )
     with transaction() as session:
-        data = session.execute(query).scalar_one_or_none()
-    return None if data is None else ImportData.model_validate(upcast("data", data))
+        row = session.execute(query).one_or_none()
+    if row is None:
+        return None
+    return PlanInputs(
+        data=ImportData.model_validate(upcast("data", row.data)),
+        analysis=Analysis.model_validate(upcast("analysis", row.analysis)),
+    )
 
 
 class PlanWriter:

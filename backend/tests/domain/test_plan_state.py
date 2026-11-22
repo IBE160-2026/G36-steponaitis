@@ -10,7 +10,16 @@ from pydantic import ValidationError
 
 from swp.domain.analysis import AnalysisSettings, build_analysis, period_for
 from swp.domain.import_data import ImportData
-from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState, Step
+from swp.domain.state import (
+    AisleMark,
+    LevelMark,
+    LocationMark,
+    NoSpace,
+    PlanState,
+    Recommendation,
+    Run,
+    Step,
+)
 from swp.domain.state_migrations import CURRENT_VERSIONS, upcast
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -143,3 +152,40 @@ def test_nfr12_steps_are_typed() -> None:
         with pytest.raises(ValidationError):
             PlanState.model_validate({**doc, "steps": [{**step, **bad}]})
     assert PlanState.model_validate(upcast("state", doc)) == PlanState.new()
+
+
+def test_nfr12_runs_are_typed() -> None:
+    doc = json.loads((FIXTURES / "state_v1.json").read_text(encoding="utf-8"))
+    run = {
+        "id": "4c6e0d9e-0000-5000-8000-000000000001",
+        "round": 1,
+        "created_at": "2026-11-22T12:00:00Z",
+        "created_by": "planner",
+        "recommendations": [
+            {
+                "id": "4c6e0d9e-0000-5000-8000-000000000001:1",
+                "number": 1,
+                "rule": "rule_1",
+                "part": "1100",
+                "from_location": "C-01-01-01",
+                "to_location": "A-01-01-03",
+            }
+        ],
+        "no_space": [{"part": "1200", "rule": "rule_1"}],
+    }
+
+    assert PlanState.model_validate(upcast("state", doc)).runs == []
+    state = PlanState.model_validate(upcast("state", {**doc, "runs": [run]}))
+
+    assert isinstance(state.runs[0], Run)
+    assert state.runs[0].recommendations[0] == Recommendation(**run["recommendations"][0])
+    assert state.runs[0].recommendations[0].status == "open"
+    assert state.runs[0].no_space == [NoSpace(part="1200", rule="rule_1")]
+    assert PlanState.model_validate(state.model_dump(mode="json")) == state
+    for bad in (
+        {"round": 0},
+        {"created_at": "2026-11-22T12:00:00"},
+        {"no_space": [{"part": "1200", "rule": "manual"}]},
+    ):
+        with pytest.raises(ValidationError):
+            PlanState.model_validate({**doc, "runs": [{**run, **bad}]})

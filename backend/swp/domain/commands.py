@@ -10,6 +10,7 @@ from typing import Annotated, Literal
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 from swp.domain.state import BestMark, PlanState, Rule
+from swp.domain.values import CODE_MAX_LENGTH
 
 
 class CommandContext(BaseModel):
@@ -43,12 +44,22 @@ class ManualMove(BaseModel):
     type: Literal["manual_move"] = "manual_move"
     command_id: uuid.UUID
     base_version: int
-    part: str
-    from_location: str = Field(alias="from")
-    to_location: str = Field(alias="to")
+    part: str = Field(max_length=CODE_MAX_LENGTH)
+    from_location: str = Field(alias="from", max_length=CODE_MAX_LENGTH)
+    to_location: str = Field(alias="to", max_length=CODE_MAX_LENGTH)
 
 
-Command = Annotated[SetBestMark | RemoveBestMark | ManualMove, Field(discriminator="type")]
+class RunRecommendations(BaseModel):
+    """Run the recommendation rules on the planning copy as a new round (FR-23)."""
+
+    type: Literal["run"] = "run"
+    command_id: uuid.UUID
+    base_version: int
+
+
+Command = Annotated[
+    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations, Field(discriminator="type")
+]
 """Every command a plan accepts (closed union)."""
 
 
@@ -97,8 +108,18 @@ class MoveRemoved(BaseModel):
     step_move_number: int
 
 
+class RunDone(BaseModel):
+    """A run made round `round` with this many recommendations and "no space" entries."""
+
+    type: Literal["run_done"] = "run_done"
+    round: int
+    recommendations: int
+    no_space: int
+
+
 Event = Annotated[
-    MarkSet | MarkRemoved | MoveMade | MovesCombined | MoveRemoved, Field(discriminator="type")
+    MarkSet | MarkRemoved | MoveMade | MovesCombined | MoveRemoved | RunDone,
+    Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""
 

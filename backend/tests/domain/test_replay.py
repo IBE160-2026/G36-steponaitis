@@ -25,8 +25,8 @@ from swp.domain.planning import (
     stock_at,
     total_stock,
 )
-from swp.domain.state import AisleMark, PlanState, Rule, Step
-from tests.domain.answer_key import answer_key_import, expected
+from swp.domain.state import AisleMark, PlanState, Rule, Run, Step
+from tests.domain.answer_key import answer_key_import, empty_analysis, expected
 
 RULES: dict[str, Rule] = {"1": "rule_1", "2": "rule_2", "3": "rule_3", "Manual": "manual"}
 
@@ -341,7 +341,7 @@ def test_ad5_round_invariant_append_step_round_0_before_any_run() -> None:
 
 
 def test_ad5_round_invariant_append_step_uses_current_round() -> None:
-    state = PlanState(runs=[{"round": 1}, {"round": 2}], next_move_number=7)
+    state = PlanState(runs=[_run(1), _run(2)], next_move_number=7)
 
     after = append_step(state, part="P", from_location="A", to_location="B", rule="rule_1")
     after = append_step(after, part="P", from_location="B", to_location="C", rule="manual")
@@ -404,6 +404,7 @@ def test_ad5_apply_checks_step_invariants(monkeypatch: pytest.MonkeyPatch) -> No
             SetBestMark(command_id=uuid.UUID(int=1), base_version=1, mark=AisleMark(aisle="A")),
             ctx,
             ImportData(locations={}, inventory=[], parts={}, transactions=[]),
+            empty_analysis(),
         )
 
 
@@ -411,3 +412,55 @@ def test_ad5_round_invariant_ignores_removed_steps() -> None:
     before = PlanState(steps=[_step(1, "P", "A", "B", rnd=0)], next_move_number=2)
 
     check_step_invariants(before, PlanState(next_move_number=2))
+
+
+def _run(round_: int) -> Run:
+    return Run(
+        id=f"run-{round_}",
+        round=round_,
+        created_at=datetime(2026, 11, 22, tzinfo=UTC),
+        created_by="planner",
+    )
+
+
+def test_ad5_item36_rewritten_log_with_reused_move_number_raises() -> None:
+    # Step 1 was undone (next stays 3); a rewritten log reuses move number 1.
+    before = PlanState(steps=[_step(2, "P", "A", "B", rnd=0)], next_move_number=3)
+    after = PlanState(
+        steps=[_step(1, "Q", "C", "D", rnd=0), _step(2, "P", "A", "B", rnd=0)],
+        next_move_number=3,
+    )
+
+    with pytest.raises(AssertionError, match="Step move number 1 is below 3"):
+        check_step_invariants(before, after)
+
+
+def test_ad5_item36_appended_step_reusing_a_move_number_raises() -> None:
+    # A step appended with move number 1 while step 1 is still in the log.
+    before = PlanState(steps=[_step(1, "P", "A", "B", rnd=0)], next_move_number=2)
+    after = PlanState(
+        steps=[_step(1, "P", "A", "B", rnd=0), _step(1, "Q", "C", "D", rnd=0)],
+        next_move_number=2,
+    )
+
+    with pytest.raises(AssertionError, match="Move number 1 is used by more than one step"):
+        check_step_invariants(before, after)
+
+
+def test_ad5_item36_decreasing_next_move_number_raises() -> None:
+    before = PlanState(steps=[_step(1, "P", "A", "B", rnd=0)], next_move_number=4)
+
+    with pytest.raises(AssertionError, match="next_move_number decreased from 4 to 3"):
+        check_step_invariants(before, before.model_copy(update={"next_move_number": 3}))
+    with pytest.raises(AssertionError, match="next_move_number decreased from 4 to 2"):
+        check_step_invariants(PlanState(next_move_number=4), PlanState(next_move_number=2))
+
+
+def test_ad5_item36_reset_shape_passes() -> None:
+    before = PlanState(
+        runs=[_run(1)],
+        steps=[_step(1, "P", "A", "B", rnd=1), _step(2, "P", "B", "C", rnd=1)],
+        next_move_number=3,
+    )
+
+    check_step_invariants(before, PlanState(next_move_number=1))

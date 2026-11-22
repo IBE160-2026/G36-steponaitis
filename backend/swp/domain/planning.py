@@ -216,8 +216,7 @@ def planning_copy(data: ImportData, state: PlanState) -> PlanningCopy:
 
 def current_round(state: PlanState) -> int:
     """The highest `round` among the plan's runs, 0 before the first run (never stored)."""
-    rounds = [run.get("round") for run in state.runs]
-    return max((r for r in rounds if isinstance(r, int) and not isinstance(r, bool)), default=0)
+    return max((run.round for run in state.runs), default=0)
 
 
 def _next_step(

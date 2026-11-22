@@ -12,7 +12,7 @@ from swp.api.app import create_app
 from swp.store.db import get_engine
 from tests.app.test_create_plan import SAME_ORIGIN
 from tests.app.test_parts_api import _sample_plan
-from tests.app.test_plan_summary import _row
+from tests.app.test_plan_summary import NOW, _create, _row
 
 
 def _single_location_part(client: TestClient, plan_id: str) -> tuple[str, str]:
@@ -146,6 +146,27 @@ def test_ad3_preview_missing_param_422_and_unknown_plan_404(empty_tables: str) -
     assert missing.json()["error"]["code"] == "validation_failed"
     assert unknown.status_code == 404, unknown.text
     assert unknown.json()["error"]["code"] == "plan_not_found"
+
+
+def test_fr33_codes_over_200_chars_are_422(empty_tables: str) -> None:
+    plan_id = str(_create("Long codes", NOW))
+    long = "X" * 201
+    with TestClient(create_app()) as client:
+        commands = [
+            client.post(f"/api/plans/{plan_id}/commands", json=_move(*args), headers=SAME_ORIGIN)
+            for args in ((long, "A", "B"), ("X", long, "B"), ("X", "A", long))
+        ]
+        previews = [
+            _preview(client, plan_id, *args)
+            for args in ((long, "A", "B"), ("X", long, "B"), ("X", "A", long))
+        ]
+        at_limit = _preview(client, plan_id, "X" * 200, "A", "B")
+
+    for response in [*commands, *previews]:
+        assert response.status_code == 422, response.text
+        assert response.json()["error"]["code"] == "validation_failed"
+    assert at_limit.status_code == 200, at_limit.text
+    assert _row(uuid.UUID(plan_id))[0] == 1
 
 
 def test_ad6_manual_move_unknown_plan_404(empty_tables: str) -> None:

@@ -347,7 +347,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"])[];
             /** Version */
             version: number;
         };
@@ -840,6 +840,41 @@ export interface components {
             /** Move Number */
             move_number: number;
         };
+        /**
+         * RunDone
+         * @description A run made round `round` with this many recommendations and "no space" entries.
+         */
+        RunDone: {
+            /** No Space */
+            no_space: number;
+            /** Recommendations */
+            recommendations: number;
+            /** Round */
+            round: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "run_done";
+        };
+        /**
+         * RunRecommendations
+         * @description Run the recommendation rules on the planning copy as a new round (FR-23).
+         */
+        RunRecommendations: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "run";
+        };
         /** SavedPlanRow */
         SavedPlanRow: {
             /**
@@ -1143,7 +1178,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"];
             };
         };
         responses: {
