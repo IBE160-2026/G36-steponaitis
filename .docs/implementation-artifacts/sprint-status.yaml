@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 09:37
+last_updated: 11-22-2026 09:44
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -60,7 +60,7 @@ development_status:
   3-2-the-command-endpoint-with-best-location-mark-commands: done
   3-3-client-command-flow-and-autosave: done
   3-4-best-locations-step-mark-and-unmark-from-the-table: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
   epic-4: backlog
   4-1-step-log-replay-and-the-planning-copy: backlog
@@ -283,3 +283,62 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-19-make-a-command-failure-with-the-backend"
+    epic: 3
+    action: "Make a command failure with the backend unreachable through the /api
+      proxy take the AD-12 retry path, with a Playwright test that blocks the command
+      route and sees Trying again"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-20-refetch-plan-queries-below-the-highest-v"
+    epic: 3
+    action: "Refetch plan queries below the highest version seen after a command,
+      and give the Best locations step a bounded refetch when its first load has mismatched
+      versions"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-21-build-the-command-inside-send-try-block"
+    epic: 3
+    action: "Build the command inside send try block and add a UUID fallback for non-secure
+      contexts so pending cannot stick"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-22-retry-or-map-sqlite-busy-locked-errors-t"
+    epic: 3
+    action: "Retry or map SQLite busy/locked errors to 503 in run_command and read
+      only id, version and state under the write lock"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-23-add-a-playwright-test-where-a-command-is"
+    epic: 3
+    action: "Add a Playwright test where a command is applied, its response replaced
+      by a 503, and the retry returns the stored result with one version bump"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-24-show-the-best-location-marks-changed-toa"
+    epic: 3
+    action: "Show the Best-location marks changed toast only when the command response
+      has events"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-25-decide-whether-set_best_mark-rejects-mar"
+    epic: 3
+    action: "Decide whether set_best_mark rejects marks naming nothing in the import
+      (422) and whether the Best locations step needs a mark that covers a location;
+      record it in FR-21"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-3-retro-item-26-require-a-later-story-spec-to-list-the-f"
+    epic: 3
+    action: "Require a later story spec to list the failure paths handed over when
+      an earlier story defers verification to it"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
