@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 12:13
+last_updated: 11-22-2026 12:30
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -69,7 +69,7 @@ development_status:
   4-4-views-follow-the-planning-copy: done
   4-5-before-after-counts-in-the-domain: done
   4-6-before-after-page: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
 
   epic-5: backlog
   5-1-run-rule-1-and-store-the-run: backlog
@@ -342,3 +342,88 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-27-make-the-manual-move-dialog-take-from-ch"
+    epic: 4
+    action: "Make the manual-move dialog take From choices from the current part detail
+      on every render and add a Playwright test for a 409 command_rejected after an
+      allowed preview"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-28-add-an-api-test-that-summary-empty_best_"
+    epic: 4
+    action: "Add an API test that summary empty_best_locations changes after a move
+      into or out of a best location and matches /locations"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-29-make-the-postgres-plan-lock-fail-fast-no"
+    epic: 4
+    action: "Make the Postgres plan lock fail fast (nowait or lock_timeout) so 55P03
+      maps to 503 unavailable, with a Postgres test"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-30-refuse-manual_move-and-the-move-preview"
+    epic: 4
+    action: "Refuse manual_move and the move preview for a part not in listed_parts"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-31-base-the-before-after-no-moves-note-on-w"
+    epic: 4
+    action: "Base the before/after no-moves note on whether anything differs, or pin
+      has_moves with a test, before epic 5"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-32-fix-manual-move-dialog-details-single-re"
+    epic: 4
+    action: "Fix manual-move dialog details: single refusal display, sentWith on busy,
+      send the previewed code, part in moves_combined toast, case-insensitive virtual
+      locations"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-33-decide-whether-manual_move-is-rejected-w"
+    epic: 4
+    action: "Decide whether manual_move is rejected when the effect differs from the
+      preview, or waits for FR-41; record in AD-6"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-34-confirm-or-revert-the-story-4-2-spine-ed"
+    epic: 4
+    action: "Confirm or revert the Story 4.2 spine edits: AD-11 unavailable 503 and
+      import data schema v2 virtual_locations"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-35-reconcile-epic-and-prd-with-as-built-ux"
+    epic: 4
+    action: "Reconcile epic and PRD with as-built: UX-DR26 From M2, FR-22 best in
+      before/after table, 4.3 AC6 location path"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-36-always-assert-next_move_number-never-dec"
+    epic: 4
+    action: "Always assert next_move_number never decreases in apply and add max_length
+      to manual move inputs and preview query"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-37-fix-e2e-flakiness-under-load-and-add-a-s"
+    epic: 4
+    action: "Fix e2e flakiness under load and add a shared tests/domain/conftest.py
+      for answer-key fixtures"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-4-retro-item-38-run-the-4-1-and-4-4-follow-up-reviews-an"
+    epic: 4
+    action: "Run the 4.1 and 4.4 follow-up reviews and require stories that close
+      retro items to name them and leave status changes to the retro"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
