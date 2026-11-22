@@ -33,6 +33,11 @@ def aisle_order(aisles: Iterable[str]) -> list[str]:
     return sorted(set(aisles))
 
 
+def part_number_order(parts: Iterable[str]) -> list[str]:
+    """Distinct part numbers in `str` order."""
+    return sorted(set(parts))
+
+
 def location_order(locations: Mapping[str, LocationData]) -> list[str]:
     """By aisle (`str`), level (`level_key` over the whole import), Walk Path (numeric),
     then code (`str`)."""

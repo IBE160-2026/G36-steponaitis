@@ -65,6 +65,12 @@ def _copy_of(data: ImportData, inventory: tuple[InventoryLine, ...]) -> Planning
     )
 
 
+def import_copy(data: ImportData) -> PlanningCopy:
+    """The import itself as a planning copy: its inventory indexed, no steps folded (the
+    "before" side of before/after, FR-37)."""
+    return _copy_of(data, tuple(data.inventory))
+
+
 class EffectiveMove(BaseModel):
     """A move as it counts for the plan after combining (FR-34); never stored.
 
