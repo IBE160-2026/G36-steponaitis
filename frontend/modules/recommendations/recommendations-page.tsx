@@ -1,7 +1,8 @@
 "use client";
 
 // Recommendations step (FR-23–FR-30, UX-DR8, UX-DR13, UX-DR31–35, UX-DR57, Story 5.7): run the
-// rules, read the rows per state tab under their rule bands, and apply one or all. Everything shown
+// rules, read the rows per state tab under their rule bands, apply one or all, and keep a part in
+// place (Story 7.1, FR-32: the shared Keep in place link and `Alt+K`). Everything shown
 // comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
 // version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
 // command goes through lib/commands; a 409 is the command client's (server message + refetch).
@@ -23,6 +24,7 @@ import { BinSwatch } from "@/components/common/bin-swatch";
 import { Button } from "@/components/common/button";
 import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { Icon } from "@/components/common/icons";
+import { KeepInPlaceButton, KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
 import { MANUAL_MOVE_LABEL, manualMoveReason } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { showToast } from "@/components/common/toast";
@@ -41,6 +43,8 @@ import {
   appliedToast,
   applyAllQuestion,
   applyAllToast,
+  KEPT_IN_PLACE,
+  keptApplyReason,
   NO_OPEN_TO_APPLY,
   noSpaceText,
   outdatedText,
@@ -57,7 +61,10 @@ import {
   collapseNoSpace,
   EMPTY_TAB,
   groupByRule,
+  bandMeta,
   isApplyShortcut,
+  isKept,
+  isKeepShortcut,
   itemId,
   type ListItem,
   moreLikeThisText,
@@ -68,6 +75,7 @@ import {
   ROWS_PER_RULE,
   ruleNumber,
   showMoreText,
+  showsKeepLink,
   TABS,
   tabCounts,
   tabItems,
@@ -92,15 +100,18 @@ export function emptyRunText(round: number): string {
   return `Round ${formatNumber(round)} found no recommendations and no “no space” parts. The rules have nothing more to suggest for these best-location marks.`;
 }
 
-/** The detail eyebrow: "SELECTED · #1 · RULE 1" or "SELECTED · NO SPACE · RULE 3". */
+/** The detail eyebrow: "SELECTED · #1 · RULE 1", "SELECTED · NO SPACE · RULE 3" or "SELECTED · KEPT IN PLACE". */
 export function eyebrowText(item: ListItem): string {
+  if (item.kind === "kept-part") return `SELECTED · ${KEPT_IN_PLACE.toUpperCase()}`;
   const rule = `RULE ${ruleNumber(item.row.rule)}`;
   return item.kind === "rec" ? `SELECTED · #${formatNumber(item.row.number)} · ${rule}` : `SELECTED · NO SPACE · ${rule}`;
 }
 
-/** Why Apply is disabled: the outdated cause, else the saving reason; undefined when it can apply. */
+/** Why Apply is disabled: the outdated cause, else "<part> is kept in place.", else the saving
+ * reason; undefined when it can apply. */
 export function applyReason(row: RecommendationRow, savingReason: string | undefined): string | undefined {
   if (row.status === "outdated" && row.outdated) return outdatedText(row.part, row.outdated);
+  if (row.status === "kept") return keptApplyReason(row.part);
   return savingReason;
 }
 
@@ -124,8 +135,19 @@ const HATCH = {
 };
 
 function RowLine({ item }: { item: ListItem }) {
+  if (item.kind === "kept-part") return <KeptInPlaceMark label={KEPT_IN_PLACE} className="type-reason text-ink-secondary" />;
   if (item.kind === "no-space") {
-    return <span className="type-reason text-ink-secondary">{noSpaceText(item.row.cause)}</span>;
+    return (
+      <span className="inline-flex flex-wrap items-center gap-1 type-reason text-ink-secondary">
+        {item.row.kept_in_place && (
+          <>
+            <KeptInPlaceMark label={KEPT_IN_PLACE} className="text-ink-secondary" />
+            <span aria-hidden="true">·</span>
+          </>
+        )}
+        <span>{noSpaceText(item.row.cause)}</span>
+      </span>
+    );
   }
   const row = item.row;
   if (row.status === "applied" && row.applied) {
@@ -145,6 +167,7 @@ function RowLine({ item }: { item: ListItem }) {
       </span>
     );
   }
+  if (row.status === "kept") return <KeptInPlaceMark label={KEPT_IN_PLACE} className="type-reason text-ink-secondary" />;
   return null;
 }
 
@@ -168,15 +191,15 @@ function OptionRow({ item }: { item: ListItem }) {
         <span className="inline-flex flex-wrap items-center gap-1 type-code-table text-ink">
           <span>{row.from_location ?? "—"}</span>
           {row.from_best && <BestTag />}
-          <span aria-hidden="true">→</span>
+          {item.kind !== "kept-part" && <span aria-hidden="true">→</span>}
           {item.kind === "rec" ? (
             <>
               <span className={cn(outdated && "line-through")}>{item.row.to_location}</span>
               {item.row.to_best && <BestTag />}
             </>
-          ) : (
+          ) : item.kind === "no-space" ? (
             <NoSpaceChip />
-          )}
+          ) : null}
         </span>
         <RowLine item={item} />
       </span>
@@ -189,18 +212,29 @@ function Detail({
   item,
   savingReason,
   onApply,
+  onKeep,
   manualMove,
 }: {
   id: string;
   item: ListItem | undefined;
   savingReason: string | undefined;
   onApply: (row: RecommendationRow) => void;
+  onKeep: (item: ListItem) => void;
   manualMove: (part: string) => ReactNode;
 }) {
   if (!item) {
     return <section id={id} aria-label="Selected recommendation" className="min-w-0" />;
   }
   const row = item.row;
+  const keepLink = showsKeepLink(item) ? (
+    <KeepInPlaceButton
+      kept={isKept(item)}
+      savingReason={savingReason}
+      keyShortcut="Alt+K"
+      onClick={() => onKeep(item)}
+    />
+  ) : null;
+  const keptLine = isKept(item) ? <KeptInPlaceMark label={KEPT_IN_PLACE} size={16} className="type-body text-ink" /> : null;
   return (
     <section
       id={id}
@@ -215,9 +249,9 @@ function Detail({
         <h2 className="type-section-title text-ink">{row.part}</h2>
       </div>
       {row.description && <p className="-mt-2 type-body text-ink-secondary">{row.description}</p>}
-      {row.reason && (
+      {item.kind !== "kept-part" && item.row.reason && (
         <p className="type-body text-ink" data-testid="detail-reason">
-          {reasonSegments(row.reason).map((segment, index) =>
+          {reasonSegments(item.row.reason).map((segment, index) =>
             segment.strong ? <strong key={index}>{segment.text}</strong> : <span key={index}>{segment.text}</span>,
           )}
         </p>
@@ -225,21 +259,37 @@ function Detail({
       <p className="inline-flex flex-wrap items-center gap-2 type-code text-ink">
         <span>{row.from_location ?? "No current location"}</span>
         {row.from_best && <BestTag />}
-        <span aria-hidden="true">→</span>
-        <span className="sr-only">to</span>
+        {item.kind !== "kept-part" && (
+          <>
+            <span aria-hidden="true">→</span>
+            <span className="sr-only">to</span>
+          </>
+        )}
         {item.kind === "rec" ? (
           <>
             <span className={cn(item.row.status === "outdated" && "line-through")}>{item.row.to_location}</span>
             {item.row.to_best && <BestTag />}
           </>
-        ) : (
+        ) : item.kind === "no-space" ? (
           <NoSpaceChip />
-        )}
+        ) : null}
       </p>
-      {item.kind === "no-space" ? (
+      {item.kind === "kept-part" ? (
         <>
+          {keptLine}
+          <div className="flex flex-wrap items-center gap-2">
+            {keepLink}
+            {manualMove(row.part)}
+          </div>
+        </>
+      ) : item.kind === "no-space" ? (
+        <>
+          {keptLine}
           <p className="type-body text-ink">{noSpaceText(item.row.cause)}</p>
-          <div className="flex flex-wrap gap-2">{manualMove(row.part)}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            {keepLink}
+            {manualMove(row.part)}
+          </div>
         </>
       ) : item.row.status === "applied" && item.row.applied ? (
         <p className="inline-flex items-center gap-1 type-body text-ink">
@@ -254,7 +304,8 @@ function Detail({
               Outdated · {outdatedText(item.row.part, item.row.outdated)}
             </p>
           )}
-          <div className="flex flex-wrap gap-2">
+          {keptLine}
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="primary"
               size="md"
@@ -264,6 +315,7 @@ function Detail({
             >
               Apply
             </Button>
+            {keepLink}
             {manualMove(row.part)}
           </div>
         </>
@@ -376,7 +428,7 @@ function RecommendationList({
   return (
     <div role="listbox" aria-label="Recommendations" aria-controls={detailId} className="flex min-w-0 flex-col gap-3">
       {bands.map((band) => {
-        const meta = RULE_BANDS.find((candidate) => candidate.rule === band.rule);
+        const meta = bandMeta(band.rule);
         const labelId = `${bandId}-${band.rule}`;
         return (
           <div key={band.rule} role="group" aria-labelledby={labelId} className="flex flex-col">
@@ -384,9 +436,9 @@ function RecommendationList({
               id={labelId}
               className="flex min-h-rule-band flex-wrap items-center gap-x-3 gap-y-1 rounded-t-lg bg-band px-3 py-1"
             >
-              <span className="rounded-xs bg-ink px-1.5 py-0.5 text-surface type-tag">{meta?.tag}</span>
-              <span className="type-body-strong text-ink">{meta?.name}</span>
-              <span className="type-meta text-ink-secondary">{meta?.note}</span>
+              <span className="rounded-xs bg-ink px-1.5 py-0.5 text-surface type-tag">{meta.tag}</span>
+              <span className="type-body-strong text-ink">{meta.name}</span>
+              <span className="type-meta text-ink-secondary">{meta.note}</span>
             </div>
             <div className="flex flex-col divide-y divide-hairline rounded-b-lg border border-t-0 border-border bg-surface">
               {band.rows.map(({ item, moreLikeThis }) => {
@@ -427,9 +479,9 @@ function RecommendationList({
                   </div>
                 );
               })}
-              {band.more && (
+              {band.more && band.rule !== "kept" && (
                 <div className="px-4 py-2">
-                  <Button variant="link" size="sm" onClick={() => onShowMore(band.rule)}>
+                  <Button variant="link" size="sm" onClick={() => onShowMore(band.rule as Rule)}>
                     {showMoreText(band.more.count, band.rule)}
                   </Button>
                 </div>
@@ -525,7 +577,7 @@ export function RecommendationsView({
   }
 
   function showMore(rule: Rule) {
-    const ruleItems = items.filter((item) => item.row.rule === rule);
+    const ruleItems = items.filter((item) => item.kind !== "kept-part" && item.row.rule === rule);
     expandTo(`${tab}:${rule}`, ruleItems[ROWS_PER_RULE]);
   }
 
@@ -569,6 +621,16 @@ export function RecommendationsView({
     if (!active || active === document.body || region.current?.contains(active)) requestFocus(before + 1, tab);
   }
 
+  async function keep(item: ListItem) {
+    const before = view.version;
+    const result = await sendKeep(onSend, item.row.part, isKept(item), notify);
+    if (result.outcome !== "confirmed" || result.events.length === 0) return;
+    // The row leaves its tab (Open or No space to Kept, Kept back to its own): focus follows the
+    // same pending-focus rule as Apply.
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    if (!active || active === document.body || region.current?.contains(active)) requestFocus(before + 1, tab);
+  }
+
   async function applyAll() {
     const result = await onSend({ type: "apply_all" });
     if (result.outcome !== "confirmed") return;
@@ -579,7 +641,15 @@ export function RecommendationsView({
   function onRegionKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     // React portal events (the ManualMoveDialog) bubble here too; only keys from this region count.
     if (!event.currentTarget.contains(event.target as Node)) return;
-    if (!isApplyShortcut({ altKey: event.altKey, code: event.code, target: event.target as HTMLElement })) return;
+    const keys = { altKey: event.altKey, code: event.code, target: event.target as HTMLElement };
+    if (isKeepShortcut(keys)) {
+      if (!selected || !showsKeepLink(selected)) return;
+      event.preventDefault();
+      if (savingReason !== undefined) return;
+      void keep(selected);
+      return;
+    }
+    if (!isApplyShortcut(keys)) return;
     if (selected?.kind !== "rec" || selected.row.status !== "open") return;
     event.preventDefault();
     if (applyReason(selected.row, savingReason) !== undefined) return;
@@ -593,6 +663,8 @@ export function RecommendationsView({
   }, [failedRound, savingReason]);
   const hasRun = view.run !== null;
   const emptyRun = hasRun && view.recommendations.length === 0 && view.no_space.length === 0;
+  // Kept parts stay reachable on the Kept in place tab before the first run and after an empty run.
+  const showTabs = (hasRun && !emptyRun) || view.kept_parts.length > 0;
 
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
@@ -639,11 +711,9 @@ export function RecommendationsView({
         className={cn("flex min-w-0 flex-col gap-4 transition-opacity", running && "opacity-50")}
         data-testid="recommendations-area"
       >
-        {!hasRun ? (
-          <p className="type-body text-ink-secondary">{NO_RUN}</p>
-        ) : emptyRun ? (
-          <p className="type-body text-ink-secondary">{emptyRunText(round)}</p>
-        ) : (
+        {!hasRun && <p className="type-body text-ink-secondary">{NO_RUN}</p>}
+        {emptyRun && <p className="type-body text-ink-secondary">{emptyRunText(round)}</p>}
+        {showTabs && (
           <Tabs.Root value={tab} onValueChange={(value) => onTabChange(value as RecommendationsTab)}>
             <Tabs.List aria-label="Recommendation states" className="flex flex-wrap gap-1 border-b border-border">
               {TABS.map(({ value, label }) => (
@@ -682,6 +752,7 @@ export function RecommendationsView({
                       item={selected}
                       savingReason={savingReason}
                       onApply={(row) => void apply(row)}
+                      onKeep={(item) => void keep(item)}
                       manualMove={manualMove}
                     />
                   </div>

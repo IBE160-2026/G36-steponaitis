@@ -227,3 +227,23 @@ describe("ux-dr24 part panel opens without re-rendering the roster", () => {
     expect(memoized.compare).toBeNull();
   });
 });
+
+describe("fr32 roster kept in place column", () => {
+  it("fr32_roster_row_shows_pin_and_keep_links", () => {
+    const view: PartsData = {
+      version: 1,
+      parts: [row({ rank: 1, part: "0500", kept_in_place: true }), row({ rank: 2, part: "1200" })],
+    };
+    const markup = html(<PartsView view={view} />);
+    const column = COLUMNS.find((c) => c.key === "kept_in_place")!;
+    expect(column.header).toBe("Kept in place");
+    const kept = html(<>{column.cell(view.parts[0], { isActive: false })}</>);
+    expect(text(kept)).toContain("kept in place");
+    expect(kept).toContain("<svg");
+    expect(kept).toMatch(/<button[^>]*>Remove keep in place<\/button>/);
+    const plain = html(<>{column.cell(view.parts[1], { isActive: false })}</>);
+    expect(plain).toMatch(/<button[^>]*>Keep in place<\/button>/);
+    expect(text(plain)).not.toContain("kept in place");
+    expect(markup.match(/data-keep-in-place=""/g)).toHaveLength(2);
+  });
+});

@@ -28,6 +28,7 @@ from tests.domain.answer_key import (
     apply_recommendation,
     expected,
     expected_run_outcome,
+    keep_step,
     manual_step,
     run_command,
     run_outcome,
@@ -292,8 +293,7 @@ def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
         ("9200", "D-01-02-03", "D-01-02-02"),  # step 5
     ]:
         state = manual_step(state, part, source, target, data, analysis)
-    # Step 6: the keep command is Epic 7, so the mark is set in the state.
-    state = state.model_copy(update={"keep_marks": ["0500"]})
+    state = keep_step(state, "0500", data, analysis)  # step 6
     for index, part in [(6, "8100"), (7, "8500"), (8, "3050")]:  # steps 7-9
         state = apply_recommendation(state, part, data, analysis)
         move = steps[index]["expect_move"]

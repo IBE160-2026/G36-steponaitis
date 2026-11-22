@@ -17,6 +17,7 @@ from swp.domain.commands import (
     CommandContext,
     ManualMove,
     RunRecommendations,
+    SetKeep,
 )
 from swp.domain.import_ import Cell, FileRole, RawSheet, check_file, check_import, normalize_import
 from swp.domain.import_data import ImportData, NormalizedImport
@@ -81,9 +82,7 @@ def answer_key_analysis() -> Analysis:
     )
 
 
-# Answer-key step helpers (retro item 37): commands go through `domain.apply`. The one exception is
-# the keep-in-place mark (answer-key step 6): the keep command is Epic 7, so callers set
-# `keep_marks` in the state directly.
+# Answer-key step helpers (retro item 37): every command goes through `domain.apply`.
 
 RunOutcome = tuple[list[tuple[int, str, str, str, str]], list[tuple[str, str]]]
 
@@ -116,6 +115,12 @@ def manual_step(
         from_location=source,
         to_location=target,
     )
+    return apply(state, command, CTX, data, analysis).state
+
+
+def keep_step(state: PlanState, part: str, data: ImportData, analysis: Analysis) -> PlanState:
+    """Keep `part` in place with the `set_keep` command (FR-32)."""
+    command = SetKeep(command_id=uuid.uuid4(), base_version=1, part=part)
     return apply(state, command, CTX, data, analysis).state
 
 

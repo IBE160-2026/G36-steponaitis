@@ -77,13 +77,16 @@ test("uj7 reads the parts roster, filters by class, sorts by picks and moves by 
     await expect(body.nth(index).locator("td").first()).toHaveText(String(row.rank));
   }
 
-  // One tab stop: ArrowDown moves to row 2, Tab leaves the table.
+  // One tab stop: ArrowDown moves to row 2, Tab reaches only that row's keep link (Story 7.1), the
+  // next Tab leaves the table.
   await body.first().focus();
   await expect(body.first()).toBeFocused();
   await page.keyboard.press("ArrowDown");
   await expect(body.nth(1)).toBeFocused();
   await expect(body.nth(1)).toHaveAttribute("tabindex", "0");
   await expect(body.first()).toHaveAttribute("tabindex", "-1");
+  await page.keyboard.press("Tab");
+  await expect(body.nth(1).getByRole("button", { name: "Keep in place" })).toBeFocused();
   await page.keyboard.press("Tab");
   const insideTable = await table.evaluate((element) => element.contains(document.activeElement));
   expect(insideTable).toBe(false);

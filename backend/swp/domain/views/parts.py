@@ -80,7 +80,7 @@ def build_parts_view(
                 movement_class=listed[part].movement_class,
                 picks=listed[part].picks,
                 pick_group_count=group_counts[part],
-                kept_in_place=False,
+                kept_in_place=part in state.keep_marks,
             )
         )
     return PartsView(version=version, parts=rows)
@@ -113,6 +113,7 @@ class PartDetail(BaseModel):
     current_location: LocationRef | None
     other_locations: list[StockedLocation]
     pick_groups: list[PartPickGroup]
+    kept_in_place: bool
 
 
 def _partner(data: ImportData, copy: PlanningCopy, part: str) -> PartnerPart:
@@ -156,4 +157,5 @@ def build_part_detail(
             for code in other_locations(copy, part)
         ],
         pick_groups=groups,
+        kept_in_place=part in state.keep_marks,
     )

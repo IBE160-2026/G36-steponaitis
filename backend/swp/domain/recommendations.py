@@ -26,6 +26,7 @@ from swp.domain.commands import (
 )
 from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
+from swp.domain.ordering import part_number_order
 from swp.domain.planning import (
     Replay,
     StepFold,
@@ -279,6 +280,10 @@ class AppliedInfo(BaseModel):
     round: int
 
 
+RowStatus = Literal["open", "applied", "kept", "outdated"]
+"""A row's view status (FR-32, AD-7): applied, then outdated, then kept, then open. `kept`
+(an open, unapplied, not-outdated recommendation of a kept part) is never stored."""
+
 ViewOutdatedCause = Literal[OutdatedCause, "moved_back"]
 """The stored causes plus the derived `moved_back`."""
 
@@ -334,7 +339,7 @@ class RecommendationRow(BaseModel):
     to_location: str
     from_best: bool
     to_best: bool
-    status: Literal["open", "applied", "outdated"]
+    status: RowStatus
     applied: AppliedInfo | None
     outdated: OutdatedInfo | None
     reason: Reason | None
@@ -362,13 +367,31 @@ class NoSpaceRow(BaseModel):
     from_best: bool
     reason: Reason | None
     cause: NoSpaceCause
+    kept_in_place: bool
+
+
+class KeptPartRow(BaseModel):
+    """A kept part with neither a `kept` recommendation row nor a kept "no space" row in the
+    latest run, with its display facts and its current location in the replayed copy (None
+    when it holds no stock), plus whether that location is best (FR-32)."""
+
+    part: str
+    description: str
+    movement_class: MovementClass | None
+    picks: int | None
+    from_location: str | None
+    from_best: bool
 
 
 class RecommendationsView(BaseModel):
+    """The latest run's rows and the kept parts without a kept row. Kept recommendation rows,
+    kept "no space" rows and `kept_parts` together hold exactly one entry per keep mark."""
+
     version: int
     run: RunMeta | None
     recommendations: list[RecommendationRow]
     no_space: list[NoSpaceRow]
+    kept_parts: list[KeptPartRow]
 
 
 def _class_reason(analysis: Analysis, part: str) -> ClassReason | None:
@@ -413,7 +436,7 @@ def _reason(
 
 def _status(
     state: PlanState, replayed: Replay, rec: Recommendation, partner_aisle: str
-) -> tuple[Literal["open", "applied", "outdated"], AppliedInfo | None, OutdatedInfo | None]:
+) -> tuple[RowStatus, AppliedInfo | None, OutdatedInfo | None]:
     step = applied_step(state, rec.id)
     if step is not None:
         move = next((m for m in replayed.moves if m.recommendation_id == rec.id), None)
@@ -438,6 +461,8 @@ def _status(
             aisle=partner_aisle if partner_cause else None,
         )
         return "outdated", None, info
+    if rec.part in state.keep_marks:
+        return "kept", None, None
     return "open", None, None
 
 
@@ -479,18 +504,47 @@ def _no_space_row(
         from_best=location is not None and is_best(replayed.copy, location, state.best_marks),
         reason=_reason(analysis, entry.rule, entry.part, entry.partner, entry.aisle),
         cause=cause,
+        kept_in_place=entry.part in state.keep_marks,
     )
+
+
+def _kept_parts(
+    data: ImportData, analysis: Analysis, state: PlanState, replayed: Replay, shown: set[str]
+) -> list[KeptPartRow]:
+    """The kept parts not in `shown` (the parts with a kept row), in part-number order."""
+    rows = []
+    for part in part_number_order(state.keep_marks):
+        if part in shown:
+            continue
+        location = current_location(replayed.copy, part)
+        rows.append(
+            KeptPartRow(
+                part=part,
+                **_part_facts(data, analysis, part).model_dump(),
+                from_location=location,
+                from_best=location is not None
+                and is_best(replayed.copy, location, state.best_marks),
+            )
+        )
+    return rows
 
 
 def build_recommendations_view(
     data: ImportData, analysis: Analysis, state: PlanState, version: int
 ) -> RecommendationsView:
     """The latest run's recommendations and "no space" entries in stored order, each with
-    its status and reason data, from one replay (FR-28, FR-29, AD-3). Read-only."""
+    its status and reason data, and the kept parts without a kept row, from one replay
+    (FR-28, FR-29, FR-32, AD-3). Read-only."""
     latest = latest_run(state)
-    if latest is None:
-        return RecommendationsView(version=version, run=None, recommendations=[], no_space=[])
     replayed = replay(data, state.steps)
+    if latest is None:
+        return RecommendationsView(
+            version=version,
+            run=None,
+            recommendations=[],
+            no_space=[],
+            kept_parts=_kept_parts(data, analysis, state, replayed, set()),
+        )
     rows = []
     for rec in latest.recommendations:
         target_aisle = aisle_of(replayed.copy, rec.to_location)
@@ -512,6 +566,9 @@ def build_recommendations_view(
                 reason=_reason(analysis, rec.rule, rec.part, rec.partner, target_aisle),
             )
         )
+    no_space = [_no_space_row(data, analysis, state, replayed, entry) for entry in latest.no_space]
+    shown = {row.part for row in rows if row.status == "kept"}
+    shown |= {row.part for row in no_space if row.kept_in_place}
     return RecommendationsView(
         version=version,
         run=RunMeta(
@@ -521,7 +578,6 @@ def build_recommendations_view(
             created_by=latest.created_by,
         ),
         recommendations=rows,
-        no_space=[
-            _no_space_row(data, analysis, state, replayed, entry) for entry in latest.no_space
-        ],
+        no_space=no_space,
+        kept_parts=_kept_parts(data, analysis, state, replayed, shown),
     )

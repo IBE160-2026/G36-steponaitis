@@ -100,15 +100,15 @@ export function storedPlanViewHref(planId: string): string {
   return planStepHref(planId, key, viewQuery((name) => (Object.hasOwn(values, name) ? values[name] : undefined)));
 }
 
-/** The tabs of the Recommendations step (Open · Applied · Outdated · No space). */
-export type RecommendationsTab = "open" | "applied" | "outdated" | "no-space";
+/** The tabs of the Recommendations step (Open · Applied · Kept in place · Outdated · No space). */
+export type RecommendationsTab = "open" | "applied" | "kept" | "outdated" | "no-space";
 
 /** `/plans/<id>/recommendations?tab=<tab>`: the Recommendations step on one tab. */
 export function recommendationsTabHref(planId: string, tab: RecommendationsTab): string {
   return `${planStepHref(planId, "recommendations")}?${new URLSearchParams({ tab })}`;
 }
 
-const RECOMMENDATIONS_TABS: readonly RecommendationsTab[] = ["open", "applied", "outdated", "no-space"];
+const RECOMMENDATIONS_TABS: readonly RecommendationsTab[] = ["open", "applied", "kept", "outdated", "no-space"];
 
 /** `?tab=` → the Recommendations tab; Open when missing or unknown. */
 export function parseRecommendationsTab(searchParams: SearchParamsInput): RecommendationsTab {

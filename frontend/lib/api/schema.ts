@@ -462,7 +462,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"])[];
             /** Version */
             version: number;
         };
@@ -517,6 +517,46 @@ export interface components {
         /** ErrorEnvelope */
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
+        };
+        /** KeepRemoved */
+        KeepRemoved: {
+            /** Part */
+            part: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "keep_removed";
+        };
+        /** KeepSet */
+        KeepSet: {
+            /** Part */
+            part: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "keep_set";
+        };
+        /**
+         * KeptPartRow
+         * @description A kept part with neither a `kept` recommendation row nor a kept "no space" row in the
+         *     latest run, with its display facts and its current location in the replayed copy (None
+         *     when it holds no stock), plus whether that location is best (FR-32).
+         */
+        KeptPartRow: {
+            /** Description */
+            description: string;
+            /** From Best */
+            from_best: boolean;
+            /** From Location */
+            from_location: string | null;
+            /** Movement Class */
+            movement_class: ("fast" | "medium" | "slow" | "dead") | null;
+            /** Part */
+            part: string;
+            /** Picks */
+            picks: number | null;
         };
         /** LevelMark */
         LevelMark: {
@@ -769,6 +809,8 @@ export interface components {
             from_best: boolean;
             /** From Location */
             from_location: string | null;
+            /** Kept In Place */
+            kept_in_place: boolean;
             /** Movement Class */
             movement_class: ("fast" | "medium" | "slow" | "dead") | null;
             /** Part */
@@ -822,6 +864,8 @@ export interface components {
             current_location: components["schemas"]["LocationRef"] | null;
             /** Description */
             description: string;
+            /** Kept In Place */
+            kept_in_place: boolean;
             /**
              * Movement Class
              * @enum {string}
@@ -980,6 +1024,8 @@ export interface components {
              * Format: uuid
              */
             import_id: string;
+            /** Kept In Place */
+            kept_in_place: number;
             /**
              * Last Edited At
              * Format: date-time
@@ -1047,7 +1093,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "open" | "applied" | "outdated";
+            status: "open" | "applied" | "kept" | "outdated";
             /** To Best */
             to_best: boolean;
             /** To Location */
@@ -1071,8 +1117,14 @@ export interface components {
              */
             type: "recommendations_outdated";
         };
-        /** RecommendationsView */
+        /**
+         * RecommendationsView
+         * @description The latest run's rows and the kept parts without a kept row. Kept recommendation rows,
+         *     kept "no space" rows and `kept_parts` together hold exactly one entry per keep mark.
+         */
         RecommendationsView: {
+            /** Kept Parts */
+            kept_parts: components["schemas"]["KeptPartRow"][];
             /** No Space */
             no_space: components["schemas"]["NoSpaceRow"][];
             /** Recommendations */
@@ -1097,6 +1149,26 @@ export interface components {
              * @enum {string}
              */
             type: "remove_best_mark";
+        };
+        /**
+         * RemoveKeep
+         * @description Remove the keep-in-place mark of `part` (FR-32).
+         */
+        RemoveKeep: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Part */
+            part: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "remove_keep";
         };
         /**
          * RemovesMove
@@ -1242,6 +1314,26 @@ export interface components {
              * @enum {string}
              */
             type: "set_best_mark";
+        };
+        /**
+         * SetKeep
+         * @description Keep `part` in place: later runs leave it alone and it cannot be applied (FR-32).
+         */
+        SetKeep: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Part */
+            part: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "set_keep";
         };
         /** StepSummary */
         StepSummary: {
@@ -1573,7 +1665,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyAll"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"];
             };
         };
         responses: {

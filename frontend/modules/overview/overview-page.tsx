@@ -9,7 +9,7 @@ import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph"
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SettingsList } from "@/components/common/settings-list";
 import { type PlanSummary, usePlanSummary } from "@/lib/api/plans";
-import { CLASS_LABELS } from "@/lib/copy";
+import { CLASS_LABELS, PARTS_KEPT_IN_PLACE } from "@/lib/copy";
 import { formatDate, formatNumber } from "@/lib/format";
 import { planSettingsHref } from "@/lib/view-state/urls";
 
@@ -24,6 +24,7 @@ export function OverviewView({ summary }: { summary: PlanSummary }) {
     { term: "Period", value: `${formatDate(summary.period_start)} to ${formatDate(summary.period_end)}` },
     { term: "Best locations", value: formatNumber(summary.best_locations) },
     { term: "Empty best locations", value: formatNumber(summary.empty_best_locations) },
+    { term: PARTS_KEPT_IN_PLACE, value: formatNumber(summary.kept_in_place) },
   ];
   return (
     <div className="flex max-w-[960px] flex-col gap-6 px-page-gutter py-5">

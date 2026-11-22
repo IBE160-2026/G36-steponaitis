@@ -7,6 +7,9 @@ import {
   applyAllQuestion,
   applyAllToast,
   CLASS_LABELS,
+  keepRemovedToast,
+  keptApplyReason,
+  keptToast,
   MARKS_CHANGED,
   marksChangedText,
   noSpaceText,
@@ -161,5 +164,13 @@ describe("fr30 run, apply and apply all copy", () => {
     expect(runAnnouncement({ type: "run_done", round: 1, recommendations: 1_200, no_space: 4 })).toBe(
       "Recommendations, round 1, 1,200 recommendations, 4 no space",
     );
+  });
+});
+
+describe("fr32 keep in place copy", () => {
+  it("fr32_keep_toasts_and_apply_reason", () => {
+    expect(keptToast("0500")).toBe("0500 is kept in place. Remove the mark from the part or the Kept in place tab.");
+    expect(keepRemovedToast("0500")).toBe("0500 is no longer kept in place.");
+    expect(keptApplyReason("0500")).toBe("0500 is kept in place.");
   });
 });

@@ -632,6 +632,7 @@ describe("fr10 save status and plan plate", () => {
       best_locations: 0,
       empty_best_locations: 0,
       apply_all_count: 0,
+      kept_in_place: 0,
       undo_preview: null,
       steps: [],
     };

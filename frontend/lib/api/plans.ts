@@ -55,6 +55,8 @@ export type RecommendationsView = components["schemas"]["RecommendationsView"];
 export type RunMeta = components["schemas"]["RunMeta"];
 export type RecommendationRow = components["schemas"]["RecommendationRow"];
 export type NoSpaceRow = components["schemas"]["NoSpaceRow"];
+/** A kept part with no kept row in the latest run (FR-32), in part-number order. */
+export type KeptPartRow = components["schemas"]["KeptPartRow"];
 export type AppliedInfo = components["schemas"]["AppliedInfo"];
 export type OutdatedInfo = components["schemas"]["OutdatedInfo"];
 export type NoSpaceCause = components["schemas"]["NoSpaceCause"];

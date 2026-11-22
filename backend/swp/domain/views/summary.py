@@ -111,6 +111,7 @@ class PlanSummary(BaseModel):
     best_locations: int
     empty_best_locations: int
     apply_all_count: int
+    kept_in_place: int
     undo_preview: UndoPreview | None
     steps: list[StepSummary]
 
@@ -191,6 +192,7 @@ def build_summary(
         best_locations=best.best,
         empty_best_locations=best.empty,
         apply_all_count=apply_all_count(state),
+        kept_in_place=len(state.keep_marks),
         undo_preview=undo_preview(last_step),
         steps=steps(analysis, state, location_count=location_count, part_count=part_count),
     )

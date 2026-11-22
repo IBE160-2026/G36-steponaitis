@@ -3,19 +3,21 @@
 // Parts roster (FR-13, UX-DR18/23/24): every Inventory part in server order (most picks first),
 // with its class, picks, current location, total stock, other locations and pick groups. The
 // server decides current and other locations; this view only filters by class and sorts. A row
-// (click or `Enter`) or a part search result opens the part panel (`?part=`, UX-DR24).
+// (click or `Enter`) or a part search result opens the part panel (`?part=`, UX-DR24). The
+// "Kept in place" column sets or removes a part's keep mark (Story 7.1); a click on its link never
+// opens the panel (DataTable skips buttons).
 
-import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
+import { createContext, memo, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
-import { Icon } from "@/components/common/icons";
+import { KeepInPlaceButton, KeptInPlaceMark, useKeepInPlace } from "@/components/common/keep-in-place";
 import { NO_CURRENT_LOCATION, usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
 import { type PartRow, type PartsView as PartsData, usePlanParts } from "@/lib/api/plans";
-import { CLASS_LABELS } from "@/lib/copy";
+import { CLASS_LABELS, KEPT_IN_PLACE } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { LocationParams } from "@/lib/view-state/urls";
@@ -46,6 +48,28 @@ export function filterByClass<T extends Pick<PartRow, "movement_class">>(
 export function countLine(shown: number, total: number, filtered: boolean): string {
   const noun = total === 1 ? "part" : "parts";
   return filtered ? `${formatNumber(shown)} of ${formatNumber(total)} ${noun}` : `${formatNumber(total)} ${noun}`;
+}
+
+/** The roster's keep action. A context, not a prop: a change of the saving reason re-renders only
+ * the keep cells, never the memoized 1,545-row table. Without a provider the link does nothing. */
+export type RosterKeep = { toggle: (part: string, kept: boolean) => unknown; savingReason: string | undefined };
+const RosterKeepContext = createContext<RosterKeep>({ toggle: () => undefined, savingReason: undefined });
+
+/** The pin when kept and the link; the link is tabbable only in the active row (`Tab` from the
+ * row reaches it, the next `Tab` leaves the table). */
+function KeepCell({ row, isActive }: { row: Pick<PartRow, "part" | "kept_in_place">; isActive: boolean }) {
+  const { toggle, savingReason } = useContext(RosterKeepContext);
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+      {row.kept_in_place && <KeptInPlaceMark />}
+      <KeepInPlaceButton
+        kept={row.kept_in_place}
+        savingReason={savingReason}
+        tabIndex={isActive ? 0 : -1}
+        onClick={() => void toggle(row.part, row.kept_in_place)}
+      />
+    </span>
+  );
 }
 
 export const COLUMNS: readonly DataTableColumn<PartRow>[] = [
@@ -108,14 +132,8 @@ export const COLUMNS: readonly DataTableColumn<PartRow>[] = [
   },
   {
     key: "kept_in_place",
-    header: "Kept in place",
-    cell: (row) =>
-      row.kept_in_place ? (
-        <span className="inline-flex items-center gap-1">
-          <Icon name="pin" size={14} />
-          kept in place
-        </span>
-      ) : null,
+    header: KEPT_IN_PLACE,
+    cell: (row, { isActive }) => <KeepCell row={row} isActive={isActive} />,
   },
 ];
 
@@ -211,17 +229,21 @@ export function PartsPage({ planId }: { planId: string; params?: LocationParams 
   const onOpen = useCallback((row: PartRow) => open(row.part), [open]);
   const search = useMemo(() => <SearchField planId={planId} onOpenPart={open} />, [planId, open]);
   const data = usePanelPlanData(planId, parts, panel.part);
+  const { toggle, savingReason } = useKeepInPlace(planId);
+  const keep = useMemo(() => ({ toggle, savingReason }), [toggle, savingReason]);
   if (data) {
     return (
-      <WithPartPanel
-        planId={planId}
-        part={panel.part}
-        detail={data.detail}
-        detailError={data.detailError}
-        onClose={panel.close}
-      >
-        <PartsView view={data.view} search={search} onOpen={onOpen} />
-      </WithPartPanel>
+      <RosterKeepContext.Provider value={keep}>
+        <WithPartPanel
+          planId={planId}
+          part={panel.part}
+          detail={data.detail}
+          detailError={data.detailError}
+          onClose={panel.close}
+        >
+          <PartsView view={data.view} search={search} onOpen={onOpen} />
+        </WithPartPanel>
+      </RosterKeepContext.Provider>
     );
   }
   return (

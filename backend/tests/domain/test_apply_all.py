@@ -23,6 +23,7 @@ from tests.domain.answer_key import (
     apply_recommendation,
     do,
     expected,
+    keep_step,
     manual_command,
     manual_step,
     run_command,
@@ -43,7 +44,7 @@ def _answer_key_after_run_2(data: ImportData, analysis: Analysis) -> PlanState:
         ("9200", "D-01-02-03", "D-01-02-02"),  # step 5
     ]:
         state = manual_step(state, part, source, target, data, analysis)
-    state = state.model_copy(update={"keep_marks": ["0500"]})  # step 6 (keep is Epic 7)
+    state = keep_step(state, "0500", data, analysis)  # step 6
     for part in ["8100", "8500", "3050", "4400", "9000", "0100"]:  # steps 7-12
         state = apply_recommendation(state, part, data, analysis)
     return run_command(data, analysis, state).state  # step 13
@@ -102,7 +103,7 @@ def test_fr30_apply_all_after_run_1(data: ImportData, analysis: Analysis) -> Non
 
 def test_fr30_apply_all_kept_part_skipped(data: ImportData, analysis: Analysis) -> None:
     state, _ = after_run_1(data, analysis)
-    state = state.model_copy(update={"keep_marks": ["0500"]})  # rec #5
+    state = keep_step(state, "0500", data, analysis)  # rec #5
 
     applied = _apply_all(state, data, analysis)
 

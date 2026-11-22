@@ -74,8 +74,33 @@ class ApplyAll(BaseModel):
     base_version: int
 
 
+class SetKeep(BaseModel):
+    """Keep `part` in place: later runs leave it alone and it cannot be applied (FR-32)."""
+
+    type: Literal["set_keep"] = "set_keep"
+    command_id: uuid.UUID
+    base_version: int
+    part: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
+
+
+class RemoveKeep(BaseModel):
+    """Remove the keep-in-place mark of `part` (FR-32)."""
+
+    type: Literal["remove_keep"] = "remove_keep"
+    command_id: uuid.UUID
+    base_version: int
+    part: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
+
+
 Command = Annotated[
-    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations | ApplyRecommendation | ApplyAll,
+    SetBestMark
+    | RemoveBestMark
+    | ManualMove
+    | RunRecommendations
+    | ApplyRecommendation
+    | ApplyAll
+    | SetKeep
+    | RemoveKeep,
     Field(discriminator="type"),
 ]
 """Every command a plan accepts (closed union)."""
@@ -89,6 +114,16 @@ class MarkSet(BaseModel):
 class MarkRemoved(BaseModel):
     type: Literal["mark_removed"] = "mark_removed"
     mark: BestMark
+
+
+class KeepSet(BaseModel):
+    type: Literal["keep_set"] = "keep_set"
+    part: str
+
+
+class KeepRemoved(BaseModel):
+    type: Literal["keep_removed"] = "keep_removed"
+    part: str
 
 
 class MoveMade(BaseModel):
@@ -166,7 +201,9 @@ Event = Annotated[
     | MoveRemoved
     | RunDone
     | RecommendationsOutdated
-    | ApplyAllDone,
+    | ApplyAllDone
+    | KeepSet
+    | KeepRemoved,
     Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""

@@ -1,12 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { keepCommand, keepLabel, keepToastText, sendKeep } from "@/components/common/keep-in-place";
 import { LocationChip, locationChipHref } from "@/components/common/location-chip";
 import {
   CLOSE_LABEL,
   NO_CURRENT_LOCATION,
   NO_PICK_GROUPS,
   PartFacts,
+  PartKeepLink,
   PartPanel,
   PartPanelFrame,
 } from "@/components/common/part-panel";
@@ -36,6 +38,7 @@ const DETAIL: PartDetail = {
     { partner: { part: "5000", description: "Engine oil 5W-30", aisle: "A" }, shared_jobs: 8 },
     { partner: { part: "1008614-00", description: "Oil filter", aisle: null }, shared_jobs: 1 },
   ],
+  kept_in_place: false,
 };
 
 function text(markup: string): string {
@@ -171,5 +174,47 @@ describe("uxdr24 part in the URL", () => {
     expect(parseLocationParams(new URLSearchParams(both.split("?")[1]))).toEqual({ aisle: "B", loc: "B-01", part: "A & B" });
     expect(parseLocationParams({ part: ["2400", "5000"] })).toEqual({ part: "2400" });
     expect(parseLocationParams({ part: "" })).toEqual({});
+  });
+});
+
+describe("fr32 keep in place in the part panel", () => {
+  it("fr32_panel_keep_link_and_pin", () => {
+    const open = text(renderToStaticMarkup(<PartKeepLink detail={DETAIL} savingReason={undefined} onToggle={() => {}} />));
+    expect(open).toContain("Keep in place");
+    expect(open).not.toContain("kept in place");
+    const kept = renderToStaticMarkup(
+      <PartKeepLink detail={{ ...DETAIL, kept_in_place: true }} savingReason={undefined} onToggle={() => {}} />,
+    );
+    expect(kept).toMatch(/<button[^>]*>Remove keep in place<\/button>/);
+    expect(text(kept)).toContain("kept in place");
+    expect(kept).toContain("<svg");
+    const saving = renderToStaticMarkup(
+      <PartKeepLink detail={DETAIL} savingReason="Saving the last change…" onToggle={() => {}} />,
+    );
+    expect(saving).toMatch(/aria-disabled="true"[^>]*>Keep in place</);
+  });
+
+  it("fr32_keep_command_label_and_toast_without_undo", async () => {
+    expect(keepCommand("0500", false)).toEqual({ type: "set_keep", part: "0500" });
+    expect(keepCommand("0500", true)).toEqual({ type: "remove_keep", part: "0500" });
+    expect(keepLabel(false)).toBe("Keep in place");
+    expect(keepLabel(true)).toBe("Remove keep in place");
+    expect(keepToastText([{ type: "keep_set", part: "0500" }])).toBe(
+      "0500 is kept in place. Remove the mark from the part or the Kept in place tab.",
+    );
+    expect(keepToastText([{ type: "keep_removed", part: "0500" }])).toBe("0500 is no longer kept in place.");
+    expect(keepToastText([])).toBeUndefined();
+
+    const notify = vi.fn();
+    const send = vi.fn(async () => ({ outcome: "confirmed" as const, events: [{ type: "keep_set" as const, part: "0500" }] }));
+    await sendKeep(send, "0500", false, notify);
+    expect(send).toHaveBeenCalledWith({ type: "set_keep", part: "0500" });
+    // A mark toast is a message only: no Undo action is passed.
+    expect(notify).toHaveBeenCalledWith("0500 is kept in place. Remove the mark from the part or the Kept in place tab.");
+    expect(notify.mock.calls[0]).toHaveLength(1);
+    const noop = vi.fn();
+    await sendKeep(async () => ({ outcome: "confirmed", events: [] }), "0500", true, noop);
+    await sendKeep(async () => ({ outcome: "dropped", events: [] }), "0500", true, noop);
+    expect(noop).not.toHaveBeenCalled();
   });
 });

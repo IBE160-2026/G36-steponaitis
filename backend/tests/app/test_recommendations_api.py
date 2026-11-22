@@ -89,7 +89,7 @@ def test_fr28_reasons_over_http_and_read_only(empty_tables: str) -> None:
     assert first.json() == second.json()
     assert _row(uuid.UUID(plan_id)) == before
     body = first.json()
-    assert set(body) == {"version", "run", "recommendations", "no_space"}
+    assert set(body) == {"version", "run", "recommendations", "no_space", "kept_parts"}
     assert body["recommendations"][0]["reason"]["kind"] == "class"
     assert body["recommendations"][5]["reason"]["kind"] == "pick_group"
     assert [n["part"] for n in body["no_space"]] == ["1200", "10240", "2400", "6600"]

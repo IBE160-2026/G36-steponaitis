@@ -190,3 +190,35 @@ export function runLine(run: RunMeta, recommendations: number, noSpace: number):
   const when = `${formatDate(run.created_at)} ${formatTime(run.created_at)}`;
   return `Run ${when} by ${run.created_by} · ${recommendationsCount(recommendations)} · ${formatNumber(noSpace)} no space`;
 }
+
+// Keep in place (Story 7.1, FR-32, UX-DR37): the link, its state words and its toasts. A mark toast
+// never offers Undo.
+
+/** The link that sets the mark, and the one that removes it. */
+export const KEEP_IN_PLACE = "Keep in place";
+export const REMOVE_KEEP_IN_PLACE = "Remove keep in place";
+/** The roster's and part panel's state words beside the pin glyph. */
+export const KEPT_IN_PLACE_STATE = "kept in place";
+/** A kept recommendation's row and detail line, the Kept tab label and the roster column head. */
+export const KEPT_IN_PLACE = "Kept in place";
+/** The Kept tab when no part is kept. */
+export const NOTHING_KEPT = "Nothing kept in place.";
+/** The overview fact's term. */
+export const PARTS_KEPT_IN_PLACE = "Parts kept in place";
+/** The Kept tab's trailing band: kept parts without an open recommendation in this run. */
+export const KEPT_BAND = { tag: "Kept", name: "No open recommendation in this run", note: "Part-number order" } as const;
+
+/** The toast after Keep in place: "0500 is kept in place. Remove the mark from the part or the Kept in place tab." */
+export function keptToast(part: string): string {
+  return `${part} is kept in place. Remove the mark from the part or the Kept in place tab.`;
+}
+
+/** The toast after Remove keep in place. */
+export function keepRemovedToast(part: string): string {
+  return `${part} is no longer kept in place.`;
+}
+
+/** Why Apply is disabled on a kept recommendation (the server's rejection, said first). */
+export function keptApplyReason(part: string): string {
+  return `${part} is kept in place.`;
+}

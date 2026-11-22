@@ -180,7 +180,13 @@ def test_fr28_view_rows_carry_display_facts(
 def test_fr28_no_run_view(data: ImportData, analysis: Analysis) -> None:
     view = _view(PlanState.new(), data, analysis)
 
-    assert view.model_dump() == {"version": 7, "run": None, "recommendations": [], "no_space": []}
+    assert view.model_dump() == {
+        "version": 7,
+        "run": None,
+        "recommendations": [],
+        "no_space": [],
+        "kept_parts": [],
+    }
 
 
 # --- FR-29: revalidate and each cause ---

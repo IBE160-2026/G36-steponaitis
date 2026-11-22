@@ -51,6 +51,7 @@ function summary(overrides: Partial<PlanSummary> = {}): PlanSummary {
     best_locations: 0,
     empty_best_locations: 0,
     apply_all_count: 0,
+    kept_in_place: 0,
     undo_preview: null,
     steps: [],
     ...overrides,
@@ -129,6 +130,11 @@ describe("fr7 overview", () => {
     expect(markup.match(/<svg[^>]*data-class=/g)).toHaveLength(4);
     expect(body).toContain("Fast-moving 24 or more picks");
     expect(markup).toContain(`href="${planSettingsHref(PLAN_ID)}"`);
+  });
+
+  it("fr32_overview_shows_parts_kept_in_place", () => {
+    expect(text(html(<OverviewView summary={summary()} />))).toContain("Parts kept in place 0");
+    expect(text(html(<OverviewView summary={summary({ kept_in_place: 1 })} />))).toContain("Parts kept in place 1");
   });
 
   it("fr22_overview_shows_best_and_empty_best_counts", () => {

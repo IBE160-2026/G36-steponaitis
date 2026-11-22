@@ -1,7 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import type { NoSpaceRow, PlanSummary, RecommendationRow, RecommendationsView, RunMeta } from "@/lib/api/plans";
+import type {
+  KeptPartRow,
+  NoSpaceRow,
+  PlanSummary,
+  RecommendationRow,
+  RecommendationsView,
+  RunMeta,
+} from "@/lib/api/plans";
 import { SAVING_REASON } from "@/lib/commands";
 import { NO_OPEN_TO_APPLY } from "@/lib/copy";
 import { parseRecommendationsTab, type RecommendationsTab } from "@/lib/view-state/urls";
@@ -10,6 +17,7 @@ import {
   collapseNoSpace,
   EMPTY_TAB,
   isApplyShortcut,
+  isKeepShortcut,
   itemId,
   nextOptionIndex,
   optionName,
@@ -17,6 +25,7 @@ import {
   tabCounts,
   tabItems,
   tabName,
+  TABS,
 } from "@/modules/recommendations/list";
 import {
   applyReason,
@@ -66,14 +75,20 @@ function noSpace(part: string, fields: Partial<NoSpaceRow> = {}): NoSpaceRow {
     from_best: false,
     reason: null,
     cause: { rule: "rule_1", aisle: null, outside_best: false },
+    kept_in_place: false,
     ...fields,
   };
 }
 
 const RUN: RunMeta = { id: "run", round: 1, created_at: "2026-11-22T13:05:00Z", created_by: "planner" };
 
-function view(recommendations: RecommendationRow[], no_space: NoSpaceRow[] = [], run: RunMeta | null = RUN): RecommendationsView {
-  return { version: 5, run, recommendations, no_space };
+function view(
+  recommendations: RecommendationRow[],
+  no_space: NoSpaceRow[] = [],
+  run: RunMeta | null = RUN,
+  kept_parts: KeptPartRow[] = [],
+): RecommendationsView {
+  return { version: 5, run, recommendations, no_space, kept_parts };
 }
 
 function summary(fields: Partial<PlanSummary> = {}): PlanSummary {
@@ -112,13 +127,14 @@ describe("ux_dr31 tabs", () => {
     expect(parseRecommendationsTab(new URLSearchParams("tab=outdated"))).toBe("outdated");
     expect(parseRecommendationsTab({ tab: "no-space" })).toBe("no-space");
     expect(parseRecommendationsTab({ tab: ["applied", "open"] })).toBe("applied");
-    expect(parseRecommendationsTab(new URLSearchParams("tab=kept"))).toBe("open");
+    expect(parseRecommendationsTab(new URLSearchParams("tab=kept"))).toBe("kept");
+    expect(parseRecommendationsTab(new URLSearchParams("tab=dismissed"))).toBe("open");
     expect(parseRecommendationsTab({})).toBe("open");
   });
 
   it("ux_dr31_tab_counts_and_names", () => {
     const data = view([rec(), rec(), OUTDATED, APPLIED], [noSpace("1200")]);
-    expect(tabCounts(data)).toEqual({ open: 2, applied: 1, outdated: 1, "no-space": 1 });
+    expect(tabCounts(data)).toEqual({ open: 2, applied: 1, kept: 0, outdated: 1, "no-space": 1 });
     expect(tabName("open", 13)).toBe("Open, 13 recommendations");
     expect(tabName("applied", 1)).toBe("Applied, 1 recommendation");
     expect(tabName("outdated", 0)).toBe("Outdated, 0 recommendations");
@@ -311,5 +327,115 @@ describe("ux_dr34 header and edge states", () => {
   it("ux_dr13_saving_disables_plan_changing_buttons", () => {
     const markup = render(view([rec()]), "open", { disabledReason: SAVING_REASON });
     expect(markup.match(new RegExp(SAVING_REASON, "g"))?.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+function keptPart(part: string, fields: Partial<KeptPartRow> = {}): KeptPartRow {
+  return {
+    part,
+    description: `Part ${part}`,
+    movement_class: "slow",
+    picks: 2,
+    from_location: "A-01-03-01",
+    from_best: true,
+    ...fields,
+  };
+}
+
+const KEPT = rec({ number: 5, part: "0500", rule: "rule_2", status: "kept" });
+
+describe("fr32 kept in place tab", () => {
+  it("fr32_tabs_in_order_with_kept_url_value", () => {
+    expect(TABS.map((tab) => tab.label)).toEqual(["Open", "Applied", "Kept in place", "Outdated", "No space"]);
+    expect(TABS.map((tab) => tab.value)).toContain("kept");
+  });
+
+  it("fr32_kept_tab_lists_each_kept_part_once_and_counts_parts", () => {
+    const data = view(
+      [rec(), KEPT, APPLIED],
+      [noSpace("1200", { kept_in_place: true }), noSpace("10240")],
+      RUN,
+      [keptPart("9100", { from_best: false, from_location: "D-01-02-03" })],
+    );
+    const kept = tabItems(data, "kept");
+    expect(kept.map(itemId)).toEqual([KEPT.id, "nospace:1200", "kept:9100"]);
+    expect(tabItems(data, "no-space").map(itemId)).toEqual(["nospace:10240"]);
+    expect(tabItems(data, "open").map(itemId)).not.toContain(KEPT.id);
+    expect(tabCounts(data)).toEqual({ open: 1, applied: 1, kept: 3, outdated: 0, "no-space": 1 });
+    expect(tabName("kept", 3)).toBe("Kept in place, 3 parts");
+    expect(tabName("kept", 1)).toBe("Kept in place, 1 part");
+    const bands = bandViews("kept", kept, new Set(), new Set());
+    expect(bands.map((band) => band.rule)).toEqual(["rule_1", "rule_2", "kept"]);
+    const markup = render(data, "kept");
+    expect(markup).toContain('aria-label="Kept in place, 3 parts"');
+    expect(text(markup)).toContain("No open recommendation in this run");
+    expect(text(markup)).toContain("Part-number order");
+  });
+
+  it("fr32_kept_tab_empty_text", () => {
+    expect(EMPTY_TAB.kept).toBe("Nothing kept in place.");
+    expect(text(render(view([rec()]), "kept"))).toContain("Nothing kept in place.");
+  });
+
+  it("fr32_kept_row_detail_apply_disabled_and_remove_link", () => {
+    expect(applyReason(KEPT, undefined)).toBe("0500 is kept in place.");
+    expect(optionName({ kind: "rec", row: KEPT })).toMatch(/, Kept in place$/);
+    expect(optionName({ kind: "kept-part", row: keptPart("9100") })).toBe("9100, at A-01-03-01 BEST, Kept in place");
+    const markup = render(view([KEPT]), "kept");
+    expect(markup).toMatch(/aria-disabled="true"[^>]*>Apply</);
+    expect(markup).toContain("0500 is kept in place.");
+    expect(markup).toMatch(/aria-keyshortcuts="Alt\+K"[^>]*>Remove keep in place</);
+    expect(text(markup)).toContain("Kept in place");
+    expect(eyebrowText({ kind: "kept-part", row: keptPart("9100") })).toBe("SELECTED · KEPT IN PLACE");
+  });
+
+  it("fr32_open_and_no_space_details_show_keep_link_applied_and_outdated_do_not", () => {
+    const open = render(view([rec()]));
+    expect(open).toMatch(/>Apply<\/button>[\s\S]*>Keep in place</);
+    expect(text(render(view([], [noSpace("1200")]), "no-space"))).toContain("Keep in place");
+    expect(text(render(view([APPLIED]), "applied"))).not.toContain("Keep in place");
+    expect(text(render(view([OUTDATED]), "outdated"))).not.toContain("Keep in place");
+  });
+
+  it("fr32_kept_part_detail_has_remove_link_pin_and_no_apply", () => {
+    const markup = render(view([], [], RUN, [keptPart("9100")]), "kept");
+    expect(markup).toMatch(/aria-keyshortcuts="Alt\+K"[^>]*>Remove keep in place</);
+    expect(markup).toMatch(/data-kept-in-place=""[^>]*><svg[\s\S]*?<span>Kept in place<\/span>/);
+    expect(markup).not.toMatch(/>Apply</);
+    expect(text(markup)).toContain("SELECTED · KEPT IN PLACE");
+  });
+
+  it("fr32_kept_no_space_detail_has_remove_link_pin_and_no_apply", () => {
+    const markup = render(view([], [noSpace("1200", { kept_in_place: true })]), "kept");
+    expect(markup).toMatch(/aria-keyshortcuts="Alt\+K"[^>]*>Remove keep in place</);
+    expect(markup).toMatch(/data-kept-in-place=""[^>]*><svg[\s\S]*?<span>Kept in place<\/span>/);
+    expect(markup).not.toMatch(/>Apply</);
+    expect(text(markup)).toContain("SELECTED · NO SPACE · RULE 1");
+  });
+
+  it("fr32_empty_run_keeps_its_text_and_shows_the_kept_tab", () => {
+    const markup = render(view([], [], RUN, [keptPart("0500")]), "kept");
+    expect(text(markup)).toContain(emptyRunText(1));
+    expect(markup).toContain('aria-label="Kept in place, 1 part"');
+    expect(markup).toMatch(/>Remove keep in place</);
+  });
+
+  it("fr32_no_run_shows_no_run_text_and_the_kept_tab", () => {
+    const markup = render(view([], [], null, [keptPart("0500")]), "kept");
+    expect(text(markup)).toContain(NO_RUN);
+    expect(markup).toContain('aria-label="Kept in place, 1 part"');
+    expect(markup).toMatch(/>Remove keep in place</);
+    expect(render(view([], [], null), "kept")).not.toContain('role="tablist"');
+  });
+
+  it("uxdr8_alt_k_keeps_never_in_a_text_field", () => {
+    const option = { tagName: "DIV" };
+    expect(isKeepShortcut({ altKey: true, code: "KeyK", target: option })).toBe(true);
+    expect(isKeepShortcut({ altKey: false, code: "KeyK", target: option })).toBe(false);
+    expect(isKeepShortcut({ altKey: true, code: "KeyA", target: option })).toBe(false);
+    for (const tagName of ["INPUT", "TEXTAREA", "SELECT"]) {
+      expect(isKeepShortcut({ altKey: true, code: "KeyK", target: { tagName } })).toBe(false);
+    }
+    expect(isKeepShortcut({ altKey: true, code: "KeyK", target: { tagName: "DIV", isContentEditable: true } })).toBe(false);
   });
 });

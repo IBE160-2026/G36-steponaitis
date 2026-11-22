@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { planViewKey } from "@/lib/view-state/storage";
-import { planOpenHref, rememberPlanView, storedPlanViewHref } from "@/lib/view-state/urls";
+import {
+  parseRecommendationsTab,
+  planOpenHref,
+  recommendationsTabHref,
+  rememberPlanView,
+  storedPlanViewHref,
+} from "@/lib/view-state/urls";
 
 // Story 6.2: the plan's last view lives only in this browser (FR-9, AD-20). Every read and write
 // goes through the try/catch helpers, so blocked storage opens the overview.
@@ -123,5 +129,12 @@ describe("ad20 plan view state", () => {
 
     expect(() => rememberPlanView(`/plans/${PLAN}/parts`, "")).not.toThrow();
     expect(storedPlanViewHref(PLAN)).toBe(OVERVIEW);
+  });
+});
+
+describe("fr32 kept in place tab url", () => {
+  it("fr32_kept_tab_href_and_parse", () => {
+    expect(recommendationsTabHref("p1", "kept")).toBe("/plans/p1/recommendations?tab=kept");
+    expect(parseRecommendationsTab(new URLSearchParams("tab=kept"))).toBe("kept");
   });
 });

@@ -30,6 +30,7 @@ def test_fr13_part_detail_endpoint_on_sample(empty_tables: str) -> None:
         "current_location",
         "other_locations",
         "pick_groups",
+        "kept_in_place",
     }
     assert body["version"] == 1
     assert body["part"] == first["part"]

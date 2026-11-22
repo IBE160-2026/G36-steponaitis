@@ -19,6 +19,7 @@ import { type KeyboardEvent, type ReactNode, type Ref, useCallback, useEffect, u
 import { ClassGlyph } from "@/components/common/class-glyph";
 import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
+import { KeepInPlaceButton, KeptInPlaceMark, useKeepInPlace } from "@/components/common/keep-in-place";
 import { LocationChip } from "@/components/common/location-chip";
 import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
@@ -216,6 +217,35 @@ export function PartPanelFrame({
   );
 }
 
+/** Keep in place / Remove keep in place under the facts (Story 7.1), with the pin when kept. */
+export function PartKeepLink({
+  detail,
+  savingReason,
+  onToggle,
+}: {
+  detail: Pick<PartDetail, "part" | "kept_in_place">;
+  savingReason: string | undefined;
+  onToggle: (part: string, kept: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <KeepInPlaceButton
+        kept={detail.kept_in_place}
+        savingReason={savingReason}
+        onClick={() => onToggle(detail.part, detail.kept_in_place)}
+      />
+      {detail.kept_in_place && <KeptInPlaceMark />}
+    </div>
+  );
+}
+
+function PartKeepAction({ planId, detail }: { planId: string; detail: PartDetail }) {
+  const { toggle, savingReason } = useKeepInPlace(planId);
+  return (
+    <PartKeepLink detail={detail} savingReason={savingReason} onToggle={(part, kept) => void toggle(part, kept)} />
+  );
+}
+
 /** Manual move… and its dialog, under the facts (Story 4.3). Opening the dialog keeps the panel. */
 function PartMoveAction({ planId, detail }: { planId: string; detail: PartDetail }) {
   const [open, setOpen] = useState(false);
@@ -252,6 +282,7 @@ export function PartPanel({
       {detail ? (
         <>
           <PartFacts planId={planId} detail={detail} />
+          <PartKeepAction planId={planId} detail={detail} />
           <PartMoveAction planId={planId} detail={detail} />
         </>
       ) : showsLoadError(detailError) ? (

@@ -1,10 +1,10 @@
 """Milestone 1 gate: the answer key (`data/answer-key/expected.json`) in one place (domain only).
 
 Classes (FR-17), pick groups (FR-19), the merged inventory (FR-6), occupancy (FR-14) and one
-replay of answer-key steps 1-14 (FR-23 to FR-30, FR-33/FR-34). Every step goes through
-`domain.apply` except step 6: the keep command is Epic 7, so 0500's keep mark is set in the state.
-Steps 15-20, the move list, the final current locations, the final before/after and the settled
-check need Epic 7/8 commands and are skipped with the story that will un-skip them.
+replay of answer-key steps 1-14 (FR-23 to FR-30, FR-32 to FR-34). Every step goes through
+`domain.apply`, step 6 as `set_keep 0500`. Steps 15-20, the move list, the final current
+locations, the final before/after and the settled check need Epic 7/8 commands and are skipped
+with the story that will un-skip them.
 
 The six rule modules never import `swp.store` or `swp.app` (checked below by scanning their
 source); the import-linter layers contract also runs on the real package in
@@ -30,6 +30,7 @@ from tests.domain.answer_key import (
     apply_recommendation,
     expected,
     expected_run_outcome,
+    keep_step,
     manual_step,
     run_command,
     run_outcome,
@@ -129,8 +130,7 @@ def test_fr23_fr30_answer_key_steps_1_to_14(
             assert run_outcome(run) == expected_run_outcome(step), f"step {number}"
             continue
         if action == "keep_in_place":
-            # The keep command is Epic 7, so the mark is set in the state.
-            state = state.model_copy(update={"keep_marks": [*state.keep_marks, step["part"]]})
+            state = keep_step(state, step["part"], data, analysis)
             continue
         before = len(state.steps)
         if action == "apply":
@@ -161,6 +161,33 @@ def test_fr23_fr30_answer_key_steps_1_to_14(
         assert row.fast_in_best.before == want["fast_in_best"]["before"][row.aisle]
         assert row.pick_groups_together.before == want["pick_groups_together"]["before"][row.aisle]
     assert before_after.total.fast_in_best.before == want["fast_in_best"]["before"]["total"]
+
+
+def test_fr32_kept_part_skipped_in_run_2(
+    key: dict[str, Any], data: ImportData, analysis: Analysis
+) -> None:
+    state = PlanState(best_marks=MARKS)
+    for step in key["steps"][:12]:
+        match step["action"]:
+            case "run":
+                state = run_command(data, analysis, state).state
+            case "keep_in_place":
+                state = keep_step(state, step["part"], data, analysis)
+            case "apply":
+                state = apply_recommendation(state, step["part"], data, analysis)
+            case action:
+                assert action == "manual_move", action
+                state = manual_step(state, step["part"], step["from"], step["to"], data, analysis)
+    assert state.keep_marks == ["0500"]
+    assert "0500" in {r.part for r in state.runs[-1].recommendations}  # run 1 had it
+
+    run_2 = key["steps"][12]
+    assert run_2["action"] == "run" and run_2["round"] == 2
+    run = run_command(data, analysis, state).state.runs[-1]
+
+    assert run_outcome(run) == expected_run_outcome(run_2)
+    assert "0500" not in {r.part for r in run.recommendations}
+    assert "0500" not in {n.part for n in run.no_space}
 
 
 @pytest.mark.parametrize(
