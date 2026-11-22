@@ -1,7 +1,9 @@
-"""FR-23/FR-24/FR-25/FR-27/AD-5/AD-14: rules 1 and 2 and the `run` command (domain only)."""
+"""FR-23/FR-24/FR-25/FR-26/FR-27/AD-5/AD-14: rules 1, 2 and 3 and the `run` command (domain
+only)."""
 
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from swp.domain.analysis import Analysis
 from swp.domain.apply import apply
@@ -17,7 +19,7 @@ from swp.domain.commands import (
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import fewest_picks_order, location_code_order
 from swp.domain.planning import current_round, import_copy, replay, run_baseline
-from swp.domain.rules import RuleMove, rule_1, rule_2
+from swp.domain.rules import RuleMove, rule_1, rule_2, rule_3
 from swp.domain.state import (
     AisleMark,
     LevelMark,
@@ -50,6 +52,30 @@ def _rule_2(
     return rule_2(data, copy, analysis, state, earlier_moves or [], earlier_no_space or [])
 
 
+def _rule_3(
+    data: ImportData,
+    analysis: Analysis,
+    state: PlanState,
+    earlier_moves: list[RuleMove] | None = None,
+    earlier_no_space: list[NoSpace] | None = None,
+) -> tuple[list[RuleMove], list[NoSpace]]:
+    copy = replay(data, state.steps).copy
+    return rule_3(data, copy, analysis, state, earlier_moves or [], earlier_no_space or [])
+
+
+def _expected_outcome(
+    step: dict[str, Any],
+) -> tuple[list[tuple[int, str, str, str, str]], list[tuple[str, str]]]:
+    """A run step of `expected.json` in `_outcome`'s shape."""
+    return (
+        [
+            (n, f"rule_{r['rule']}", r["part"], r["from"], r["to"])
+            for n, r in enumerate(step["recommendations_in_order"], start=1)
+        ],
+        [(n["part"], f"rule_{n['rule']}") for n in step["no_space"]],
+    )
+
+
 def _run(
     data: ImportData, analysis: Analysis, state: PlanState, command_id: uuid.UUID | None = None
 ) -> Applied:
@@ -64,21 +90,12 @@ def _outcome(run: Run) -> tuple[list[tuple[int, str, str, str, str]], list[tuple
 
 def test_fr24_answer_key_round1(data: ImportData, analysis: Analysis) -> None:
     step = expected()["steps"][0]
-    # Rules 1 and 2 only: rule 3 is Story 5.4.
-    recs = [r for r in step["recommendations_in_order"] if r["rule"] in (1, 2)]
-    no_space = [n for n in step["no_space"] if n["rule"] in (1, 2)]
 
     applied = _run(data, analysis, PlanState(best_marks=MARKS))
 
     run = applied.state.runs[-1]
     assert run.round == step["round"] == 1
-    assert _outcome(run) == (
-        [
-            (n, f"rule_{r['rule']}", r["part"], r["from"], r["to"])
-            for n, r in enumerate(recs, start=1)
-        ],
-        [(n["part"], f"rule_{n['rule']}") for n in no_space],
-    )
+    assert _outcome(run) == _expected_outcome(step)
     assert _outcome(run) == (
         [
             (1, "rule_1", "1100", "C-01-01-01", "A-01-01-03"),
@@ -86,10 +103,13 @@ def test_fr24_answer_key_round1(data: ImportData, analysis: Analysis) -> None:
             (3, "rule_2", "9000", "A-01-01-02", "B-01-04-01"),
             (4, "rule_2", "0100", "A-01-01-01", "B-01-04-02"),
             (5, "rule_2", "0500", "A-01-03-01", "B-01-04-03"),
+            (6, "rule_3", "8100", "B-01-02-01", "C-01-03-01"),
+            (7, "rule_3", "8500", "B-01-02-02", "D-01-03-01"),
+            (8, "rule_3", "3050", "B-01-02-03", "D-01-03-02"),
         ],
-        [("1200", "rule_1"), ("10240", "rule_1"), ("2400", "rule_1")],
+        [("1200", "rule_1"), ("10240", "rule_1"), ("2400", "rule_1"), ("6600", "rule_3")],
     )
-    assert applied.events == [RunDone(round=1, recommendations=5, no_space=3)]
+    assert applied.events == [RunDone(round=1, recommendations=8, no_space=4)]
     assert applied.state.steps == []
     assert applied.state.next_move_number == 1
 
@@ -176,7 +196,7 @@ def test_fr23_run_identity_and_metadata(data: ImportData, analysis: Analysis) ->
         to_location="A-01-01-03",
     )
     assert [(r.id, r.number) for r in run.recommendations] == [
-        (f"{run_id}:{n}", n) for n in range(1, 6)
+        (f"{run_id}:{n}", n) for n in range(1, 9)
     ]
     assert all(r.status == "open" for r in run.recommendations)
     assert current_round(applied.state) == 1
@@ -219,18 +239,22 @@ def test_fr23_new_run_prunes_unreferenced_and_bumps_round(
     assert old.no_space == []
     assert new.round == 2
     assert new.id == str(uuid.uuid5(uuid.UUID(int=2), "run:2"))
-    # 1100 is now in A-01-01-03 (best); aisle A has no empty location left. Rule 2's
-    # moves are not applied, so it recommends them again.
+    # 1100 is now in A-01-01-03 (best); aisle A has no empty location left. Rule 2's and
+    # rule 3's moves are not applied, so they come again; 1100 freed C-01-01-01, which is
+    # now the first empty location in 8200's aisle.
     assert _outcome(new) == (
         [
             (1, "rule_2", "4400", "A-01-03-02", "B-01-03-03"),
             (2, "rule_2", "9000", "A-01-01-02", "B-01-04-01"),
             (3, "rule_2", "0100", "A-01-01-01", "B-01-04-02"),
             (4, "rule_2", "0500", "A-01-03-01", "B-01-04-03"),
+            (5, "rule_3", "8100", "B-01-02-01", "C-01-01-01"),
+            (6, "rule_3", "8500", "B-01-02-02", "D-01-03-01"),
+            (7, "rule_3", "3050", "B-01-02-03", "D-01-03-02"),
         ],
-        [("1200", "rule_1"), ("10240", "rule_1"), ("2400", "rule_1")],
+        [("1200", "rule_1"), ("10240", "rule_1"), ("2400", "rule_1"), ("6600", "rule_3")],
     )
-    assert applied.events == [RunDone(round=2, recommendations=4, no_space=3)]
+    assert applied.events == [RunDone(round=2, recommendations=7, no_space=4)]
     assert applied.state.steps == [step]
     assert current_round(applied.state) == 2
 
@@ -315,13 +339,18 @@ def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
         state = _manual(state, part, source, target, data, analysis)
     # Step 6: the keep command is Epic 7, so the mark is set in the state.
     state = state.model_copy(update={"keep_marks": ["0500"]})
-    # Steps 7-9: rule 3 is Story 5.4, so its moves are made as manual moves in round 1.
-    for part, source, target in [
-        ("8100", "B-01-02-01", "C-01-03-01"),
-        ("8500", "B-01-02-02", "D-01-03-01"),
-        ("3050", "B-01-02-03", "D-01-03-02"),
-    ]:
-        state = _manual(state, part, source, target, data, analysis)
+    for index, part in [(6, "8100"), (7, "8500"), (8, "3050")]:  # steps 7-9
+        state = _apply_rec(state, part, data, analysis)
+        move = steps[index]["expect_move"]
+        assert (state.steps[-1].part, state.steps[-1].rule, state.steps[-1].round) == (
+            part,
+            f"rule_{move['rule']}",
+            move["round"],
+        )
+        assert (state.steps[-1].from_location, state.steps[-1].to_location) == (
+            move["from"],
+            move["to"],
+        )
     for part in ["4400", "9000", "0100"]:  # steps 10-12
         state = _apply_rec(state, part, data, analysis)
     assert {step.round for step in state.steps} == {1}
@@ -329,25 +358,19 @@ def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
     applied = _run(data, analysis, state)  # step 13
 
     step = steps[12]
-    recs = [r for r in step["recommendations_in_order"] if r["rule"] in (1, 2)]
     run = applied.state.runs[-1]
     assert run.round == step["round"] == 2
-    assert _outcome(run) == (
-        [
-            (n, f"rule_{r['rule']}", r["part"], r["from"], r["to"])
-            for n, r in enumerate(recs, start=1)
-        ],
-        [(n["part"], f"rule_{n['rule']}") for n in step["no_space"] if n["rule"] in (1, 2)],
-    )
+    assert _outcome(run) == _expected_outcome(step)
     assert _outcome(run) == (
         [
             (1, "rule_1", "1200", "B-01-01-02", "A-01-01-01"),
             (2, "rule_1", "10240", "B-01-01-03", "A-01-01-02"),
             (3, "rule_1", "2400", "C-01-01-02", "A-01-03-02"),
+            (4, "rule_3", "8400", "C-01-02-02", "D-01-03-03"),
         ],
-        [],
+        [("6600", "rule_3")],
     )
-    assert applied.events == [RunDone(round=2, recommendations=3, no_space=0)]
+    assert applied.events == [RunDone(round=2, recommendations=4, no_space=1)]
 
 
 def test_fr25_no_space_under_rule_2(data: ImportData, analysis: Analysis) -> None:
@@ -444,3 +467,195 @@ def test_ad14_fewest_picks_order(analysis: Analysis) -> None:
     tied = analysis.parts["4400"]
     more = tied.model_copy(update={"picks": tied.picks + 1})
     assert fewest_picks_order({"3050": tied, "9": more, "30400": tied}) == ["30400", "3050", "9"]
+
+
+def _rule_3_moves(moves: list[RuleMove]) -> list[tuple[str, str, str]]:
+    return [(m.part, m.from_location, m.to_location) for m in moves]
+
+
+def test_fr26_answer_key_round1_rule_3(data: ImportData, analysis: Analysis) -> None:
+    state = PlanState(best_marks=MARKS)
+    moves_1, no_space_1 = _rule_1(data, analysis, state)
+    moves_2, no_space_2 = _rule_2(data, analysis, state, moves_1, no_space_1)
+
+    moves, no_space = _rule_3(
+        data, analysis, state, [*moves_1, *moves_2], [*no_space_1, *no_space_2]
+    )
+
+    assert moves == [
+        RuleMove(rule="rule_3", part="8100", from_location="B-01-02-01", to_location="C-01-03-01"),
+        RuleMove(rule="rule_3", part="8500", from_location="B-01-02-02", to_location="D-01-03-01"),
+        RuleMove(rule="rule_3", part="3050", from_location="B-01-02-03", to_location="D-01-03-02"),
+    ]
+    assert no_space == [NoSpace(part="6600", rule="rule_3")]
+
+
+def test_fr26_blocks_and_silent_skips(data: ImportData, analysis: Analysis) -> None:
+    step = expected()["steps"][0]
+
+    run = _run(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
+
+    outcome = {r.part for r in run.recommendations} | {n.part for n in run.no_space}
+    rule_3 = {r.part for r in run.recommendations if r.rule == "rule_3"} | {
+        n.part for n in run.no_space if n.rule == "rule_3"
+    }
+    assert rule_3 == {"8100", "8500", "3050", "6600"}
+    # 0600 is in a best location, 1008614-00 has no location (so 2300's group is blocked),
+    # and 8400's partner 8500 already has a recommendation.
+    for part in ["0600", "1008614-00", "2300", "8400"]:
+        assert part not in outcome
+    # 8100-8300 (8100 handled) and 2400-5000 (2400 "no space" under rule 1) are skipped:
+    # neither part gets anything from rule 3.
+    for part in ["8300", "5000", "8200", "8600", "30400", "7000", "9100", "9200"]:
+        assert part not in outcome
+    assert outcome.isdisjoint(step["no_outcome"])
+
+
+def test_fr26_tie_moves_later_part_number(data: ImportData, analysis: Analysis) -> None:
+    assert analysis.parts["30400"].picks == analysis.parts["3050"].picks
+    assert "30400" < "3050"
+
+    run = _run(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
+
+    [rec] = [r for r in run.recommendations if r.part in {"3050", "30400"}]
+    assert (rec.rule, rec.part, rec.to_location) == ("rule_3", "3050", "D-01-03-02")
+
+
+def test_fr26_loop_limit_round2(data: ImportData, analysis: Analysis) -> None:
+    # 8100 sits with 8200 (10 shared jobs) in aisle C; 8100-8300 (6 jobs) must not pull it
+    # to aisle D and undo that.
+    state = PlanState(best_marks=MARKS)
+    for part, source, target in [
+        ("8100", "B-01-02-01", "C-01-03-01"),
+        ("8500", "B-01-02-02", "D-01-03-01"),
+        ("3050", "B-01-02-03", "D-01-03-02"),
+    ]:
+        state = _manual(state, part, source, target, data, analysis)
+
+    moves, no_space = _rule_3(data, analysis, state)
+
+    # No earlier rule ran here, so 2400 (fast, fewer picks than 5000) also moves to A.
+    assert _rule_3_moves(moves) == [
+        ("2400", "C-01-01-02", "A-01-01-03"),
+        ("8400", "C-01-02-02", "D-01-03-03"),
+    ]
+    assert no_space == [NoSpace(part="6600", rule="rule_3")]
+
+
+def test_fr26_slow_mover_never_offered_best(data: ImportData, analysis: Analysis) -> None:
+    assert analysis.parts["6600"].movement_class == "slow"
+    # 2400 is handled earlier, so A-01-01-03 (best) is the only free location in partner
+    # 7000's aisle A.
+    earlier = [NoSpace(part="2400", rule="rule_1")]
+    state = PlanState(best_marks=MARKS)
+
+    def outcome_6600(classes: Analysis) -> tuple[list[RuleMove], list[NoSpace]]:
+        moves, no_space = _rule_3(data, classes, state, [], earlier)
+        return [m for m in moves if m.part == "6600"], [n for n in no_space if n.part == "6600"]
+
+    assert outcome_6600(analysis) == ([], [NoSpace(part="6600", rule="rule_3")])
+
+    def with_class(movement_class: str) -> Analysis:
+        parts = dict(analysis.parts)
+        parts["6600"] = parts["6600"].model_copy(update={"movement_class": movement_class})
+        return analysis.model_copy(update={"parts": parts})
+
+    assert outcome_6600(with_class("dead")) == ([], [NoSpace(part="6600", rule="rule_3")])
+    # For contrast: a medium mover takes the best location.
+    assert outcome_6600(with_class("medium")) == (
+        [
+            RuleMove(
+                rule="rule_3", part="6600", from_location="C-01-02-03", to_location="A-01-01-03"
+            )
+        ],
+        [],
+    )
+
+
+def _8300_in_aisle_b(data: ImportData, analysis: Analysis) -> PlanState:
+    """8300 moved next to 8100 in aisle B."""
+    return _manual(PlanState(best_marks=MARKS), "8300", "D-01-01-01", "B-01-03-03", data, analysis)
+
+
+def test_fr26_loop_limit_weaker_partner_does_not_block(
+    data: ImportData, analysis: Analysis
+) -> None:
+    # 8100 shares aisle B with 8300 (6 jobs); 8100-8200 (10 jobs) still moves it to C.
+    state = _8300_in_aisle_b(data, analysis)
+
+    moves, no_space = _rule_3(data, analysis, state)
+
+    assert ("8100", "B-01-02-01", "C-01-03-01") in _rule_3_moves(moves)
+    assert "8100" not in {n.part for n in no_space}
+
+
+def test_fr26_loop_limit_tie_blocks(data: ImportData, analysis: Analysis) -> None:
+    # 8100-8300 gets as many shared jobs as 8100-8200 (10); 8300 already sits in 8100's
+    # aisle B, so 8100-8200 is blocked and 8100 gets nothing.
+    groups = [
+        g.model_copy(update={"shared_jobs": 10}) if (g.part_a, g.part_b) == ("8100", "8300") else g
+        for g in analysis.pick_groups
+    ]
+    tied = analysis.model_copy(update={"pick_groups": groups})
+    state = _8300_in_aisle_b(data, tied)
+
+    moves, no_space = _rule_3(data, tied, state)
+
+    assert "8100" not in {m.part for m in moves} | {n.part for n in no_space}
+
+
+def test_fr26_medium_mover_may_take_best(data: ImportData, analysis: Analysis) -> None:
+    assert analysis.parts["8100"].movement_class == "medium"
+
+    moves, _ = _rule_3(data, analysis, PlanState(best_marks=[AisleMark(aisle="C")]))
+
+    assert ("8100", "B-01-02-01", "C-01-03-01") in _rule_3_moves(moves)
+
+
+def test_fr26_kept_mover_blocked(data: ImportData, analysis: Analysis) -> None:
+    run = _run(data, analysis, PlanState(best_marks=MARKS, keep_marks=["8100"])).state.runs[-1]
+
+    rule_3 = [(r.part, r.to_location) for r in run.recommendations if r.rule == "rule_3"]
+    assert rule_3 == [("8500", "D-01-03-01"), ("3050", "D-01-03-02")]
+    assert "8100" not in {n.part for n in run.no_space}
+
+
+def test_fr27_rule_3_skips_groups_of_handled_parts(data: ImportData, analysis: Analysis) -> None:
+    # 8200 (the partner) has "no space": 8100-8200 gives nothing; 8100 then moves via
+    # 8100-8300 into 8300's aisle D, after 8500 took D-01-03-01.
+    moves, no_space = _rule_3(
+        data, analysis, PlanState(best_marks=MARKS), [], [NoSpace(part="8200", rule="rule_1")]
+    )
+
+    assert _rule_3_moves(moves) == [
+        ("8500", "B-01-02-02", "D-01-03-01"),
+        ("2400", "C-01-01-02", "A-01-01-03"),
+        ("8100", "B-01-02-01", "D-01-03-02"),
+        ("3050", "B-01-02-03", "D-01-03-03"),
+    ]
+    assert "8200" not in {m.part for m in moves} | {n.part for n in no_space}
+
+    # A mover with an earlier recommendation is skipped silently, never "no space".
+    earlier = RuleMove(
+        rule="rule_2", part="8100", from_location="B-01-02-01", to_location="B-01-03-03"
+    )
+    moves, no_space = _rule_3(data, analysis, PlanState(best_marks=MARKS), [earlier])
+    assert "8100" not in {m.part for m in moves} | {n.part for n in no_space}
+
+
+def test_fr27_rule_3_never_virtual_and_location_once(data: ImportData, analysis: Analysis) -> None:
+    virtual = data.model_copy(update={"virtual_locations": [*data.virtual_locations, "C-01-03-01"]})
+
+    moves, _ = _rule_3(virtual, analysis, PlanState(best_marks=MARKS))
+
+    assert ("8100", "B-01-02-01", "C-01-03-02") in _rule_3_moves(moves)
+    targets = [m.to_location for m in moves]
+    assert "C-01-03-01" not in targets
+    assert len(set(targets)) == len(targets)
+
+    # A location an earlier rule took is never offered again.
+    earlier = RuleMove(
+        rule="rule_2", part="4400", from_location="A-01-03-02", to_location="C-01-03-01"
+    )
+    moves, _ = _rule_3(data, analysis, PlanState(best_marks=MARKS), [earlier])
+    assert ("8100", "B-01-02-01", "C-01-03-02") in _rule_3_moves(moves)

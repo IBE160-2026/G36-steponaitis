@@ -57,7 +57,7 @@ def test_fr23_run_over_http(empty_tables: str) -> None:
 
 
 def test_fr24_answer_key_round1_over_http(empty_tables: str) -> None:
-    """FR-24 + FR-25: rule 1 then rule 2 over the stored analysis."""
+    """FR-24 + FR-25 + FR-26: rules 1, 2 and 3 over the stored analysis."""
     with TestClient(create_app()) as client:
         created = client.post(
             "/api/plans",
@@ -85,7 +85,7 @@ def test_fr24_answer_key_round1_over_http(empty_tables: str) -> None:
     assert response.status_code == 200, response.text
     assert response.json() == {
         "version": 3,
-        "events": [{"type": "run_done", "round": 1, "recommendations": 5, "no_space": 3}],
+        "events": [{"type": "run_done", "round": 1, "recommendations": 8, "no_space": 4}],
     }
     stored = get_plan(uuid.UUID(plan_id))
     assert stored is not None
@@ -98,11 +98,15 @@ def test_fr24_answer_key_round1_over_http(empty_tables: str) -> None:
         (3, "9000", "A-01-01-02", "B-01-04-01", "rule_2"),
         (4, "0100", "A-01-01-01", "B-01-04-02", "rule_2"),
         (5, "0500", "A-01-03-01", "B-01-04-03", "rule_2"),
+        (6, "8100", "B-01-02-01", "C-01-03-01", "rule_3"),
+        (7, "8500", "B-01-02-02", "D-01-03-01", "rule_3"),
+        (8, "3050", "B-01-02-03", "D-01-03-02", "rule_3"),
     ]
     assert [(n.part, n.rule) for n in run.no_space] == [
         ("1200", "rule_1"),
         ("10240", "rule_1"),
         ("2400", "rule_1"),
+        ("6600", "rule_3"),
     ]
 
 
