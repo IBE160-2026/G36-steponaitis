@@ -8,7 +8,7 @@ import pytest
 from pydantic import ValidationError
 
 from swp.domain.analysis import AnalysisSettings, build_analysis, period_for
-from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState
+from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState, Step
 from swp.domain.state_migrations import CURRENT_VERSIONS, upcast
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -107,3 +107,26 @@ def test_nfr12_best_marks_discriminated_by_kind() -> None:
     assert [type(mark) for mark in state.best_marks] == [AisleMark, LevelMark, LocationMark]
     with pytest.raises(ValidationError):
         PlanState.model_validate({"best_marks": [{"kind": "shelf", "aisle": "A"}]})
+
+
+def test_nfr12_steps_are_typed() -> None:
+    doc = json.loads((FIXTURES / "state_v1.json").read_text(encoding="utf-8"))
+    step = {
+        "move_number": 1,
+        "part": "9300",
+        "from_location": "B-01-03-02",
+        "to_location": "C-01-01-01",
+        "rule": "manual",
+        "round": 0,
+    }
+
+    state = PlanState.model_validate(upcast("state", {**doc, "steps": [step]}))
+
+    assert state.steps == [Step(**step)]
+    assert state.steps[0].recommendation_id is None
+    assert state.steps[0].swap_id is None
+    assert PlanState.model_validate(state.model_dump(mode="json")) == state
+    for bad in ({"rule": "rule_4"}, {"move_number": 0}, {"round": -1}):
+        with pytest.raises(ValidationError):
+            PlanState.model_validate({**doc, "steps": [{**step, **bad}]})
+    assert PlanState.model_validate(upcast("state", doc)) == PlanState.new()

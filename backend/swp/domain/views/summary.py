@@ -11,7 +11,7 @@ from typing import Literal
 from pydantic import AwareDatetime, BaseModel
 
 from swp.domain.analysis import Analysis, AnalysisSettings
-from swp.domain.planning import PlanningCopy, best_counts
+from swp.domain.planning import PlanningCopy, best_counts, current_round
 from swp.domain.state import PlanState
 
 StepKey = Literal[
@@ -69,12 +69,6 @@ class PlanSummary(BaseModel):
     best_locations: int
     empty_best_locations: int
     steps: list[StepSummary]
-
-
-def current_round(state: PlanState) -> int:
-    """The highest `round` among the plan's runs, 0 before the first run."""
-    rounds = [run.get("round") for run in state.runs]
-    return max((r for r in rounds if isinstance(r, int) and not isinstance(r, bool)), default=0)
 
 
 def class_counts(analysis: Analysis) -> ClassCounts:

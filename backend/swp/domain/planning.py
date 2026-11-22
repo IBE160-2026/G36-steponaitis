@@ -3,8 +3,9 @@
 This module holds the only implementations of the planning copy, stock per location,
 empty/occupied, current and other locations, the aisle of a location, and which
 locations the best-location marks cover (AD-4, FR-21, FR-22). Every view
-imports these and never re-derives them. In Epic 2 the planning copy is the import itself;
-Epic 4 makes `planning_copy` replay the plan's moves without changing `PlanningCopy`.
+imports these and never re-derives them. `replay` is the one fold from the import and
+the step log to the planning copy, the effective moves and each part's current location
+(AD-5, FR-33, FR-34, FR-36); none of its results are stored.
 """
 
 from collections.abc import Mapping, Sequence
@@ -12,10 +13,10 @@ from dataclasses import dataclass
 from decimal import Decimal
 from types import MappingProxyType
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
-from swp.domain.state import BestMark, PlanState
+from swp.domain.state import BestMark, PlanState, Rule, Step
 
 ZERO = Decimal(0)
 _NO_STOCK: Mapping[str, Decimal] = MappingProxyType({})
@@ -52,16 +53,188 @@ def _index(
     return by_part, by_location
 
 
-def planning_copy(data: ImportData, state: PlanState) -> PlanningCopy:
-    """The plan as it is now. In this epic it is the import as-is; `state` is unused."""
-    del state  # Epic 4 replays the plan's moves from the state.
-    inventory = tuple(data.inventory)
+def _copy_of(data: ImportData, inventory: tuple[InventoryLine, ...]) -> PlanningCopy:
     by_part, by_location = _index(inventory)
     return PlanningCopy(
         locations=MappingProxyType(dict(data.locations)),
         inventory=inventory,
         by_part=MappingProxyType(by_part),
         by_location=MappingProxyType(by_location),
+    )
+
+
+class EffectiveMove(BaseModel):
+    """A move as it counts for the plan after combining (FR-34); never stored.
+
+    A combined move keeps the first step's move number and recommendation id, has rule
+    `manual` and no swap id; `steps` lists the move numbers of the steps it is made of.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    move_number: int
+    part: str
+    from_location: str
+    to_location: str
+    rule: Rule
+    round: int
+    recommendation_id: str | None
+    swap_id: str | None
+    steps: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class Replay:
+    """The result of replaying the step log on the import."""
+
+    copy: PlanningCopy
+    moves: tuple[EffectiveMove, ...]
+    current_locations: Mapping[str, str | None]
+
+
+@dataclass
+class _Open:
+    """An effective move while folding: whether its target held none of the part right
+    before the step that set the target, and that step's position in the log."""
+
+    move: EffectiveMove
+    target_was_empty: bool
+    set_at: int
+
+
+class _Stock:
+    """Inventory entries keyed by (part, location) in import order, new keys appended.
+
+    A removed key keeps its slot, so a key that comes back returns to its old place.
+    """
+
+    def __init__(self, inventory: Sequence[InventoryLine]) -> None:
+        self._lines: dict[tuple[str, str], list[InventoryLine]] = {}
+        for line in inventory:
+            self._lines.setdefault((line.part, line.location), []).append(line)
+
+    def quantity(self, part: str, location: str) -> Decimal:
+        return sum((line.quantity for line in self._lines.get((part, location), ())), ZERO)
+
+    def move(self, part: str, from_location: str, to_location: str) -> None:
+        moved = self.quantity(part, from_location)
+        if (part, from_location) in self._lines:
+            self._lines[(part, from_location)] = []
+        held = self.quantity(part, to_location)
+        line = InventoryLine(part=part, location=to_location, quantity=held + moved)
+        self._lines[(part, to_location)] = [line]
+
+    def inventory(self) -> tuple[InventoryLine, ...]:
+        return tuple(line for lines in self._lines.values() for line in lines)
+
+
+def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) -> None:
+    """Add `step` to the effective moves (FR-34): combine it with the part's latest move in
+    the same round that ends where the step starts, when that move's target held none of
+    the part; drop the move when it returns to its first from-location. "Latest" is by
+    the step that last set the move's target, not by the move's place in the list."""
+    latest = max(
+        (
+            index
+            for index, item in enumerate(moves)
+            if item.move.part == step.part
+            and item.move.round == step.round
+            and item.move.to_location == step.from_location
+        ),
+        key=lambda index: moves[index].set_at,
+        default=None,
+    )
+    if latest is not None and moves[latest].target_was_empty:
+        first = moves[latest].move
+        if step.to_location == first.from_location:
+            del moves[latest]
+            return
+        combined = first.model_copy(
+            update={
+                "to_location": step.to_location,
+                "rule": "manual",
+                "swap_id": None,
+                "steps": (*first.steps, step.move_number),
+            }
+        )
+        moves[latest] = _Open(combined, target_was_empty, at)
+        return
+    moves.append(
+        _Open(
+            EffectiveMove(
+                move_number=step.move_number,
+                part=step.part,
+                from_location=step.from_location,
+                to_location=step.to_location,
+                rule=step.rule,
+                round=step.round,
+                recommendation_id=step.recommendation_id,
+                swap_id=step.swap_id,
+                steps=(step.move_number,),
+            ),
+            target_was_empty,
+            at,
+        )
+    )
+
+
+def replay(data: ImportData, steps: Sequence[Step]) -> Replay:
+    """Replay `steps` on the import: the planning copy, the effective moves and each part's
+    current location (AD-5, FR-33, FR-34, FR-36).
+
+    Pure and total: steps are trusted (commands validate them). A step moves all of the
+    part's stock at its from-location and adds it to the to-location. The import is never
+    changed: new inventory lines are built.
+    """
+    stock = _Stock(data.inventory)
+    moves: list[_Open] = []
+    for at, step in enumerate(steps):
+        target_was_empty = stock.quantity(step.part, step.to_location) == 0
+        stock.move(step.part, step.from_location, step.to_location)
+        _fold_move(moves, step, target_was_empty, at)
+    copy = _copy_of(data, stock.inventory())
+    parts = dict.fromkeys([*data.parts, *(line.part for line in data.inventory)])
+    return Replay(
+        copy=copy,
+        moves=tuple(item.move for item in moves),
+        current_locations=MappingProxyType({part: current_location(copy, part) for part in parts}),
+    )
+
+
+def planning_copy(data: ImportData, state: PlanState) -> PlanningCopy:
+    """The plan as it is now: the import with the plan's steps replayed."""
+    return replay(data, state.steps).copy
+
+
+def current_round(state: PlanState) -> int:
+    """The highest `round` among the plan's runs, 0 before the first run (never stored)."""
+    rounds = [run.get("round") for run in state.runs]
+    return max((r for r in rounds if isinstance(r, int) and not isinstance(r, bool)), default=0)
+
+
+def append_step(
+    state: PlanState,
+    *,
+    part: str,
+    from_location: str,
+    to_location: str,
+    rule: Rule,
+    recommendation_id: str | None = None,
+    swap_id: str | None = None,
+) -> PlanState:
+    """A new state with one step appended in the current round under the next move number."""
+    step = Step(
+        move_number=state.next_move_number,
+        part=part,
+        from_location=from_location,
+        to_location=to_location,
+        rule=rule,
+        round=current_round(state),
+        recommendation_id=recommendation_id,
+        swap_id=swap_id,
+    )
+    return state.model_copy(
+        update={"steps": [*state.steps, step], "next_move_number": state.next_move_number + 1}
     )
 
 

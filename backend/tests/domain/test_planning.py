@@ -86,7 +86,7 @@ def test_fr13_aisle_of_and_location_ref(copy) -> None:
     }
 
 
-def test_fr13_planning_copy_ignores_state_in_this_epic() -> None:
+def test_fr13_planning_copy_without_steps_is_the_import() -> None:
     data = answer_key_import().data
     copy = planning_copy(data, PlanState.new())
     assert dict(copy.locations) == data.locations
