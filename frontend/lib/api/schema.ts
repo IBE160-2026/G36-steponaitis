@@ -304,6 +304,52 @@ export interface components {
             round: number;
         };
         /**
+         * ApplyAll
+         * @description Apply every open, not-kept recommendation of the latest run in number order (FR-30).
+         */
+        ApplyAll: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "apply_all";
+        };
+        /**
+         * ApplyAllDone
+         * @description Apply all applied these recommendation numbers and skipped these (FR-30, AD-6).
+         */
+        ApplyAllDone: {
+            /** Applied */
+            applied: number[];
+            /** Skipped */
+            skipped: components["schemas"]["ApplyAllSkipped"][];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "apply_all_done";
+        };
+        /**
+         * ApplyAllSkipped
+         * @description A recommendation apply all left out: outdated (with its cause) or kept in place.
+         */
+        ApplyAllSkipped: {
+            /**
+             * Cause
+             * @enum {string}
+             */
+            cause: "moved" | "filled" | "marks" | "partner_aisle" | "kept";
+            /** Number */
+            number: number;
+        };
+        /**
          * ApplyRecommendation
          * @description Apply one recommendation of the latest run as a move (FR-30, AD-7).
          */
@@ -413,7 +459,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"])[];
             /** Version */
             version: number;
         };
@@ -886,6 +932,8 @@ export interface components {
         };
         /** PlanSummary */
         PlanSummary: {
+            /** Apply All Count */
+            apply_all_count: number;
             /** Best Locations */
             best_locations: number;
             class_counts: components["schemas"]["ClassCounts"];
@@ -1383,7 +1431,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyAll"];
             };
         };
         responses: {

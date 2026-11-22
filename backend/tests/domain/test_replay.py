@@ -17,6 +17,7 @@ from swp.domain.import_data import ImportData
 from swp.domain.pick_groups import find_pick_groups
 from swp.domain.planning import (
     EffectiveMove,
+    StepFold,
     append_step,
     current_location,
     current_round,
@@ -286,6 +287,18 @@ def test_fr34_answer_key_scenario_effective_moves(data: ImportData) -> None:
     assert (combined.move_number, combined.steps) == (12, (12, 13))
     for part, location in expected()["final_current_locations"].items():
         assert result.current_locations[part] == location, part
+
+
+def test_ad5_step_fold_matches_replay_after_every_step(data: ImportData) -> None:
+    """The incremental fold apply all uses gives `replay`'s result after each added step."""
+    steps = _scenario_steps()
+    fold = StepFold(data)
+    for count, step in enumerate(steps, start=1):
+        fold.add(step)
+        folded, replayed = fold.replay(), replay(data, steps[:count])
+        assert folded.copy == replayed.copy
+        assert folded.moves == replayed.moves
+        assert dict(folded.current_locations) == dict(replayed.current_locations)
 
 
 def _random_steps(data: ImportData, seed: int) -> list[Step]:

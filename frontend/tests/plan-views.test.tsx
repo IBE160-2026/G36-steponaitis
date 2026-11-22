@@ -43,6 +43,7 @@ function summary(overrides: Partial<PlanSummary> = {}): PlanSummary {
     class_counts: { fast: 1584, medium: 12, slow: 3, dead: 0 },
     best_locations: 0,
     empty_best_locations: 0,
+    apply_all_count: 0,
     steps: [],
     ...overrides,
   };

@@ -1,7 +1,8 @@
 """The plan summary view behind GET /api/plans/{id} (FR-7, FR-9, FR-18, AD-3, AD-13).
 
-Pure: built from the stored plan's fields; it never writes. Steps 5 to 8 stay unchecked
-and without counts until the epics that own them fill them in.
+Pure: built from the stored plan's fields; it never writes. Recommendations is checked
+when the latest run has no open recommendation left (UX-DR6); before-after and move list
+stay unchecked and without counts until the epics that own them fill them in.
 """
 
 import uuid
@@ -11,7 +12,13 @@ from typing import Literal
 from pydantic import AwareDatetime, BaseModel
 
 from swp.domain.analysis import Analysis, AnalysisSettings
-from swp.domain.planning import PlanningCopy, best_counts, current_round
+from swp.domain.planning import (
+    PlanningCopy,
+    best_counts,
+    current_round,
+    latest_run,
+    open_recommendations,
+)
 from swp.domain.state import PlanState
 
 StepKey = Literal[
@@ -68,6 +75,7 @@ class PlanSummary(BaseModel):
     class_counts: ClassCounts
     best_locations: int
     empty_best_locations: int
+    apply_all_count: int
     steps: list[StepSummary]
 
 
@@ -76,6 +84,11 @@ def class_counts(analysis: Analysis) -> ClassCounts:
     for part in analysis.parts.values():
         counts[part.movement_class] += 1
     return ClassCounts(**counts)
+
+
+def apply_all_count(state: PlanState) -> int:
+    """Open recommendations of the latest run minus kept ones (FR-30, AD-3)."""
+    return sum(1 for rec in open_recommendations(state) if rec.part not in state.keep_marks)
 
 
 def steps(
@@ -88,6 +101,7 @@ def steps(
         "locations": True,
         "pick-groups": True,
         "best-locations": bool(state.best_marks),
+        "recommendations": latest_run(state) is not None and not open_recommendations(state),
     }
     counts: dict[StepKey, int] = {
         "parts": part_count,
@@ -138,5 +152,6 @@ def build_summary(
         class_counts=class_counts(analysis),
         best_locations=best.best,
         empty_best_locations=best.empty,
+        apply_all_count=apply_all_count(state),
         steps=steps(analysis, state, location_count=location_count, part_count=part_count),
     )

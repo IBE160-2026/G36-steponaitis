@@ -8,7 +8,7 @@ the step log to the planning copy, the effective moves and each part's current l
 (AD-5, FR-33, FR-34, FR-36); none of its results are stored.
 """
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from types import MappingProxyType
@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from swp.domain.analysis import Analysis, PartAnalysis
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
-from swp.domain.state import BestMark, PlanState, Rule, Step
+from swp.domain.state import BestMark, PlanState, Recommendation, Rule, Run, Step
 
 ZERO = Decimal(0)
 _NO_STOCK: Mapping[str, Decimal] = MappingProxyType({})
@@ -186,6 +186,64 @@ def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) 
     )
 
 
+class _CurrentLocations(Mapping[str, str | None]):
+    """Each listed part's current location in `copy`, computed when first read (a fold
+    that replays after every step reads only a few)."""
+
+    def __init__(self, copy: PlanningCopy, parts: tuple[str, ...]) -> None:
+        self._copy = copy
+        self._parts = parts
+        self._known = frozenset(parts)
+        self._cache: dict[str, str | None] = {}
+
+    def __getitem__(self, part: str) -> str | None:
+        if part not in self._known:
+            raise KeyError(part)
+        if part not in self._cache:
+            self._cache[part] = current_location(self._copy, part)
+        return self._cache[part]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._parts)
+
+    def __len__(self) -> int:
+        return len(self._parts)
+
+
+class StepFold:
+    """`replay` as an incremental fold: `add` one step at a time, `replay()` the result.
+
+    The one implementation behind `replay`; a multi-step command (apply all) adds each new
+    step instead of replaying the whole log again. Mutable and private to its caller.
+    """
+
+    def __init__(self, data: ImportData, steps: Sequence[Step] = ()) -> None:
+        self._data = data
+        self._stock = _Stock(data.inventory)
+        self._moves: list[_Open] = []
+        self._count = 0
+        for step in steps:
+            self.add(step)
+
+    def add(self, step: Step) -> None:
+        """Fold the next step of the log."""
+        target_was_empty = self._stock.quantity(step.part, step.to_location) == 0
+        self._stock.move(step.part, step.from_location, step.to_location)
+        _fold_move(self._moves, step, target_was_empty, self._count)
+        self._count += 1
+
+    def replay(self) -> Replay:
+        """The replay of the steps added so far."""
+        data = self._data
+        copy = _copy_of(data, self._stock.inventory())
+        parts = dict.fromkeys([*data.parts, *(line.part for line in data.inventory)])
+        return Replay(
+            copy=copy,
+            moves=tuple(item.move for item in self._moves),
+            current_locations=_CurrentLocations(copy, tuple(parts)),
+        )
+
+
 def replay(data: ImportData, steps: Sequence[Step]) -> Replay:
     """Replay `steps` on the import: the planning copy, the effective moves and each part's
     current location (AD-5, FR-33, FR-34, FR-36).
@@ -194,19 +252,7 @@ def replay(data: ImportData, steps: Sequence[Step]) -> Replay:
     part's stock at its from-location and adds it to the to-location. The import is never
     changed: new inventory lines are built.
     """
-    stock = _Stock(data.inventory)
-    moves: list[_Open] = []
-    for at, step in enumerate(steps):
-        target_was_empty = stock.quantity(step.part, step.to_location) == 0
-        stock.move(step.part, step.from_location, step.to_location)
-        _fold_move(moves, step, target_was_empty, at)
-    copy = _copy_of(data, stock.inventory())
-    parts = dict.fromkeys([*data.parts, *(line.part for line in data.inventory)])
-    return Replay(
-        copy=copy,
-        moves=tuple(item.move for item in moves),
-        current_locations=MappingProxyType({part: current_location(copy, part) for part in parts}),
-    )
+    return StepFold(data, steps).replay()
 
 
 def run_baseline(data: ImportData, steps: Sequence[Step], k: int) -> Replay:
@@ -223,6 +269,30 @@ def planning_copy(data: ImportData, state: PlanState) -> PlanningCopy:
 def current_round(state: PlanState) -> int:
     """The highest `round` among the plan's runs, 0 before the first run (never stored)."""
     return max((run.round for run in state.runs), default=0)
+
+
+def latest_run(state: PlanState) -> Run | None:
+    """The run with the highest round, or None before the first run."""
+    return max(state.runs, key=lambda run: run.round, default=None)
+
+
+def applied_step(state: PlanState, recommendation_id: str) -> Step | None:
+    """The step that applied `recommendation_id`, or None (the one place "applied" is
+    derived, AD-7)."""
+    return next((s for s in state.steps if s.recommendation_id == recommendation_id), None)
+
+
+def open_recommendations(state: PlanState) -> list[Recommendation]:
+    """The latest run's recommendations with stored status `open` and no applied step, in
+    stored order; empty before the first run. Kept parts are included (FR-30, AD-3)."""
+    latest = latest_run(state)
+    if latest is None:
+        return []
+    return [
+        rec
+        for rec in latest.recommendations
+        if rec.status == "open" and applied_step(state, rec.id) is None
+    ]
 
 
 def _next_step(

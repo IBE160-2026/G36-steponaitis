@@ -9,6 +9,7 @@ from swp.domain import marks, moves, recommendations, rules
 from swp.domain.analysis import Analysis
 from swp.domain.commands import (
     Applied,
+    ApplyAll,
     ApplyRecommendation,
     Command,
     CommandContext,
@@ -91,5 +92,7 @@ def _dispatch(
             return rules.run(state, command, ctx, data, analysis)
         case ApplyRecommendation():
             return recommendations.apply_recommendation(state, command, ctx, data, analysis)
+        case ApplyAll():
+            return recommendations.apply_all(state, command, ctx, data, analysis)
         case _:
             assert_never(command)

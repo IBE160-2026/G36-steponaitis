@@ -1,9 +1,10 @@
-"""Slice: recommendations after a run: applying one, revalidating them and their view
-(FR-28, FR-29, FR-30, AD-3, AD-7).
+"""Slice: recommendations after a run: applying one or all, revalidating them and their
+view (FR-28, FR-29, FR-30, AD-3, AD-7).
 
-"Applied" is derived from the step log (a step that references the recommendation) and is
-never stored. `_check` is the one implementation of AD-7's causes; `outdated_cause`,
-`revalidate` and `apply_recommendation` share it. Pure: imports only the kernel.
+"Applied" is derived from the step log (a step that references the recommendation, see
+the kernel's `applied_step`, re-exported here with `latest_run`) and is never stored.
+`_check` is the one implementation of AD-7's causes; `outdated_cause`, `revalidate`,
+`apply_recommendation` and `apply_all` share it. Pure: imports only the kernel.
 """
 
 from collections import Counter
@@ -14,6 +15,9 @@ from pydantic import AwareDatetime, BaseModel, Field
 from swp.domain.analysis import Analysis, ClassThreshold, MovementClass, class_threshold
 from swp.domain.commands import (
     Applied,
+    ApplyAll,
+    ApplyAllDone,
+    ApplyAllSkipped,
     ApplyRecommendation,
     CommandContext,
     Event,
@@ -24,11 +28,14 @@ from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
 from swp.domain.planning import (
     Replay,
+    StepFold,
     aisle_of,
     append_step,
+    applied_step,
     current_aisle,
     is_best,
     is_empty,
+    latest_run,
     replay,
 )
 from swp.domain.state import (
@@ -39,22 +46,10 @@ from swp.domain.state import (
     Recommendation,
     RecommendationRule,
     Run,
-    Step,
 )
 
 CAUSE_ORDER: tuple[OutdatedCause, ...] = get_args(OutdatedCause)
 """AD-7's check order: the first true cause wins."""
-
-
-def applied_step(state: PlanState, recommendation_id: str) -> Step | None:
-    """The step that applied `recommendation_id`, or None (the one place "applied" is
-    derived, AD-7)."""
-    return next((s for s in state.steps if s.recommendation_id == recommendation_id), None)
-
-
-def latest_run(state: PlanState) -> Run | None:
-    """The run with the highest round, or None before the first run."""
-    return max(state.runs, key=lambda run: run.round, default=None)
 
 
 def _marks_fail(rec: Recommendation, analysis: Analysis, from_best: bool, to_best: bool) -> bool:
@@ -99,23 +94,35 @@ def _check(
 
 
 def outdated_cause(
-    data: ImportData, analysis: Analysis, state: PlanState, run: Run, rec: Recommendation
+    data: ImportData,
+    analysis: Analysis,
+    state: PlanState,
+    run: Run,
+    rec: Recommendation,
+    replayed: Replay | None = None,
 ) -> OutdatedCause | None:
     """AD-7's first true cause for `rec` of `run` on the state as it is now; None while
-    the recommendation is still valid."""
-    outdated = _check(analysis, state, run, rec, replay(data, state.steps))
+    the recommendation is still valid. `replayed`, when given, is the replay of the
+    state's steps (saves replaying them again)."""
+    if replayed is None:
+        replayed = replay(data, state.steps)
+    outdated = _check(analysis, state, run, rec, replayed)
     return outdated.cause if outdated is not None else None
 
 
-def revalidate(data: ImportData, analysis: Analysis, state: PlanState) -> Applied:
+def revalidate(
+    data: ImportData, analysis: Analysis, state: PlanState, replayed: Replay | None = None
+) -> Applied:
     """Store `outdated(cause)` on every open, unapplied recommendation of the latest run
     that a cause of AD-7 now holds for (FR-29, AD-6). Outdated is sticky: it is never
     cleared here, only replaced by the next run. Emits one `recommendations_outdated`
-    per cause that newly outdated at least one recommendation, in cause order."""
+    per cause that newly outdated at least one recommendation, in cause order. `replayed`,
+    when given, is the replay of the state's steps."""
     latest = latest_run(state)
     if latest is None:
         return Applied(state=state)
-    replayed = replay(data, state.steps)
+    if replayed is None:
+        replayed = replay(data, state.steps)
     counts: Counter[OutdatedCause] = Counter()
     recommendations = []
     for rec in latest.recommendations:
@@ -143,9 +150,11 @@ def apply_recommendation(
     _ctx: CommandContext,
     data: ImportData,
     analysis: Analysis,
+    replayed: Replay | None = None,
 ) -> Applied:
     """Append the recommendation's move with its rule and its run's round (FR-30), or raise
-    `command_rejected` with the plan unchanged (AD-7)."""
+    `command_rejected` with the plan unchanged (AD-7). `replayed`, when given, is the
+    replay of the state's steps."""
     latest = latest_run(state)
     rec = None
     if latest is not None:
@@ -154,7 +163,7 @@ def apply_recommendation(
         raise DomainError("command_rejected", "This recommendation is not in the latest run.")
     if applied_step(state, rec.id) is not None:
         raise DomainError("command_rejected", f"Recommendation #{rec.number} is already applied.")
-    cause = outdated_cause(data, analysis, state, latest, rec)
+    cause = outdated_cause(data, analysis, state, latest, rec, replayed)
     if rec.status != "open" or cause is not None:
         raise DomainError(
             "command_rejected",
@@ -182,6 +191,74 @@ def apply_recommendation(
         round=step.round,
     )
     return Applied(state=new_state, events=[event])
+
+
+def apply_all(
+    state: PlanState,
+    command: ApplyAll,
+    ctx: CommandContext,
+    data: ImportData,
+    analysis: Analysis,
+) -> Applied:
+    """Apply every open, not-kept recommendation of the latest run that still holds, in
+    `number` order, revalidating before the fold and after each apply (FR-30, AD-6, AD-7).
+
+    Each apply is exactly `apply_recommendation`'s. Recommendations applied before this
+    command are ignored; outdated ones (stored, or outdated by an earlier apply of the fold)
+    and kept ones are skipped with their cause; "no space" entries are never touched. A
+    no-op (input state, no events) when nothing gets applied. Otherwise the events are
+    `apply_all_done` and the fold's `recommendations_outdated`, one per cause in cause order.
+    """
+    latest = latest_run(state)
+    if latest is None:
+        return Applied(state=state)
+    counts: Counter[OutdatedCause] = Counter()
+    fold = StepFold(data, state.steps)  # the replay follows each applied step, not re-run
+
+    def _revalidate(current: PlanState, replayed: Replay) -> PlanState:
+        result = revalidate(data, analysis, current, replayed)
+        for event in result.events:
+            if isinstance(event, RecommendationsOutdated):
+                counts[event.cause] += event.count
+        return result.state
+
+    replayed = fold.replay()
+    current = _revalidate(state, replayed)
+    applied: list[int] = []
+    skipped: list[ApplyAllSkipped] = []
+    for rec_id in [r.id for r in sorted(latest.recommendations, key=lambda r: r.number)]:
+        run = latest_run(current)
+        assert run is not None and run.id == latest.id
+        rec = next(r for r in run.recommendations if r.id == rec_id)
+        if applied_step(current, rec.id) is not None:
+            continue
+        if rec.status == "outdated" and rec.outdated is not None:
+            skipped.append(ApplyAllSkipped(number=rec.number, cause=rec.outdated.cause))
+            continue
+        if rec.part in current.keep_marks:
+            skipped.append(ApplyAllSkipped(number=rec.number, cause="kept"))
+            continue
+        single = ApplyRecommendation(
+            command_id=command.command_id,
+            base_version=command.base_version,
+            recommendation_id=rec.id,
+        )
+        current = apply_recommendation(current, single, ctx, data, analysis, replayed).state
+        fold.add(current.steps[-1])
+        replayed = fold.replay()
+        current = _revalidate(current, replayed)
+        applied.append(rec.number)
+    if not applied:
+        return Applied(state=state)
+    events: list[Event] = [
+        ApplyAllDone(applied=applied, skipped=skipped),
+        *(
+            RecommendationsOutdated(count=counts[cause], cause=cause)
+            for cause in CAUSE_ORDER
+            if counts[cause]
+        ),
+    ]
+    return Applied(state=current, events=events)
 
 
 # --- The recommendations view: GET /api/plans/{id}/recommendations (FR-28, FR-29, AD-3) ---

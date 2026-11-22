@@ -10,7 +10,7 @@ from swp.domain.analysis import (
     build_analysis,
 )
 from swp.domain.planning import planning_copy
-from swp.domain.state import AisleMark, PlanState, Run
+from swp.domain.state import AisleMark, Outdated, PlanState, Recommendation, Run, Step
 from swp.domain.views.summary import STEP_KEYS, PlanSummary, build_summary
 from tests.domain.answer_key import answer_key_import
 
@@ -60,6 +60,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
     assert body["class_counts"] == {"fast": 0, "medium": 0, "slow": 0, "dead": 0}
     assert body["best_locations"] == 0
     assert body["empty_best_locations"] == 0
+    assert body["apply_all_count"] == 0
     assert set(body) == {
         "id",
         "name",
@@ -78,6 +79,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
         "class_counts",
         "best_locations",
         "empty_best_locations",
+        "apply_all_count",
         "steps",
     }
 
@@ -137,3 +139,95 @@ def test_fr22_summary_carries_best_and_empty_best_counts() -> None:
 
     assert body["best_locations"] == 9
     assert body["empty_best_locations"] == 1
+
+
+def _run_with(*statuses: str, round: int = 1) -> Run:
+    """A run whose recommendation n (1-based) has part `P<n>` and the given stored status."""
+    return Run(
+        id=f"run-{round}",
+        round=round,
+        created_at=NOW,
+        created_by="planner",
+        recommendations=[
+            Recommendation(
+                id=f"run-{round}:{n}",
+                number=n,
+                rule="rule_1",
+                part=f"P{n}",
+                from_location="B-01-01-01",
+                to_location="A-01-01-01",
+                status=status,  # type: ignore[arg-type]
+                outdated=Outdated(cause="marks") if status == "outdated" else None,
+            )
+            for n, status in enumerate(statuses, start=1)
+        ],
+    )
+
+
+def _applied(rec_id: str, move_number: int) -> Step:
+    return Step(
+        move_number=move_number,
+        part="X",
+        from_location="B-01-01-01",
+        to_location="A-01-01-01",
+        rule="rule_1",
+        round=1,
+        recommendation_id=rec_id,
+    )
+
+
+def _recommendations_step(summary: PlanSummary) -> tuple[bool, int | None]:
+    [step] = [s for s in summary.steps if s.key == "recommendations"]
+    return step.checked, step.count
+
+
+def test_ad3_apply_all_count_is_open_minus_kept() -> None:
+    state = PlanState(
+        runs=[_run_with("open", "open", "outdated", "open", "open")],
+        steps=[_applied("run-1:1", 1)],
+        next_move_number=2,
+        keep_marks=["P2"],
+    )
+
+    assert _summary(state).apply_all_count == 2  # #4 and #5; #1 applied, #2 kept, #3 outdated
+
+
+def test_ad3_apply_all_count_reads_only_the_latest_run() -> None:
+    earlier = _run_with("open", "open", round=1)
+    latest = _run_with("open", round=2)
+
+    assert _summary(PlanState(runs=[latest, earlier])).apply_all_count == 1
+    assert _summary(PlanState()).apply_all_count == 0
+
+
+def test_fr7_recommendations_unchecked_without_run() -> None:
+    assert _recommendations_step(_summary(PlanState(best_marks=[AisleMark(aisle="A")]))) == (
+        False,
+        None,
+    )
+
+
+def test_fr7_recommendations_unchecked_while_open_left() -> None:
+    state = PlanState(runs=[_run_with("open", "outdated")])
+
+    assert _recommendations_step(_summary(state)) == (False, None)
+
+
+def test_fr7_recommendations_unchecked_while_kept_open_left() -> None:
+    """A kept recommendation is still open: the round is not done (UX-DR6)."""
+    state = PlanState(runs=[_run_with("open")], keep_marks=["P1"])
+    summary = _summary(state)
+
+    assert summary.apply_all_count == 0
+    assert _recommendations_step(summary) == (False, None)
+
+
+def test_fr7_recommendations_checked_when_none_open() -> None:
+    state = PlanState(
+        runs=[_run_with("open", "outdated")],
+        steps=[_applied("run-1:1", 1)],
+        next_move_number=2,
+    )
+
+    assert _recommendations_step(_summary(state)) == (True, None)
+    assert _recommendations_step(_summary(PlanState(runs=[_run_with()]))) == (True, None)

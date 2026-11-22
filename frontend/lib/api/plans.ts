@@ -64,6 +64,9 @@ export type PickGroupReason = components["schemas"]["PickGroupReason"];
 export type RecommendationReason = ClassReason | PickGroupReason;
 /** `recommendations_outdated{count, cause}`: a command outdated this many recommendations. */
 export type RecommendationsOutdatedEvent = components["schemas"]["RecommendationsOutdated"];
+/** `apply_all_done{applied, skipped}`: the numbers apply all applied and those it skipped, with the cause. */
+export type ApplyAllDoneEvent = components["schemas"]["ApplyAllDone"];
+export type ApplyAllSkipped = components["schemas"]["ApplyAllSkipped"];
 
 export const PLANS_KEY = ["plans"] as const;
 

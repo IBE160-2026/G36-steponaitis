@@ -66,8 +66,16 @@ class ApplyRecommendation(BaseModel):
     recommendation_id: str = Field(min_length=1, max_length=CODE_MAX_LENGTH)
 
 
+class ApplyAll(BaseModel):
+    """Apply every open, not-kept recommendation of the latest run in number order (FR-30)."""
+
+    type: Literal["apply_all"] = "apply_all"
+    command_id: uuid.UUID
+    base_version: int
+
+
 Command = Annotated[
-    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations | ApplyRecommendation,
+    SetBestMark | RemoveBestMark | ManualMove | RunRecommendations | ApplyRecommendation | ApplyAll,
     Field(discriminator="type"),
 ]
 """Every command a plan accepts (closed union)."""
@@ -135,6 +143,21 @@ class RecommendationsOutdated(BaseModel):
     cause: OutdatedCause
 
 
+class ApplyAllSkipped(BaseModel):
+    """A recommendation apply all left out: outdated (with its cause) or kept in place."""
+
+    number: int
+    cause: Literal[OutdatedCause, "kept"]
+
+
+class ApplyAllDone(BaseModel):
+    """Apply all applied these recommendation numbers and skipped these (FR-30, AD-6)."""
+
+    type: Literal["apply_all_done"] = "apply_all_done"
+    applied: list[int]
+    skipped: list[ApplyAllSkipped]
+
+
 Event = Annotated[
     MarkSet
     | MarkRemoved
@@ -142,7 +165,8 @@ Event = Annotated[
     | MovesCombined
     | MoveRemoved
     | RunDone
-    | RecommendationsOutdated,
+    | RecommendationsOutdated
+    | ApplyAllDone,
     Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""
