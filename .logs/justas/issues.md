@@ -101,3 +101,4 @@
 - [ ] 2026-11-22 [epic-3-retrospektiv](955-2026-11-22-09-44-47-epic-3-retrospektiv.md) — feil: når backend ikke nås gjennom `/api`-proxyen får klienten 500 og forkaster endringen uten retry (AD-12, «Trying again») — retro Epic 3, punkt 1
 - [ ] 2026-11-22 [epic-3-retrospektiv](955-2026-11-22-09-44-47-epic-3-retrospektiv.md) — retro Epic 3, punkt 7: avgjør om `set_best_mark` skal avvise markeringer som ikke treffer noe (422) og når Best locations-steget regnes som ferdig (FR-21)
 - [ ] 2026-11-22 [epic-3-retrospektiv](955-2026-11-22-09-44-47-epic-3-retrospektiv.md) — retro Epic 3, punkt 8: når verifisering utsettes til en senere story, må den senere specen liste feilstiene som overleveres
+- [ ] 2026-11-22 [4-1-step-log-replay-and-the-planning-copy](954-2026-11-22-10-04-01-4-1-step-log-replay-and-the-planning-copy.md) — oppfølgingsreview Story 4.1: FR-34-rettelsen i `replay` (siste flytt etter tid) dekkes bare av én test
