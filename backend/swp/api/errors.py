@@ -28,6 +28,7 @@ STATUS_BY_CODE: Mapping[str, int] = {
     "login_locked": 429,
     "limit_reached": 413,
     "internal": 500,
+    "unavailable": 503,
 }
 
 NOT_FOUND = "Not found."

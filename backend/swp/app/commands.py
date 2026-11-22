@@ -2,7 +2,9 @@
 
 Reads the plan in a write transaction, applies the command in the domain and saves it with
 a conditional update on the version read. A repeated `command_id` returns its stored result,
-a no-op writes nothing, and a lost race is re-read and re-applied up to 3 times.
+a no-op writes nothing, and a lost race is re-read and re-applied up to 3 times. The import
+is read once before the lock (it never changes); a busy database answers `unavailable` at
+once and the client retries (AD-12).
 """
 
 import uuid
@@ -12,12 +14,14 @@ from swp.app.plans import DEFAULT_USER, PLAN_NOT_FOUND
 from swp.domain.apply import apply
 from swp.domain.commands import Command, CommandContext, CommandResult
 from swp.domain.errors import DomainError
+from swp.domain.import_data import ImportData
 from swp.domain.state import PlanState
-from swp.store.plans import plan_for_update
+from swp.store.plans import PlanBusy, get_plan_import, plan_for_update
 
 MAX_ATTEMPTS = 4  # the first attempt and 3 retries
 RECENT_COMMANDS = 50
 NOT_SAVED = "The change was not saved. Try again."
+PLAN_BUSY = "The plan is busy. Try again."
 
 
 def _stored_result(state: PlanState, command_id: uuid.UUID) -> CommandResult | None:
@@ -33,6 +37,18 @@ def run_command(
 ) -> CommandResult:
     """Apply `command` to the plan once and return `{version, events}`."""
     ctx = CommandContext(now=now if now is not None else datetime.now(UTC), user=user)
+    data = get_plan_import(plan_id)
+    if data is None:
+        raise DomainError("plan_not_found", PLAN_NOT_FOUND)
+    try:
+        return _run(plan_id, command, ctx, data)
+    except PlanBusy as error:
+        raise DomainError("unavailable", PLAN_BUSY) from error
+
+
+def _run(
+    plan_id: uuid.UUID, command: Command, ctx: CommandContext, data: ImportData
+) -> CommandResult:
     for _attempt in range(MAX_ATTEMPTS):
         with plan_for_update(plan_id) as writer:
             if writer is None:
@@ -41,7 +57,7 @@ def run_command(
             stored = _stored_result(plan.state, command.command_id)
             if stored is not None:
                 return stored
-            applied = apply(plan.state, command, ctx)
+            applied = apply(plan.state, command, ctx, data)
             if not applied.events:
                 return CommandResult(version=plan.version, events=[])
             result = CommandResult(version=plan.version + 1, events=applied.events)

@@ -217,6 +217,7 @@ flowchart LR
   | `limit_reached` | 413 | for upload size and rows |
   | `limit_reached` | 409 | for plans and accounts |
   | `internal` | 500 | |
+  | `unavailable` | 503 | the database is busy; the client retries (AD-12) |
 
   - **Messages.** The backend writes `message` as final English copy for errors, and never puts a date or time in it.
   - **Other copy.** Recommendation reasons, outdated causes and command events are structured data. They are worded in one frontend module, `frontend/lib/copy`, from the EXPERIENCE.md wording.

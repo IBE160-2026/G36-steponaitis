@@ -7,7 +7,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from swp.domain.values import Dec
 
@@ -36,11 +36,14 @@ class TransactionLine(BaseModel):
 
 
 class ImportData(BaseModel):
-    schema_version: int = 1
+    schema_version: int = 2
     locations: dict[str, LocationData]
     inventory: list[InventoryLine]
     parts: dict[str, str]
     transactions: list[TransactionLine]
+    # Codes on Issue Part lines that are not in the Locations file (such as FLSKRS), in
+    # first-seen order: the domain needs them to refuse a move to a virtual location (FR-33).
+    virtual_locations: list[str] = Field(default_factory=list)
 
 
 class NormalizedImport(BaseModel):

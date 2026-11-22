@@ -403,6 +403,7 @@ def test_ad5_apply_checks_step_invariants(monkeypatch: pytest.MonkeyPatch) -> No
             PlanState.new(),
             SetBestMark(command_id=uuid.UUID(int=1), base_version=1, mark=AisleMark(aisle="A")),
             ctx,
+            ImportData(locations={}, inventory=[], parts={}, transactions=[]),
         )
 
 

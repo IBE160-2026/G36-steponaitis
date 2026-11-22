@@ -90,6 +90,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/moves/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Move Preview */
+        get: operations["get_move_preview_api_plans__plan_id__moves_preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/parts": {
         parameters: {
             query?: never;
@@ -179,6 +196,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AddsToStock
+         * @description The move is a new effective move; the target already holds the part (stock adds up).
+         */
+        AddsToStock: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "adds_to_stock";
+        };
         /** AisleMark */
         AisleMark: {
             /** Aisle */
@@ -254,12 +282,25 @@ export interface components {
             min_picks: number;
         };
         /**
+         * CombinesWith
+         * @description The move lands in effective move `move_number`, which keeps its number (FR-34).
+         */
+        CombinesWith: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "combines_with";
+            /** Move Number */
+            move_number: number;
+        };
+        /**
          * CommandResult
          * @description The response of the command endpoint; also stored in `recent_commands`.
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"])[];
             /** Version */
             version: number;
         };
@@ -387,6 +428,30 @@ export interface components {
             version: number;
             warehouse: components["schemas"]["Occupancy"];
         };
+        /**
+         * ManualMove
+         * @description Move all of `part`'s stock at `from` to `to` (FR-33); on the wire `from` and `to`.
+         */
+        ManualMove: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** From */
+            from: string;
+            /** Part */
+            part: string;
+            /** To */
+            to: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "manual_move";
+        };
         /** MarkRemoved */
         MarkRemoved: {
             /** Mark */
@@ -406,6 +471,105 @@ export interface components {
              * @enum {string}
              */
             type: "mark_set";
+        };
+        /**
+         * MoveMade
+         * @description A manual move became a new effective move (FR-33).
+         */
+        MoveMade: {
+            /** From Location */
+            from_location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** Round */
+            round: number;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3" | "manual";
+            /** To Location */
+            to_location: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "move_made";
+        };
+        /** MovePreview */
+        MovePreview: {
+            /** Allowed */
+            allowed: boolean;
+            /** Effect */
+            effect: (components["schemas"]["NewMove"] | components["schemas"]["AddsToStock"] | components["schemas"]["CombinesWith"] | components["schemas"]["RemovesMove"]) | null;
+            /** Refusal Message */
+            refusal_message: string | null;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "empty" | "occupied" | "none";
+            /** Target Parts */
+            target_parts: components["schemas"]["TargetPart"][];
+            /** Version */
+            version: number;
+        };
+        /**
+         * MoveRemoved
+         * @description A manual move returned the part to `location`: move `move_number` is removed (FR-34).
+         */
+        MoveRemoved: {
+            /** Location */
+            location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** Round */
+            round: number;
+            /** Step Move Number */
+            step_move_number: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "move_removed";
+        };
+        /**
+         * MovesCombined
+         * @description A manual move was combined into effective move `move_number` (FR-34).
+         */
+        MovesCombined: {
+            /** From Location */
+            from_location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** Round */
+            round: number;
+            /** Step Move Number */
+            step_move_number: number;
+            /** To Location */
+            to_location: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "moves_combined";
+        };
+        /**
+         * NewMove
+         * @description The move is a new effective move to a location that holds none of the part.
+         */
+        NewMove: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "new";
         };
         /** Occupancy */
         Occupancy: {
@@ -606,6 +770,20 @@ export interface components {
              */
             type: "remove_best_mark";
         };
+        /**
+         * RemovesMove
+         * @description The move returns the part to where move `move_number` took it from: that move is
+         *     removed (FR-34).
+         */
+        RemovesMove: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "removes_move";
+            /** Move Number */
+            move_number: number;
+        };
         /** SavedPlanRow */
         SavedPlanRow: {
             /**
@@ -698,6 +876,21 @@ export interface components {
         /** StockedLocation */
         StockedLocation: {
             location: components["schemas"]["LocationRef"];
+            /** Stock */
+            stock: string;
+        };
+        /** TargetPart */
+        TargetPart: {
+            /** Description */
+            description: string;
+            /** Kept In Place */
+            kept_in_place: boolean;
+            /** Movement Class */
+            movement_class: ("fast" | "medium" | "slow" | "dead") | null;
+            /** Part */
+            part: string;
+            /** Picks */
+            picks: number | null;
             /** Stock */
             stock: string;
         };
@@ -854,7 +1047,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"];
             };
         };
         responses: {
@@ -886,6 +1079,15 @@ export interface operations {
                 };
             };
             /** @description Error */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -896,6 +1098,15 @@ export interface operations {
             };
             /** @description Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -923,6 +1134,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LocationsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_move_preview_api_plans__plan_id__moves_preview_get: {
+        parameters: {
+            query: {
+                part: string;
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovePreview"];
                 };
             };
             /** @description Error */

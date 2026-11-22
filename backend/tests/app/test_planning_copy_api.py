@@ -10,7 +10,7 @@ from swp.api.app import create_app
 from swp.domain.planning import append_step, current_location, is_empty, planning_copy
 from swp.store.db import get_engine
 from swp.store.models import ImportRow, PlanRow
-from swp.store.plans import plan_for_update
+from swp.store.plans import get_plan_import, plan_for_update
 from tests.app.test_parts_api import _sample_plan
 
 
@@ -25,13 +25,15 @@ def test_fr36_stored_steps_replay_in_views(empty_tables: str) -> None:
         plan_id = uuid.UUID(_sample_plan(client))
         stored_import = _import_data(plan_id)
 
+        data = get_plan_import(plan_id)
+        assert data is not None
         with plan_for_update(plan_id) as writer:
             assert writer is not None
             plan = writer.plan
-            copy = planning_copy(plan.imported.data, plan.state)
+            copy = planning_copy(data, plan.state)
             part = next(
                 p
-                for p in sorted(plan.imported.data.parts)
+                for p in sorted(data.parts)
                 if sum(1 for qty in copy.stock_of(p).values() if qty > 0) == 1
             )
             source = current_location(copy, part)

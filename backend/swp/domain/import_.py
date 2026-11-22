@@ -505,10 +505,14 @@ def normalize_import(
     ]
 
     transactions: list[TransactionLine] = []
+    virtual_locations: dict[str, None] = {}
     for row in transactions_file.rows:
         kind = transaction_type(row.values["Transaction Type"])
         if kind is None:
             continue
+        code = row.values["Location"]
+        if kind == "issue_part" and isinstance(code, str) and code not in locations:
+            virtual_locations.setdefault(code, None)
         transactions.append(
             TransactionLine(
                 type=kind,
@@ -526,5 +530,6 @@ def normalize_import(
             inventory=inventory,
             parts=parts,
             transactions=transactions,
+            virtual_locations=list(virtual_locations),
         ),
     )

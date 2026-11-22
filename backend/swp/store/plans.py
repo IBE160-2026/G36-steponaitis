@@ -2,11 +2,12 @@
 
 import uuid
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from datetime import date, datetime
 
 from sqlalchemy import select, update
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from swp.domain.analysis import Analysis
@@ -115,10 +116,39 @@ def get_plan(plan_id: uuid.UUID) -> StoredPlan | None:
         return None if row is None else _stored(session, row)
 
 
+@dataclass(frozen=True)
+class LockedPlan:
+    """The plan columns read under the write lock: only what a command changes (AD-6)."""
+
+    id: uuid.UUID
+    version: int
+    state: PlanState
+
+
+class PlanBusy(Exception):
+    """The database is busy: another writer holds the lock (SQLite busy/locked, pg 55P03)."""
+
+
+def get_plan_import(plan_id: uuid.UUID) -> ImportData | None:
+    """The import of the plan, upcast and validated; None if there is no such plan.
+
+    An import never changes and a plan never changes its `import_id`, so this may be read
+    before the plan is locked.
+    """
+    query = (
+        select(ImportRow.data)
+        .join(PlanRow, PlanRow.import_id == ImportRow.id)
+        .where(PlanRow.id == plan_id)
+    )
+    with transaction() as session:
+        data = session.execute(query).scalar_one_or_none()
+    return None if data is None else ImportData.model_validate(upcast("data", data))
+
+
 class PlanWriter:
     """The plan as read inside a write transaction, and its conditional save (AD-6)."""
 
-    def __init__(self, session: Session, plan: StoredPlan) -> None:
+    def __init__(self, session: Session, plan: LockedPlan) -> None:
         self._session = session
         self.plan = plan
 
@@ -140,15 +170,52 @@ class PlanWriter:
         return result.rowcount == 1
 
 
+_SQLITE_BUSY_CODES = (5, 6)  # SQLITE_BUSY, SQLITE_LOCKED (primary result codes)
+_SQLITE_BUSY_TEXT = ("database is locked", "database is busy")
+_PG_LOCK_NOT_AVAILABLE = "55P03"
+
+
+def _is_busy(error: OperationalError) -> bool:
+    """True when `error` means another writer holds the lock."""
+    orig = error.orig
+    code = getattr(orig, "sqlite_errorcode", None)
+    if isinstance(code, int) and code & 0xFF in _SQLITE_BUSY_CODES:
+        return True
+    if getattr(orig, "sqlstate", None) == _PG_LOCK_NOT_AVAILABLE:
+        return True
+    text = str(orig).lower()
+    return any(fragment in text for fragment in _SQLITE_BUSY_TEXT)
+
+
 @contextmanager
 def plan_for_update(plan_id: uuid.UUID) -> Iterator[PlanWriter | None]:
-    """The plan locked for a read-modify-write in one transaction; None if there is no such plan.
+    """The plan's id, version and state locked for a read-modify-write in one transaction;
+    None if there is no such plan. Raise PlanBusy when the lock cannot be taken.
 
     The transaction commits when the block ends and rolls back if it raises.
     """
-    with write_transaction() as session:
-        row = session.get(PlanRow, plan_id, with_for_update=True)
-        yield None if row is None else PlanWriter(session, _stored(session, row))
+    query = (
+        select(PlanRow.id, PlanRow.version, PlanRow.state)
+        .where(PlanRow.id == plan_id)
+        .with_for_update()
+    )
+    with ExitStack() as stack:
+        try:
+            session = stack.enter_context(write_transaction())
+            row = session.execute(query).one_or_none()
+        except OperationalError as error:
+            if _is_busy(error):
+                raise PlanBusy from error
+            raise
+        if row is None:
+            yield None
+            return
+        plan = LockedPlan(
+            id=row.id,
+            version=row.version,
+            state=PlanState.model_validate(upcast("state", row.state)),
+        )
+        yield PlanWriter(session, plan)
 
 
 def list_plans() -> list[PlanListItem]:

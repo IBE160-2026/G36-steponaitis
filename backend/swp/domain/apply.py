@@ -5,8 +5,16 @@ Pure: returns a new state and its events and never mutates the input state.
 
 from typing import assert_never
 
-from swp.domain import marks
-from swp.domain.commands import Applied, Command, CommandContext, RemoveBestMark, SetBestMark
+from swp.domain import marks, moves
+from swp.domain.commands import (
+    Applied,
+    Command,
+    CommandContext,
+    ManualMove,
+    RemoveBestMark,
+    SetBestMark,
+)
+from swp.domain.import_data import ImportData
 from swp.domain.planning import current_round
 from swp.domain.state import PlanState
 
@@ -41,17 +49,20 @@ def check_step_invariants(before: PlanState, after: PlanState) -> None:
         )
 
 
-def apply(state: PlanState, command: Command, ctx: CommandContext) -> Applied:
-    applied = _dispatch(state, command, ctx)
+def apply(state: PlanState, command: Command, ctx: CommandContext, data: ImportData) -> Applied:
+    """Apply `command` to `state`; `data` is the plan's import (read-only)."""
+    applied = _dispatch(state, command, ctx, data)
     check_step_invariants(state, applied.state)
     return applied
 
 
-def _dispatch(state: PlanState, command: Command, ctx: CommandContext) -> Applied:
+def _dispatch(state: PlanState, command: Command, ctx: CommandContext, data: ImportData) -> Applied:
     match command:
         case SetBestMark():
             return marks.set_best_mark(state, command, ctx)
         case RemoveBestMark():
             return marks.remove_best_mark(state, command, ctx)
+        case ManualMove():
+            return moves.manual_move(state, command, ctx, data)
         case _:
             assert_never(command)

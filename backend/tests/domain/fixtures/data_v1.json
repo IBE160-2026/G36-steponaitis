@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "locations": {
+    "A-01-01-01": {
+      "walk_path": "1",
+      "aisle": "A",
+      "level": "1",
+      "section": "01",
+      "position": "01"
+    }
+  },
+  "inventory": [
+    {"part": "P1", "location": "A-01-01-01", "quantity": "2.5"}
+  ],
+  "parts": {"P1": "Part one"},
+  "transactions": [
+    {"type": "issue_part", "part": "P1", "transaction_code": "7", "date": "2026-09-30"}
+  ]
+}

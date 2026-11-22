@@ -9,7 +9,7 @@ from typing import Annotated, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
-from swp.domain.state import BestMark, PlanState
+from swp.domain.state import BestMark, PlanState, Rule
 
 
 class CommandContext(BaseModel):
@@ -35,7 +35,20 @@ class RemoveBestMark(BaseModel):
     mark: BestMark
 
 
-Command = Annotated[SetBestMark | RemoveBestMark, Field(discriminator="type")]
+class ManualMove(BaseModel):
+    """Move all of `part`'s stock at `from` to `to` (FR-33); on the wire `from` and `to`."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["manual_move"] = "manual_move"
+    command_id: uuid.UUID
+    base_version: int
+    part: str
+    from_location: str = Field(alias="from")
+    to_location: str = Field(alias="to")
+
+
+Command = Annotated[SetBestMark | RemoveBestMark | ManualMove, Field(discriminator="type")]
 """Every command a plan accepts (closed union)."""
 
 
@@ -49,7 +62,44 @@ class MarkRemoved(BaseModel):
     mark: BestMark
 
 
-Event = Annotated[MarkSet | MarkRemoved, Field(discriminator="type")]
+class MoveMade(BaseModel):
+    """A manual move became a new effective move (FR-33)."""
+
+    type: Literal["move_made"] = "move_made"
+    move_number: int
+    part: str
+    from_location: str
+    to_location: str
+    rule: Rule
+    round: int
+
+
+class MovesCombined(BaseModel):
+    """A manual move was combined into effective move `move_number` (FR-34)."""
+
+    type: Literal["moves_combined"] = "moves_combined"
+    move_number: int
+    part: str
+    from_location: str
+    to_location: str
+    round: int
+    step_move_number: int
+
+
+class MoveRemoved(BaseModel):
+    """A manual move returned the part to `location`: move `move_number` is removed (FR-34)."""
+
+    type: Literal["move_removed"] = "move_removed"
+    move_number: int
+    part: str
+    location: str
+    round: int
+    step_move_number: int
+
+
+Event = Annotated[
+    MarkSet | MarkRemoved | MoveMade | MovesCombined | MoveRemoved, Field(discriminator="type")
+]
 """Every event a command can produce (closed union)."""
 
 

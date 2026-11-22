@@ -12,10 +12,20 @@ type Doc = dict[str, Any]
 type Upcaster = Callable[[Doc], Doc]
 Kind = Literal["state", "analysis", "data"]
 
-CURRENT_VERSIONS: Mapping[Kind, int] = {"state": 1, "analysis": 1, "data": 1}
+CURRENT_VERSIONS: Mapping[Kind, int] = {"state": 1, "analysis": 1, "data": 2}
+
+
+def _data_v1_to_v2(doc: Doc) -> Doc:
+    """Data v2 stores the import's virtual locations; an older import knows none (FR-33)."""
+    return {**doc, "virtual_locations": []}
+
 
 # UPCASTERS[kind][i] upcasts version i + 1 to i + 2. Append only; never edit an entry.
-UPCASTERS: Mapping[Kind, tuple[Upcaster, ...]] = {"state": (), "analysis": (), "data": ()}
+UPCASTERS: Mapping[Kind, tuple[Upcaster, ...]] = {
+    "state": (),
+    "analysis": (),
+    "data": (_data_v1_to_v2,),
+}
 
 
 def upcast(kind: Kind, doc: Mapping[str, Any]) -> Doc:

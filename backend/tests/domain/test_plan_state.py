@@ -2,12 +2,14 @@
 
 import json
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from swp.domain.analysis import AnalysisSettings, build_analysis, period_for
+from swp.domain.import_data import ImportData
 from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState, Step
 from swp.domain.state_migrations import CURRENT_VERSIONS, upcast
 
@@ -81,6 +83,17 @@ def test_nfr12_state_v1_fixture_upcasts_to_new() -> None:
     assert upcast_doc == doc
     assert PlanState.model_validate(upcast_doc) == PlanState.new()
     assert PlanState.new().model_dump(mode="json") == doc
+
+
+def test_nfr12_data_v1_fixture_upcasts() -> None:
+    doc = json.loads((FIXTURES / "data_v1.json").read_text(encoding="utf-8"))
+
+    data = ImportData.model_validate(upcast("data", doc))
+
+    assert data.schema_version == CURRENT_VERSIONS["data"] == 2
+    assert data.virtual_locations == []
+    assert list(data.locations) == ["A-01-01-01"]
+    assert data.inventory[0].quantity == Decimal("2.5")
 
 
 def test_nfr12_missing_schema_version_is_version_1() -> None:

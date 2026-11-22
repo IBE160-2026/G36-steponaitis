@@ -12,8 +12,9 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from types import MappingProxyType
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
 from swp.domain.state import BestMark, PlanState, Rule, Step
@@ -212,6 +213,29 @@ def current_round(state: PlanState) -> int:
     return max((r for r in rounds if isinstance(r, int) and not isinstance(r, bool)), default=0)
 
 
+def _next_step(
+    state: PlanState,
+    *,
+    part: str,
+    from_location: str,
+    to_location: str,
+    rule: Rule,
+    recommendation_id: str | None = None,
+    swap_id: str | None = None,
+) -> Step:
+    """The step `append_step` would append: the current round, the next move number."""
+    return Step(
+        move_number=state.next_move_number,
+        part=part,
+        from_location=from_location,
+        to_location=to_location,
+        rule=rule,
+        round=current_round(state),
+        recommendation_id=recommendation_id,
+        swap_id=swap_id,
+    )
+
+
 def append_step(
     state: PlanState,
     *,
@@ -223,13 +247,12 @@ def append_step(
     swap_id: str | None = None,
 ) -> PlanState:
     """A new state with one step appended in the current round under the next move number."""
-    step = Step(
-        move_number=state.next_move_number,
+    step = _next_step(
+        state,
         part=part,
         from_location=from_location,
         to_location=to_location,
         rule=rule,
-        round=current_round(state),
         recommendation_id=recommendation_id,
         swap_id=swap_id,
     )
@@ -332,4 +355,116 @@ def location_ref(copy: PlanningCopy, code: str, marks: Sequence[BestMark]) -> Lo
         section=location.section,
         position=location.position,
         is_best=is_best(copy, code, marks),
+    )
+
+
+class NewMove(BaseModel):
+    """The move is a new effective move to a location that holds none of the part."""
+
+    kind: Literal["new"] = "new"
+
+
+class AddsToStock(BaseModel):
+    """The move is a new effective move; the target already holds the part (stock adds up)."""
+
+    kind: Literal["adds_to_stock"] = "adds_to_stock"
+
+
+class CombinesWith(BaseModel):
+    """The move lands in effective move `move_number`, which keeps its number (FR-34)."""
+
+    kind: Literal["combines_with"] = "combines_with"
+    move_number: int
+
+
+class RemovesMove(BaseModel):
+    """The move returns the part to where move `move_number` took it from: that move is
+    removed (FR-34)."""
+
+    kind: Literal["removes_move"] = "removes_move"
+    move_number: int
+
+
+MoveEffect = Annotated[
+    NewMove | AddsToStock | CombinesWith | RemovesMove, Field(discriminator="kind")
+]
+"""What a manual move does to the effective moves (AD-3)."""
+
+ENTER_TO_LOCATION = "Enter a to-location."
+IS_FROM_LOCATION = "This is the from-location. Choose another."
+
+
+@dataclass(frozen=True)
+class ManualMoveCheck:
+    """Whether a manual move is allowed and what it does (FR-33, FR-34, AD-3).
+
+    `copy` is the planning copy before the move. When allowed, `step` is the step to append,
+    `move` the effective move holding it afterwards (None when the move removes one) and
+    `removed` the effective move it removes (None otherwise).
+    """
+
+    copy: PlanningCopy
+    refusal_message: str | None
+    effect: MoveEffect | None
+    step: Step | None = None
+    move: EffectiveMove | None = None
+    removed: EffectiveMove | None = None
+
+    @property
+    def allowed(self) -> bool:
+        return self.refusal_message is None
+
+
+def _refusal(
+    data: ImportData, copy: PlanningCopy, part: str, from_location: str, to_location: str
+) -> str | None:
+    """The first rule a manual move breaks, as a final English sentence; None if allowed."""
+    if not to_location.strip():
+        return ENTER_TO_LOCATION
+    if to_location == from_location:
+        return IS_FROM_LOCATION
+    if to_location in data.virtual_locations:
+        return f"{to_location} is a virtual location, not a shelf."
+    if to_location not in data.locations:
+        return f"{to_location} is not in the Locations file."
+    if stock_at(copy, part, from_location) <= 0:
+        return f"{part} has no stock at {from_location}."
+    return None
+
+
+def check_manual_move(
+    data: ImportData, state: PlanState, part: str, from_location: str, to_location: str
+) -> ManualMoveCheck:
+    """Check a manual move of all of `part`'s stock at `from_location` to `to_location`
+    (FR-33, FR-34). The only implementation of the refusals and the effect: the command and
+    the preview both call it. The effect comes from replaying the step log with and
+    without the new step, so `replay` stays the only FR-34 fold (AD-5)."""
+    before = replay(data, state.steps)
+    refusal = _refusal(data, before.copy, part, from_location, to_location)
+    if refusal is not None:
+        return ManualMoveCheck(copy=before.copy, refusal_message=refusal, effect=None)
+    step = _next_step(
+        state, part=part, from_location=from_location, to_location=to_location, rule="manual"
+    )
+    after = replay(data, [*state.steps, step])
+    after_numbers = {move.move_number for move in after.moves}
+    removed = next((m for m in before.moves if m.move_number not in after_numbers), None)
+    if removed is not None:
+        return ManualMoveCheck(
+            copy=before.copy,
+            refusal_message=None,
+            effect=RemovesMove(move_number=removed.move_number),
+            step=step,
+            removed=removed,
+        )
+    holding = next(m for m in after.moves if step.move_number in m.steps)
+    effect: MoveEffect
+    if holding.move_number != step.move_number:
+        effect = CombinesWith(move_number=holding.move_number)
+    elif stock_at(before.copy, part, to_location) > 0:
+        effect = AddsToStock()
+    else:
+        effect = NewMove()
+    return ManualMoveCheck(
+        copy=before.copy, refusal_message=None, effect=effect, step=step, move=holding
     )

@@ -17,6 +17,7 @@ from swp.domain.import_ import (
 )
 from swp.domain.import_data import NormalizedImport
 from swp.domain.values import Dec, dec_text
+from tests.domain.answer_key import answer_key_import
 
 LOC_HEADER: tuple[Cell, ...] = ("Location", "Walk Path", "Aisle", "Level")
 INV_HEADER: tuple[Cell, ...] = ("Part", "Part Description", "Quantity", "Location")
@@ -107,6 +108,22 @@ def test_fr5_issue_part_at_virtual_location_accepted() -> None:
     result = _normalize(_files(transactions=(("Issue Part", "P1", "FLSKRS", 7, "2026-09-30"),)))
 
     assert [t.type for t in result.data.transactions] == ["issue_part"]
+
+
+def test_fr5_virtual_locations_stored() -> None:
+    assert answer_key_import().data.virtual_locations == ["FLSKRS"]
+    result = _normalize(
+        _files(
+            transactions=(
+                ("Issue Part", "P1", "ZZ", 7, "2026-09-01"),
+                ("Issue Part", "P1", "A-01", 8, "2026-09-02"),
+                ("Issue Part", "P1", "FLSKRS", 9, "2026-09-03"),
+                ("Issue Part", "P1", "ZZ", 10, "2026-09-04"),
+            )
+        )
+    )
+
+    assert result.data.virtual_locations == ["ZZ", "FLSKRS"]
 
 
 def test_fr5_other_types_accepted_and_ignored() -> None:
@@ -372,8 +389,9 @@ def test_fr6_import_data_json_keys() -> None:
         "inventory",
         "parts",
         "transactions",
+        "virtual_locations",
     ]
-    assert dumped["data"]["schema_version"] == 1
+    assert dumped["data"]["schema_version"] == 2
     assert dumped["data"]["transactions"] == [
         {"type": "issue_part", "part": "P1", "transaction_code": "7", "date": "2026-09-30"}
     ]

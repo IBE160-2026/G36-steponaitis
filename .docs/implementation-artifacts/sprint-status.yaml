@@ -311,7 +311,7 @@ action_items:
     action: "Retry or map SQLite busy/locked errors to 503 in run_command and read
       only id, version and state under the write lock"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-23-add-a-playwright-test-where-a-command-is"
     epic: 3
