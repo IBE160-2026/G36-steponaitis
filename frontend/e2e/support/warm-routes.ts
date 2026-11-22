@@ -3,7 +3,9 @@ import { type FullConfig, request } from "@playwright/test";
 // Global setup: `next dev` compiles a route the first time it is requested, which can take longer
 // than an assertion's timeout under parallel workers. Requesting every app route once before the
 // tests start moves that compile out of the journeys, so a cross-route navigation (e.g. a location
-// chip from Parts to Locations) waits only on rendering, never on a cold compile.
+// chip from Parts to Locations) waits only on rendering, never on a cold compile. Only needed when
+// a reused `next dev` server runs; the default web server (`npm run e2e:serve`) is a production
+// build with nothing to compile, so there it is a cheap warm-up.
 
 const PLAN = "00000000-0000-0000-0000-000000000000";
 // One built step per route file, plus "best-locations" for the `[step]` placeholder route.

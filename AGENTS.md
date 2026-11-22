@@ -25,7 +25,7 @@ Run every command from the repo root. Required: Node 24.x, Python 3.12, uv.
 - Dev: `npm run dev` (backend on 127.0.0.1:8000, frontend on localhost:3000 proxying `/api/*`). Single side: `npm run dev:backend` / `npm run dev:frontend`.
 - Lint: `npm run lint:py` (ruff), `npm run lint:imports` (import-linter layer contracts), `npm run lint` (ESLint, frontend), `npm run typecheck` (tsc).
 - Test: `npm test` (runs `npm run test:py` = pytest, then `npm run test:web` = Vitest).
-- E2E: `npm run e2e -- --project=chromium`; plain `npm run e2e` also runs firefox and msedge, which need those browsers installed. Install Chromium once with `npx --workspace frontend playwright install chromium`. Playwright starts `npm run dev` itself against `backend/var/e2e.db` and reuses a running dev server outside CI.
+- E2E: `npm run e2e -- --project=chromium`; plain `npm run e2e` also runs firefox and msedge, which need those browsers installed. Install Chromium once with `npx --workspace frontend playwright install chromium`. Playwright builds and starts the production app itself (`npm run e2e:serve`: `next build` + `next start`, backend with 4 uvicorn workers) against `backend/var/e2e.db`, and reuses a running server on :3000 outside CI.
 - Run Python tools through uv (`uv run --directory backend --locked <tool>`), never bare `pytest`/`ruff`, which run outside the locked environment.
 
 ## Conventions that differ from defaults

@@ -110,7 +110,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx --workspace frontend playwright install --with-deps chromium
-      # Playwright starts the app itself through its webServer (no reuse when CI is set).
+      # Playwright builds and starts the production app itself through its webServer
+      # (`npm run e2e:serve`: next build + next start, multi-worker backend; no reuse when CI is set).
       - run: npm run e2e -- --project=chromium
       - if: failure() || cancelled()
         uses: actions/upload-artifact@v7

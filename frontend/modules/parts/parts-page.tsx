@@ -5,7 +5,7 @@
 // server decides current and other locations; this view only filters by class and sorts. A row
 // (click or `Enter`) or a part search result opens the part panel (`?part=`, UX-DR24).
 
-import { type ReactNode, useState } from "react";
+import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
@@ -144,7 +144,9 @@ function ClassChip({
   );
 }
 
-export function PartsView({
+// Memoized: opening or closing the part panel re-renders `PartsPage`, and re-rendering the
+// 1,545-row table each time made the panel slow to appear.
+export const PartsView = memo(function PartsView({
   view,
   search,
   onOpen,
@@ -198,19 +200,19 @@ export function PartsView({
       />
     </div>
   );
-}
+});
 
 export function PartsPage({ planId }: { planId: string; params?: LocationParams }) {
   const parts = usePlanParts(planId);
   const panel = usePartPanel(planId, "parts");
+  const open = panel.open;
+  // Stable across panel changes so the memoized table does not re-render when a part opens.
+  const onOpen = useCallback((row: PartRow) => open(row.part), [open]);
+  const search = useMemo(() => <SearchField planId={planId} onOpenPart={open} />, [planId, open]);
   if (parts.data) {
     return (
       <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
-        <PartsView
-          view={parts.data}
-          search={<SearchField planId={planId} onOpenPart={panel.open} />}
-          onOpen={(row) => panel.open(row.part)}
-        />
+        <PartsView view={parts.data} search={search} onOpen={onOpen} />
       </WithPartPanel>
     );
   }

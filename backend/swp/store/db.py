@@ -16,9 +16,16 @@ from swp.config import get_settings
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 
 
-def _enable_sqlite_foreign_keys(dbapi_connection: Any, _record: Any) -> None:
+def _configure_sqlite_connection(dbapi_connection: Any, _record: Any) -> None:
+    """Enforce foreign keys and use WAL on every SQLite connection.
+
+    WAL lets readers and one writer in different processes (several uvicorn workers share
+    the file) work at the same time: with the default rollback journal a commit waits while
+    any other connection holds a read lock.
+    """
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA journal_mode=WAL")
     cursor.close()
 
 
@@ -26,7 +33,7 @@ def _enable_sqlite_foreign_keys(dbapi_connection: Any, _record: Any) -> None:
 def get_engine() -> Engine:
     engine = create_engine(get_settings().database_url)
     if engine.dialect.name == "sqlite":
-        event.listen(engine, "connect", _enable_sqlite_foreign_keys)
+        event.listen(engine, "connect", _configure_sqlite_connection)
     return engine
 
 
@@ -44,6 +51,11 @@ def ping() -> None:
 
 
 def upgrade_to_head() -> None:
+    # Connect once through the app engine first: on SQLite this switches the file to WAL (the
+    # mode is stored in the file); the switch needs an exclusive lock. A multi-worker start must
+    # run `swp db upgrade` first (as `e2e:backend` does) so the switch happens before any worker
+    # opens the file; the workers' lifespan upgrades are then no-ops.
+    ping()
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS_DIR))
     # ConfigParser interpolation: escape % (URL-encoded passwords).

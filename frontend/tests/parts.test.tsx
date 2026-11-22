@@ -198,3 +198,13 @@ describe("uxdr23 bin swatch", () => {
     expect(markup).toContain('aria-label="Fast-moving"');
   });
 });
+
+describe("ux-dr24 part panel opens without re-rendering the roster", () => {
+  it("uxdr24_parts_view_is_memoized_so_a_panel_change_skips_the_table", () => {
+    // PartsPage re-renders when `?part=` changes; a memoized view with default (shallow) props
+    // comparison skips the 1,545-row table when its props are the same stable values.
+    const memoized = PartsView as unknown as { $$typeof: symbol; compare: unknown };
+    expect(memoized.$$typeof).toBe(Symbol.for("react.memo"));
+    expect(memoized.compare).toBeNull();
+  });
+});
