@@ -16,6 +16,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from swp.domain.analysis import Analysis, PartAnalysis
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
 from swp.domain.state import BestMark, PlanState, Rule, Step
 
@@ -298,6 +299,18 @@ def other_locations(copy: PlanningCopy, part: str) -> list[str]:
 def aisle_of(copy: PlanningCopy, location: str) -> str:
     """The aisle of a location code."""
     return copy.locations[location].aisle
+
+
+def current_aisle(copy: PlanningCopy, part: str) -> str | None:
+    """The aisle of the part's current location; None when no stock is above zero."""
+    current = current_location(copy, part)
+    return aisle_of(copy, current) if current is not None else None
+
+
+def listed_parts(data: ImportData, analysis: Analysis) -> dict[str, PartAnalysis]:
+    """The parts the views list: Inventory parts (in `data.parts` order) that have an
+    analysis entry, with that entry."""
+    return {part: analysis.parts[part] for part in data.parts if part in analysis.parts}
 
 
 def covering_marks(copy: PlanningCopy, location: str, marks: Sequence[BestMark]) -> list[BestMark]:

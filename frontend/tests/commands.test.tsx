@@ -18,6 +18,7 @@ import {
   IDLE_STATE,
   isConsistent,
   latestConsistent,
+  MAX_STALE_REFETCHES,
   newCommandId,
   noticeText,
   RETRY_DELAYS_MS,
@@ -25,7 +26,9 @@ import {
   SAVED_TEXT,
   SAVING_REASON,
   type SaveNotice,
+  staleIndexes,
   useConsistentPlanData,
+  useConsistentPlanQueries,
   usePlanCommands,
 } from "@/lib/commands";
 
@@ -194,6 +197,24 @@ describe("fr10 confirmed command", () => {
     expect(h.summaryFn).toHaveBeenCalledTimes(3);
     expect(h.locationsFn).toHaveBeenCalledTimes(1);
     expect(h.queryClient.getQueryData(planSummaryKey(PLAN))).toEqual({ version: 4 });
+  });
+
+  it("ad12_refetch_brings_views_up_to_the_highest_version_seen", async () => {
+    // Another writer: the summary comes back at v6 after the v5 confirm; locations at v5 is now
+    // stale and is refetched until it reaches v6.
+    const h = setup({ summary: [6], locations: [5, 6] });
+    mockFetch(json(200, { version: 5, events: [] }));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("confirmed");
+    expect(h.summaryFn).toHaveBeenCalledTimes(1);
+    expect(h.locationsFn).toHaveBeenCalledTimes(2);
+    expect(h.queryClient.getQueryData(planLocationsKey(PLAN))).toEqual({ version: 6 });
+  });
+
+  it("ad12_refetch_to_the_highest_version_is_still_bounded", async () => {
+    const h = setup({ summary: [6], locations: [5] });
+    mockFetch(json(200, { version: 5, events: [] }));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("confirmed");
+    expect(h.locationsFn).toHaveBeenCalledTimes(1 + MAX_STALE_REFETCHES);
   });
 
   it("ad12_stale_refetch_stops_once_the_view_catches_up", async () => {
@@ -481,6 +502,27 @@ describe("ad12 version-consistent plan data", () => {
     expect(isConsistent([v(5), v(4)])).toBe(false);
     expect(isConsistent([v(5), undefined])).toBe(false);
     expect(isConsistent([])).toBe(true);
+  });
+
+  it("ad12_stale_indexes_only_for_defined_mismatched_sets", () => {
+    expect(staleIndexes([v(5), v(4)])).toEqual([1]);
+    expect(staleIndexes([v(4), v(6), v(5), v(6)])).toEqual([0, 2]);
+    expect(staleIndexes([v(5), v(5)])).toEqual([]);
+    expect(staleIndexes([v(5), undefined])).toEqual([]);
+    expect(staleIndexes([undefined, v(4), v(5)])).toEqual([]);
+    expect(staleIndexes([v(5), { other: 1 }])).toEqual([]);
+    expect(staleIndexes([])).toEqual([]);
+  });
+
+  it("ad12_use_consistent_plan_queries_renders_only_agreeing_sets", () => {
+    const query = (data: Versioned | undefined) => ({ data, isFetching: false, refetch: vi.fn() });
+    function View({ datas }: { datas: [Versioned | undefined, Versioned | undefined] }) {
+      const consistent = useConsistentPlanQueries([query(datas[0]), query(datas[1])]);
+      return <span>{consistent ? consistent.map((d) => d.version).join(",") : "none"}</span>;
+    }
+    expect(html(<View datas={[v(5), v(4)]} />)).toContain("none");
+    expect(html(<View datas={[v(5), undefined]} />)).toContain("none");
+    expect(html(<View datas={[v(6), v(6)]} />)).toContain("6,6");
   });
 
   it("ad12_latest_consistent_keeps_the_previous_set_while_versions_disagree", () => {

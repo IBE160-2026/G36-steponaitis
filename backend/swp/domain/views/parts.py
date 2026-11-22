@@ -16,8 +16,9 @@ from swp.domain.ordering import part_order, pick_group_order
 from swp.domain.planning import (
     LocationRef,
     PlanningCopy,
-    aisle_of,
+    current_aisle,
     current_location,
+    listed_parts,
     location_ref,
     other_locations,
     planning_copy,
@@ -53,7 +54,7 @@ def build_parts_view(
     """The roster of the plan as it is now, in `ordering.part_order`."""
     copy = planning_copy(data, state)
     marks = state.best_marks
-    listed = {part: analysis.parts[part] for part in data.parts if part in analysis.parts}
+    listed = listed_parts(data, analysis)
     group_counts = Counter(
         part for group in analysis.pick_groups for part in (group.part_a, group.part_b)
     )
@@ -137,11 +138,8 @@ def class_threshold(settings: AnalysisSettings, movement_class: MovementClass) -
 
 
 def _partner(data: ImportData, copy: PlanningCopy, part: str) -> PartnerPart:
-    current = current_location(copy, part)
     return PartnerPart(
-        part=part,
-        description=data.parts.get(part, ""),
-        aisle=aisle_of(copy, current) if current is not None else None,
+        part=part, description=data.parts.get(part, ""), aisle=current_aisle(copy, part)
     )
 
 
@@ -150,8 +148,8 @@ def build_part_detail(
 ) -> PartDetail:
     """Every fact about one classified part of the plan as it is now; `not_found` when the
     part has no analysis entry (unknown, or only in Transactions)."""
-    facts = analysis.parts.get(part)
-    if facts is None or part not in data.parts:
+    facts = listed_parts(data, analysis).get(part)
+    if facts is None:
         raise DomainError("not_found", f"No part {part} in this plan.")
     copy = planning_copy(data, state)
     marks = state.best_marks

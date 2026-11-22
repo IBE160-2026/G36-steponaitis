@@ -687,6 +687,8 @@ export interface components {
         };
         /** PickGroupsView */
         PickGroupsView: {
+            /** Min Shared Jobs */
+            min_shared_jobs: number;
             /** Pick Groups */
             pick_groups: components["schemas"]["PickGroupRow"][];
             /** Version */

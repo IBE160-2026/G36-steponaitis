@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
+import { type Occupancy, occupancyLine } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1: the planner opens the Locations step, reads the occupancy lines, filters by aisle and
@@ -10,19 +11,12 @@ import { createSamplePlan } from "./support/sample-plan";
 
 test.skip(({ browserName }) => browserName !== "chromium", "The locations journey runs in Chromium.");
 
-type Occupancy = { locations: number; occupied: number; empty: number; occupied_percent: string };
 type Row = {
   location: { code: string; aisle: string };
   occupied: boolean;
   contents: { part: string }[];
 };
 type View = { locations: Row[]; aisles: (Occupancy & { aisle: string })[]; warehouse: Occupancy };
-
-function occupancyLine(label: string, occupancy: Occupancy): string {
-  const n = (value: number) => value.toLocaleString("en-US");
-  const noun = occupancy.locations === 1 ? "location" : "locations";
-  return `${label} · ${occupancy.occupied_percent}% occupied · ${n(occupancy.occupied)} of ${n(occupancy.locations)} ${noun} · ${n(occupancy.empty)} empty`;
-}
 
 test("uj1 reads the locations table with occupancy, filters it and opens a location from the URL", async ({
   page,
@@ -97,4 +91,54 @@ test("uj1 reads the locations table with occupancy, filters it and opens a locat
   await expect(body).toHaveCount(2_000);
   const focusedInTable = await table.evaluate((element) => element.contains(document.activeElement));
   expect(focusedInTable).toBe(false);
+});
+
+test("uj1 changing the aisle keeps the occupancy filter", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const planId = (await createSamplePlan(request, `Aisle filter ${randomUUID().slice(0, 8)}`)).id;
+  const view = (await (await request.get(`/api/plans/${planId}/locations`)).json()) as View;
+  const aisleA = view.aisles.find((aisle) => aisle.aisle === "A")!;
+  const aisleB = view.aisles.find((aisle) => aisle.aisle === "B")!;
+
+  await page.goto(`/plans/${planId}/locations`);
+  const main = page.getByRole("main");
+  const body = main.getByRole("table", { name: "Locations" }).locator("tbody tr");
+  await expect(body).toHaveCount(2_000);
+  const emptyButton = main.getByRole("group", { name: "Filter by occupancy" }).getByRole("button", { name: "Empty" });
+  const notBest = main.getByRole("group", { name: "Filter by best location" }).getByRole("button", { name: "Not best" });
+  await emptyButton.click();
+  await notBest.click();
+
+  // The table's aisle change writes `?aisle=` itself; the Occupancy and Best filters stay on.
+  const aisleSelect = main.getByRole("combobox", { name: "Aisle" });
+  await aisleSelect.selectOption("A");
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A$`));
+  await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
+  await expect(notBest).toHaveAttribute("aria-pressed", "true");
+  await expect(body).toHaveCount(aisleA.empty);
+  await aisleSelect.selectOption("B");
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=B$`));
+  await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
+  await expect(body).toHaveCount(aisleB.empty);
+
+  // A different `?aisle=&loc=` link (a part panel's location chip) still resets them.
+  const target = view.locations.find((row) => row.location.aisle === "A" && row.contents.length > 0)!;
+  const part = target.contents[0].part;
+  await main.getByRole("heading", { name: "Locations", level: 1 }).click();
+  await page.keyboard.press("Control+/");
+  await page.keyboard.type(part);
+  await page.locator(`[data-search-part="${part}"]`).click();
+  const panel = page.getByRole("complementary", { name: part });
+  await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
+  const chip = panel.locator("[data-location-chip]").first();
+  const chipCode = (await chip.getAttribute("data-location-chip"))!;
+  const chipAisle = view.locations.find((row) => row.location.code === chipCode)!.location.aisle;
+  await chip.click();
+  await expect(page).toHaveURL(new RegExp(`\\?aisle=${chipAisle}&loc=${encodeURIComponent(chipCode)}$`));
+  await expect(aisleSelect).toHaveValue(chipAisle);
+  await expect(emptyButton).toHaveAttribute("aria-pressed", "false");
+  await expect(notBest).toHaveAttribute("aria-pressed", "false");
+  const chipAisleView = view.aisles.find((aisle) => aisle.aisle === chipAisle)!;
+  await expect(body).toHaveCount(chipAisleView.locations);
 });

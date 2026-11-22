@@ -11,7 +11,7 @@ import { BinSwatch } from "@/components/common/bin-swatch";
 import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
 import { Icon } from "@/components/common/icons";
-import { NO_CURRENT_LOCATION, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
+import { NO_CURRENT_LOCATION, usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
 import { type PartRow, type PartsView as PartsData, usePlanParts } from "@/lib/api/plans";
@@ -209,10 +209,17 @@ export function PartsPage({ planId }: { planId: string; params?: LocationParams 
   // Stable across panel changes so the memoized table does not re-render when a part opens.
   const onOpen = useCallback((row: PartRow) => open(row.part), [open]);
   const search = useMemo(() => <SearchField planId={planId} onOpenPart={open} />, [planId, open]);
-  if (parts.data) {
+  const data = usePanelPlanData(planId, parts, panel.part);
+  if (data) {
     return (
-      <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
-        <PartsView view={parts.data} search={search} onOpen={onOpen} />
+      <WithPartPanel
+        planId={planId}
+        part={panel.part}
+        detail={data.detail}
+        detailError={data.detailError}
+        onClose={panel.close}
+      >
+        <PartsView view={data.view} search={search} onOpen={onOpen} />
       </WithPartPanel>
     );
   }

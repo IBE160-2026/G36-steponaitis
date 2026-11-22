@@ -7,6 +7,7 @@ import {
   NO_CURRENT_LOCATION,
   NO_PICK_GROUPS,
   PartFacts,
+  PartPanel,
   PartPanelFrame,
   picksLine,
   sharedJobsText,
@@ -131,6 +132,34 @@ describe("uxdr24 part panel", () => {
     expect(markup).not.toContain("shadow");
     expect(markup).toContain(`aria-label="${CLOSE_LABEL}"`);
     expect(markup).toContain('data-icon="close"');
+  });
+});
+
+describe("ad12 part panel takes its detail from the page", () => {
+  it("ad12_panel_shows_loading_while_the_detail_is_not_consistent_yet", () => {
+    const plain = text(
+      renderToStaticMarkup(
+        <PartPanel planId="p1" part="2400" detail={undefined} detailError={null} onClose={() => {}} />,
+      ),
+    );
+    expect(plain).toContain("Loading part 2400…");
+    expect(plain).not.toContain("Brake pad - Volvo V70");
+  });
+
+  it("ad12_panel_shows_the_load_error_without_a_detail", () => {
+    const plain = text(
+      renderToStaticMarkup(
+        <PartPanel
+          planId="p1"
+          part="2400"
+          detail={undefined}
+          detailError={new Error("No part 2400 in this plan.")}
+          onClose={() => {}}
+        />,
+      ),
+    );
+    expect(plain).toContain("No part 2400 in this plan.");
+    expect(plain).not.toContain("Loading part");
   });
 });
 

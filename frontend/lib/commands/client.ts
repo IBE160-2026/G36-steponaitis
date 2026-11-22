@@ -83,6 +83,18 @@ export function isConsistent(datas: readonly unknown[]): boolean {
   return versions.every((version) => version === versions[0]);
 }
 
+/**
+ * The indexes whose `version` is below the highest in `datas`: `[]` unless every item is defined
+ * with a `version` and the versions differ (AD-12).
+ */
+export function staleIndexes(datas: readonly unknown[]): number[] {
+  const versions = datas.map(versionOf);
+  if (versions.some((version) => version === undefined)) return [];
+  const defined = versions as number[];
+  const highest = Math.max(...defined);
+  return defined.flatMap((version, index) => (version < highest ? [index] : []));
+}
+
 type PostOutcome = { ok: CommandResult } | "transient" | ApiError;
 
 export class CommandClient {
@@ -208,13 +220,18 @@ export class CommandClient {
     return this.queryClient.invalidateQueries({ queryKey: planRootKey(planId), refetchType: "active" });
   }
 
-  /** Refetch every active plan query, then re-refetch those still older than `version` (≤ 2 rounds). */
+  /**
+   * Refetch every active plan query, then re-refetch those still older than the highest version
+   * seen: the confirmed `version` or a newer one any plan query now carries (another writer).
+   * At most `MAX_STALE_REFETCHES` extra rounds.
+   */
   private async refetchConsistent(planId: string, version: number): Promise<void> {
     await this.refetchPlan(planId);
     for (let round = 0; round < MAX_STALE_REFETCHES; round++) {
+      const target = Math.max(version, baseVersion(this.queryClient, planId));
       const stale = (query: Query) => {
         const seen = versionOf(query.state.data);
-        return seen !== undefined && seen < version;
+        return seen !== undefined && seen < target;
       };
       const staleQueries = this.queryClient
         .getQueryCache()

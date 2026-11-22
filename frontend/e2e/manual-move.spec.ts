@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { type APIRequestContext, expect, type Locator, type Page, test } from "@playwright/test";
 
+import { type Detail, enterTarget, getJson, locationRows, planVersion, type RosterRow } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1 and UJ-7: the planner makes a manual move from the part panel and moves it back, keyboard
@@ -11,23 +12,8 @@ import { createSamplePlan } from "./support/sample-plan";
 
 test.skip(({ browserName }) => browserName !== "chromium", "The manual move journeys run in Chromium.");
 
-type Ref = { code: string; aisle: string };
-type RosterRow = { part: string; current_location: Ref | null };
-type Detail = { part: string; current_location: Ref | null; other_locations: { location: Ref }[] };
-type LocationRow = { location: Ref; occupied: boolean; contents: { part: string }[] };
-
 const NO_STOCK = "No current location (no stock above zero)";
 const RETRYING = "The last change was not saved yet. Trying again.";
-
-async function getJson<T>(request: APIRequestContext, url: string): Promise<T> {
-  const response = await request.get(url);
-  expect(response.ok()).toBe(true);
-  return (await response.json()) as T;
-}
-
-async function planVersion(request: APIRequestContext, planId: string): Promise<number> {
-  return (await getJson<{ version: number }>(request, `/api/plans/${planId}`)).version;
-}
 
 /** A part with stock in exactly one location (so the dialog shows "From …" as text). */
 async function singleLocationPart(request: APIRequestContext, planId: string, skip: string[] = []): Promise<Detail> {
@@ -38,10 +24,6 @@ async function singleLocationPart(request: APIRequestContext, planId: string, sk
     if (detail.other_locations.length === 0) return detail;
   }
   throw new Error("no part with a single location");
-}
-
-async function locationRows(request: APIRequestContext, planId: string): Promise<LocationRow[]> {
-  return (await getJson<{ locations: LocationRow[] }>(request, `/api/plans/${planId}/locations`)).locations;
 }
 
 /** An empty location, a prefix to type for it and how many ↓ presses highlight it. */
@@ -72,12 +54,6 @@ async function openDialog(page: Page, planId: string, part: string): Promise<Loc
   const dialog = page.getByRole("dialog", { name: `Manual move · ${part}` });
   await expect(dialog.getByRole("combobox", { name: "To-location" })).toBeFocused();
   return dialog;
-}
-
-/** Types the whole code and waits for the allowed preview's effect line. */
-async function enterTarget(page: Page, dialog: Locator, code: string, effect: string) {
-  await page.keyboard.type(code);
-  await expect(dialog.locator("[data-move-effect]")).toHaveText(effect);
 }
 
 test("uj1 makes a manual move from the part panel and moves it back", async ({ page, request }) => {

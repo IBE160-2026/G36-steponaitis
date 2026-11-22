@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import type { PickGroupRow, PickGroupsView as PickGroupsData } from "@/lib/api/plans";
-import { EMPTY_MESSAGE, groupCountLine, PickGroupsView } from "@/modules/pick-groups/pick-groups-page";
+import { emptyMessage, groupCountLine, PickGroupsView } from "@/modules/pick-groups/pick-groups-page";
 
 // Story 2.5: the pick groups table (FR-20, UX-DR29). Rendered to static markup; Vitest has no DOM.
 
@@ -43,7 +43,7 @@ describe("fr20 group count line", () => {
 
 describe("uxdr29 pick groups table", () => {
   it("uxdr29_pick_groups_table_markup", () => {
-    const view: PickGroupsData = { version: 1, pick_groups: ROWS };
+    const view: PickGroupsData = { version: 1, min_shared_jobs: 5, pick_groups: ROWS };
     const markup = renderToStaticMarkup(<PickGroupsView view={view} />);
     const plain = text(markup);
     expect(markup).toContain('aria-label="Pick groups"');
@@ -64,14 +64,21 @@ describe("uxdr29 pick groups table", () => {
     const order = ["8100", "9100", "1008614-00", "5000"].map((part) => plain.indexOf(`${part} Description`));
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((x, y) => x - y)).toEqual(order);
-    expect(plain).not.toContain(EMPTY_MESSAGE);
+    expect(plain).not.toContain(emptyMessage(5));
   });
 
   it("uxdr29_empty_state", () => {
-    const markup = renderToStaticMarkup(<PickGroupsView view={{ version: 1, pick_groups: [] }} />);
+    const markup = renderToStaticMarkup(<PickGroupsView view={{ version: 1, min_shared_jobs: 5, pick_groups: [] }} />);
     expect(text(markup)).toContain("No pick groups: no two parts share 5 or more jobs in the period.");
-    expect(EMPTY_MESSAGE).toBe("No pick groups: no two parts share 5 or more jobs in the period.");
     expect(markup).not.toContain("<table");
     expect(text(markup)).not.toMatch(/\d pick group/);
+  });
+
+  it("fr20_empty_message_uses_the_servers_min_shared_jobs", () => {
+    expect(emptyMessage(5)).toBe("No pick groups: no two parts share 5 or more jobs in the period.");
+    expect(emptyMessage(3)).toBe("No pick groups: no two parts share 3 or more jobs in the period.");
+    const markup = renderToStaticMarkup(<PickGroupsView view={{ version: 2, min_shared_jobs: 3, pick_groups: [] }} />);
+    expect(text(markup)).toContain(emptyMessage(3));
+    expect(text(markup)).not.toContain("share 5 or more");
   });
 });

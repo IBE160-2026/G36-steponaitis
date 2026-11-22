@@ -23,7 +23,7 @@ import {
   usePlanLocations,
   usePlanSummary,
 } from "@/lib/api/plans";
-import { type CommandBody, type SendResult, useConsistentPlanData, usePlanCommands } from "@/lib/commands";
+import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
 import { bestCountsLine, hasLocationMark, levelsInAisle, markLabel, sameMark } from "./marks";
 
@@ -242,7 +242,7 @@ export function BestLocationsView({
 export function BestLocationsPage({ planId }: { planId: string }) {
   const summary = usePlanSummary(planId);
   const locations = usePlanLocations(planId);
-  const data = useConsistentPlanData([summary.data, locations.data]);
+  const data = useConsistentPlanQueries([summary, locations]);
   const { sendWithEvents, disabledReason } = usePlanCommands(planId);
   if (data) {
     const [summaryData, view] = data;

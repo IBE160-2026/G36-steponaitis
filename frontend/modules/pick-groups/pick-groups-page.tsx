@@ -7,7 +7,7 @@
 
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
 import { Icon } from "@/components/common/icons";
-import { usePartPanel, WithPartPanel } from "@/components/common/part-panel";
+import { usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import {
   type PickGroupPart,
@@ -18,7 +18,10 @@ import {
 import { formatNumber } from "@/lib/format";
 import type { LocationParams } from "@/lib/view-state/urls";
 
-export const EMPTY_MESSAGE = "No pick groups: no two parts share 5 or more jobs in the period.";
+/** The empty sentence, with the plan's minimum shared jobs from the server (never hard-coded). */
+export function emptyMessage(minSharedJobs: number): string {
+  return `No pick groups: no two parts share ${formatNumber(minSharedJobs)} or more jobs in the period.`;
+}
 
 /** "10 pick groups" (singular "1 pick group"). */
 export function groupCountLine(count: number): string {
@@ -79,7 +82,7 @@ export function PickGroupsView({ view, onOpenPart }: { view: PickGroupsData; onO
     <div className="flex flex-col gap-4 px-page-gutter py-5">
       <h1 className="type-page-title">Pick groups</h1>
       {view.pick_groups.length === 0 ? (
-        <p className="type-body text-ink-secondary">{EMPTY_MESSAGE}</p>
+        <p className="type-body text-ink-secondary">{emptyMessage(view.min_shared_jobs)}</p>
       ) : (
         <>
           <p className="type-body text-ink-secondary">{groupCountLine(view.pick_groups.length)}</p>
@@ -99,10 +102,17 @@ export function PickGroupsView({ view, onOpenPart }: { view: PickGroupsData; onO
 export function PickGroupsPage({ planId }: { planId: string; params?: LocationParams }) {
   const pickGroups = usePlanPickGroups(planId);
   const panel = usePartPanel(planId, "pick-groups");
-  if (pickGroups.data) {
+  const data = usePanelPlanData(planId, pickGroups, panel.part);
+  if (data) {
     return (
-      <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
-        <PickGroupsView view={pickGroups.data} onOpenPart={panel.open} />
+      <WithPartPanel
+        planId={planId}
+        part={panel.part}
+        detail={data.detail}
+        detailError={data.detailError}
+        onClose={panel.close}
+      >
+        <PickGroupsView view={data.view} onOpenPart={panel.open} />
       </WithPartPanel>
     );
   }

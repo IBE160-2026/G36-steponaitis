@@ -240,21 +240,21 @@ action_items:
     action: "Stop the Locations aisle change from clearing the Occupancy and Best
       filters, with an e2e test that presses a filter then changes the aisle"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-13-build-the-pick-groups-empty-state-senten"
     epic: 2
     action: "Build the Pick groups empty-state sentence from the plan pick_group_min_shared_jobs
       instead of the literal 5"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-14-move-the-part-aisle-derivation-and-the-l"
     epic: 2
     action: "Move the part-aisle derivation and the listed-parts rule into domain/planning.py
       and use them from the parts, pick-groups and search views"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-15-guard-datatable-onkeydown-against-enter"
     epic: 2
@@ -297,7 +297,7 @@ action_items:
       and give the Best locations step a bounded refetch when its first load has mismatched
       versions"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-21-build-the-command-inside-send-try-block"
     epic: 3

@@ -1,7 +1,8 @@
 "use client";
 
 // React bindings for the command flow (AD-12): one `CommandClient` per app, the per-plan save
-// state through `useSyncExternalStore`, and the version-consistent view of several plan queries.
+// state through `useSyncExternalStore`, and the version-consistent view of several plan queries
+// (refetching the stale ones a bounded number of times).
 
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -10,6 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -19,10 +21,12 @@ import {
   type CommandBody,
   CommandClient,
   isConsistent,
+  MAX_STALE_REFETCHES,
   type PlanCommandState,
   SAVING_REASON,
   type SendOutcome,
   type SendResult,
+  staleIndexes,
 } from "@/lib/commands/client";
 
 const CommandsContext = createContext<CommandClient | null>(null);
@@ -95,4 +99,44 @@ export function useConsistentPlanData<T extends readonly (Versioned | undefined)
   if (sameItems(result, last)) return last;
   setLast(result);
   return result;
+}
+
+/** What `useConsistentPlanQueries` reads of a plan query (a `useQuery` result fits). */
+export type PlanQueryLike<D extends Versioned = Versioned> = {
+  data: D | undefined;
+  isFetching: boolean;
+  refetch: () => unknown;
+};
+
+type DatasOf<Q extends readonly PlanQueryLike[]> = {
+  [K in keyof Q]: Q[K] extends PlanQueryLike<infer D> ? D | undefined : never;
+};
+
+/**
+ * `useConsistentPlanData` over the queries' data (AD-12), and the repair: while every query has
+ * data but their versions differ and none is fetching, the queries below the highest version are
+ * refetched, at most `MAX_STALE_REFETCHES` times per highest version seen (a newer version earns
+ * a fresh budget; a view that stays behind cannot loop).
+ */
+export function useConsistentPlanQueries<Q extends readonly PlanQueryLike[]>(
+  queries: readonly [...Q],
+): Defined<DatasOf<Q>> | undefined {
+  const datas = queries.map((query) => query.data);
+  const consistent = useConsistentPlanData<readonly (Versioned | undefined)[]>(datas);
+  const staleKey = staleIndexes(datas).join(",");
+  const fetching = queries.some((query) => query.isFetching);
+  const highest = Math.max(0, ...datas.map((data) => data?.version ?? 0));
+  const latest = useRef(queries);
+  const budget = useRef({ version: -1, used: 0 });
+  useEffect(() => {
+    latest.current = queries;
+  });
+  useEffect(() => {
+    if (staleKey === "" || fetching) return;
+    if (budget.current.version !== highest) budget.current = { version: highest, used: 0 };
+    if (budget.current.used >= MAX_STALE_REFETCHES) return;
+    budget.current.used += 1;
+    for (const index of staleKey.split(",").map(Number)) void latest.current[index]?.refetch();
+  }, [staleKey, fetching, highest]);
+  return consistent as Defined<DatasOf<Q>> | undefined;
 }

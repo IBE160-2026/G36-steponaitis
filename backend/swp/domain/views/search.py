@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from swp.domain.analysis import Analysis, MovementClass
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import location_order, part_order
-from swp.domain.planning import LocationRef, location_ref, planning_copy
+from swp.domain.planning import LocationRef, listed_parts, location_ref, planning_copy
 from swp.domain.state import PlanState
 
 SEARCH_LIMIT = 20
@@ -48,7 +48,7 @@ def build_search_view(
         )
     copy = planning_copy(data, state)
     marks = state.best_marks
-    classified = {part: analysis.parts[part] for part in data.parts if part in analysis.parts}
+    classified = listed_parts(data, analysis)
     parts = [
         part
         for part in part_order(classified)

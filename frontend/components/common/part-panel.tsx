@@ -9,7 +9,9 @@
 // native History API (which Next.js integrates with `useSearchParams`): the URL changes at once and
 // the panel follows on the next client render, with no server render of the page. `useSearchParams`
 // renders on the server only because each page route awaits `searchParams` (dynamic rendering); a
-// static route would need a `<Suspense>` boundary around the page.
+// static route would need a `<Suspense>` boundary around the page. The panel does not fetch: each
+// page reads the part through `usePanelPlanData`, which renders the page's view and the part
+// together only when their versions agree (AD-12).
 
 import { useSearchParams } from "next/navigation";
 import { type KeyboardEvent, type ReactNode, type Ref, useCallback, useEffect, useId, useRef, useState } from "react";
@@ -21,7 +23,7 @@ import { LocationChip } from "@/components/common/location-chip";
 import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
 import { type ClassThreshold, type PartDetail, usePlanPart } from "@/lib/api/plans";
-import { usePlanCommands } from "@/lib/commands";
+import { type PlanQueryLike, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
 import { formatNumber } from "@/lib/format";
 import type { StepKey } from "@/lib/view-state/steps";
 import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
@@ -249,17 +251,28 @@ function PartMoveAction({ planId, detail }: { planId: string; detail: PartDetail
   );
 }
 
-export function PartPanel({ planId, part, onClose }: { planId: string; part: string; onClose: () => void }) {
-  const detail = usePlanPart(planId, part);
+export function PartPanel({
+  planId,
+  part,
+  detail,
+  detailError,
+  onClose,
+}: {
+  planId: string;
+  part: string;
+  detail: PartDetail | undefined;
+  detailError: Error | null;
+  onClose: () => void;
+}) {
   return (
     <PartPanelFrame part={part} onClose={onClose}>
-      {detail.data ? (
+      {detail ? (
         <>
-          <PartFacts planId={planId} detail={detail.data} />
-          <PartMoveAction planId={planId} detail={detail.data} />
+          <PartFacts planId={planId} detail={detail} />
+          <PartMoveAction planId={planId} detail={detail} />
         </>
-      ) : showsLoadError(detail.error) ? (
-        <PlanLoadError message={detail.error.message} />
+      ) : showsLoadError(detailError) ? (
+        <PlanLoadError message={detailError.message} />
       ) : (
         <p role="status" className="type-body text-ink-secondary">
           Loading part {part}…
@@ -273,18 +286,68 @@ export function PartPanel({ planId, part, onClose }: { planId: string; part: str
 export function WithPartPanel({
   planId,
   part,
+  detail,
+  detailError = null,
   onClose,
   children,
 }: {
   planId: string;
   part: string | undefined;
+  /** The open part's detail, version-consistent with the page (`usePanelPlanData`). */
+  detail: PartDetail | undefined;
+  detailError?: Error | null;
   onClose: () => void;
   children: ReactNode;
 }) {
   return (
     <div className="flex items-start">
       <div className="min-w-0 flex-1">{children}</div>
-      {part !== undefined && <PartPanel key={part} planId={planId} part={part} onClose={onClose} />}
+      {part !== undefined && (
+        <PartPanel
+          key={part}
+          planId={planId}
+          part={part}
+          detail={detail}
+          detailError={detailError}
+          onClose={onClose}
+        />
+      )}
     </div>
   );
+}
+
+export type PanelPlanData<V> = {
+  view: V;
+  /** The open part's detail at the view's version; undefined while it loads or catches up. */
+  detail: PartDetail | undefined;
+  /** The part query's load error (shown in the panel when there is no detail). */
+  detailError: Error | null;
+};
+
+/**
+ * A page's view and its open part, rendered together (AD-12): the latest version-consistent
+ * `[view, detail]` set (`[view]` with no part open) through `useConsistentPlanQueries`, which also
+ * refetches the stale one. A remembered detail is used only for the part that is open now. Before
+ * any consistent set exists, the view alone with no detail; undefined while the view has no data.
+ */
+export function usePanelPlanData<V extends { version: number }>(
+  planId: string,
+  viewQuery: PlanQueryLike<V>,
+  part: string | undefined,
+): PanelPlanData<V> | undefined {
+  const detailQuery = usePlanPart(planId, part);
+  // A part that failed to load (and has no data) does not hold the view back: the view follows
+  // its own query alone, as with no part open, and the panel shows the error.
+  const viewAlone = part === undefined || (detailQuery.error !== null && detailQuery.data === undefined);
+  const queries: readonly PlanQueryLike[] = viewAlone ? [viewQuery] : [viewQuery, detailQuery];
+  const set = useConsistentPlanQueries(queries);
+  if (set) {
+    const remembered = set[1] as PartDetail | undefined;
+    return {
+      view: set[0] as V,
+      detail: remembered !== undefined && remembered.part === part ? remembered : undefined,
+      detailError: detailQuery.error,
+    };
+  }
+  return viewQuery.data ? { view: viewQuery.data, detail: undefined, detailError: detailQuery.error } : undefined;
 }

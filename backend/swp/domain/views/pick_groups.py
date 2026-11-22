@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from swp.domain.analysis import Analysis
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import pick_group_order
-from swp.domain.planning import PlanningCopy, aisle_of, current_location, planning_copy
+from swp.domain.planning import PlanningCopy, current_aisle, planning_copy
 from swp.domain.state import PlanState
 
 
@@ -29,15 +29,13 @@ class PickGroupRow(BaseModel):
 
 class PickGroupsView(BaseModel):
     version: int
+    min_shared_jobs: int
     pick_groups: list[PickGroupRow]
 
 
 def _part(data: ImportData, copy: PlanningCopy, part: str) -> PickGroupPart:
-    current = current_location(copy, part)
     return PickGroupPart(
-        part=part,
-        description=data.parts.get(part, ""),
-        aisle=aisle_of(copy, current) if current is not None else None,
+        part=part, description=data.parts.get(part, ""), aisle=current_aisle(copy, part)
     )
 
 
@@ -58,4 +56,8 @@ def build_pick_groups_view(
                 same_aisle=part_a.aisle is not None and part_a.aisle == part_b.aisle,
             )
         )
-    return PickGroupsView(version=version, pick_groups=rows)
+    return PickGroupsView(
+        version=version,
+        min_shared_jobs=analysis.settings.pick_group_min_shared_jobs,
+        pick_groups=rows,
+    )

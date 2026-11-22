@@ -18,7 +18,7 @@ def test_fr20_pick_groups_endpoint_on_sample(empty_tables: str) -> None:
 
     assert response.status_code == 200, response.text
     body = response.json()
-    assert set(body) == {"version", "pick_groups"}
+    assert set(body) == {"version", "min_shared_jobs", "pick_groups"}
     assert body["version"] == 1
     rows = body["pick_groups"]
     assert rows, "the sample data has pick groups"

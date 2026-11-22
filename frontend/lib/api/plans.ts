@@ -128,8 +128,13 @@ export function fetchPlanPart(planId: string, part: string): Promise<PartDetail>
   return getJson<PartDetail>(`/api/plans/${encodeURIComponent(planId)}/parts/${encodeURIComponent(part)}`);
 }
 
-export function usePlanPart(planId: string, part: string) {
-  return useQuery({ queryKey: planPartKey(planId, part), queryFn: () => fetchPlanPart(planId, part) });
+/** Runs only with a part (the part panel is closed otherwise). */
+export function usePlanPart(planId: string, part: string | undefined) {
+  return useQuery({
+    queryKey: planPartKey(planId, part ?? ""),
+    queryFn: () => fetchPlanPart(planId, part ?? ""),
+    enabled: part !== undefined,
+  });
 }
 
 export function fetchPlanSearch(planId: string, q: string): Promise<SearchView> {

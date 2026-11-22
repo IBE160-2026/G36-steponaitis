@@ -19,11 +19,16 @@ import {
   occupancyLine,
   type OpenPart,
 } from "@/components/common/locations-table";
-import { usePartPanel, WithPartPanel } from "@/components/common/part-panel";
+import { usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
 import { type LocationsView as LocationsData, usePlanLocations } from "@/lib/api/plans";
 import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
+
+/** The part of the URL that resets the filters: `?aisle=` and `?loc=` (empty values dropped). */
+function locationUrlKey(aisle: string | undefined, loc: string | undefined): string {
+  return `${aisle ?? ""}\u0000${loc ?? ""}`;
+}
 
 export function LocationsView({
   view,
@@ -43,17 +48,23 @@ export function LocationsView({
   const fromUrl = aisleFromParams(params, view.aisles);
   const [filters, setFilters] = useState<LocationFilters>({ ...NO_FILTERS, aisle: fromUrl });
   // A new URL (e.g. another `?aisle=&loc=` link) clears the filters and sets the aisle again,
-  // so a filter left on cannot hide the linked row.
-  const urlKey = `${params.aisle ?? ""}\u0000${params.loc ?? ""}`;
+  // so a filter left on cannot hide the linked row. The URL this view writes itself when the
+  // table's aisle changes (`?aisle=` without `loc`) keeps the Occupancy and Best filters.
+  const urlKey = locationUrlKey(params.aisle, params.loc);
   const [seenUrl, setSeenUrl] = useState(urlKey);
+  const [ownUrl, setOwnUrl] = useState<string | null>(null);
   if (seenUrl !== urlKey) {
     setSeenUrl(urlKey);
-    setFilters({ ...NO_FILTERS, aisle: fromUrl });
+    setOwnUrl(null);
+    if (urlKey !== ownUrl) setFilters({ ...NO_FILTERS, aisle: fromUrl });
   }
 
   function changeFilters(next: LocationFilters) {
     setFilters(next);
-    if (next.aisle !== filters.aisle) onAisleChange?.(next.aisle);
+    if (next.aisle !== filters.aisle && onAisleChange) {
+      setOwnUrl(locationUrlKey(next.aisle, undefined));
+      onAisleChange(next.aisle);
+    }
   }
 
   return (
@@ -91,11 +102,18 @@ export function LocationsPage({ planId }: { planId: string; params?: LocationPar
   const params = parseLocationParams(useSearchParams());
   const locations = usePlanLocations(planId);
   const panel = usePartPanel(planId, "locations");
-  if (locations.data) {
+  const data = usePanelPlanData(planId, locations, panel.part);
+  if (data) {
     return (
-      <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
+      <WithPartPanel
+        planId={planId}
+        part={panel.part}
+        detail={data.detail}
+        detailError={data.detailError}
+        onClose={panel.close}
+      >
         <LocationsView
-          view={locations.data}
+          view={data.view}
           params={params}
           search={<SearchField planId={planId} onOpenPart={panel.open} />}
           onOpenPart={panel.open}
