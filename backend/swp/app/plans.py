@@ -201,6 +201,19 @@ def summary(plan_id: uuid.UUID) -> PlanSummary:
     )
 
 
+def delete(plan_id: uuid.UUID) -> None:
+    """Delete the plan permanently, and its import with its last plan (FR-12).
+
+    Raise `plan_not_found` for an unknown id and `unavailable` while the import is locked.
+    """
+    try:
+        deleted = store.delete_plan(plan_id)
+    except PlanBusy as error:
+        raise DomainError("unavailable", IMPORT_BUSY) from error
+    if not deleted:
+        raise DomainError("plan_not_found", PLAN_NOT_FOUND)
+
+
 def list_saved() -> list[PlanListItem]:
     """The saved plans, most recently edited first (FR-8); reads columns only."""
     return store.list_plans()

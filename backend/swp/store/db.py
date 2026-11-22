@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 from swp.config import get_settings
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
+# How long a Postgres writer waits for a row lock before failing with 55P03 (PlanBusy, 503).
+PG_LOCK_TIMEOUT = "3s"
 
 
 def _configure_sqlite_connection(dbapi_connection: Any, _record: Any) -> None:
@@ -50,11 +52,15 @@ def write_transaction() -> Iterator[Session]:
 
     pysqlite opens no transaction before a SELECT, so taking the write lock first serializes
     writers across connections and processes; on Postgres the reader locks rows with
-    `FOR UPDATE` instead.
+    `FOR UPDATE` instead, and `SET LOCAL lock_timeout` makes a held row lock fail with 55P03
+    (PlanBusy) after `PG_LOCK_TIMEOUT` rather than wait forever (epic-4 retro item 29).
     """
     with transaction() as session:
-        if session.get_bind().dialect.name == "sqlite":
+        dialect = session.get_bind().dialect.name
+        if dialect == "sqlite":
             session.execute(text("BEGIN IMMEDIATE"))
+        elif dialect == "postgresql":
+            session.execute(text(f"SET LOCAL lock_timeout = '{PG_LOCK_TIMEOUT}'"))
         yield session
 
 

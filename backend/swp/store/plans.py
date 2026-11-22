@@ -6,7 +6,7 @@ from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
@@ -108,8 +108,7 @@ def insert_plan_on_import(plan: StoredPlan) -> bool:
     """Insert `plan` on its existing import while holding the import row lock (AD-4).
 
     False, and nothing inserted, if the import no longer exists. Raise PlanBusy when the
-    lock cannot be taken. Story 6.4's import delete must take this same lock, so that a delete
-    cannot race a reuse.
+    lock cannot be taken. `delete_plan` takes this same lock, so a delete cannot race a reuse.
     """
     query = select(ImportRow.id).where(ImportRow.id == plan.import_id).with_for_update()
     with ExitStack() as stack:
@@ -123,6 +122,48 @@ def insert_plan_on_import(plan: StoredPlan) -> bool:
         if found is None:
             return False
         session.add(_plan_row(plan))
+    return True
+
+
+def delete_plan(plan_id: uuid.UUID) -> bool:
+    """Delete the plan and, when it was its import's last plan, the import (FR-12, AD-4).
+
+    One write transaction holds the import row lock that `insert_plan_on_import` takes, so a
+    delete serializes with a reuse and with another delete on the same import: the import is
+    deleted only by the delete that removes its last plan. False, and nothing deleted, if
+    there is no such plan (or a concurrent delete won). Raise PlanBusy when a lock cannot be
+    taken or the commit finds the database busy; nothing is then half-deleted.
+    """
+    try:
+        with write_transaction() as session:
+            import_id = session.execute(
+                select(PlanRow.import_id).where(PlanRow.id == plan_id)
+            ).scalar_one_or_none()
+            if import_id is None:
+                return False
+            session.execute(
+                select(ImportRow.id).where(ImportRow.id == import_id).with_for_update()
+            ).one_or_none()
+            deleted = session.execute(
+                delete(PlanRow)
+                .where(PlanRow.id == plan_id)
+                .execution_options(synchronize_session=False)
+            )
+            if deleted.rowcount != 1:
+                return False
+            remaining = session.execute(
+                select(func.count()).select_from(PlanRow).where(PlanRow.import_id == import_id)
+            ).scalar_one()
+            if remaining == 0:
+                session.execute(
+                    delete(ImportRow)
+                    .where(ImportRow.id == import_id)
+                    .execution_options(synchronize_session=False)
+                )
+    except OperationalError as error:
+        if _is_busy(error):
+            raise PlanBusy from error
+        raise
     return True
 
 

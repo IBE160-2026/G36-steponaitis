@@ -21,6 +21,15 @@ export const SAVED_PLANS_TITLE = "Saved plans";
 export const LOADING_SAVED_PLANS = "Loading saved plans…";
 /** The plate menu and saved-plans row menu item that opens New Plan reusing a plan's import (FR-2). */
 export const NEW_PLAN_FROM_IMPORT = "New Plan from this import";
+/** The saved-plans row menu item, the confirm's title and its destructive action (FR-12, UX-DR16). */
+export const DELETE_PLAN_ITEM = "Delete…";
+export const DELETE_PLAN_TITLE = "Delete plan";
+export const DELETE_PLAN_CONFIRM = "Delete plan";
+
+/** The delete confirm's question (FR-12): permanent, for everyone, with no archive. */
+export function deletePlanQuestion(name: string): string {
+  return `Delete “${name}”? The plan, its marks, moves and recommendations are deleted for everyone. There is no archive.`;
+}
 
 export type MovementClass = "fast" | "medium" | "slow" | "dead";
 

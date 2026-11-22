@@ -1,15 +1,25 @@
+import { DropdownMenu } from "radix-ui";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import type { SavedPlanRow } from "@/lib/api/plans";
-import { LOADING_SAVED_PLANS, NEW_PLAN_FROM_IMPORT } from "@/lib/copy";
+import {
+  DELETE_PLAN_CONFIRM,
+  DELETE_PLAN_ITEM,
+  DELETE_PLAN_TITLE,
+  deletePlanQuestion,
+  LOADING_SAVED_PLANS,
+  NEW_PLAN_FROM_IMPORT,
+} from "@/lib/copy";
 import { NEW_PLAN_HREF, planOpenHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 import {
   actionsLabel,
-  COLUMNS,
   DEMO_FILES_TEXT,
   EMPTY_TEXT,
+  focusAfterDelete,
+  planActionsId,
+  planColumns,
   PlansLoadError,
   RETRY_LABEL,
   RowMenu,
@@ -21,6 +31,7 @@ import {
 
 const html = renderToStaticMarkup;
 const noop = () => {};
+const COLUMNS = planColumns(noop);
 
 const A: SavedPlanRow = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -150,7 +161,7 @@ describe("fr8 saved-plans list", () => {
 
 describe("fr2 saved-plans row menu", () => {
   it("fr2_ux_dr18_row_menu_holds_open_then_new_plan_from_this_import", () => {
-    const links = elements(RowMenu({ plan: A, isActive: true })).filter(
+    const links = elements(RowMenu({ plan: A, isActive: true, onDelete: noop })).filter(
       (element) => typeof element.props.href === "string",
     );
     expect(links.map((link) => [link.props.children, link.props.href])).toEqual([
@@ -158,5 +169,48 @@ describe("fr2 saved-plans row menu", () => {
       [NEW_PLAN_FROM_IMPORT, `/plans/new?from=${A.id}`],
     ]);
     expect(NEW_PLAN_FROM_IMPORT).toBe("New Plan from this import");
+  });
+});
+
+const C: SavedPlanRow = { ...A, id: "33333333-3333-4333-8333-333333333333", name: "Third" };
+
+/** The text of a menu item: its own string child, or its link's. */
+function itemText(item: ReactElement<Record<string, unknown>>): unknown {
+  const child = item.props.children;
+  return isValidElement<Record<string, unknown>>(child) ? child.props.children : child;
+}
+
+describe("fr12 delete a plan", () => {
+  it("fr12_ux_dr18_row_menu_order_open_new_plan_then_delete", () => {
+    const onDelete = vi.fn();
+    const items = elements(RowMenu({ plan: A, isActive: true, onDelete })).filter(
+      (element) => element.type === DropdownMenu.Item,
+    );
+    expect(items.map(itemText)).toEqual(["Open", NEW_PLAN_FROM_IMPORT, DELETE_PLAN_ITEM]);
+    expect(DELETE_PLAN_ITEM).toBe("Delete…");
+    (items[2].props.onSelect as () => void)();
+    expect(onDelete).toHaveBeenCalledWith(A);
+  });
+
+  it("fr12_ux_dr16_delete_confirm_copy", () => {
+    expect(deletePlanQuestion("Spring")).toBe(
+      "Delete “Spring”? The plan, its marks, moves and recommendations are deleted for everyone. There is no archive.",
+    );
+    expect(DELETE_PLAN_TITLE).toBe("Delete plan");
+    expect(DELETE_PLAN_CONFIRM).toBe("Delete plan");
+  });
+
+  it("fr12_menu_button_has_a_stable_id", () => {
+    expect(planActionsId(A.id)).toBe(`plan-actions-${A.id}`);
+    expect(planActionsId(A.id)).toBe(planActionsId(A.id));
+    expect(ready([A, B])).toContain(`id="${planActionsId(A.id)}"`);
+  });
+
+  it("fr12_ux_dr16_focus_after_delete_next_previous_or_none", () => {
+    expect(focusAfterDelete([A, B, C], A.id)).toBe(B.id);
+    expect(focusAfterDelete([A, B, C], B.id)).toBe(C.id);
+    expect(focusAfterDelete([A, B, C], C.id)).toBe(B.id);
+    expect(focusAfterDelete([A], A.id)).toBeNull();
+    expect(focusAfterDelete([], A.id)).toBeNull();
   });
 });

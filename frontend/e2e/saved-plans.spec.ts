@@ -88,7 +88,8 @@ test.describe("uj3 saved plans", () => {
     await expect(table(page).locator('button[tabindex="0"]')).toHaveCount(1);
     await page.keyboard.press("Enter");
     const menu = page.getByRole("menu");
-    await expect(menu.getByRole("menuitem")).toHaveCount(2);
+    // Open, New Plan from this import and Delete… (Story 6.4).
+    await expect(menu.getByRole("menuitem")).toHaveCount(3);
     await page.keyboard.press("Escape");
     await expect(menu).toHaveCount(0);
     await expect(menuButton).toBeFocused();

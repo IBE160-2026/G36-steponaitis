@@ -1,10 +1,10 @@
 "use client";
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
-// used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
+// with its delete (Story 6.4), the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
 // preview (Story 4.3), before/after (Story 4.6) and the recommendations view (Stories 5.5,
-// 5.7). All are GETs and never change the plan (FR-9).
+// 5.7). The reads are GETs and never change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -230,4 +230,19 @@ export function fetchPlans(): Promise<SavedPlanRow[]> {
 
 export function usePlans() {
   return useQuery({ queryKey: PLANS_KEY, queryFn: fetchPlans });
+}
+
+/**
+ * `DELETE /api/plans/{id}` (FR-12): resolves on 204. Any other status throws its AD-11 error
+ * (`plan_not_found`, `unavailable`, …); a network failure throws `internal`. Same origin, so the
+ * origin guard passes; not a query, so the shared `plan_not_found` hook never sees it.
+ */
+export async function deletePlan(planId: string): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(`/api/plans/${encodeURIComponent(planId)}`, { method: "DELETE" });
+  } catch {
+    throw internalError();
+  }
+  if (response.status !== 204) throw parseErrorBody(response.status, await response.text());
 }

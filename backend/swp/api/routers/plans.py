@@ -1,4 +1,5 @@
-"""Plans: create from the three exports or a saved import, list and summary (FR-1 to FR-9, FR-18).
+"""Plans: create from the three exports or a saved import, list, summary and delete
+(FR-1 to FR-9, FR-12, FR-18).
 
 The GETs only read: they never change `version` or `last_edited_*` (FR-9).
 """
@@ -6,7 +7,7 @@ The GETs only read: they never change `version` or `last_edited_*` (FR-9).
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi import APIRouter, File, Form, Response, UploadFile, status
 
 from swp.api.errors import INVALID_REQUEST, error_responses
 from swp.api.schemas.plans import SavedPlanRow
@@ -94,3 +95,15 @@ def get_plan_summary(plan_id: str) -> PlanSummary:
     # A string, not uuid.UUID: an id that is no UUID names no plan, so it is `plan_not_found`
     # (404) like an unknown one, not `validation_failed` (epic-1 retro item 4).
     return plans.summary(plans.parse_plan_id(plan_id))
+
+
+@router.delete(
+    "/plans/{plan_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    responses=error_responses(403, 404, 422, 503),
+)
+def delete_plan(plan_id: str) -> Response:
+    # A string id like the GET: an id that is no UUID is `plan_not_found` (404).
+    plans.delete(plans.parse_plan_id(plan_id))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
