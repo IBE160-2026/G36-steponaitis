@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { PlanSaveStatus } from "@/components/common/app-shell/save-status";
 import { Toolbar } from "@/components/common/app-shell/toolbar";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -14,6 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <Toolbar />
+      <PlanSaveStatus />
       <main id="content" tabIndex={-1}>
         {children}
       </main>

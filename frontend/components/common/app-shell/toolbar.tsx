@@ -12,6 +12,7 @@ import { FlowBar } from "@/components/common/app-shell/flow-bar";
 import { PlanPlate } from "@/components/common/app-shell/plan-plate";
 import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { usePlanSummary } from "@/lib/api/plans";
+import { usePlanCommands } from "@/lib/commands";
 import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
 import { parsePlanPath, planStepHref } from "@/lib/view-state/urls";
 
@@ -21,6 +22,7 @@ function asStepKey(view: string): StepKey | undefined {
 
 function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   const summary = usePlanSummary(planId);
+  const { saved } = usePlanCommands(planId);
   const doneSteps = summary.data?.steps.filter((step) => step.checked).map((step) => step.key as StepKey) ?? [];
   return (
     <>
@@ -30,6 +32,7 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
           dataAsOf={summary.data.data_as_of}
           uploadedAt={summary.data.uploaded_at}
           round={summary.data.current_round}
+          saved={saved}
         />
       )}
       <FlowBar

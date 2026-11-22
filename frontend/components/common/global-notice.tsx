@@ -4,10 +4,11 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/common/icons";
 
-export function GlobalNotice({ children }: { children: ReactNode }) {
+/** `live={false}` drops the notice's own `role="status"` when it sits inside another live region. */
+export function GlobalNotice({ children, live = true }: { children: ReactNode; live?: boolean }) {
   return (
     <div
-      role="status"
+      role={live ? "status" : undefined}
       className="flex w-full items-center gap-2 border-b-2 border-ink bg-surface px-page-gutter py-2 text-ink type-body-strong"
     >
       <Icon name="warning" size={16} />

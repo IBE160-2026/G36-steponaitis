@@ -8,7 +8,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { internalError, parseErrorBody } from "@/lib/api/errors";
-import type { components } from "@/lib/api/schema";
+import type { components, operations } from "@/lib/api/schema";
 
 export type PlanSummary = components["schemas"]["PlanSummary"];
 export type AnalysisSettings = components["schemas"]["AnalysisSettings"];
@@ -32,30 +32,40 @@ export type SearchView = components["schemas"]["SearchView"];
 export type PartMatch = components["schemas"]["PartMatch"];
 export type LocationMatch = components["schemas"]["LocationMatch"];
 
+/** The body of `POST /api/plans/{id}/commands` (AD-6): one of the closed command union. */
+export type Command =
+  operations["post_command_api_plans__plan_id__commands_post"]["requestBody"]["content"]["application/json"];
+export type CommandResult = components["schemas"]["CommandResult"];
+
 export const PLANS_KEY = ["plans"] as const;
 
+/** `['plan', planId]`: the prefix of every plan query key, the one place it is spelled out. */
+export function planRootKey(planId: string) {
+  return ["plan", planId] as const;
+}
+
 export function planSummaryKey(planId: string) {
-  return ["plan", planId, "summary"] as const;
+  return [...planRootKey(planId), "summary"] as const;
 }
 
 export function planPartsKey(planId: string) {
-  return ["plan", planId, "parts"] as const;
+  return [...planRootKey(planId), "parts"] as const;
 }
 
 export function planLocationsKey(planId: string) {
-  return ["plan", planId, "locations"] as const;
+  return [...planRootKey(planId), "locations"] as const;
 }
 
 export function planPickGroupsKey(planId: string) {
-  return ["plan", planId, "pick-groups"] as const;
+  return [...planRootKey(planId), "pick-groups"] as const;
 }
 
 export function planPartKey(planId: string, part: string) {
-  return ["plan", planId, "part", part] as const;
+  return [...planRootKey(planId), "part", part] as const;
 }
 
 export function planSearchKey(planId: string, q: string) {
-  return ["plan", planId, "search", q] as const;
+  return [...planRootKey(planId), "search", q] as const;
 }
 
 async function getJson<T>(url: string): Promise<T> {

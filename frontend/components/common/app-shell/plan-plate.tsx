@@ -1,7 +1,8 @@
 "use client";
 
 // Plan plate (UX-DR5): the open plan's name and "Data as of YYYY-MM-DD · round N" on the toolbar.
-// The upload date shows in a tooltip on hover and focus. It opens a menu that in M1 holds only
+// The upload date (and "Saved automatically" after a confirmed change) shows in a tooltip on hover
+// and focus. It opens a menu that in M1 holds only
 // New Plan (the launcher and "New Plan from this import" arrive in later epics).
 
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { DropdownMenu } from "radix-ui";
 import { type KeyboardEvent, useId, useState } from "react";
 
 import { Icon } from "@/components/common/icons";
+import { SAVED_TEXT } from "@/lib/commands/client";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +21,8 @@ export type PlanPlateProps = {
   dataAsOf: string;
   uploadedAt: string;
   round: number;
+  /** After a confirmed change the tooltip also says "Saved automatically" (autosave, no Save button). */
+  saved?: boolean;
 };
 
 export function plateMeta(dataAsOf: string, round: number): string {
@@ -32,7 +36,7 @@ export function uploadedText(uploadedAt: string): string {
 const MENU_FADE =
   "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 duration-150";
 
-export function PlanPlate({ name, dataAsOf, uploadedAt, round }: PlanPlateProps) {
+export function PlanPlate({ name, dataAsOf, uploadedAt, round, saved = false }: PlanPlateProps) {
   const tooltipId = useId();
   // Escape hides the tooltip until the pointer leaves or focus moves away (WCAG 1.4.13).
   const [dismissed, setDismissed] = useState(false);
@@ -84,7 +88,8 @@ export function PlanPlate({ name, dataAsOf, uploadedAt, round }: PlanPlateProps)
           !dismissed && "group-hover:block group-has-[:focus-visible]:block",
         )}
       >
-        {uploadedText(uploadedAt)}
+        <span className="block">{uploadedText(uploadedAt)}</span>
+        {saved && <span className="block">{SAVED_TEXT}</span>}
       </span>
     </span>
   );
