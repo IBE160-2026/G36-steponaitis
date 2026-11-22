@@ -8,6 +8,9 @@ import { type FileRole, ROLES } from "./selection";
 
 export type CreatedPlan = components["schemas"]["CreatedPlan"];
 
+/** A new plan on the import of a saved plan (FR-2): a name and that plan's `import_id`. */
+export type ReuseForm = { name: string; importId: string };
+
 export type UploadForm = { name: string; files: Record<FileRole, Blob & { name?: string }> };
 
 /** The part of XMLHttpRequest the upload uses, so tests can pass a fake. */
@@ -99,4 +102,24 @@ export function uploadPlan(form: UploadForm, options: UploadOptions = {}): Promi
     xhr.open("POST", "/api/plans");
     xhr.send(planFormData(form));
   });
+}
+
+/** The multipart body of a reuse: `name` and `import_id`, no files (the endpoint stays multipart). */
+export function reuseFormData(form: ReuseForm): FormData {
+  const data = new FormData();
+  data.append("name", form.name);
+  data.append("import_id", form.importId);
+  return data;
+}
+
+/** POST /api/plans with `name` + `import_id` (FR-2). Nothing to upload, so a plain fetch; never retried. */
+export async function reusePlan(form: ReuseForm, fetchImpl: typeof fetch = fetch): Promise<CreatedPlan> {
+  let response: Response;
+  try {
+    response = await fetchImpl("/api/plans", { method: "POST", body: reuseFormData(form) });
+  } catch {
+    throw internalError();
+  }
+  if (!response.ok) throw parseErrorBody(response.status, await response.text());
+  return (await response.json()) as CreatedPlan;
 }

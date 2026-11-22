@@ -149,3 +149,23 @@ export function errorView(error: ApiError): ErrorView {
   }
   return { kind: "message", message: error.message };
 }
+
+// Reusing a saved plan's import (FR-2, UX-DR17): the Listbox of saved plans replaces the tiles.
+export const REUSE_OPTION_TEXT = "Or reuse the import of a saved plan";
+export const UPLOAD_INSTEAD_TEXT = "Upload three files instead";
+export const CHOOSE_PLAN = "Choose a saved plan.";
+export const NO_SAVED_PLANS = "No saved plans yet. Upload three files instead.";
+
+/** The second line of a saved plan's option: its data-as-of date. */
+export function reuseOptionMeta(dataAsOf: string): string {
+  return `Data as of ${formatDate(dataAsOf)}`;
+}
+
+export type ReuseErrors = { name: string | null; plan: string | null };
+
+/** Check the reuse form before anything is sent; `ok` only with a name and a chosen plan. */
+export function validateReuse(name: string, chosenPlanId: string | undefined): ReuseErrors & { ok: boolean } {
+  const nameError = name.trim() === "" ? NAME_REQUIRED : null;
+  const planError = chosenPlanId ? null : CHOOSE_PLAN;
+  return { name: nameError, plan: planError, ok: nameError === null && planError === null };
+}

@@ -8,20 +8,22 @@ from pathlib import Path
 from pydantic import AwareDatetime, BaseModel
 
 from swp.config import BACKEND_DIR
-from swp.domain.analysis import AnalysisSettings, build_analysis
+from swp.domain.analysis import Analysis, AnalysisSettings, build_analysis
 from swp.domain.classify import classify_parts
 from swp.domain.errors import DomainError
-from swp.domain.import_data import NormalizedImport
+from swp.domain.import_data import ImportData, NormalizedImport
 from swp.domain.pick_groups import find_pick_groups
 from swp.domain.planning import replay
 from swp.domain.state import PlanState
 from swp.domain.views.summary import PlanSummary, build_summary
 from swp.store import plans as store
-from swp.store.plans import PlanListItem, StoredImport, StoredPlan
+from swp.store.plans import PlanBusy, PlanListItem, StoredImport, StoredPlan
 
 ANALYSIS_SETTINGS_PATH = BACKEND_DIR / "settings" / "analysis.toml"
 NAME_REQUIRED = "Give the plan a name."
 PLAN_NOT_FOUND = "This plan does not exist."
+IMPORT_NOT_FOUND = "This import no longer exists. Choose another saved plan."
+IMPORT_BUSY = "The plan is busy. Try again."
 DEFAULT_USER = "planner"  # M1 runs with auth off (FR-11); Epic 9 uses the logged-in user.
 
 
@@ -66,21 +68,72 @@ def create(
     stored (AD-4).
     """
     name = plan_name(name)
-    settings = settings if settings is not None else load_analysis_settings()
-    analysis = build_analysis(imported.data_as_of, settings)
-    analysis = analysis.model_copy(
-        update={
-            "parts": classify_parts(imported.data, analysis),
-            "pick_groups": find_pick_groups(imported.data, analysis),
-        }
-    )
+    analysis = _analysis(imported.data, imported.data_as_of, settings)
     stored_import = StoredImport(
         id=uuid.uuid4(), uploaded_at=now, data_as_of=imported.data_as_of, data=imported.data
     )
-    plan = StoredPlan(
+    plan = _new_plan(name, stored_import, analysis, now=now, user=user)
+    store.insert_plan_with_import(plan)
+    return plan
+
+
+def create_from_import(
+    name: str,
+    import_id: uuid.UUID,
+    *,
+    now: datetime,
+    user: str = DEFAULT_USER,
+    settings: AnalysisSettings | None = None,
+) -> StoredPlan:
+    """Create and store a new plan on an existing import (FR-2).
+
+    The analysis is recomputed with the current settings; no other plan's analysis or state
+    is read. The import never changes (AD-4), so the analysis is computed from a plain read;
+    only the insert runs under the import row lock, which re-checks that the import exists.
+    """
+    name = plan_name(name)
+    stored_import = store.get_import(import_id)
+    if stored_import is None:
+        raise DomainError("not_found", IMPORT_NOT_FOUND)
+    analysis = _analysis(stored_import.data, stored_import.data_as_of, settings)
+    plan = _new_plan(name, stored_import, analysis, now=now, user=user)
+    try:
+        inserted = store.insert_plan_on_import(plan)
+    except PlanBusy as error:
+        raise DomainError("unavailable", IMPORT_BUSY) from error
+    if not inserted:
+        raise DomainError("not_found", IMPORT_NOT_FOUND)
+    return plan
+
+
+def parse_import_id(raw: str) -> uuid.UUID:
+    """The `import_id` form value; raise `not_found` when it is not a UUID (no import has it)."""
+    try:
+        return uuid.UUID(raw)
+    except ValueError:
+        raise DomainError("not_found", IMPORT_NOT_FOUND) from None
+
+
+def _analysis(data: ImportData, data_as_of: date, settings: AnalysisSettings | None) -> Analysis:
+    """The picks and class of every part and every pick group, computed once (AD-4, FR-18)."""
+    settings = settings if settings is not None else load_analysis_settings()
+    analysis = build_analysis(data_as_of, settings)
+    return analysis.model_copy(
+        update={
+            "parts": classify_parts(data, analysis),
+            "pick_groups": find_pick_groups(data, analysis),
+        }
+    )
+
+
+def _new_plan(
+    name: str, imported: StoredImport, analysis: Analysis, *, now: datetime, user: str
+) -> StoredPlan:
+    """A fresh plan on `imported`: empty state, round 0, version 1."""
+    return StoredPlan(
         id=uuid.uuid4(),
         name=name,
-        import_id=stored_import.id,
+        import_id=imported.id,
         created_by=user,
         created_at=now,
         last_edited_by=user,
@@ -88,10 +141,8 @@ def create(
         version=1,
         analysis=analysis,
         state=PlanState.new(),
-        imported=stored_import,
+        imported=imported,
     )
-    store.insert_plan_with_import(plan)
-    return plan
 
 
 def created(plan: StoredPlan) -> CreatedPlan:

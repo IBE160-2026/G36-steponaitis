@@ -388,17 +388,19 @@ export interface components {
         };
         /** Body_create_plan_api_plans_post */
         Body_create_plan_api_plans_post: {
+            /** Import Id */
+            import_id?: string | null;
             /** Inventory */
-            inventory: string;
+            inventory?: string | null;
             /** Locations */
-            locations: string;
+            locations?: string | null;
             /**
              * Name
              * @default
              */
             name: string;
             /** Transactions */
-            transactions: string;
+            transactions?: string | null;
         };
         /** ClassCounts */
         ClassCounts: {
@@ -1178,6 +1180,11 @@ export interface components {
              */
             id: string;
             /**
+             * Import Id
+             * Format: uuid
+             */
+            import_id: string;
+            /**
              * Last Edited At
              * Format: date-time
              */
@@ -1356,7 +1363,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "multipart/form-data": components["schemas"]["Body_create_plan_api_plans_post"];
             };
@@ -1381,6 +1388,15 @@ export interface operations {
                 };
             };
             /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -1391,6 +1407,15 @@ export interface operations {
             };
             /** @description Error */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

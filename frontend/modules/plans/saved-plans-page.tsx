@@ -4,7 +4,7 @@
 // in server order (most recently edited first; no user sorts) in the shared DataTable, with New
 // Plan as the one primary button. The table is one tab stop: `↑`/`↓` move rows, `Enter` or a
 // click opens the plan, and `Tab` reaches the active row's menu button only. The row menu holds
-// Open for now; Delete… and New Plan from this import arrive with Stories 6.3 and 6.4.
+// Open and New Plan from this import (Story 6.3, FR-2); Delete… arrives with Story 6.4.
 // When the list fails to load, the page offers Try again and New Plan (epic-1 retro item 5).
 
 import Link from "next/link";
@@ -16,11 +16,10 @@ import { type CellContext, DataTable, type DataTableColumn } from "@/components/
 import { Icon } from "@/components/common/icons";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "@/components/common/menu-styles";
 import { type SavedPlanRow, usePlans } from "@/lib/api/plans";
+import { LOADING_SAVED_PLANS, NEW_PLAN_FROM_IMPORT, SAVED_PLANS_TITLE } from "@/lib/copy";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { NEW_PLAN_HREF, planOpenHref } from "@/lib/view-state/urls";
+import { NEW_PLAN_HREF, newPlanFromHref, planOpenHref } from "@/lib/view-state/urls";
 
-export const PAGE_TITLE = "Saved plans";
-export const LOADING_TEXT = "Loading saved plans…";
 export const EMPTY_TEXT =
   "No plans yet. A plan starts from the three files the warehouse exports: Locations, Inventory and Transactions.";
 export const DEMO_FILES_TEXT = "Demo files: data/sample/";
@@ -58,6 +57,11 @@ export function RowMenu({ plan, isActive }: { plan: SavedPlanRow; isActive: bool
               className={MENU_ITEM_CLASS}
             >
               Open
+            </Link>
+          </DropdownMenu.Item>
+          <DropdownMenu.Item asChild>
+            <Link href={newPlanFromHref(plan.id)} className={MENU_ITEM_CLASS}>
+              {NEW_PLAN_FROM_IMPORT}
             </Link>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
@@ -137,12 +141,12 @@ export function SavedPlansView({
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="type-page-title">{PAGE_TITLE}</h1>
+        <h1 className="type-page-title">{SAVED_PLANS_TITLE}</h1>
         {headerNewPlan && <NewPlanLink />}
       </div>
       {state.kind === "loading" && (
         <p role="status" className="type-body text-ink-secondary">
-          {LOADING_TEXT}
+          {LOADING_SAVED_PLANS}
         </p>
       )}
       {state.kind === "error" && <PlansLoadError message={state.message} onRetry={onRetry} />}
@@ -151,7 +155,7 @@ export function SavedPlansView({
           <EmptyPlans />
         ) : (
           <DataTable
-            label={PAGE_TITLE}
+            label={SAVED_PLANS_TITLE}
             columns={COLUMNS}
             rows={state.plans}
             rowKey={(row) => row.id}

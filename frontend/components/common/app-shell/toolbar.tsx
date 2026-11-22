@@ -3,15 +3,15 @@
 // App toolbar (UX-DR4): 64px louvre-panel graphite with the product mark, the product name, the
 // plan plate and the flow bar. Sticky while the viewport is at least 500px tall; below that it
 // scrolls with the page. It lives in the root layout, so it learns the open plan from the URL
-// (AD-20) and reads only the plan summary query (AD-3). Off plan paths the steps are plain text.
+// (AD-20) and reads only the plan summary and saved-plans queries (AD-3). Off plan paths the steps are plain text.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { FlowBar } from "@/components/common/app-shell/flow-bar";
-import { PlanPlate } from "@/components/common/app-shell/plan-plate";
+import { PlanPlate, planMenuItems } from "@/components/common/app-shell/plan-plate";
 import { ProductMark } from "@/components/common/app-shell/product-mark";
-import { usePlanSummary } from "@/lib/api/plans";
+import { usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
 import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
 import { parsePlanPath, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
@@ -22,6 +22,8 @@ function asStepKey(view: string): StepKey | undefined {
 
 function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   const summary = usePlanSummary(planId);
+  // The saved plans for the plate menu's recent plans (UX-DR5); the menu works without them.
+  const plans = usePlans();
   const { saved } = usePlanCommands(planId);
   const doneSteps = summary.data?.steps.filter((step) => step.checked).map((step) => step.key as StepKey) ?? [];
   return (
@@ -29,6 +31,7 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
       {summary.data && (
         <PlanPlate
           name={summary.data.name}
+          menu={planMenuItems(planId, plans.data)}
           dataAsOf={summary.data.data_as_of}
           uploadedAt={summary.data.uploaded_at}
           round={summary.data.current_round}

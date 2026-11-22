@@ -47,6 +47,7 @@ class PlanListItem:
 
     id: uuid.UUID
     name: str
+    import_id: uuid.UUID
     data_as_of: date
     uploaded_at: datetime
     created_by: str
@@ -68,32 +69,68 @@ def insert_plan_with_import(plan: StoredPlan) -> None:
             )
         )
         session.flush()
-        session.add(
-            PlanRow(
-                id=plan.id,
-                name=plan.name,
-                import_id=imported.id,
-                created_by=plan.created_by,
-                created_at=plan.created_at,
-                last_edited_by=plan.last_edited_by,
-                last_edited_at=plan.last_edited_at,
-                version=plan.version,
-                analysis=plan.analysis.model_dump(mode="json"),
-                state=plan.state.model_dump(mode="json"),
-            )
-        )
+        session.add(_plan_row(plan))
+
+
+def _plan_row(plan: StoredPlan) -> PlanRow:
+    return PlanRow(
+        id=plan.id,
+        name=plan.name,
+        import_id=plan.import_id,
+        created_by=plan.created_by,
+        created_at=plan.created_at,
+        last_edited_by=plan.last_edited_by,
+        last_edited_at=plan.last_edited_at,
+        version=plan.version,
+        analysis=plan.analysis.model_dump(mode="json"),
+        state=plan.state.model_dump(mode="json"),
+    )
+
+
+def _stored_import(import_row: ImportRow) -> StoredImport:
+    """The import of `import_row`, its data upcast and validated."""
+    return StoredImport(
+        id=import_row.id,
+        uploaded_at=import_row.uploaded_at,
+        data_as_of=import_row.data_as_of,
+        data=ImportData.model_validate(upcast("data", import_row.data)),
+    )
+
+
+def get_import(import_id: uuid.UUID) -> StoredImport | None:
+    """The stored import, upcast and validated; None if there is no such import."""
+    with transaction() as session:
+        row = session.get(ImportRow, import_id)
+        return None if row is None else _stored_import(row)
+
+
+def insert_plan_on_import(plan: StoredPlan) -> bool:
+    """Insert `plan` on its existing import while holding the import row lock (AD-4).
+
+    False, and nothing inserted, if the import no longer exists. Raise PlanBusy when the
+    lock cannot be taken. Story 6.4's import delete must take this same lock, so that a delete
+    cannot race a reuse.
+    """
+    query = select(ImportRow.id).where(ImportRow.id == plan.import_id).with_for_update()
+    with ExitStack() as stack:
+        try:
+            session = stack.enter_context(write_transaction())
+            found = session.execute(query).one_or_none()
+        except OperationalError as error:
+            if _is_busy(error):
+                raise PlanBusy from error
+            raise
+        if found is None:
+            return False
+        session.add(_plan_row(plan))
+    return True
 
 
 def _stored(session: Session, row: PlanRow) -> StoredPlan:
     """The stored plan of `row` with its import, upcast and validated."""
     import_row = session.get(ImportRow, row.import_id)
     assert import_row is not None  # FK ON DELETE RESTRICT
-    imported = StoredImport(
-        id=import_row.id,
-        uploaded_at=import_row.uploaded_at,
-        data_as_of=import_row.data_as_of,
-        data=ImportData.model_validate(upcast("data", import_row.data)),
-    )
+    imported = _stored_import(import_row)
     return StoredPlan(
         id=row.id,
         name=row.name,
@@ -238,6 +275,7 @@ def list_plans() -> list[PlanListItem]:
         select(
             PlanRow.id,
             PlanRow.name,
+            PlanRow.import_id,
             ImportRow.data_as_of,
             ImportRow.uploaded_at,
             PlanRow.created_by,

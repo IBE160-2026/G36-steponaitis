@@ -9,6 +9,7 @@ from pydantic import AwareDatetime, BaseModel
 class SavedPlanRow(BaseModel):
     id: uuid.UUID
     name: str
+    import_id: uuid.UUID
     data_as_of: date
     uploaded_at: AwareDatetime
     created_by: str

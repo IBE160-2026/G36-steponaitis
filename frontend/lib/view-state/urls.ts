@@ -1,8 +1,9 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
 // the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
 // recommendations tab (`?tab=`, Story 5.7) is built and parsed here too, as are the saved-plans
-// list (`/plans`, FR-8) and New Plan (`/plans/new`). So is the plan's last view, kept per browser
-// (`swp:plan:<id>:view`, Story 6.2), which the bare `/plans/<id>` opens.
+// list (`/plans`, FR-8) and New Plan (`/plans/new`, with `?from=<planId>` to reuse that plan's
+// import, FR-2). So is the plan's last view, kept per browser (`swp:plan:<id>:view`, Story 6.2),
+// which the bare `/plans/<id>` opens.
 
 import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
 import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
@@ -18,6 +19,11 @@ export const SAVED_PLANS_HREF = "/plans";
 
 /** New Plan (FR-1). */
 export const NEW_PLAN_HREF = "/plans/new";
+
+/** New Plan reusing the import of the saved plan `planId` (`/plans/new?from=<id>`, FR-2). */
+export function newPlanFromHref(planId: string): string {
+  return `${NEW_PLAN_HREF}?${new URLSearchParams({ from: planId })}`;
+}
 
 /** The query keys that make up a plan view (and the only ones its stored last view keeps). */
 export const VIEW_QUERY_KEYS = ["aisle", "loc", "part", "tab", "rec", "move"] as const;
@@ -116,6 +122,11 @@ function firstValue(searchParams: SearchParamsInput, key: string): string | unde
   const value = searchParams instanceof URLSearchParams ? searchParams.get(key) : searchParams[key];
   const first = Array.isArray(value) ? value[0] : value;
   return first ? first : undefined;
+}
+
+/** New Plan's `?from=` → the saved plan whose import to reuse; undefined when missing or empty. */
+export function parseNewPlanFrom(searchParams: SearchParamsInput): string | undefined {
+  return firstValue(searchParams, "from");
 }
 
 /** `?aisle=&loc=&part=` → `{aisle?, loc?, part?}`: the first value of each; empty values are dropped. */

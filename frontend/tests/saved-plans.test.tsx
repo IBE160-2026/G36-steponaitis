@@ -3,15 +3,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import type { SavedPlanRow } from "@/lib/api/plans";
+import { LOADING_SAVED_PLANS, NEW_PLAN_FROM_IMPORT } from "@/lib/copy";
 import { NEW_PLAN_HREF, planOpenHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 import {
   actionsLabel,
   COLUMNS,
   DEMO_FILES_TEXT,
   EMPTY_TEXT,
-  LOADING_TEXT,
   PlansLoadError,
   RETRY_LABEL,
+  RowMenu,
   SavedPlansView,
 } from "@/modules/plans/saved-plans-page";
 
@@ -24,6 +25,7 @@ const noop = () => {};
 const A: SavedPlanRow = {
   id: "11111111-1111-4111-8111-111111111111",
   name: "Edited",
+  import_id: "99999999-9999-4999-8999-999999999999",
   data_as_of: "2026-09-30",
   uploaded_at: "2026-11-20T23:30:00Z",
   created_by: "planner",
@@ -122,7 +124,7 @@ describe("fr8 saved-plans list", () => {
   it("fr8_loading_is_plain_text", () => {
     const page = html(<SavedPlansView state={{ kind: "loading" }} onRetry={noop} onOpen={noop} />);
     expect(page).toContain('role="status"');
-    expect(page).toContain(LOADING_TEXT);
+    expect(page).toContain(LOADING_SAVED_PLANS);
     expect(page).not.toContain("<table");
   });
 
@@ -143,5 +145,18 @@ describe("fr8 saved-plans list", () => {
     expect(retry).toBeDefined();
     (retry!.props.onClick as () => void)();
     expect(onRetry).toHaveBeenCalledOnce();
+  });
+});
+
+describe("fr2 saved-plans row menu", () => {
+  it("fr2_ux_dr18_row_menu_holds_open_then_new_plan_from_this_import", () => {
+    const links = elements(RowMenu({ plan: A, isActive: true })).filter(
+      (element) => typeof element.props.href === "string",
+    );
+    expect(links.map((link) => [link.props.children, link.props.href])).toEqual([
+      ["Open", `/plans/${A.id}`],
+      [NEW_PLAN_FROM_IMPORT, `/plans/new?from=${A.id}`],
+    ]);
+    expect(NEW_PLAN_FROM_IMPORT).toBe("New Plan from this import");
   });
 });

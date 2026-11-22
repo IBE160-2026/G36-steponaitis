@@ -1,7 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { PLAN_MENU, PlanPlate, plateMeta, uploadedText } from "@/components/common/app-shell/plan-plate";
+import {
+  ALL_SAVED_PLANS,
+  PlanPlate,
+  planMenuItems,
+  plateMeta,
+  uploadedText,
+} from "@/components/common/app-shell/plan-plate";
+import { NEW_PLAN_FROM_IMPORT } from "@/lib/copy";
 import { openingText, showsLoadError } from "@/components/common/plan-status";
 import { SettingsList, settingsRows } from "@/components/common/settings-list";
 import { ApiError, INTERNAL_MESSAGE, internalError } from "@/lib/api/errors";
@@ -139,6 +146,7 @@ describe("fr7 overview", () => {
       {
         id: PLAN_ID,
         name: "Spring plan",
+        import_id: s.import_id,
         data_as_of: s.data_as_of,
         uploaded_at: s.uploaded_at,
         created_by: s.created_by,
@@ -225,7 +233,7 @@ describe("ad12 plan views leave a deleted plan to the shared hook", () => {
 
 describe("ux_dr5 plan plate", () => {
   const plate = () =>
-    html(<PlanPlate name="Demo" dataAsOf="2026-09-30" uploadedAt="2026-11-21T23:30:00Z" round={0} />);
+    html(<PlanPlate name="Demo" menu={planMenuItems("p0")} dataAsOf="2026-09-30" uploadedAt="2026-11-21T23:30:00Z" round={0} />);
 
   it("ux_dr5_plan_plate_shows_name_data_as_of_and_round", () => {
     expect(plateMeta("2026-09-30", 2)).toBe("Data as of 2026-09-30 · round 2");
@@ -245,7 +253,34 @@ describe("ux_dr5 plan plate", () => {
     expect(markup).toContain('aria-haspopup="menu"');
   });
 
-  it("ux_dr5_plan_plate_menu_holds_only_new_plan", () => {
-    expect(PLAN_MENU).toEqual([{ label: "New Plan", href: "/plans/new" }]);
+  const plans = (ids: string[]) => ids.map((id) => ({ id, name: `Plan ${id}` }));
+
+  it("ux_dr5_fr2_plan_plate_menu_ends_with_all_saved_plans_and_new_plan_from_this_import", () => {
+    expect(planMenuItems("p0")).toEqual([
+      { label: ALL_SAVED_PLANS, href: "/plans", kind: "action" },
+      { label: NEW_PLAN_FROM_IMPORT, href: "/plans/new?from=p0", kind: "action" },
+    ]);
+    expect(ALL_SAVED_PLANS).toBe("All saved plans");
+    expect(NEW_PLAN_FROM_IMPORT).toBe("New Plan from this import");
+  });
+
+  it("ux_dr5_fr8_plan_plate_menu_lists_at_most_five_other_plans_in_server_order", () => {
+    const items = planMenuItems("p2", plans(["p1", "p2", "p3", "p4", "p5", "p6", "p7"]));
+    expect(items.map((item) => item.label)).toEqual([
+      "Plan p1",
+      "Plan p3",
+      "Plan p4",
+      "Plan p5",
+      "Plan p6",
+      ALL_SAVED_PLANS,
+      NEW_PLAN_FROM_IMPORT,
+    ]);
+    expect(items[0]).toEqual({ label: "Plan p1", href: "/plans/p1", kind: "recent" });
+    expect(items.at(-1)?.href).toBe("/plans/new?from=p2");
+  });
+
+  it("ux_dr5_plan_plate_menu_never_lists_the_open_plan", () => {
+    const items = planMenuItems("p1", plans(["p1"]));
+    expect(items.map((item) => item.label)).toEqual([ALL_SAVED_PLANS, NEW_PLAN_FROM_IMPORT]);
   });
 });

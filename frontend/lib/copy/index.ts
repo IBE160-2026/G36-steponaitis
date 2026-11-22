@@ -16,6 +16,12 @@ import type {
 } from "@/lib/api/plans";
 import { formatDate, formatNumber, formatTime } from "@/lib/format";
 
+/** The saved-plans list's title, also the label of New Plan's list of saved plans (FR-2, FR-8). */
+export const SAVED_PLANS_TITLE = "Saved plans";
+export const LOADING_SAVED_PLANS = "Loading saved plans…";
+/** The plate menu and saved-plans row menu item that opens New Plan reusing a plan's import (FR-2). */
+export const NEW_PLAN_FROM_IMPORT = "New Plan from this import";
+
 export type MovementClass = "fast" | "medium" | "slow" | "dead";
 
 /** Glossary names of the movement classes. */

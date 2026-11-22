@@ -2,24 +2,51 @@
 
 // Plan plate (UX-DR5): the open plan's name and "Data as of YYYY-MM-DD · round N" on the toolbar.
 // The upload date (and "Saved automatically" after a confirmed change) shows in a tooltip on hover
-// and focus. It opens a menu that in M1 holds only
-// New Plan (the launcher and "New Plan from this import" arrive in later epics).
+// and focus. Its menu (click or `Enter`) lists up to five other recent plans, "All saved plans" and
+// "New Plan from this import" (FR-2, FR-8); `Esc` closes it and returns focus to the plate. The
+// toolbar passes the saved plans in; the plate only shows them.
 
 import Link from "next/link";
 import { DropdownMenu } from "radix-ui";
-import { type KeyboardEvent, useId, useState } from "react";
+import { Fragment, type KeyboardEvent, useId, useState } from "react";
 
 import { Icon } from "@/components/common/icons";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "@/components/common/menu-styles";
 import { SAVED_TEXT } from "@/lib/commands/client";
+import { NEW_PLAN_FROM_IMPORT } from "@/lib/copy";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { NEW_PLAN_HREF } from "@/lib/view-state/urls";
+import { newPlanFromHref, planOpenHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
-export const PLAN_MENU = [{ label: "New Plan", href: NEW_PLAN_HREF }] as const;
+/** How many other plans the menu lists (UX-DR5). */
+export const RECENT_PLANS_MAX = 5;
+export const ALL_SAVED_PLANS = "All saved plans";
+
+export type PlanMenuItem = { label: string; href: string; kind: "recent" | "action" };
+
+/**
+ * The plate menu of the open plan `planId`: up to five other plans in the order given (the
+ * server's, most recently edited first), then "All saved plans" and "New Plan from this import".
+ */
+export function planMenuItems(
+  planId: string,
+  plans: readonly { id: string; name: string }[] = [],
+): PlanMenuItem[] {
+  const recent = plans
+    .filter((plan) => plan.id !== planId)
+    .slice(0, RECENT_PLANS_MAX)
+    .map((plan): PlanMenuItem => ({ label: plan.name, href: planOpenHref(plan.id), kind: "recent" }));
+  return [
+    ...recent,
+    { label: ALL_SAVED_PLANS, href: SAVED_PLANS_HREF, kind: "action" },
+    { label: NEW_PLAN_FROM_IMPORT, href: newPlanFromHref(planId), kind: "action" },
+  ];
+}
 
 export type PlanPlateProps = {
   name: string;
+  /** The plate menu's items (`planMenuItems`). */
+  menu: readonly PlanMenuItem[];
   dataAsOf: string;
   uploadedAt: string;
   round: number;
@@ -35,7 +62,7 @@ export function uploadedText(uploadedAt: string): string {
   return `Uploaded ${formatDate(uploadedAt)}`;
 }
 
-export function PlanPlate({ name, dataAsOf, uploadedAt, round, saved = false }: PlanPlateProps) {
+export function PlanPlate({ name, menu, dataAsOf, uploadedAt, round, saved = false }: PlanPlateProps) {
   const tooltipId = useId();
   // Escape hides the tooltip until the pointer leaves or focus moves away (WCAG 1.4.13).
   const [dismissed, setDismissed] = useState(false);
@@ -66,15 +93,17 @@ export function PlanPlate({ name, dataAsOf, uploadedAt, round, saved = false }: 
             collisionPadding={16}
             className={MENU_CONTENT_CLASS}
           >
-            {PLAN_MENU.map((item) => (
-              <DropdownMenu.Item key={item.href} asChild>
-                <Link
-                  href={item.href}
-                  className={MENU_ITEM_CLASS}
-                >
-                  {item.label}
-                </Link>
-              </DropdownMenu.Item>
+            {menu.map((item, index) => (
+              <Fragment key={item.href}>
+                {index > 0 && item.kind !== menu[index - 1].kind && (
+                  <DropdownMenu.Separator className="my-1 h-px bg-hairline" />
+                )}
+                <DropdownMenu.Item asChild>
+                  <Link href={item.href} className={cn(MENU_ITEM_CLASS, "max-w-80")}>
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                </DropdownMenu.Item>
+              </Fragment>
             ))}
           </DropdownMenu.Content>
         </DropdownMenu.Portal>

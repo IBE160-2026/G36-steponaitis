@@ -561,7 +561,7 @@ describe("ad12 version-consistent plan data", () => {
 });
 
 describe("fr10 save status and plan plate", () => {
-  const plate = { name: "Demo", dataAsOf: "2026-09-30", uploadedAt: "2026-11-21T23:30:00Z", round: 0 };
+  const plate = { name: "Demo", dataAsOf: "2026-09-30", uploadedAt: "2026-11-21T23:30:00Z", round: 0, menu: [] };
 
   it("fr10_save_status_is_a_persistent_polite_live_region", () => {
     const empty = html(<SaveStatusView />);

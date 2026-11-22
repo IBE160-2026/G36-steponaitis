@@ -92,6 +92,7 @@ def test_fr8_list_most_recently_edited_first(empty_tables: str) -> None:
     assert set(rows[0]) == {
         "id",
         "name",
+        "import_id",
         "data_as_of",
         "uploaded_at",
         "created_by",

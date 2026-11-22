@@ -89,9 +89,12 @@ test.describe("uj1 plan overview", () => {
 
     await plate(page).click();
     const menu = page.getByRole("menu");
-    await expect(menu.getByRole("menuitem")).toHaveCount(1);
-    await menu.getByRole("menuitem", { name: "New Plan" }).click();
-    await expect(page).toHaveURL(/\/plans\/new$/);
+    // UX-DR5 (Story 6.3): the menu ends with All saved plans and New Plan from this import.
+    const items = menu.getByRole("menuitem");
+    await expect(items.nth(-2)).toHaveText("All saved plans");
+    await expect(items.nth(-1)).toHaveText("New Plan from this import");
+    await menu.getByRole("menuitem", { name: "All saved plans" }).click();
+    await expect(page).toHaveURL(/\/plans$/);
   });
 
   test("uj1 opens settings from the overview", async ({ page, request }) => {
@@ -154,7 +157,9 @@ test.describe("uj1 plan overview", () => {
     await expect(plate(page)).toBeVisible();
 
     await plate(page).click();
-    await page.getByRole("menu").getByRole("menuitem", { name: "New Plan" }).click();
+    await page.getByRole("menu").getByRole("menuitem", { name: "All saved plans" }).click();
+    await expect(page).toHaveURL(/\/plans$/);
+    await page.getByRole("main").getByRole("link", { name: "New Plan", exact: true }).click();
     await expect(page).toHaveURL(/\/plans\/new$/);
     const name = `Fresh ${randomUUID().slice(0, 8)}`;
     await page.getByLabel("Plan name").fill(name);

@@ -88,7 +88,7 @@ test.describe("uj3 saved plans", () => {
     await expect(table(page).locator('button[tabindex="0"]')).toHaveCount(1);
     await page.keyboard.press("Enter");
     const menu = page.getByRole("menu");
-    await expect(menu.getByRole("menuitem")).toHaveCount(1);
+    await expect(menu.getByRole("menuitem")).toHaveCount(2);
     await page.keyboard.press("Escape");
     await expect(menu).toHaveCount(0);
     await expect(menuButton).toBeFocused();
@@ -100,7 +100,10 @@ test.describe("uj3 saved plans", () => {
     await expect(table(page).locator("tr:focus")).toHaveCount(0);
     // Keys inside the open (portaled) menu never move or open rows.
     const open = menu.getByRole("menuitem", { name: "Open" });
+    // Opening with ArrowDown focuses the first item; wait for it so the keys below land in order.
+    await expect(open).toBeFocused();
     await page.keyboard.press("ArrowDown");
+    await expect(menu.getByRole("menuitem", { name: "New Plan from this import" })).toBeFocused();
     await page.keyboard.press("ArrowUp");
     await expect(menu).toBeVisible();
     await expect(table(page).locator("tr:focus")).toHaveCount(0);
