@@ -105,6 +105,7 @@ modules =
     swp.domain.import_
     swp.domain.classify
     swp.domain.pick_groups
+    swp.domain.marks
     swp.domain.views.summary
     swp.domain.views.parts
     swp.domain.views.locations

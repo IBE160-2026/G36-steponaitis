@@ -44,6 +44,20 @@ def transaction() -> Iterator[Session]:
         yield session
 
 
+@contextmanager
+def write_transaction() -> Iterator[Session]:
+    """A transaction for a read-modify-write: on SQLite it starts with BEGIN IMMEDIATE (AD-6).
+
+    pysqlite opens no transaction before a SELECT, so taking the write lock first serializes
+    writers across connections and processes; on Postgres the reader locks rows with
+    `FOR UPDATE` instead.
+    """
+    with transaction() as session:
+        if session.get_bind().dialect.name == "sqlite":
+            session.execute(text("BEGIN IMMEDIATE"))
+        yield session
+
+
 def ping() -> None:
     """Run SELECT 1; raises if the database is unreachable."""
     with get_engine().connect() as conn:

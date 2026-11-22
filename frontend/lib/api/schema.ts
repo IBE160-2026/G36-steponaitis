@@ -56,6 +56,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/commands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Command */
+        post: operations["post_command_api_plans__plan_id__commands_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/locations": {
         parameters: {
             query?: never;
@@ -237,6 +254,16 @@ export interface components {
             min_picks: number;
         };
         /**
+         * CommandResult
+         * @description The response of the command endpoint; also stored in `recent_commands`.
+         */
+        CommandResult: {
+            /** Events */
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"])[];
+            /** Version */
+            version: number;
+        };
+        /**
          * CreatedPlan
          * @description The response of POST /api/plans.
          */
@@ -355,6 +382,26 @@ export interface components {
             /** Version */
             version: number;
             warehouse: components["schemas"]["Occupancy"];
+        };
+        /** MarkRemoved */
+        MarkRemoved: {
+            /** Mark */
+            mark: components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "mark_removed";
+        };
+        /** MarkSet */
+        MarkSet: {
+            /** Mark */
+            mark: components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "mark_set";
         };
         /** Occupancy */
         Occupancy: {
@@ -538,6 +585,23 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** RemoveBestMark */
+        RemoveBestMark: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Mark */
+            mark: components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "remove_best_mark";
+        };
         /** SavedPlanRow */
         SavedPlanRow: {
             /**
@@ -597,6 +661,23 @@ export interface components {
             max_upload_bytes: number;
             /** User */
             user: string | null;
+        };
+        /** SetBestMark */
+        SetBestMark: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Mark */
+            mark: components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "set_best_mark";
         };
         /** StepSummary */
         StepSummary: {
@@ -749,6 +830,68 @@ export interface operations {
             };
             /** @description Error */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_command_api_plans__plan_id__commands_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommandResult"];
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

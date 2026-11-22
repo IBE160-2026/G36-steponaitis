@@ -165,6 +165,10 @@ KERNEL_MODULES = {
     "swp.domain",
     "swp.domain.views",
     "swp.domain.analysis",
+    # The dispatcher that imports the command slices (AD-6); listed as kernel only so this
+    # check accepts it.
+    "swp.domain.apply",
+    "swp.domain.commands",
     "swp.domain.errors",
     "swp.domain.import_data",
     "swp.domain.ordering",
