@@ -13,6 +13,7 @@ from swp.api.routers import (
     commands,
     health,
     locations,
+    move_list,
     moves,
     parts,
     pick_groups,
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(search.router, prefix="/api")
     app.include_router(moves.router, prefix="/api")
     app.include_router(before_after.router, prefix="/api")
+    app.include_router(move_list.router, prefix="/api")
     app.include_router(recommendations.router, prefix="/api")
     app.include_router(session.router, prefix="/api")
     return app

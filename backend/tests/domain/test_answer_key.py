@@ -6,9 +6,8 @@ whole scenario of answer-key steps 1-20 (SM-1, FR-23 to FR-37): every step is pl
 `tests.domain.answer_key.scenario` through `domain.apply` and `revalidate` with a fixed
 command id (step 6 as `set_keep 0500`, steps 15-16 as `undo`, step 20 as `apply_all`).
 After it: the 14 effective moves, the final current locations, the final before/after, the
-unchanged import and the settled check (one more run). The printed move list order needs
-Story 8.1 and stays skipped. `tests/app/test_answer_key_api.py` posts the same commands
-over HTTP.
+unchanged import, the settled check (one more run) and the printed move list in order
+(FR-38). `tests/app/test_answer_key_api.py` posts the same commands over HTTP.
 
 The six rule modules never import `swp.store` or `swp.app` (checked below by scanning their
 source); the import-linter layers contract also runs on the real package in
@@ -36,6 +35,7 @@ from swp.domain.commands import (
     StepUndone,
 )
 from swp.domain.import_data import ImportData
+from swp.domain.move_list import build_move_list_rounds
 from swp.domain.planning import UndoEffect, UndoPreview, current_round, replay
 from swp.domain.state import Outdated, PlanState, Rule
 from swp.domain.views.locations import build_locations_view
@@ -53,7 +53,6 @@ from tests.domain.answer_key import (
 )
 
 RULES: dict[str | int, Rule] = {1: "rule_1", 2: "rule_2", 3: "rule_3", "Manual": "manual"}
-MOVE_LIST = 'Story 8.1 "Move list order and header in the domain"'
 
 
 @pytest.fixture(scope="module")
@@ -486,6 +485,22 @@ def test_fr23_answer_key_settled_check(
     )
 
 
-@pytest.mark.skip(reason=f"move list: {MOVE_LIST}")
-def test_fr38_answer_key_move_list() -> None:
-    raise AssertionError("deferred")
+def test_fr38_answer_key_move_list(key: dict[str, Any], data: ImportData, final: PlanState) -> None:
+    rounds = build_move_list_rounds(data, replay(data, final.steps).moves)
+    want = key["move_list"]
+
+    assert len(rounds) == want["rounds"] == 3
+    assert [
+        (line.round, line.part, line.from_location, line.to_location, line.rule)
+        for r in rounds
+        for line in r.lines
+    ] == [
+        (e["round"], e["part"], e["from"], e["to"], _rule(e["rule"]))
+        for e in want["lines_in_order"]
+    ]
+    assert all(line.round == r.round for r in rounds for line in r.lines)
+    moves = {(m.round, m.part): m for m in replay(data, final.steps).moves}
+    assert len(moves) == 14
+    for line in (line for r in rounds for line in r.lines):
+        assert line.move_number == moves[(line.round, line.part)].move_number, line
+        assert line.description == data.parts[line.part], line

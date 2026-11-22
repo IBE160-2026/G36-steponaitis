@@ -85,3 +85,19 @@ def mark_order(marks: Iterable[BestMark], locations: Mapping[str, LocationData])
             key=lambda m: (m.location not in position, position.get(m.location, 0), m.location),
         ),
     ]
+
+
+def walk_path_key(
+    locations: Mapping[str, LocationData],
+) -> Callable[[str, str, int], tuple[object, ...]]:
+    """The base key of a move-list line (FR-38): the from-location's Walk Path (numeric), then
+    part number (`str`), then move number. A from-location missing from `locations` sorts
+    after every known one, by code."""
+
+    def key(from_location: str, part: str, move_number: int) -> tuple[object, ...]:
+        location = locations.get(from_location)
+        if location is None:
+            return (1, 0, from_location, part, move_number)
+        return (0, location.walk_path, "", part, move_number)
+
+    return key

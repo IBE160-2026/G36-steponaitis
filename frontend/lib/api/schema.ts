@@ -108,6 +108,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/move-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Move List */
+        get: operations["get_plan_move_list_api_plans__plan_id__move_list_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/moves/preview": {
         parameters: {
             query?: never;
@@ -726,6 +743,65 @@ export interface components {
              * @enum {string}
              */
             type: "mark_set";
+        };
+        /** MoveListHeader */
+        MoveListHeader: {
+            /**
+             * Data As Of
+             * Format: date
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Name */
+            name: string;
+            /** Rounds */
+            rounds: number;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
+        /** MoveListLine */
+        MoveListLine: {
+            /** Description */
+            description: string;
+            /** From Location */
+            from_location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** Round */
+            round: number;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3" | "manual";
+            /** To Location */
+            to_location: string;
+        };
+        /** MoveListRound */
+        MoveListRound: {
+            /** Label */
+            label: string | null;
+            /** Lines */
+            lines: components["schemas"]["MoveListLine"][];
+            /** Round */
+            round: number;
+        };
+        /** MoveListView */
+        MoveListView: {
+            header: components["schemas"]["MoveListHeader"];
+            /** Rounds */
+            rounds: components["schemas"]["MoveListRound"][];
+            /** Version */
+            version: number;
         };
         /**
          * MoveMade
@@ -1876,6 +1952,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LocationsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_move_list_api_plans__plan_id__move_list_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoveListView"];
                 };
             };
             /** @description Error */

@@ -118,3 +118,4 @@ modules =
     swp.domain.before_after
     swp.domain.rules
     swp.domain.recommendations
+    swp.domain.move_list

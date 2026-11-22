@@ -17,7 +17,8 @@ from swp.store.plans import get_plan_inputs
 from tests.app.test_apply_command import _command, _state
 from tests.app.test_create_plan import SAME_ORIGIN, _multipart
 from tests.app.test_import_readers import _data_files
-from tests.domain.answer_key import answer_key_import, scenario
+from tests.domain.answer_key import answer_key_import, expected, scenario
+from tests.domain.test_answer_key import _rule
 
 EVENTS = TypeAdapter(list[Event])
 
@@ -76,6 +77,7 @@ def test_ad6_answer_key_scenario_over_http(empty_tables: str) -> None:
 
         after = get_plan_inputs(uuid.UUID(plan_id))
         total = client.get(f"/api/plans/{plan_id}/before-after").json()["total"]
+        move_list = client.get(f"/api/plans/{plan_id}/move-list").json()
 
     assert repeated.status_code == 200, repeated.text
     assert repeated.json() == last
@@ -97,3 +99,14 @@ def test_ad6_answer_key_scenario_over_http(empty_tables: str) -> None:
         1,
         6,
     )
+    want = expected()["move_list"]
+    assert move_list["version"] == version
+    assert move_list["header"]["rounds"] == want["rounds"] == 3
+    assert [
+        (line["round"], line["part"], line["from_location"], line["to_location"], line["rule"])
+        for r in move_list["rounds"]
+        for line in r["lines"]
+    ] == [
+        (e["round"], e["part"], e["from"], e["to"], _rule(e["rule"]))
+        for e in want["lines_in_order"]
+    ]
