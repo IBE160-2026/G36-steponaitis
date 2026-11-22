@@ -118,3 +118,7 @@
 - [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — AGENTS.md mangler porten med alle tre nettlesere, `e2e:reset-db` og `ruff format --check`; oppdater med bmad-project-context (Story 5.8)
 - [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — DOM-enhetstest for DataTable krever `@testing-library/react` og `jsdom`; installasjonen ble nektet, så avgjør om de skal tillates (Story 5.8)
 - [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — oppfølgingsreview Story 5.8 anbefalt
+- [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — avgjør om en anvendt anbefaling, der delen flyttes videre i samme runde, forblir «applied» eller blir utdatert; skriv det i AD-7 med en test (epic 5 retro, punkt 2)
+- [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — bekreftelsesspørsmålet for Apply all lover en angrefunksjon som ikke finnes ennå (FR-35); avgjør ny tekst (epic 5 retro, punkt 3)
+- [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — avgjør om en partner i regel 3 kan flyttes bort i samme kjøring, og om Apply all skal bære med seg kjøringen den bekreftet; før `kept` og stille no-op inn i AD-7 (epic 5 retro, punkt 6)
+- [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — fem oppfølgingsreviews gjenstår (4.1, 4.4, 5.1, 5.7, 5.8), og tre runbook-regler bør vurderes (epic 5 retro, punkt 10)
