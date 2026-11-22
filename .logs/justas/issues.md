@@ -89,3 +89,7 @@
 - [ ] 2026-11-21 [2-5-pick-groups-table](963-2026-11-21-23-02-32-2-5-pick-groups-table.md) — Pick groups tom-tilstand sier alltid «5 or more jobs» uavhengig av `pick_group_min_shared_jobs` (Story 2.5)
 - [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delpanelet (400 px) legger seg ikke over siden under 1280 px bredde (Story 2.6)
 - [ ] 2026-11-21 [2-6-part-panel-and-search](962-2026-11-21-23-23-23-2-6-part-panel-and-search.md) — delsøket sender en forespørsel per tastetrykk, ingen debounce (Story 2.6)
+- [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — feil: bytte av gang i Locations nullstiller Occupancy- og Best-filtrene (fra review-rettelse i Story 2.4; retro Epic 2, punkt 1)
+- [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 5: plan-visningene laster `transactions` unødig — endre lesingen eller AD-4
+- [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 6: krev test av brukerstien når en review-rettelse endrer når delt tilstand nullstilles
+- [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 7: avgjør når de åpne action items fra Epic 1 skal planlegges (10 av 11 åpne)
