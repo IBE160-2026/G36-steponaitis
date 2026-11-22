@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "./support/test";
 
 // UJ-1: the planner opens the app shell with no plan open (Story 1.4, UX-DR1/2/4/6/57/58).
 // `/` redirects to a plan since Story 1.9, so these open New Plan, which has no plan.

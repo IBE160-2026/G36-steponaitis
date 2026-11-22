@@ -39,6 +39,24 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   ...moduleBoundaries,
+  {
+    // Every spec uses the shared fixture so in-flight route handlers are unrouted at teardown.
+    files: ["e2e/**/*.{spec,test}.{ts,tsx,js,jsx,mts,cts,mjs,cjs}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@playwright/test",
+              importNames: ["test", "default"],
+              message: "Import `test` from e2e/support/test.ts so route handlers are unrouted at teardown.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   globalIgnores([
     ".next/**",
     "out/**",

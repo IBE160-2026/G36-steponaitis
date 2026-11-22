@@ -1,6 +1,6 @@
 import { join } from "node:path";
 
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "./support/test";
 
 // UJ-1: the planner creates a plan from the three exports (Story 1.8; FR-1, FR-3, FR-4, UX-DR19/20).
 

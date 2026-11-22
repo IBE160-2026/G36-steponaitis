@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/test";
 
 // No user journey covers the walking skeleton; these tests name NFR-2 (local install). `/` now
 // redirects to a plan (Story 1.9), so the frontend is checked on New Plan.

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, type Locator, test } from "@playwright/test";
+import { expect, type Locator, test } from "./support/test";
 
 import { type Detail, getJson, locationRows, moveFromPanel, partDetail } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";

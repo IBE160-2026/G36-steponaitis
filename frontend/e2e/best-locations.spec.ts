@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, type Locator, type Page, test } from "@playwright/test";
+import { type APIRequestContext, expect, type Locator, type Page, test } from "./support/test";
 
 import { createSamplePlan } from "./support/sample-plan";
 
