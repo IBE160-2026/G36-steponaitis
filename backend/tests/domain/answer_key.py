@@ -3,6 +3,7 @@
 import csv
 import json
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ from swp.domain.apply import apply
 from swp.domain.classify import classify_parts
 from swp.domain.commands import (
     Applied,
+    ApplyAll,
     ApplyRecommendation,
     Command,
     CommandContext,
@@ -139,9 +141,11 @@ def keep_step(state: PlanState, part: str, data: ImportData, analysis: Analysis)
     return command(state, cmd, data, analysis).state
 
 
-def undo_command(move_number: int) -> Undo:
+def undo_command(move_number: int, command_id: uuid.UUID | None = None) -> Undo:
     """An `undo` command expecting `move_number` to be the last step (FR-35)."""
-    return Undo(command_id=uuid.uuid4(), base_version=1, expected_move_number=move_number)
+    return Undo(
+        command_id=command_id or uuid.uuid4(), base_version=1, expected_move_number=move_number
+    )
 
 
 def undo_step(state: PlanState, data: ImportData, analysis: Analysis) -> Applied:
@@ -154,28 +158,64 @@ def reset_step(state: PlanState, data: ImportData, analysis: Analysis) -> Applie
     return command(state, Reset(command_id=uuid.uuid4(), base_version=1), data, analysis)
 
 
-def play_steps(data: ImportData, analysis: Analysis, through: int) -> tuple[PlanState, list[Event]]:
-    """Answer-key steps 1 to `through` of `expected.json` through the helpers, from aisle A
-    marked; the state and the last step's events (only an undo step reports them)."""
+SCENARIO_NS = uuid.UUID("7c5e0a1e-5a4b-4e1f-9f0e-2b7d3c1a7005")
+"""Namespace of the scenario's fixed command ids: `uuid5(SCENARIO_NS, "step:n")` (AD-13)."""
+
+
+@dataclass(frozen=True)
+class ScenarioStep:
+    """One answer-key step as played: the `expected.json` step, its command, the state
+    before it and what `command` gave."""
+
+    step: dict[str, Any]
+    command: Command
+    before: PlanState
+    applied: Applied
+
+
+def step_command(step: dict[str, Any], state: PlanState) -> Command:
+    """The command for an `expected.json` step on `state`, with a fixed `command_id` so
+    recommendation ids are the same in every replay; part phrases map to recommendation ids
+    here only (AD-13)."""
+    command_id = uuid.uuid5(SCENARIO_NS, f"step:{step['step']}")
+    match step["action"]:
+        case "run":
+            return RunRecommendations(command_id=command_id, base_version=1)
+        case "apply":
+            [rec] = [r for r in state.runs[-1].recommendations if r.part == step["part"]]
+            return apply_command(rec.id, command_id)
+        case "manual_move":
+            return manual_command(step["part"], step["from"], step["to"], command_id)
+        case "keep_in_place":
+            return SetKeep(command_id=command_id, base_version=1, part=step["part"])
+        case "undo":
+            return undo_command(state.steps[-1].move_number, command_id)
+        case "apply_all":
+            return ApplyAll(command_id=command_id, base_version=1)
+        case action:
+            raise AssertionError(f"step {step['step']}: unexpected action {action}")
+
+
+def scenario(
+    data: ImportData, analysis: Analysis, through: int | None = None
+) -> list[ScenarioStep]:
+    """The answer-key steps of `expected.json` (all 20, or 1 to `through`) played from aisle A
+    marked, each through `command` (apply, then revalidate)."""
     state = PlanState(best_marks=MARKS)
-    events: list[Event] = []
+    played: list[ScenarioStep] = []
     for step in expected()["steps"][:through]:
-        events = []
-        match step["action"]:
-            case "run":
-                state = run_command(data, analysis, state).state
-            case "keep_in_place":
-                state = keep_step(state, step["part"], data, analysis)
-            case "apply":
-                state = apply_recommendation(state, step["part"], data, analysis)
-            case "manual_move":
-                state = manual_step(state, step["part"], step["from"], step["to"], data, analysis)
-            case "undo":
-                applied = undo_step(state, data, analysis)
-                state, events = applied.state, applied.events
-            case action:
-                raise AssertionError(f"step {step['step']}: unexpected action {action}")
-    return state, events
+        cmd = step_command(step, state)
+        applied = command(state, cmd, data, analysis)
+        played.append(ScenarioStep(step=step, command=cmd, before=state, applied=applied))
+        state = applied.state
+    return played
+
+
+def play_steps(data: ImportData, analysis: Analysis, through: int) -> tuple[PlanState, list[Event]]:
+    """Answer-key steps 1 to `through` played by `scenario`; the state after step `through`
+    and that step's events."""
+    last = scenario(data, analysis, through)[-1].applied
+    return last.state, last.events
 
 
 def run_outcome(run: Run) -> RunOutcome:
@@ -201,16 +241,20 @@ def after_run_1(data: ImportData, analysis: Analysis) -> tuple[PlanState, str]:
     return state, state.runs[-1].recommendations[0].id
 
 
-def apply_command(rec_id: str) -> ApplyRecommendation:
+def apply_command(rec_id: str, command_id: uuid.UUID | None = None) -> ApplyRecommendation:
     """An `apply` command for `rec_id`."""
-    return ApplyRecommendation(command_id=uuid.uuid4(), base_version=1, recommendation_id=rec_id)
+    return ApplyRecommendation(
+        command_id=command_id or uuid.uuid4(), base_version=1, recommendation_id=rec_id
+    )
 
 
-def manual_command(part: str, from_location: str, to_location: str) -> ManualMove:
+def manual_command(
+    part: str, from_location: str, to_location: str, command_id: uuid.UUID | None = None
+) -> ManualMove:
     """A `manual_move` command, built from the wire names `from`/`to`."""
     return ManualMove.model_validate(
         {
-            "command_id": uuid.uuid4(),
+            "command_id": command_id or uuid.uuid4(),
             "base_version": 1,
             "part": part,
             "from": from_location,

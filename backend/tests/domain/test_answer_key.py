@@ -1,10 +1,14 @@
-"""Milestone 1 gate: the answer key (`data/answer-key/expected.json`) in one place (domain only).
+"""Milestone 1 and 2 gate: the answer key (`data/answer-key/expected.json`) in one place
+(domain only).
 
-Classes (FR-17), pick groups (FR-19), the merged inventory (FR-6), occupancy (FR-14) and one
-replay of answer-key steps 1-16 (FR-23 to FR-30, FR-32 to FR-35). Every step goes through
-`domain.apply` and `revalidate`, step 6 as `set_keep 0500`, steps 15-16 as `undo`. Steps
-17-20, the move list, the final current locations, the final before/after and the settled
-check need Epic 7/8 work and are skipped with the story that will un-skip them.
+Classes (FR-17), pick groups (FR-19), the merged inventory (FR-6), occupancy (FR-14) and the
+whole scenario of answer-key steps 1-20 (SM-1, FR-23 to FR-37): every step is played by
+`tests.domain.answer_key.scenario` through `domain.apply` and `revalidate` with a fixed
+command id (step 6 as `set_keep 0500`, steps 15-16 as `undo`, step 20 as `apply_all`).
+After it: the 14 effective moves, the final current locations, the final before/after, the
+unchanged import and the settled check (one more run). The printed move list order needs
+Story 8.1 and stays skipped. `tests/app/test_answer_key_api.py` posts the same commands
+over HTTP.
 
 The six rule modules never import `swp.store` or `swp.app` (checked below by scanning their
 source); the import-linter layers contract also runs on the real package in
@@ -12,6 +16,7 @@ source); the import-linter layers contract also runs on the real package in
 """
 
 import ast
+from collections import Counter
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -20,32 +25,51 @@ import pytest
 
 from swp.domain.analysis import Analysis
 from swp.domain.before_after import build_before_after
-from swp.domain.commands import RecommendationsOutdated, StepUndone
+from swp.domain.commands import (
+    ApplyAllDone,
+    Event,
+    KeepSet,
+    MoveMade,
+    MovesCombined,
+    RecommendationsOutdated,
+    RunDone,
+    StepUndone,
+)
 from swp.domain.import_data import ImportData
-from swp.domain.planning import current_round, replay
+from swp.domain.planning import UndoEffect, UndoPreview, current_round, replay
 from swp.domain.state import Outdated, PlanState, Rule
 from swp.domain.views.locations import build_locations_view
 from tests.domain.answer_key import (
     CLASS_NAMES,
     MARKS,
-    apply_recommendation,
+    ScenarioStep,
+    answer_key_analysis,
+    answer_key_import,
     expected,
     expected_run_outcome,
-    keep_step,
-    manual_step,
-    play_steps,
     run_command,
     run_outcome,
+    scenario,
 )
 
 RULES: dict[str | int, Rule] = {1: "rule_1", 2: "rule_2", 3: "rule_3", "Manual": "manual"}
-RUN_3 = 'Story 7.5 "Answer-key scenario through run 3"'
 MOVE_LIST = 'Story 8.1 "Move list order and header in the domain"'
 
 
 @pytest.fixture(scope="module")
 def key() -> dict[str, Any]:
     return expected()
+
+
+@pytest.fixture(scope="module")
+def played(data: ImportData, analysis: Analysis) -> list[ScenarioStep]:
+    """All 20 answer-key steps, played once per module."""
+    return scenario(data, analysis)
+
+
+@pytest.fixture(scope="module")
+def final(played: list[ScenarioStep]) -> PlanState:
+    return played[-1].applied.state
 
 
 DOMAIN_DIR = Path(__file__).resolve().parents[2] / "swp" / "domain"
@@ -119,29 +143,24 @@ def test_fr14_answer_key_occupancy_and_zero_stock(key: dict[str, Any], data: Imp
 
 
 def test_fr23_fr30_answer_key_steps_1_to_14(
-    key: dict[str, Any], data: ImportData, analysis: Analysis
+    key: dict[str, Any], data: ImportData, analysis: Analysis, played: list[ScenarioStep]
 ) -> None:
-    state = PlanState(best_marks=MARKS)
-    for step in key["steps"][:14]:
+    for played_step in played[:14]:
+        step, before, state = played_step.step, played_step.before, played_step.applied.state
         number, action = step["step"], step["action"]
         if action == "run":
-            state = run_command(data, analysis, state).state
             run = state.runs[-1]
             assert run.round == step["round"], f"step {number}"
             assert run_outcome(run) == expected_run_outcome(step), f"step {number}"
             continue
         if action == "keep_in_place":
-            state = keep_step(state, step["part"], data, analysis)
             continue
-        before = len(state.steps)
         if action == "apply":
-            state = apply_recommendation(state, step["part"], data, analysis)
             source, target = step["expect_move"]["from"], step["expect_move"]["to"]
         else:
             assert action == "manual_move", f"step {number}: unexpected action {action}"
-            state = manual_step(state, step["part"], step["from"], step["to"], data, analysis)
             source, target = step["from"], step["to"]
-        assert len(state.steps) == before + 1, f"step {number}"
+        assert len(state.steps) == len(before.steps) + 1, f"step {number}"
         move = state.steps[-1]
         want = step["expect_move"]
         assert (move.part, move.from_location, move.to_location, move.rule, move.round) == (
@@ -152,6 +171,7 @@ def test_fr23_fr30_answer_key_steps_1_to_14(
             want["round"],
         ), f"step {number}"
 
+    state = played[13].applied.state
     assert state.keep_marks == ["0500"]
     assert [(s.part, s.round) for s in state.steps][-1] == ("1200", 2)
     before_after = build_before_after(data, replay(data, state.steps).copy, analysis, MARKS)
@@ -164,27 +184,14 @@ def test_fr23_fr30_answer_key_steps_1_to_14(
     assert before_after.total.fast_in_best.before == want["fast_in_best"]["before"]["total"]
 
 
-def test_fr32_kept_part_skipped_in_run_2(
-    key: dict[str, Any], data: ImportData, analysis: Analysis
-) -> None:
-    state = PlanState(best_marks=MARKS)
-    for step in key["steps"][:12]:
-        match step["action"]:
-            case "run":
-                state = run_command(data, analysis, state).state
-            case "keep_in_place":
-                state = keep_step(state, step["part"], data, analysis)
-            case "apply":
-                state = apply_recommendation(state, step["part"], data, analysis)
-            case action:
-                assert action == "manual_move", action
-                state = manual_step(state, step["part"], step["from"], step["to"], data, analysis)
+def test_fr32_kept_part_skipped_in_run_2(key: dict[str, Any], played: list[ScenarioStep]) -> None:
+    state = played[11].applied.state
     assert state.keep_marks == ["0500"]
     assert "0500" in {r.part for r in state.runs[-1].recommendations}  # run 1 had it
 
     run_2 = key["steps"][12]
     assert run_2["action"] == "run" and run_2["round"] == 2
-    run = run_command(data, analysis, state).state.runs[-1]
+    run = played[12].applied.state.runs[-1]
 
     assert run_outcome(run) == expected_run_outcome(run_2)
     assert "0500" not in {r.part for r in run.recommendations}
@@ -192,14 +199,115 @@ def test_fr32_kept_part_skipped_in_run_2(
 
 
 UNDONE = Outdated(cause="undo")
+MOVE_NUMBERS = {2: 1, 3: 2, 4: 3, 5: 4, 7: 5, 8: 6, 9: 7, 10: 8, 11: 9, 12: 10, 14: 11, 17: 12}
+"""The move number each apply or manual step takes (step 6 is a mark, step 18 is combined)."""
 
 
-def _step_15(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
-    before, _ = play_steps(data, analysis, 14)
-    assert key["steps"][14]["action"] == "undo"
+def _undone(move_number: int, part: str, source: str, target: str) -> StepUndone:
+    return StepUndone(
+        undone=UndoPreview(
+            move_number=move_number,
+            part=part,
+            from_location=source,
+            to_location=target,
+            effect=UndoEffect(kind="reverts_move", move_number=move_number),
+        )
+    )
+
+
+def _expected_events(step: dict[str, Any]) -> list[Event]:
+    """The exact events of an answer-key step (retro epic-5 #43)."""
+    number = step["step"]
+    match step["action"]:
+        case "run":
+            return [
+                RunDone(
+                    round=step["round"],
+                    recommendations=len(step["recommendations_in_order"]),
+                    no_space=len(step["no_space"]),
+                )
+            ]
+        case "keep_in_place":
+            return [KeepSet(part=step["part"])]
+        case "apply_all":
+            return [ApplyAllDone(applied=[1, 2, 3, 4], skipped=[])]
+        case "undo" if number == 15:
+            return [
+                _undone(11, "1200", "B-01-01-02", "A-01-01-01"),
+                RecommendationsOutdated(count=4, cause="undo"),
+            ]
+        case "undo":
+            assert number == 16
+            return [_undone(10, "0100", "A-01-01-01", "B-01-04-02")]
+        case "manual_move" if number == 18:
+            return [
+                MovesCombined(
+                    move_number=12,
+                    part="0100",
+                    from_location="A-01-01-01",
+                    to_location="B-01-03-02",
+                    round=2,
+                    step_move_number=13,
+                )
+            ]
+    want = step["expect_move"]
+    return [
+        MoveMade(
+            move_number=MOVE_NUMBERS[number],
+            part=step["part"],
+            from_location=want.get("from", step.get("from")),
+            to_location=want.get("to", step.get("to")),
+            rule=RULES[want["rule"]],
+            round=want["round"],
+        )
+    ]
+
+
+def test_sm1_answer_key_scenario(played: list[ScenarioStep]) -> None:
+    assert [p.step["step"] for p in played] == list(range(1, 21))
+    last_next = 1
+    runs = 0
+    for played_step in played:
+        step, applied = played_step.step, played_step.applied
+        number, state = step["step"], applied.state
+        assert applied.events == _expected_events(step), f"step {number}"
+
+        if step["action"] == "run":
+            runs += 1
+            run = state.runs[-1]
+            assert run.round == step["round"], f"step {number}"
+            assert run_outcome(run) == expected_run_outcome(step), f"step {number}"
+        assert current_round(state) == runs, f"step {number}"
+
+        latest = state.runs[-1].recommendations
+        if 15 <= number <= 18:
+            assert all((r.status, r.outdated) == ("outdated", UNDONE) for r in latest), number
+        else:
+            assert all((r.status, r.outdated) == ("open", None) for r in latest), number
+        if number == 16:
+            [rec] = [r for r in state.runs[0].recommendations if r.part == "0100"]
+            assert (rec.status, rec.outdated) == ("outdated", UNDONE)
+
+        assert state.next_move_number >= last_next, f"step {number}"  # retro epic-4 #36
+        last_next = state.next_move_number
+
+    assert runs == 3
+    final = played[-1].applied.state
+    run_3 = final.runs[-1]
+    assert [
+        (s.move_number, s.part, s.from_location, s.to_location, s.rule, s.round)
+        for s in final.steps[-4:]
+    ] == [
+        (n, r.part, r.from_location, r.to_location, r.rule, 3)
+        for n, r in zip([14, 15, 16, 17], run_3.recommendations, strict=True)
+    ]
+    assert final.next_move_number == 18
+
+
+def _step_15(played: list[ScenarioStep], data: ImportData) -> None:
+    before, (state, events) = played[14].before, _after(played, 15)
+    assert played[14].step["action"] == "undo"
     assert before.steps[-1].move_number == 11  # 1200's apply; step 6 is a mark
-
-    state, events = play_steps(data, analysis, 15)
 
     assert replay(data, state.steps).current_locations["1200"] == "B-01-01-02"
     run_2 = state.runs[-1]
@@ -212,12 +320,10 @@ def _step_15(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
     assert events[1:] == [RecommendationsOutdated(count=4, cause="undo")]
 
 
-def _step_16(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
-    before, _ = play_steps(data, analysis, 15)
-    assert key["steps"][15]["action"] == "undo"
+def _step_16(played: list[ScenarioStep], data: ImportData) -> None:
+    before, (state, events) = played[15].before, _after(played, 16)
+    assert played[15].step["action"] == "undo"
     assert (before.steps[-1].move_number, before.steps[-1].part) == (10, "0100")
-
-    state, events = play_steps(data, analysis, 16)
 
     assert replay(data, state.steps).current_locations["0100"] == "A-01-01-01"
     [rec] = [r for r in state.runs[0].recommendations if r.part == "0100"]
@@ -227,27 +333,65 @@ def _step_16(key: dict[str, Any], data: ImportData, analysis: Analysis) -> None:
     assert state.next_move_number == 12
 
 
-@pytest.mark.parametrize(
-    "number",
-    [
-        15,
-        16,
-        pytest.param(17, marks=pytest.mark.skip(reason=f"after undo: {RUN_3}")),
-        pytest.param(18, marks=pytest.mark.skip(reason=f"after undo: {RUN_3}")),
-        pytest.param(19, marks=pytest.mark.skip(reason=f"run 3: {RUN_3}")),
-        pytest.param(20, marks=pytest.mark.skip(reason=f"apply all in run 3: {RUN_3}")),
-    ],
-)
+def _step_17(played: list[ScenarioStep], data: ImportData) -> None:
+    state, events = _after(played, 17)
+    move = state.steps[-1]
+    assert (move.move_number, move.part, move.from_location, move.to_location) == (
+        12,
+        "0100",
+        "A-01-01-01",
+        "C-01-03-02",
+    )
+    assert (move.rule, move.round) == ("manual", 2)
+    assert [e.type for e in events] == ["move_made"]
+    assert replay(data, state.steps).current_locations["0100"] == "C-01-03-02"
+
+
+def _step_18(played: list[ScenarioStep], data: ImportData) -> None:
+    state, events = _after(played, 18)
+    assert (state.steps[-1].move_number, state.steps[-1].part) == (13, "0100")
+    moves = [m for m in replay(data, state.steps).moves if m.part == "0100"]
+    assert [(m.move_number, m.from_location, m.to_location, m.rule, m.round) for m in moves] == [
+        (12, "A-01-01-01", "B-01-03-02", "manual", 2)
+    ]
+    assert [e.type for e in events] == ["moves_combined"]
+
+
+def _step_19(played: list[ScenarioStep], data: ImportData) -> None:
+    state, _ = _after(played, 19)
+    run = state.runs[-1]
+    assert run.round == 3 and current_round(state) == 3
+    assert run_outcome(run) == expected_run_outcome(played[18].step)
+
+
+def _step_20(played: list[ScenarioStep], data: ImportData) -> None:
+    state, events = _after(played, 20)
+    recs = state.runs[-1].recommendations
+    assert [(s.move_number, s.recommendation_id, s.round) for s in state.steps[-4:]] == [
+        (14 + i, r.id, 3) for i, r in enumerate(recs)
+    ]
+    moves = replay(data, state.steps).moves
+    assert [(m.part, m.from_location, m.to_location, m.rule, m.round) for m in moves[-4:]] == [
+        (r.part, r.from_location, r.to_location, r.rule, 3) for r in recs
+    ]
+    assert events == [ApplyAllDone(applied=[1, 2, 3, 4], skipped=[])]
+
+
+def _after(played: list[ScenarioStep], number: int) -> tuple[PlanState, list[Event]]:
+    applied = played[number - 1].applied
+    return applied.state, applied.events
+
+
+@pytest.mark.parametrize("number", [15, 16, 17, 18, 19, 20])
 def test_fr23_fr30_answer_key_steps_15_to_20(
-    number: int, key: dict[str, Any], data: ImportData, analysis: Analysis
+    number: int, played: list[ScenarioStep], data: ImportData
 ) -> None:
-    {15: _step_15, 16: _step_16}[number](key, data, analysis)
+    steps = {15: _step_15, 16: _step_16, 17: _step_17, 18: _step_18, 19: _step_19, 20: _step_20}
+    steps[number](played, data)
 
 
-def test_fr35_undo_after_later_run(
-    key: dict[str, Any], data: ImportData, analysis: Analysis
-) -> None:
-    state, _ = play_steps(data, analysis, 18)
+def test_fr35_undo_after_later_run(played: list[ScenarioStep], data: ImportData) -> None:
+    state = played[17].applied.state
 
     moves = [m for m in replay(data, state.steps).moves if m.part == "0100"]
     assert [(m.from_location, m.to_location, m.rule, m.round) for m in moves] == [
@@ -259,21 +403,89 @@ def test_fr35_undo_after_later_run(
     )
 
 
+def _rule(rule: str) -> Rule:
+    return RULES["Manual" if rule == "Manual" else int(rule)]
+
+
+def test_fr34_answer_key_final_effective_moves(
+    key: dict[str, Any], data: ImportData, final: PlanState
+) -> None:
+    moves = replay(data, final.steps).moves
+    lines = key["move_list"]["lines_in_order"]
+
+    assert len(moves) == len(lines) == 14
+    assert Counter(
+        (m.part, m.from_location, m.to_location, m.rule, m.round) for m in moves
+    ) == Counter((e["part"], e["from"], e["to"], _rule(e["rule"]), e["round"]) for e in lines)
+    assert [
+        (m.round, m.from_location, m.to_location, m.rule) for m in moves if m.part == "0100"
+    ] == [(2, "A-01-01-01", "B-01-03-02", "manual")]
+
+
+def test_fr33_answer_key_final_current_locations(
+    key: dict[str, Any], data: ImportData, final: PlanState
+) -> None:
+    current = replay(data, final.steps).current_locations
+    assert {part: current[part] for part in key["final_current_locations"]} == key[
+        "final_current_locations"
+    ]
+
+
+def test_fr37_answer_key_final_before_after(
+    key: dict[str, Any], data: ImportData, analysis: Analysis, final: PlanState
+) -> None:
+    counts = build_before_after(data, replay(data, final.steps).copy, analysis, final.best_marks)
+    want = key["before_after"]
+    occupancy = want["occupancy_after"]
+
+    assert {row.aisle for row in counts.aisles} == set(occupancy) - {"total"}
+    for row in counts.aisles:
+        aisle = row.aisle
+        for field in ("fast_in_best", "pick_groups_together"):
+            count = getattr(row, field)
+            assert (count.before, count.after) == (
+                want[field]["before"][aisle],
+                want[field]["after"][aisle],
+            ), (aisle, field)
+        assert row.moved_in == want["moved_in"][aisle], aisle
+        assert row.moved_out == want["moved_out"][aisle], aisle
+        assert (row.occupied.after, row.empty.after) == (
+            occupancy[aisle]["occupied"],
+            occupancy[aisle]["empty"],
+        ), aisle
+    total = counts.total
+    for field in ("fast_in_best", "pick_groups_together"):
+        count = getattr(total, field)
+        assert (count.before, count.after) == (
+            want[field]["before"]["total"],
+            want[field]["after"]["total"],
+        ), field
+    assert (total.occupied.after, total.empty.after) == (
+        occupancy["total"]["occupied"],
+        occupancy["total"]["empty"],
+    )
+
+
+def test_fr36_answer_key_import_unchanged(
+    data: ImportData, analysis: Analysis, played: list[ScenarioStep]
+) -> None:
+    assert len(played) == 20  # the module's scenario has run on these fixtures
+    assert data == answer_key_import().data
+    assert analysis == answer_key_analysis()
+
+
+def test_fr23_answer_key_settled_check(
+    key: dict[str, Any], data: ImportData, analysis: Analysis, final: PlanState
+) -> None:
+    run = run_command(data, analysis, final).state.runs[-1]
+    want = key["settled_check"]
+
+    assert run.round == 4
+    assert run_outcome(run) == expected_run_outcome(
+        {"recommendations_in_order": want["recommendations"], "no_space": want["no_space"]}
+    )
+
+
 @pytest.mark.skip(reason=f"move list: {MOVE_LIST}")
 def test_fr38_answer_key_move_list() -> None:
-    raise AssertionError("deferred")
-
-
-@pytest.mark.skip(reason=f"final before/after after run 3: {RUN_3}")
-def test_fr37_answer_key_final_before_after() -> None:
-    raise AssertionError("deferred")
-
-
-@pytest.mark.skip(reason=f"final current locations after run 3: {RUN_3}")
-def test_fr33_answer_key_final_current_locations() -> None:
-    raise AssertionError("deferred")
-
-
-@pytest.mark.skip(reason=f"settled check (one more run on the final state): {RUN_3}")
-def test_fr23_answer_key_settled_check() -> None:
     raise AssertionError("deferred")
