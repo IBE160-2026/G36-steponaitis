@@ -122,3 +122,4 @@
 - [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — bekreftelsesspørsmålet for Apply all lover en angrefunksjon som ikke finnes ennå (FR-35); avgjør ny tekst (epic 5 retro, punkt 3)
 - [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — avgjør om en partner i regel 3 kan flyttes bort i samme kjøring, og om Apply all skal bære med seg kjøringen den bekreftet; før `kept` og stille no-op inn i AD-7 (epic 5 retro, punkt 6)
 - [ ] 2026-11-22 [epic-5-retrospective](938-2026-11-22-18-32-28-epic-5-retrospective.md) — fem oppfølgingsreviews gjenstår (4.1, 4.4, 5.1, 5.7, 5.8), og tre runbook-regler bør vurderes (epic 5 retro, punkt 10)
+- [ ] 2026-11-22 [6-1-saved-plans-list-as-the-start-page](937-2026-11-22-19-00-57-6-1-saved-plans-list-as-the-start-page.md) — oppfølgingsreview Story 6.1: radmenyen i DataTable avhenger av at Radix kaller preventDefault; bare sjekket i Chromium, ikke Firefox/Edge
