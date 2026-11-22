@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-21-2026 23:23
+last_updated: 11-22-2026 03:05
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -53,7 +53,7 @@ development_status:
   2-4-locations-table-with-occupancy: done
   2-5-pick-groups-table: done
   2-6-part-panel-and-search: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   epic-3: backlog
   3-1-best-location-marks-in-the-domain: backlog
@@ -235,3 +235,51 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
+  - id: "epic-2-retro-item-12-stop-the-locations-aisle-change-from-cle"
+    epic: 2
+    action: "Stop the Locations aisle change from clearing the Occupancy and Best
+      filters, with an e2e test that presses a filter then changes the aisle"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-13-build-the-pick-groups-empty-state-senten"
+    epic: 2
+    action: "Build the Pick groups empty-state sentence from the plan pick_group_min_shared_jobs
+      instead of the literal 5"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-14-move-the-part-aisle-derivation-and-the-l"
+    epic: 2
+    action: "Move the part-aisle derivation and the listed-parts rule into domain/planning.py
+      and use them from the parts, pick-groups and search views"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-15-guard-datatable-onkeydown-against-enter"
+    epic: 2
+    action: "Guard DataTable onKeyDown against Enter on interactive children and add
+      an e2e test that opens a row with Enter after a user sort"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-16-make-plan-views-read-the-plan-without-lo"
+    epic: 2
+    action: "Make plan views read the plan without loading transactions, or amend
+      AD-4"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-17-require-a-test-of-the-in-page-user-path"
+    epic: 2
+    action: "Require a test of the in-page user path when a review patch changes when
+      shared state resets"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
+  - id: "epic-2-retro-item-18-decide-when-the-open-epic-1-action-items"
+    epic: 2
+    action: "Decide when the open epic 1 action items are scheduled"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
