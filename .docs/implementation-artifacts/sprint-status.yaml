@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 21:12
+last_updated: 11-22-2026 21:24
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -88,7 +88,7 @@ development_status:
   6-3-start-a-new-plan-from-an-existing-plan-s-import: done
   6-4-delete-a-plan: done
   6-5-launcher-jump-to-any-step-action-or-saved-plan: done
-  epic-6-retrospective: optional
+  epic-6-retrospective: done
 
   epic-7: backlog
   7-1-keep-a-part-in-place: backlog
@@ -504,3 +504,84 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-49-make-get_plan-read-the-plan-and-its-impo"
+    epic: 6
+    action: "Make get_plan read the plan and its import in one statement (or return
+      None when the import is gone) so a GET racing a last-plan delete gives plan_not_found,
+      not 500; add a store test (R1, R14)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-50-scope-the-plan_not_found-hook-to-the-pla"
+    epic: 6
+    action: "Scope the plan_not_found hook to the plan on screen (plan id via query
+      meta and the command client, abort signal to fetch), with a Vitest for a 404
+      from a plan no longer shown (R2, R14)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-51-launcher-and-delete-hand-offs-keep-the-c"
+    epic: 6
+    action: "Launcher and delete hand-offs: keep the current query when the launcher
+      opens the current step, refresh the plans list when the launcher or plate menu
+      opens, clear a plan localStorage keys on delete or plan_not_found (R3, R4, R5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-52-strengthen-epic-6-tests-surviving-plan-w"
+    epic: 6
+    action: "Strengthen epic-6 tests: surviving plan with marks, moves and runs in
+      test_fr12_delete_keeps_other_plans, a launcher test pinning the bare /plans/<id>
+      href, and the deleted-in-another-tab e2e checking the list (A5, R7, R8)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-53-take-now-after-the-files-are-parsed-in-p"
+    epic: 6
+    action: "Take now after the files are parsed in POST /api/plans, give reuse-create
+      its own busy message, and fix the stale comment at new-plan-page.tsx:182 (R9,
+      R10, R13)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-54-move-launcher-saved-plans-new-plan-and-p"
+    epic: 6
+    action: "Move launcher, saved-plans, New Plan and plate copy into lib/copy, build
+      Data as of in one helper, move duplicated e2e helpers into e2e/support, and
+      include launcher.tsx in the epic-5 item-46 split (A2, A3, A4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-55-reconcile-epics-md-and-the-architecture"
+    epic: 6
+    action: "Reconcile epics.md and the architecture with epic 6 as built: create_from_import,
+      undo_preview shape, ?from= plan id, plate menu without New Plan, global 3 s
+      lock timeout, Not done yet state, four-entry Keyboard box, launcher only on
+      plan paths (A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-56-before-epic-7-decide-whether-launchercon"
+    epic: 6
+    action: "Before Epic 7, decide whether LauncherContext is wide enough for Undo
+      and Reset, and document LAUNCHER_ACTIONS as the extension point in AGENTS.md
+      (A1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-57-confirm-the-seven-landed-retro-items-epi"
+    epic: 6
+    action: "Confirm the seven landed retro items (epic-1 4/5/7, epic-2 15, epic-4
+      28/29/36) as done, tick their issues.md lines, and add a runbook rule that each
+      story prompt carries every deferral addressed to it (P2, P3, R5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
+  - id: "epic-6-retro-item-58-run-the-six-outstanding-follow-up-review"
+    epic: 6
+    action: "Run the six outstanding follow-up reviews (4.1, 4.4, 5.1, 5.7, 5.8, 6.1
+      incl. row menu in Firefox and Edge) and add a runbook guard that a build agent
+      may not hand back while its subagents still run (P4, P5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
