@@ -183,3 +183,46 @@ def test_fr22_summary_and_locations_carry_stored_marks(empty_tables: str) -> Non
         else:
             assert row["location"]["is_best"] is False
             assert row["covering_marks"] == []
+
+
+def test_fr8_saved_plans_sorted_by_last_edit(empty_tables: str) -> None:
+    """FR-8/AD-20: opening or listing a plan never moves it; only a plan-changing command does."""
+    a = _create("A", NOW)
+    b = _create("B", NOW + timedelta(minutes=5))
+    a_before, b_before = _row(a), _row(b)
+    aisle = min(location.aisle for location in plans.require(a).imported.data.locations.values())
+
+    with TestClient(create_app()) as client:
+        for _ in range(3):
+            assert client.get(f"/api/plans/{b}").status_code == 200
+            rows = client.get("/api/plans").json()
+            assert [row["id"] for row in rows] == [str(b), str(a)]
+        assert _row(a) == a_before
+        assert _row(b) == b_before
+
+        changed = client.post(
+            f"/api/plans/{a}/commands",
+            json={
+                "type": "set_best_mark",
+                "command_id": str(uuid.uuid4()),
+                "base_version": a_before[0],
+                "mark": {"kind": "aisle", "aisle": aisle},
+            },
+            headers=SAME_ORIGIN,
+        )
+        assert changed.status_code == 200, changed.text
+        rows = client.get("/api/plans").json()
+
+    assert [row["id"] for row in rows] == [str(a), str(b)]
+    a_after = _row(a)
+    assert a_after[0] == a_before[0] + 1
+    assert a_after[2] > a_before[2]
+    assert a_after[2] > b_before[2]
+    assert a_after[1] == "planner"
+    assert _row(b) == b_before
+    by_id = {row["id"]: row for row in rows}
+    assert by_id[str(a)]["last_edited_by"] == "planner"
+    a_listed = datetime.fromisoformat(by_id[str(a)]["last_edited_at"])
+    b_listed = datetime.fromisoformat(by_id[str(b)]["last_edited_at"])
+    assert a_listed > b_listed
+    assert by_id[str(b)]["last_edited_by"] == b_before[1]

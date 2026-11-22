@@ -5,6 +5,10 @@
 // stable, so ties keep server order (AD-14). The rows are one tab stop (roving tabindex):
 // `↑`/`↓` move between rows, `Home`/`End` jump, `Enter` or a click opens a row when `onOpen` is
 // given (a click on a link or button inside the row keeps its own action).
+// A cell learns whether its row is active (`cell(row, { isActive })`), so a row's menu button can be
+// tabbable only in the active row: `Tab` from the row reaches that row's menu and no other.
+// Keys a control inside the row already handled (default prevented) and events from content
+// portaled out of the row (e.g. an open menu) never move or open rows.
 // `focusKey` (UX-DR9) focuses a shown row and scrolls it into view, once per key value.
 // Rows are memoized: after a command the refetched view keeps unchanged rows (TanStack Query's
 // structural sharing), so only changed rows re-render. Re-rendering every row of a 2,000-row table
@@ -29,10 +33,13 @@ import { cn } from "@/lib/utils";
 export type ColumnAlign = "start" | "end";
 export type SortKind = "number" | "text";
 
+/** What a cell knows about its row besides the data. */
+export type CellContext = { isActive: boolean };
+
 export type DataTableColumn<T> = {
   key: string;
   header: string;
-  cell: (row: T) => ReactNode;
+  cell: (row: T, context: CellContext) => ReactNode;
   align?: ColumnAlign;
   /** Makes the column sortable. A decimal column gives its server `sort_rank` as a number. */
   sortValue?: (row: T) => SortValue;
@@ -113,8 +120,8 @@ type RowProps<T> = {
   onClick: (event: MouseEvent<HTMLTableRowElement>, index: number) => void;
 };
 
-// A row's cells depend only on `row` and `columns` (cells close over nothing else that changes
-// without a new `columns`), so equal props mean equal output.
+// A row's cells depend only on `row`, `isActive` and `columns` (cells close over nothing else that
+// changes without a new `columns`), so equal props mean equal output.
 const DataTableRow = memo(function DataTableRow<T>({
   row,
   index,
@@ -139,7 +146,7 @@ const DataTableRow = memo(function DataTableRow<T>({
           key={column.key}
           className={cn("h-table-row px-2 py-1", column.align === "end" && "text-right tabular-nums", column.className)}
         >
-          {column.cell(row)}
+          {column.cell(row, { isActive })}
         </td>
       ))}
     </tr>
@@ -180,7 +187,9 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
   function onClick(event: MouseEvent<HTMLTableRowElement>, index: number) {
     if (!onOpen) return;
     const target = event.target as Element | null;
-    if (target?.closest("a, button, input, select, textarea, label")) return;
+    // A click in content portaled out of the row (an open menu) is not a click on the row.
+    if (!target || !event.currentTarget.contains(target)) return;
+    if (target.closest("a, button, input, select, textarea, label")) return;
     // Selecting text in a row (e.g. to copy a part number) does not open it.
     if (window.getSelection()?.toString()) return;
     onOpen(shown[index]);
@@ -188,6 +197,7 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
 
   function onKeyDown(event: KeyboardEvent<HTMLTableRowElement>, index: number) {
     if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+    if (event.defaultPrevented || !event.currentTarget.contains(event.target as Node)) return;
     const next = nextRowIndex(event.key, index, shown.length);
     if (next === null) return;
     if (next === "open") {

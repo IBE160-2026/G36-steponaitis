@@ -1,6 +1,7 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
 // the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
-// recommendations tab (`?tab=`, Story 5.7) is built and parsed here too.
+// recommendations tab (`?tab=`, Story 5.7) is built and parsed here too, as are the saved-plans
+// list (`/plans`, FR-8) and New Plan (`/plans/new`).
 
 import type { StepKey } from "@/lib/view-state/steps";
 
@@ -9,6 +10,12 @@ import type { StepKey } from "@/lib/view-state/steps";
  * part whose panel is open.
  */
 export type LocationParams = { aisle?: string; loc?: string; part?: string };
+
+/** The saved-plans list, the start page (FR-8, AD-20). */
+export const SAVED_PLANS_HREF = "/plans";
+
+/** New Plan (FR-1). */
+export const NEW_PLAN_HREF = "/plans/new";
 
 /** `/plans/<id>/<step>`, with only the non-empty `params` appended as a query. */
 export function planStepHref(planId: string, step: StepKey, params?: LocationParams): string {
@@ -19,6 +26,14 @@ export function planStepHref(planId: string, step: StepKey, params?: LocationPar
   }
   const search = query.toString();
   return search ? `${path}?${search}` : path;
+}
+
+/**
+ * Where opening a saved plan goes (FR-9): its overview today. Story 6.2 makes this the plan's
+ * stored last view; every "open this plan" goes through here.
+ */
+export function planOpenHref(planId: string): string {
+  return planStepHref(planId, "overview");
 }
 
 /** The tabs of the Recommendations step (Open · Applied · Outdated · No space). */

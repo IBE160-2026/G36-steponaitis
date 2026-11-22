@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDate, formatNumber, formatTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatNumber, formatTime } from "@/lib/format";
 
 // UX-DR56 display formats, a copy rule under NFR-11. Vitest runs with TZ=Europe/Oslo.
 
@@ -17,6 +17,17 @@ describe("nfr11 formats dates as YYYY-MM-DD", () => {
   it("rejects input that is not a date", () => {
     expect(() => formatDate("not a date")).toThrow(RangeError);
     expect(() => formatDate("2026-02-30")).toThrow(RangeError);
+  });
+});
+
+describe("nfr11 fr8 formats date-times as YYYY-MM-DD HH:MM in the viewer's zone", () => {
+  it("shows an instant as the local date and 24-hour time", () => {
+    expect(formatDateTime("2026-09-30T22:30:00Z")).toBe("2026-10-01 00:30");
+    expect(formatDateTime("2026-07-01T10:00:00Z")).toBe("2026-07-01 12:00");
+  });
+
+  it("rejects a date-only string, which has no time", () => {
+    expect(() => formatDateTime("2026-09-30")).toThrow(RangeError);
   });
 });
 

@@ -1,10 +1,11 @@
-// The one shared error hook for GETs (AD-12): a plan that no longer exists sends the planner to
-// New Plan with a toast. Every other error stays with the view that asked for the data.
+// The one shared error hook for GETs and commands (AD-12): a plan that no longer exists sends the
+// planner to the saved-plans list with a toast (FR-8). Every other error stays with the view that
+// asked for the data.
 
 import { ApiError } from "@/lib/api/errors";
+import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 export const PLAN_DELETED = "This plan was deleted.";
-export const NEW_PLAN_HREF = "/plans/new";
 
 export type QueryErrorEffects = {
   notify: (message: string) => void;
@@ -14,6 +15,6 @@ export type QueryErrorEffects = {
 export function handleQueryError(error: unknown, { notify, navigate }: QueryErrorEffects): void {
   if (error instanceof ApiError && error.code === "plan_not_found") {
     notify(PLAN_DELETED);
-    navigate(NEW_PLAN_HREF);
+    navigate(SAVED_PLANS_HREF);
   }
 }

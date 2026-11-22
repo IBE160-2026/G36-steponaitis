@@ -172,13 +172,13 @@ describe("ad20 plan urls", () => {
 });
 
 describe("ad12 shared query error hook", () => {
-  it("ad12_plan_not_found_toasts_and_opens_new_plan", () => {
+  it("ad12_fr8_plan_not_found_toasts_and_opens_saved_plans", () => {
     const notify = vi.fn();
     const navigate = vi.fn();
     handleQueryError(new ApiError(404, "plan_not_found", "This plan does not exist."), { notify, navigate });
     expect(notify).toHaveBeenCalledWith(PLAN_DELETED);
     expect(PLAN_DELETED).toBe("This plan was deleted.");
-    expect(navigate).toHaveBeenCalledWith("/plans/new");
+    expect(navigate).toHaveBeenCalledWith("/plans");
   });
 
   it("ad12_plan_not_found_hook_ignores_other_errors", () => {

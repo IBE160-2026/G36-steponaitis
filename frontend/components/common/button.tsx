@@ -32,6 +32,22 @@ const DISABLED: Record<ButtonVariant, string> = {
   link: "bg-transparent text-ink-disabled underline underline-offset-2 cursor-not-allowed",
 };
 
+/** A button's classes, also for a link that looks like a button (e.g. New Plan, a navigation). */
+export function buttonClassName(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "lg",
+  isDisabled = false,
+  className?: string,
+): string {
+  return cn(
+    "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg type-button whitespace-nowrap",
+    variant !== "link" && SIZES[size],
+    isDisabled ? DISABLED[variant] : VARIANTS[variant],
+    variant === "link" && "px-0",
+    className,
+  );
+}
+
 export type ButtonProps = ComponentProps<"button"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -57,13 +73,7 @@ export function Button({
   const [reasonDismissed, setReasonDismissed] = useState(false);
   const isDisabled = disabledReason !== undefined;
 
-  const classes = cn(
-    "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg type-button whitespace-nowrap",
-    variant !== "link" && SIZES[size],
-    isDisabled ? DISABLED[variant] : VARIANTS[variant],
-    variant === "link" && "px-0",
-    className,
-  );
+  const classes = buttonClassName(variant, size, isDisabled, className);
 
   if (!isDisabled) {
     return (

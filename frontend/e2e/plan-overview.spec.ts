@@ -11,7 +11,8 @@ import {
 } from "./support/sample-plan";
 
 // UJ-1: after New Plan the planner lands on the overview, opens the settings and comes back to
-// the latest plan from `/` (Story 1.9; FR-7, FR-8, FR-9, FR-18, AD-12, AD-20, UX-DR5/6/21/22).
+// the plan from the saved-plans list at `/` (Story 1.9, Story 6.1; FR-7, FR-8, FR-9, FR-18, AD-12,
+// AD-20, UX-DR5/6/21/22). The list itself is covered by saved-plans.spec.ts (UJ-3).
 
 const STEP_COUNT = 8;
 
@@ -107,41 +108,17 @@ test.describe("uj1 plan overview", () => {
     await expect(page.getByRole("navigation", { name: "Plan steps" }).locator("[aria-current]")).toHaveCount(0);
   });
 
-  test("uj1 start page opens the latest plan", async ({ page, request }) => {
-    await createPlan(request, `Latest ${randomUUID().slice(0, 8)}`);
-    // Other specs create plans in parallel, so read the list the page itself received.
-    let latestId: string | undefined;
-    await page.route("**/api/plans", async (route) => {
-      const response = await route.fetch();
-      const rows = (await response.json()) as { id: string }[];
-      latestId = rows[0]?.id;
-      await route.fulfill({ response, json: rows });
-    });
-
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/plans\/[0-9a-f-]{36}\/overview$/);
-    expect(latestId).toBeTruthy();
-    expect(page.url()).toContain(`/plans/${latestId}/overview`);
-    await expect(page.getByRole("main").getByRole("heading", { name: "Overview" })).toBeVisible();
-  });
-
-  test("uj1 start page opens new plan when there is no plan", async ({ page }) => {
-    await page.route("**/api/plans", (route) => route.fulfill({ json: [] }));
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/plans\/new$/);
-    await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
-  });
-
   test("uj1 overview shows the error for a malformed plan id", async ({ page }) => {
     await page.goto("/plans/abc/overview");
     await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
     await expect(page).toHaveURL(/\/plans\/abc\/overview$/);
   });
 
-  test("uj1 unknown plan shows plan was deleted", async ({ page }) => {
+  test("uj1 unknown plan shows plan was deleted and opens saved plans", async ({ page }) => {
     await page.goto(`/plans/${randomUUID()}/overview`);
     await expect(page.getByText("This plan was deleted.")).toBeVisible();
-    await expect(page).toHaveURL(/\/plans\/new$/);
+    await expect(page).toHaveURL(/\/plans$/);
+    await expect(page.getByRole("main").getByRole("heading", { name: "Saved plans", level: 1 })).toBeVisible();
     await expect(page.getByText("This plan was deleted.")).toHaveCount(1);
   });
 
@@ -159,7 +136,8 @@ test.describe("uj1 plan overview", () => {
       await route.continue();
     });
 
-    await page.goto("/");
+    await page.goto("/plans");
+    await page.getByRole("table", { name: "Saved plans" }).getByRole("row", { name: plan.name }).click();
     await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/overview$`));
     await expect(page.getByRole("main").getByText(`Opening ${plan.name}…`)).toBeVisible();
     await expect(page.getByRole("main").locator("svg")).toHaveCount(0);
@@ -167,10 +145,9 @@ test.describe("uj1 plan overview", () => {
     await expect(page.getByRole("main").getByRole("heading", { name: "Overview" })).toBeVisible();
   });
 
-  test("uj1 start page opens the plan just created", async ({ page, request }) => {
-    await createPlan(request, `Older ${randomUUID().slice(0, 8)}`);
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/plans\/[0-9a-f-]{36}\/overview$/, { timeout: 30_000 });
+  test("uj1 start page lists the plan just created", async ({ page, request }) => {
+    const older = await createPlan(request, `Older ${randomUUID().slice(0, 8)}`);
+    await page.goto(`/plans/${older.id}/overview`);
     await expect(plate(page)).toBeVisible();
 
     await plate(page).click();
@@ -184,16 +161,11 @@ test.describe("uj1 plan overview", () => {
     await page.getByRole("button", { name: "New Plan", exact: true }).click();
     await expect(page).toHaveURL(/\/plans\/[0-9a-f-]{36}\/overview$/, { timeout: 30_000 });
     const createdUrl = page.url();
-    const createdId = createdUrl.split("/").at(-2);
 
-    // Other specs create plans in parallel: keep only this plan in the fresh list. The list cached
-    // from the first visit does not hold it, so a redirect on cached data opens another plan.
-    await page.route("**/api/plans", async (route) => {
-      const response = await route.fetch();
-      const rows = (await response.json()) as { id: string }[];
-      await route.fulfill({ response, json: rows.filter((row) => row.id === createdId) });
-    });
     await page.getByRole("link", { name: "Smart Warehouse Planner" }).click();
+    await expect(page).toHaveURL(/\/plans$/);
+    const table = page.getByRole("table", { name: "Saved plans" });
+    await table.getByRole("row", { name }).click();
     await expect(page).toHaveURL(createdUrl);
     await expect(plate(page)).toContainText(name);
   });
@@ -213,12 +185,5 @@ test.describe("uj1 plan overview", () => {
 
     const response = await page.goto(`/plans/${plan.id}/nope`);
     expect(response?.status()).toBe(404);
-  });
-
-  test("uj1 start page shows the error when plans cannot load", async ({ page }) => {
-    await page.route("**/api/plans", (route) => route.abort());
-    await page.goto("/");
-    await expect(page.getByRole("alert").filter({ hasText: "Something went wrong. Try again." })).toBeVisible();
-    await expect(page).toHaveURL(/\/$/);
   });
 });

@@ -16,7 +16,7 @@ export function Providers({ children }: { children: ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: { queries: { retry: false } },
-        // One shared hook for every GET (AD-12): a deleted plan goes back to New Plan.
+        // One shared hook for every GET (AD-12): a deleted plan goes back to the saved-plans list.
         queryCache: new QueryCache({
           onError: (error) => handleQueryError(error, effects),
         }),

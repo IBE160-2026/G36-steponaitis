@@ -51,6 +51,11 @@ export function formatTime(value: string | Date): string {
   return `${parts.hour}:${parts.minute}`;
 }
 
+/** `YYYY-MM-DD HH:MM` in the viewer's zone (an instant, not a date-only string). */
+export function formatDateTime(value: string | Date): string {
+  return `${formatDate(value)} ${formatTime(value)}`;
+}
+
 function groupThousands(digits: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

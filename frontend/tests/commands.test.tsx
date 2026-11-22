@@ -9,7 +9,7 @@ import { SaveStatusView } from "@/components/common/app-shell/save-status";
 import { Button } from "@/components/common/button";
 import { INTERNAL_MESSAGE, isErrorEnvelope } from "@/lib/api/errors";
 import { planLocationsKey, type PlanSummary, planSummaryKey } from "@/lib/api/plans";
-import { NEW_PLAN_HREF, PLAN_DELETED } from "@/lib/api/query-errors";
+import { PLAN_DELETED } from "@/lib/api/query-errors";
 import {
   baseVersion,
   CommandClient,
@@ -31,6 +31,7 @@ import {
   useConsistentPlanQueries,
   usePlanCommands,
 } from "@/lib/commands";
+import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 // Story 3.3: the client command flow and autosave (FR-10, AD-12). fetch is mocked; the
 // QueryClient is real, with plan queries observed so they count as active.
@@ -416,7 +417,7 @@ describe("ad12 retries and failures", () => {
     mockFetch(envelope(404, "plan_not_found", "Plan not found."));
     expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
     expect(h.effects.notify).toHaveBeenCalledWith(PLAN_DELETED);
-    expect(h.effects.navigate).toHaveBeenCalledWith(NEW_PLAN_HREF);
+    expect(h.effects.navigate).toHaveBeenCalledWith(SAVED_PLANS_HREF);
     expect(h.summaryFn).not.toHaveBeenCalled();
     expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: null, saved: false });
   });

@@ -14,7 +14,7 @@ import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
 import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
-import { parsePlanPath, planStepHref } from "@/lib/view-state/urls";
+import { parsePlanPath, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 function asStepKey(view: string): StepKey | undefined {
   return FLOW_STEPS.find((step) => step.key === view)?.key;
@@ -51,7 +51,7 @@ export function Toolbar() {
       data-surface="graphite"
       className="static z-40 flex min-h-toolbar-height flex-wrap items-center gap-x-6 gap-y-2 border-b border-shell-edge bg-louvre-shell px-page-gutter py-3 tall:sticky tall:top-0"
     >
-      <Link href="/" className="flex shrink-0 items-center gap-2 rounded-sm">
+      <Link href={SAVED_PLANS_HREF} className="flex shrink-0 items-center gap-2 rounded-sm">
         <ProductMark />
         <span className="font-code text-[15px] leading-none font-bold whitespace-nowrap text-white">
           Smart Warehouse Planner

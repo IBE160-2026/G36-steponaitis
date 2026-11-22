@@ -10,11 +10,13 @@ import { DropdownMenu } from "radix-ui";
 import { type KeyboardEvent, useId, useState } from "react";
 
 import { Icon } from "@/components/common/icons";
+import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "@/components/common/menu-styles";
 import { SAVED_TEXT } from "@/lib/commands/client";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { NEW_PLAN_HREF } from "@/lib/view-state/urls";
 
-export const PLAN_MENU = [{ label: "New Plan", href: "/plans/new" }] as const;
+export const PLAN_MENU = [{ label: "New Plan", href: NEW_PLAN_HREF }] as const;
 
 export type PlanPlateProps = {
   name: string;
@@ -32,9 +34,6 @@ export function plateMeta(dataAsOf: string, round: number): string {
 export function uploadedText(uploadedAt: string): string {
   return `Uploaded ${formatDate(uploadedAt)}`;
 }
-
-const MENU_FADE =
-  "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 duration-150";
 
 export function PlanPlate({ name, dataAsOf, uploadedAt, round, saved = false }: PlanPlateProps) {
   const tooltipId = useId();
@@ -65,13 +64,13 @@ export function PlanPlate({ name, dataAsOf, uploadedAt, round, saved = false }: 
             align="start"
             sideOffset={6}
             collisionPadding={16}
-            className={`z-50 min-w-40 rounded-lg border border-border bg-surface p-1 text-ink shadow-overlay ${MENU_FADE}`}
+            className={MENU_CONTENT_CLASS}
           >
             {PLAN_MENU.map((item) => (
               <DropdownMenu.Item key={item.href} asChild>
                 <Link
                   href={item.href}
-                  className="flex h-control-md items-center rounded px-2 type-button outline-none data-[highlighted]:bg-selected-tint"
+                  className={MENU_ITEM_CLASS}
                 >
                   {item.label}
                 </Link>
