@@ -1,0 +1,25 @@
+import { type FullConfig, request } from "@playwright/test";
+
+// Global setup: `next dev` compiles a route the first time it is requested, which can take longer
+// than an assertion's timeout under parallel workers. Requesting every app route once before the
+// tests start moves that compile out of the journeys, so a cross-route navigation (e.g. a location
+// chip from Parts to Locations) waits only on rendering, never on a cold compile.
+
+const PLAN = "00000000-0000-0000-0000-000000000000";
+// One built step per route file, plus "best-locations" for the `[step]` placeholder route.
+const PLAN_STEPS = ["overview", "parts", "locations", "pick-groups", "settings", "best-locations"];
+
+export default async function warmRoutes(config: FullConfig): Promise<void> {
+  const baseURL = config.projects[0]?.use.baseURL;
+  if (!baseURL) return;
+  const context = await request.newContext({ baseURL });
+  try {
+    const paths = ["/", "/plans/new", ...PLAN_STEPS.map((step) => `/plans/${PLAN}/${step}`)];
+    for (const path of paths) {
+      // A route only needs to compile; any status (e.g. 404 for an unbuilt step) will do.
+      await context.get(path, { timeout: 120_000, failOnStatusCode: false });
+    }
+  } finally {
+    await context.dispose();
+  }
+}

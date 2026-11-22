@@ -96,9 +96,9 @@ export function PickGroupsView({ view, onOpenPart }: { view: PickGroupsData; onO
   );
 }
 
-export function PickGroupsPage({ planId, params = {} }: { planId: string; params?: LocationParams }) {
+export function PickGroupsPage({ planId }: { planId: string; params?: LocationParams }) {
   const pickGroups = usePlanPickGroups(planId);
-  const panel = usePartPanel(planId, "pick-groups", params);
+  const panel = usePartPanel(planId, "pick-groups");
   if (pickGroups.data) {
     return (
       <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>

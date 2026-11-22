@@ -5,9 +5,13 @@
 // and the partners' aisles (AD-3); the panel only formats them. Opening moves focus to the heading;
 // `Esc` inside the panel or the close button closes it and returns focus to the opener. The open
 // part lives in the URL as `?part=` (through lib/view-state), handled by `usePartPanel` for every
-// page that shows the panel.
+// page that shows the panel. Opening and closing is pure client view state, so it goes through the
+// native History API (which Next.js integrates with `useSearchParams`): the URL changes at once and
+// the panel follows on the next client render, with no server render of the page. `useSearchParams`
+// renders on the server only because each page route awaits `searchParams` (dynamic rendering); a
+// static route would need a `<Suspense>` boundary around the page.
 
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef } from "react";
 
 import { CLASS_LABELS, ClassGlyph } from "@/components/common/class-glyph";
@@ -17,7 +21,7 @@ import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
 import { type ClassThreshold, type PartDetail, usePlanPart } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 import type { StepKey } from "@/lib/view-state/steps";
-import { type LocationParams, planStepHref } from "@/lib/view-state/urls";
+import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 
 export const NO_CURRENT_LOCATION = "No current location (no stock above zero)";
 export const NO_PICK_GROUPS = "No pick groups";
@@ -41,11 +45,13 @@ export function sharedJobsText(count: number): string {
   return `${formatNumber(count)} ${count === 1 ? "shared job" : "shared jobs"}`;
 }
 
-/** Records the opener, pushes `?part=` on open, and on close replaces the URL without it. */
-export function usePartPanel(planId: string, step: StepKey, params: LocationParams) {
-  const router = useRouter();
+/**
+ * Reads the open part from the URL's `?part=`, records the opener, pushes `?part=` on open, and on
+ * close replaces the URL without it (keeping `aisle`/`loc`).
+ */
+export function usePartPanel(planId: string, step: StepKey) {
   const opener = useRef<HTMLElement | null>(null);
-  const { part, ...rest } = params;
+  const { part, ...rest } = parseLocationParams(useSearchParams());
   const restKey = JSON.stringify(rest);
 
   const open = useCallback(
@@ -53,18 +59,18 @@ export function usePartPanel(planId: string, step: StepKey, params: LocationPara
       const active = typeof document === "undefined" ? null : document.activeElement;
       opener.current = from ?? (active instanceof HTMLElement ? active : null);
       const current = JSON.parse(restKey) as LocationParams;
-      router.push(planStepHref(planId, step, { ...current, part: next }), { scroll: false });
+      window.history.pushState(null, "", planStepHref(planId, step, { ...current, part: next }));
     },
-    [planId, step, restKey, router],
+    [planId, step, restKey],
   );
 
   const close = useCallback(() => {
     const current = JSON.parse(restKey) as LocationParams;
-    router.replace(planStepHref(planId, step, current), { scroll: false });
+    window.history.replaceState(null, "", planStepHref(planId, step, current));
     const element = opener.current;
     opener.current = null;
     if (element && element.isConnected) element.focus();
-  }, [planId, step, restKey, router]);
+  }, [planId, step, restKey]);
 
   return { part, open, close };
 }

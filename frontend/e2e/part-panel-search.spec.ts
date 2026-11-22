@@ -58,6 +58,12 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await expect(results.getByRole("heading", { name: "Locations" })).toBeVisible();
   const partButton = results.locator(`[data-search-part="${firstPart}"]`);
   await expect(partButton).toBeVisible();
+  // Opening the panel is client view state: it never waits on a server render of the page.
+  const pageRenders: string[] = [];
+  const onRequest = (req: { url(): string }) => {
+    if (req.url().includes("_rsc=") && req.url().includes(`/plans/${planId}/parts`)) pageRenders.push(req.url());
+  };
+  page.on("request", onRequest);
   await partButton.click();
 
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/parts\\?part=${encodeURIComponent(firstPart)}$`));
@@ -77,6 +83,8 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await expect(panel).toHaveCount(0);
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/parts$`));
   await expect(field).toBeFocused();
+  page.off("request", onRequest);
+  expect(pageRenders).toEqual([]);
 
   // Esc clears the field, then blurs it.
   await page.keyboard.press("Escape");
@@ -126,7 +134,12 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   // closed with Esc back to the search field.
   await locField.fill("oil filter");
   await page.locator(`[data-search-part="${firstPart}"]`).click();
-  await expect(page).toHaveURL(new RegExp(`[?&]part=${encodeURIComponent(firstPart)}(&|$)`));
+  // Opening keeps the view state already in the URL.
+  await expect(page).toHaveURL(
+    new RegExp(
+      `/plans/${planId}/locations\\?aisle=${target.aisle}&loc=${encodeURIComponent(target.code)}&part=${encodeURIComponent(firstPart)}$`,
+    ),
+  );
   const locPanel = page.getByRole("complementary", { name: firstPart });
   await expect(locPanel).toBeVisible();
   const otherAisle = (await (await request.get(`/api/plans/${planId}/locations`)).json()) as {
@@ -139,7 +152,7 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await locPanel.getByRole("heading", { name: firstPart, level: 2 }).focus();
   await page.keyboard.press("Escape");
   await expect(locPanel).toHaveCount(0);
-  await expect(page).not.toHaveURL(/part=/);
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=${nextAisle}$`));
   await expect(locField).toBeFocused();
 });
 
@@ -169,4 +182,20 @@ test("uj6 opens a pick-group part's panel", async ({ page, request }) => {
   await panel.getByRole("button", { name: "Close part panel" }).click();
   await expect(panel).toHaveCount(0);
   await expect(opener).toBeFocused();
+
+  // Browser Back closes a panel opened in the page, without reloading it.
+  await page.evaluate(() => Object.assign(window, { __samePage: true }));
+  await opener.click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/pick-groups\\?part=${encodeURIComponent(part)}$`));
+  await expect(panel).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/pick-groups$`));
+  await expect(panel).toHaveCount(0);
+  expect(await page.evaluate(() => (window as { __samePage?: boolean }).__samePage)).toBe(true);
+
+  // A direct load of `?part=` shows the panel.
+  await page.goto(`/plans/${planId}/pick-groups?part=${encodeURIComponent(part)}`);
+  await main.getByRole("table", { name: "Pick groups" }).waitFor();
+  await expect(panel.getByRole("heading", { name: part, level: 2 })).toBeVisible();
+  await expect(panel.locator("[data-partner]")).toHaveCount(detail.pick_groups.length);
 });

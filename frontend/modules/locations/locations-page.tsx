@@ -7,7 +7,7 @@
 // the row (UX-DR9, through lib/view-state). The header's search field opens a part's panel
 // (`?part=`, UX-DR24) or another location.
 
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { type ReactNode, useId, useState } from "react";
 
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
@@ -17,7 +17,7 @@ import { SearchField } from "@/components/common/search-field";
 import { type LocationRow, type LocationsView as LocationsData, type Occupancy, usePlanLocations } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { type LocationParams, planStepHref } from "@/lib/view-state/urls";
+import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 
 export type OccupancyFilter = "all" | "occupied" | "empty";
 export type BestFilter = "all" | "best" | "not-best";
@@ -242,10 +242,12 @@ export function LocationsView({
   );
 }
 
-export function LocationsPage({ planId, params = {} }: { planId: string; params?: LocationParams }) {
-  const router = useRouter();
+export function LocationsPage({ planId }: { planId: string; params?: LocationParams }) {
+  // The URL is the one source of the view state: `?aisle=&loc=` and the panel's `?part=` are read
+  // from it here, and the aisle filter changes it without a server render, like the panel does.
+  const params = parseLocationParams(useSearchParams());
   const locations = usePlanLocations(planId);
-  const panel = usePartPanel(planId, "locations", params);
+  const panel = usePartPanel(planId, "locations");
   if (locations.data) {
     return (
       <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
@@ -254,7 +256,7 @@ export function LocationsPage({ planId, params = {} }: { planId: string; params?
           params={params}
           search={<SearchField planId={planId} onOpenPart={panel.open} />}
           onAisleChange={(aisle) =>
-            router.replace(planStepHref(planId, "locations", { aisle, part: params.part }), { scroll: false })
+            window.history.replaceState(null, "", planStepHref(planId, "locations", { aisle, part: panel.part }))
           }
         />
       </WithPartPanel>

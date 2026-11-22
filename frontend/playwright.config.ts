@@ -6,6 +6,8 @@ const repoRoot = join(__dirname, "..");
 
 export default defineConfig({
   testDir: "./e2e",
+  // Runs after the web server is up: compiles every route once so no journey waits on a cold compile.
+  globalSetup: "./e2e/support/warm-routes.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

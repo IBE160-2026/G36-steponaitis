@@ -200,9 +200,9 @@ export function PartsView({
   );
 }
 
-export function PartsPage({ planId, params = {} }: { planId: string; params?: LocationParams }) {
+export function PartsPage({ planId }: { planId: string; params?: LocationParams }) {
   const parts = usePlanParts(planId);
-  const panel = usePartPanel(planId, "parts", params);
+  const panel = usePartPanel(planId, "parts");
   if (parts.data) {
     return (
       <WithPartPanel planId={planId} part={panel.part} onClose={panel.close}>
