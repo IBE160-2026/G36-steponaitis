@@ -5,16 +5,22 @@ from typing import Any
 import pytest
 
 from swp.domain.analysis import Analysis
-from swp.domain.before_after import BeforeAfter, Count, build_before_after
+from swp.domain.before_after import (
+    BeforeAfter,
+    Count,
+    build_before_after,
+    build_before_after_view,
+)
 from swp.domain.import_data import ImportData
 from swp.domain.planning import (
     PlanningCopy,
     current_location,
     import_copy,
+    is_empty,
     listed_parts,
     replay,
 )
-from swp.domain.state import AisleMark, BestMark, Rule, Step
+from swp.domain.state import AisleMark, BestMark, PlanState, Rule, Step
 from tests.domain.answer_key import answer_key_import, expected
 from tests.domain.test_pick_groups_view import _analysis
 
@@ -201,3 +207,37 @@ def test_fr37_aisles_in_text_order_and_totals_are_sums(
         size = sum(1 for loc in data.locations.values() if loc.aisle == row.aisle)
         assert row.occupied.before + row.empty.before == size
         assert row.occupied.after + row.empty.after == size
+
+
+def test_fr37_view_has_moves_and_version(data: ImportData, analysis: Analysis) -> None:
+    key = expected()
+    marks: list[BestMark] = [AisleMark.model_validate(m) for m in key["best_location_marks"]]
+    moved = PlanState(steps=_steps(key["move_list"]["lines_in_order"]), best_marks=marks)
+
+    view = build_before_after_view(data, analysis, moved, 7)
+
+    assert view.version == 7
+    assert view.has_moves is True
+    counts = build_before_after(data, replay(data, moved.steps).copy, analysis, marks)
+    assert view.aisles == counts.aisles and view.total == counts.total
+    assert view.total.fast_in_best == Count(before=1, after=5)
+
+    fresh = build_before_after_view(data, analysis, PlanState.new(), 1)
+
+    assert fresh.version == 1
+    assert fresh.has_moves is False
+
+    before = import_copy(data)
+    target = next(
+        code for code in sorted(data.locations) if code[0] == "A" and is_empty(before, code)
+    )
+    there_and_back = PlanState(
+        steps=_manual([("1200", "B-01-01-02", target), ("1200", target, "B-01-01-02")])
+    )
+
+    back = build_before_after_view(data, analysis, there_and_back, 3)
+
+    assert back.has_moves is False
+    for row in back.aisles:
+        assert row.moved_in == [] and row.moved_out == []
+        assert row.occupied.before == row.occupied.after

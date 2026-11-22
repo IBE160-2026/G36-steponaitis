@@ -16,6 +16,7 @@ const PLAN_STEPS = [
   "pick-groups",
   "best-locations",
   "settings",
+  "before-after",
   "recommendations",
 ];
 

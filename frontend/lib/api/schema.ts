@@ -56,6 +56,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/before-after": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Before After */
+        get: operations["get_plan_before_after_api_plans__plan_id__before_after_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/commands": {
         parameters: {
             query?: never;
@@ -207,6 +224,19 @@ export interface components {
              */
             kind: "adds_to_stock";
         };
+        /** AisleBeforeAfter */
+        AisleBeforeAfter: {
+            /** Aisle */
+            aisle: string;
+            empty: components["schemas"]["Count"];
+            fast_in_best: components["schemas"]["Count"];
+            /** Moved In */
+            moved_in: string[];
+            /** Moved Out */
+            moved_out: string[];
+            occupied: components["schemas"]["Count"];
+            pick_groups_together: components["schemas"]["Count"];
+        };
         /** AisleMark */
         AisleMark: {
             /** Aisle */
@@ -245,6 +275,23 @@ export interface components {
             pick_group_min_shared_jobs: number;
             /** Slow Min Picks */
             slow_min_picks: number;
+        };
+        /** BeforeAfterTotal */
+        BeforeAfterTotal: {
+            empty: components["schemas"]["Count"];
+            fast_in_best: components["schemas"]["Count"];
+            occupied: components["schemas"]["Count"];
+            pick_groups_together: components["schemas"]["Count"];
+        };
+        /** BeforeAfterView */
+        BeforeAfterView: {
+            /** Aisles */
+            aisles: components["schemas"]["AisleBeforeAfter"][];
+            /** Has Moves */
+            has_moves: boolean;
+            total: components["schemas"]["BeforeAfterTotal"];
+            /** Version */
+            version: number;
         };
         /** Body_create_plan_api_plans_post */
         Body_create_plan_api_plans_post: {
@@ -303,6 +350,13 @@ export interface components {
             events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"])[];
             /** Version */
             version: number;
+        };
+        /** Count */
+        Count: {
+            /** After */
+            after: number;
+            /** Before */
+            before: number;
         };
         /**
          * CreatedPlan
@@ -1016,6 +1070,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanSummary"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_before_after_api_plans__plan_id__before_after_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BeforeAfterView"];
                 };
             };
             /** @description Error */

@@ -9,6 +9,7 @@ from swp.api.errors import install_error_handlers
 from swp.api.origin_guard import OriginGuard
 from swp.api.request_log import RequestLog, configure_logging
 from swp.api.routers import (
+    before_after,
     commands,
     health,
     locations,
@@ -48,5 +49,6 @@ def create_app() -> FastAPI:
     app.include_router(pick_groups.router, prefix="/api")
     app.include_router(search.router, prefix="/api")
     app.include_router(moves.router, prefix="/api")
+    app.include_router(before_after.router, prefix="/api")
     app.include_router(session.router, prefix="/api")
     return app

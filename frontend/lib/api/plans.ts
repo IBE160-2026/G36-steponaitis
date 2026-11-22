@@ -2,8 +2,8 @@
 
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
 // used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
-// pick groups table (Story 2.5), the part detail and search (Story 2.6), and the manual move
-// preview (Story 4.3). All are GETs and never change the plan (FR-9).
+// pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
+// preview (Story 4.3) and before/after (Story 4.6). All are GETs and never change the plan (FR-9).
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -45,6 +45,10 @@ export type MovePreview = components["schemas"]["MovePreview"];
 /** What the previewed move does: `new`, `adds_to_stock`, `combines_with(n)` or `removes_move(n)`. */
 export type MoveEffect = NonNullable<MovePreview["effect"]>;
 export type TargetPart = components["schemas"]["TargetPart"];
+/** Before/after per aisle and in total (FR-37); every count and list comes from the server. */
+export type BeforeAfterView = components["schemas"]["BeforeAfterView"];
+export type AisleBeforeAfter = components["schemas"]["AisleBeforeAfter"];
+export type BeforeAfterCount = components["schemas"]["Count"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -67,6 +71,10 @@ export function planLocationsKey(planId: string) {
 
 export function planPickGroupsKey(planId: string) {
   return [...planRootKey(planId), "pick-groups"] as const;
+}
+
+export function planBeforeAfterKey(planId: string) {
+  return [...planRootKey(planId), "before-after"] as const;
 }
 
 export function planPartKey(planId: string, part: string) {
@@ -122,6 +130,15 @@ export function fetchPlanPickGroups(planId: string): Promise<PickGroupsView> {
 
 export function usePlanPickGroups(planId: string) {
   return useQuery({ queryKey: planPickGroupsKey(planId), queryFn: () => fetchPlanPickGroups(planId) });
+}
+
+export function fetchPlanBeforeAfter(planId: string): Promise<BeforeAfterView> {
+  return getJson<BeforeAfterView>(`/api/plans/${encodeURIComponent(planId)}/before-after`);
+}
+
+/** Under `['plan', planId]`, so a confirmed command refetches it. */
+export function usePlanBeforeAfter(planId: string) {
+  return useQuery({ queryKey: planBeforeAfterKey(planId), queryFn: () => fetchPlanBeforeAfter(planId) });
 }
 
 export function fetchPlanPart(planId: string, part: string): Promise<PartDetail> {

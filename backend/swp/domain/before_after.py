@@ -1,7 +1,8 @@
 """Before/after counts per aisle and for the whole warehouse (FR-37, AD-3, AD-14).
 
-Pure: compares the import ("before", via `planning.import_copy`) with the planning copy
-("after") the caller has already replayed, so the slice never folds the step log itself.
+Pure: `build_before_after` compares the import ("before", via `planning.import_copy`) with
+a planning copy ("after") the caller has already replayed. `build_before_after_view` is the
+view behind GET /api/plans/{id}/before-after: one `replay` per request, it never writes.
 Both sides use the current best-location marks; classes and pick groups come from
 `analysis` and are never recomputed.
 """
@@ -22,8 +23,9 @@ from swp.domain.planning import (
     is_best,
     is_occupied,
     listed_parts,
+    replay,
 )
-from swp.domain.state import BestMark
+from swp.domain.state import BestMark, PlanState
 
 
 class Count(BaseModel):
@@ -140,4 +142,26 @@ def build_before_after(
             occupied=total("occupied"),
             empty=total("empty"),
         ),
+    )
+
+
+class BeforeAfterView(BaseModel):
+    version: int
+    has_moves: bool
+    aisles: list[AisleBeforeAfter]
+    total: BeforeAfterTotal
+
+
+def build_before_after_view(
+    data: ImportData, analysis: Analysis, state: PlanState, version: int
+) -> BeforeAfterView:
+    """The plan's before/after as it is now. `has_moves` is whether any effective move is
+    left after replay (a move undone by moving back counts as none)."""
+    result = replay(data, state.steps)
+    counts = build_before_after(data, result.copy, analysis, state.best_marks)
+    return BeforeAfterView(
+        version=version,
+        has_moves=len(result.moves) > 0,
+        aisles=counts.aisles,
+        total=counts.total,
     )
