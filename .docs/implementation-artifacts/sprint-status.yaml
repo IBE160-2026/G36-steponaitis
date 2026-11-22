@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 18:19
+last_updated: 11-22-2026 18:31
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -80,7 +80,7 @@ development_status:
   5-6-apply-all: done
   5-7-recommendations-page: done
   5-8-milestone-1-gate: done
-  epic-5-retrospective: optional
+  epic-5-retrospective: done
 
   epic-6: backlog
   6-1-saved-plans-list-as-the-start-page: backlog
@@ -427,3 +427,80 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-39-make-rule-3-consider-fast-parts-that-rul"
+    epic: 5
+    action: "Make rule 3 consider fast parts that rule 1 listed as no space only because
+      no best location exists, so Rule 3 runs without them holds; add a best_marks=[]
+      answer-key test (R2, L5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-40-decide-whether-an-applied-recommendation"
+    epic: 5
+    action: "Decide whether an applied recommendation whose part is moved on in the
+      same round (FR-34 combine) stays applied or becomes outdated moved; record in
+      AD-7 and pin with a view test (R1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-41-change-the-apply-all-confirm-question-so"
+    epic: 5
+    action: "Change the Apply all confirm question so it does not promise undo before
+      FR-35 ships (Story 5.7 AC, lib/copy/index.ts:156) (R3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-42-fix-recommendations-page-edge-paths-newl"
+    epic: 5
+    action: "Fix recommendations-page edge paths: newly-skipped count in Apply all
+      toast, toast on no-op Apply all, one message for a rejected run, focus after
+      empty run, moved-back re-apply as outdated, stored status consistency (R7, R9)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-43-make-the-answer-key-gate-helpers-run-app"
+    epic: 5
+    action: "Make the answer-key gate helpers run apply-then-revalidate and assert
+      outdated statuses and recommendations_outdated events before Story 7.5 un-skips
+      step 15 (R8)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-44-decide-fr-26-partner-moving-in-the-same"
+    epic: 5
+    action: "Decide FR-26 partner moving in the same run, whether apply_all carries
+      the confirmed run_id, and record the kept skip cause and no-op Apply all in
+      AD-7 (R4, R6, A6)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-45-tie-_marks_fail-to-the-rule-selection-co"
+    epic: 5
+    action: "Tie _marks_fail to the rule selection conditions with shared predicates
+      and replace the four inline slow/dead class sets with one kernel constant (A4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-46-split-planning-py-move-check-recommendat"
+    epic: 5
+    action: "Split planning.py move check, recommendations.py commands vs views, and
+      recommendations-page.tsx components and strings into lib/copy; merge duplicated
+      test helpers (A2, A3, A5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-47-update-agents-md-for-the-three-browser-l"
+    epic: 5
+    action: "Update AGENTS.md for the three-browser local gate, e2e:reset-db and ruff
+      format --check, and tick closed items in .logs/justas/issues.md (A6, P4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
+  - id: "epic-5-retro-item-48-run-the-five-outstanding-follow-up-revie"
+    epic: 5
+    action: "Run the five outstanding follow-up reviews (4.1, 4.4, 5.1, 5.7, 5.8)
+      and add runbook rules: act on followup_review_recommended, name closed retro
+      items in commits, forbid build subagents committing session logs (P1-P3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
