@@ -138,3 +138,5 @@
 - [ ] 2026-11-22 [7-3-undo-the-last-move](929-2026-11-22-23-12-12-7-3-undo-the-last-move.md) — Undo-meldingen i en flytte-toast nevner flyttets runde, ikke en ny kjøring som skjedde mens toasten ble vist (Story 7.3)
 - [ ] 2026-11-22 [7-3-undo-the-last-move](929-2026-11-22-23-12-12-7-3-undo-the-last-move.md) — Undo-knappen viser «No moves to undo» mens plansammendraget lastes (Story 7.3)
 - [ ] 2026-11-22 [7-3-undo-the-last-move](929-2026-11-22-23-12-12-7-3-undo-the-last-move.md) — Undo av kombinert flytt og av flytt tilbake er bare testet i domenet og i Vitest, ikke i e2e (Story 7.3)
+- [ ] 2026-11-22 [7-4-reset-the-planning-copy](928-2026-11-22-23-40-05-7-4-reset-the-planning-copy.md) — bekreft hvordan reset teller flytt: «N moves» teller flytt slik planleggeren ser dem, ikke rå steg (Story 7.4)
+- [ ] 2026-11-22 [7-4-reset-the-planning-copy](928-2026-11-22-23-40-05-7-4-reset-the-planning-copy.md) — bekreft at reset av en plan uten noe å tilbakestille ikke gir noen `plan_reset`-hendelse og ingen ny versjon, selv om akseptkriteriet nevner hendelsen (Story 7.4)
