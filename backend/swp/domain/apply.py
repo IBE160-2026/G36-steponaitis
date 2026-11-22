@@ -17,6 +17,7 @@ from swp.domain.commands import (
     ManualMove,
     RemoveBestMark,
     RemoveKeep,
+    Reset,
     RunRecommendations,
     SetBestMark,
     SetKeep,
@@ -106,5 +107,7 @@ def _dispatch(
             return keep.remove_keep(state, command, ctx, data, analysis)
         case Undo():
             return history.undo(state, command, ctx, data, analysis)
+        case Reset():
+            return history.reset(state, command, ctx, data, analysis)
         case _:
             assert_never(command)

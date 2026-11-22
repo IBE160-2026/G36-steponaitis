@@ -115,6 +115,7 @@ def test_fr10_command_union_is_closed() -> None:
         "set_keep",
         "remove_keep",
         "undo",
+        "reset",
     }
     assert event_types == {
         "mark_set",
@@ -128,6 +129,7 @@ def test_fr10_command_union_is_closed() -> None:
         "keep_set",
         "keep_removed",
         "step_undone",
+        "plan_reset",
     }
     with pytest.raises(ValidationError):
         TypeAdapter(Command).validate_python(

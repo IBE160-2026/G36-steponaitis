@@ -113,6 +113,14 @@ class Undo(BaseModel):
     expected_move_number: int = Field(ge=1)
 
 
+class Reset(BaseModel):
+    """Delete every step and run and restart move numbering; marks stay (FR-35, AD-5)."""
+
+    type: Literal["reset"] = "reset"
+    command_id: uuid.UUID
+    base_version: int
+
+
 Command = Annotated[
     SetBestMark
     | RemoveBestMark
@@ -123,7 +131,8 @@ Command = Annotated[
     | ApplyAll
     | SetKeep
     | RemoveKeep
-    | Undo,
+    | Undo
+    | Reset,
     Field(discriminator="type"),
 ]
 """Every command a plan accepts (closed union)."""
@@ -191,6 +200,13 @@ class StepUndone(BaseModel):
     undone: UndoPreview
 
 
+class PlanReset(BaseModel):
+    """The plan was reset; `moves_removed` effective moves were deleted (FR-35, AD-5)."""
+
+    type: Literal["plan_reset"] = "plan_reset"
+    moves_removed: int
+
+
 class RunDone(BaseModel):
     """A run made round `round` with this many recommendations and "no space" entries."""
 
@@ -234,7 +250,8 @@ Event = Annotated[
     | ApplyAllDone
     | KeepSet
     | KeepRemoved
-    | StepUndone,
+    | StepUndone
+    | PlanReset,
     Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""

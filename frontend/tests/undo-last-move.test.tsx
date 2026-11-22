@@ -163,7 +163,7 @@ function context(preview: UndoPreview | null, fields: Partial<LauncherContext> =
 
 describe("fr35 launcher undo last move", () => {
   it("uxdr38_launcher_action_registered_in_recommendations", () => {
-    expect(LAUNCHER_ACTIONS.at(-1)).toBe(UNDO_LAST_MOVE_ACTION);
+    expect(LAUNCHER_ACTIONS).toContain(UNDO_LAST_MOVE_ACTION);
     expect(UNDO_LAST_MOVE_ACTION.column).toBe("recommendations");
     expect(UNDO_LAST_MOVE_ACTION.keywords).toEqual(["undo last move"]);
   });

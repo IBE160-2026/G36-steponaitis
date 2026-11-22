@@ -6,7 +6,7 @@ import { Button } from "@/components/common/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import type { CommandEvent, PlanSummary } from "@/lib/api/plans";
 import { SAVING_REASON, type SendResult } from "@/lib/commands";
-import { applyAllQuestion, NO_OPEN_TO_APPLY } from "@/lib/copy";
+import { applyAllQuestion, NO_OPEN_TO_APPLY, resetQuestion } from "@/lib/copy";
 import {
   BAND_ENTRIES,
   isLauncherShortcut,
@@ -18,6 +18,7 @@ import {
   type LauncherContext,
   launcherResults,
   NO_MATCH,
+  RESET_ACTION,
   SEARCH_PLACEHOLDER,
   STAGE2_PLATES,
   STEP_CODES,
@@ -42,6 +43,7 @@ function summary(fields: Partial<PlanSummary> = {}): PlanSummary {
     apply_all_count: 4,
     best_locations: 120,
     empty_best_locations: 9,
+    move_count: 0,
     undo_preview: null,
     class_counts: { fast: 312, medium: 400, slow: 500, dead: 333 },
     steps: [
@@ -260,6 +262,43 @@ describe("ux_dr7 registered actions", () => {
     expect(ctx.send).toHaveBeenCalledWith({ type: "apply_all" });
     expect(ctx.notify).toHaveBeenCalledWith("Applied 2 recommendations from round 1.");
   });
+
+  it("fr35_uxdr38_reset_label_confirm_and_saving_reason", () => {
+    expect(LAUNCHER_ACTIONS.map((action) => action.id)).toEqual([
+      "run-recommendations",
+      "apply-all",
+      "undo-last-move",
+      "reset",
+    ]);
+    expect(LAUNCHER_ACTIONS.at(-1)).toBe(RESET_ACTION);
+    expect(RESET_ACTION.id).toBe("reset");
+    expect(RESET_ACTION.column).toBe("recommendations");
+    expect(RESET_ACTION.label(context())).toBe("Reset…");
+    expect(RESET_ACTION.keywords).toEqual(["reset plan"]);
+    expect(RESET_ACTION.disabledReason?.(context())).toBeUndefined();
+    expect(RESET_ACTION.disabledReason?.(context({ savingReason: SAVING_REASON }))).toBe(SAVING_REASON);
+    expect(RESET_ACTION.confirm?.(context({ summary: summary({ move_count: 18 }) }))).toEqual({
+      title: "Reset plan",
+      description: resetQuestion(18),
+      confirmLabel: "Reset plan",
+      destructive: true,
+    });
+  });
+
+  it("fr35_uxdr38_reset_navigates_sends_and_toasts", async () => {
+    const event = { type: "plan_reset", moves_removed: 2 } as CommandEvent;
+    const ctx = context({ send: vi.fn(async (): Promise<SendResult> => ({ outcome: "confirmed", events: [event] })) });
+    await RESET_ACTION.run(ctx);
+    expect(ctx.navigate).toHaveBeenCalledWith(planStepHref(PLAN, "recommendations"));
+    expect(ctx.send).toHaveBeenCalledWith({ type: "reset" });
+    expect(ctx.notify).toHaveBeenCalledWith("Plan reset. 2 moves removed; marks kept. The next run is round 1.");
+  });
+
+  it("fr35_uxdr38_reset_noop_toasts_0_moves", async () => {
+    const ctx = context();
+    await RESET_ACTION.run(ctx);
+    expect(ctx.notify).toHaveBeenCalledWith("Plan reset. 0 moves removed; marks kept. The next run is round 1.");
+  });
 });
 
 describe("uj8 launcher drawer", () => {
@@ -273,6 +312,7 @@ describe("uj8 launcher drawer", () => {
     const rec = column(markup, "Recommendations");
     expect(text(rec)).toContain("Run round 2");
     expect(text(rec)).toContain("Apply all (4)…");
+    expect(text(rec)).toContain("Reset…");
     expect(text(column(markup, "Move list"))).toContain("Output");
     const stage2 = column(markup, "Stage 2");
     expect(stage2).toContain('aria-disabled="true"');

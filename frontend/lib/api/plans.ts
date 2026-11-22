@@ -76,6 +76,8 @@ export type OtherLocationsView = components["schemas"]["OtherLocationsView"];
 export type UndoPreview = components["schemas"]["UndoPreview"];
 /** `step_undone{undone}`: the last step was undone; `undone` is the undo preview it had (FR-35). */
 export type StepUndoneEvent = components["schemas"]["StepUndone"];
+/** `plan_reset{moves_removed}`: every step and run was deleted; marks stayed (FR-35). */
+export type PlanResetEvent = components["schemas"]["PlanReset"];
 
 export const PLANS_KEY = ["plans"] as const;
 

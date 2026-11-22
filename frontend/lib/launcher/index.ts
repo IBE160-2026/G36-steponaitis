@@ -6,11 +6,16 @@
 
 import type { CommandEvent, PlanSummary } from "@/lib/api/plans";
 import type { CommandBody, SendResult } from "@/lib/commands/client";
+import { sendReset } from "@/lib/commands/reset";
 import { sendUndo, undoReason } from "@/lib/commands/undo";
 import {
   applyAllQuestion,
   applyAllToast,
   NO_OPEN_TO_APPLY,
+  RESET_CONFIRM,
+  RESET_ITEM,
+  RESET_TITLE,
+  resetQuestion,
   runAnnouncement,
   UNDO_LAST_MOVE,
   undoLabel,
@@ -136,8 +141,32 @@ export const UNDO_LAST_MOVE_ACTION: LauncherAction = {
   },
 };
 
+/** Reset… (FR-35, UX-DR38): delete every move and run after a destructive confirm; marks stay. */
+export const RESET_ACTION: LauncherAction = {
+  id: "reset",
+  column: "recommendations",
+  label: () => RESET_ITEM,
+  keywords: ["reset plan"],
+  disabledReason: (ctx) => ctx.savingReason,
+  confirm: (ctx) => ({
+    title: RESET_TITLE,
+    description: resetQuestion(ctx.summary.move_count),
+    confirmLabel: RESET_CONFIRM,
+    destructive: true,
+  }),
+  async run(ctx) {
+    ctx.navigate(planStepHref(ctx.planId, "recommendations"));
+    await sendReset(ctx.send, ctx.notify);
+  },
+};
+
 /** The registered actions, in list order. Append here to add one; the launcher needs no change. */
-export const LAUNCHER_ACTIONS: readonly LauncherAction[] = [RUN_RECOMMENDATIONS, APPLY_ALL, UNDO_LAST_MOVE_ACTION];
+export const LAUNCHER_ACTIONS: readonly LauncherAction[] = [
+  RUN_RECOMMENDATIONS,
+  APPLY_ALL,
+  UNDO_LAST_MOVE_ACTION,
+  RESET_ACTION,
+];
 
 /** A plan-level entry of the band (SAV, NEW, SET). */
 export type BandEntry = {

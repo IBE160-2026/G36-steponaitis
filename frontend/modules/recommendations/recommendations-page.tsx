@@ -3,7 +3,8 @@
 // Recommendations step (FR-23–FR-30, UX-DR8, UX-DR13, UX-DR31–35, UX-DR57, Story 5.7): run the
 // rules, read the rows per state tab under their rule bands, apply one or all, and keep a part in
 // place (Story 7.1, FR-32: the shared Keep in place link and `Alt+K`), and apply one to another
-// allowed location (Story 7.2, FR-31: Other location ▾ and `Alt+O`). Everything shown
+// allowed location (Story 7.2, FR-31: Other location ▾ and `Alt+O`), and reset the planning copy
+// (Story 7.4, FR-35: the "⋯" menu's Reset…, in reset-plan.tsx). Everything shown
 // comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
 // version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
 // command goes through lib/commands; a 409 is the command client's (server message + refetch).
@@ -40,6 +41,7 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import { sendReset } from "@/lib/commands/reset";
 import { moveUndoAction } from "@/lib/commands/undo";
 import {
   appliedText,
@@ -87,6 +89,7 @@ import {
   tabName,
 } from "./list";
 import { OtherLocationAction, type OtherLocationActionProps } from "./other-location";
+import { ResetPlanMenu } from "./reset-plan";
 
 export const RUN_LABEL = "Run recommendations";
 export const RUNNING_LABEL = "Running…";
@@ -671,6 +674,15 @@ export function RecommendationsView({
     if (done) notify(applyAllToast(done, round));
   }
 
+  async function reset() {
+    const result = await sendReset(onSend, notify);
+    if (result.outcome !== "confirmed") return;
+    setFailedRound(null);
+    setChosenId(undefined);
+    setExpanded(new Set());
+    onTabChange("open");
+  }
+
   function onRegionKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     // React portal events (the ManualMoveDialog) bubble here too; only keys from this region count.
     if (!event.currentTarget.contains(event.target as Node)) return;
@@ -742,6 +754,7 @@ export function RecommendationsView({
             savingReason={savingReason}
             onConfirm={() => void applyAll()}
           />
+          <ResetPlanMenu moveCount={summary.move_count} savingReason={savingReason} onConfirm={() => void reset()} />
         </div>
       </div>
       <p role="status" aria-live="polite" className="sr-only">

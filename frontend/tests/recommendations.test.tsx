@@ -101,7 +101,7 @@ function view(
 }
 
 function summary(fields: Partial<PlanSummary> = {}): PlanSummary {
-  return { version: 5, current_round: 1, apply_all_count: 3, best_locations: 12, undo_preview: null, ...fields } as PlanSummary;
+  return { version: 5, current_round: 1, apply_all_count: 3, best_locations: 12, move_count: 0, undo_preview: null, ...fields } as PlanSummary;
 }
 
 function render(

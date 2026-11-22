@@ -43,6 +43,7 @@ def _summary(state: PlanState | None = None, **analysis_fields: object) -> PlanS
         state=state,
         copy=(replayed := replay(answer_key_import().data, state.steps)).copy,
         last_step=replayed.last,
+        move_count=len(replayed.moves),
         location_count=2_000,
         part_count=350,
     )
@@ -63,6 +64,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
     assert body["empty_best_locations"] == 0
     assert body["apply_all_count"] == 0
     assert body["kept_in_place"] == 0
+    assert body["move_count"] == 0
     assert body["undo_preview"] is None
     assert set(body) == {
         "id",
@@ -84,6 +86,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
         "empty_best_locations",
         "apply_all_count",
         "kept_in_place",
+        "move_count",
         "undo_preview",
         "steps",
     }

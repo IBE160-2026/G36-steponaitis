@@ -306,6 +306,7 @@ def test_fr21_marks_never_change_the_import(marks: list[dict[str, str]]) -> None
         state=state,
         copy=copy,
         last_step=None,
+        move_count=0,
         location_count=len(data.locations),
         part_count=len(data.parts),
     )

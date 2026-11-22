@@ -304,3 +304,31 @@ export function undoneToast(event: StepUndoneEvent, outdatedCount: number, round
   if (outdatedCount <= 0) return first;
   return `${first} Unapplied recommendations of round ${formatNumber(round)} are now outdated. Run recommendations to continue.`;
 }
+
+// Reset the planning copy (Story 7.4, FR-35, UX-DR38): the "⋯" menu, the launcher action, the
+// confirm dialog and the toast. The move count is the server's `move_count` and `moves_removed`
+// (effective moves), never counted in the client (AD-3). A reset toast never offers Undo.
+
+/** The aria-label of the Recommendations header's "⋯" menu button. */
+export const MORE_ACTIONS = "More actions";
+/** The menu item and the launcher action. */
+export const RESET_ITEM = "Reset…";
+/** The confirm dialog's title. */
+export const RESET_TITLE = "Reset plan";
+/** The confirm dialog's destructive button. */
+export const RESET_CONFIRM = "Reset plan";
+
+/**
+ * The confirm question (UX-DR38): "Reset removes all 18 moves, the recommendations and the
+ * no-space parts. …", "Reset removes 1 move, …" or, with no moves, "Reset removes the
+ * recommendations and the no-space parts. …".
+ */
+export function resetQuestion(moveCount: number): string {
+  const moves = moveCount === 0 ? "" : moveCount === 1 ? "1 move, " : `all ${formatNumber(moveCount)} moves, `;
+  return `Reset removes ${moves}the recommendations and the no-space parts. Best-location marks and keep-in-place marks stay. The next run is round 1.`;
+}
+
+/** The toast after a reset: "Plan reset. 18 moves removed; marks kept. The next run is round 1." */
+export function resetToast(movesRemoved: number): string {
+  return `Plan reset. ${plural(movesRemoved, "move", "moves")} removed; marks kept. The next run is round 1.`;
+}

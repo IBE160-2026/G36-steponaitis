@@ -196,6 +196,7 @@ def summary(plan_id: uuid.UUID) -> PlanSummary:
         state=plan.state,
         copy=replayed.copy,
         last_step=replayed.last,
+        move_count=len(replayed.moves),
         location_count=len(plan.imported.data.locations),
         part_count=len(plan.imported.data.parts),
     )

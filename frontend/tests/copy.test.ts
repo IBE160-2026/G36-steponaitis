@@ -23,6 +23,12 @@ import {
   picksLine,
   reasonSegments,
   reasonText,
+  RESET_CONFIRM,
+  RESET_ITEM,
+  RESET_TITLE,
+  resetQuestion,
+  resetToast,
+  MORE_ACTIONS,
   runAnnouncement,
   runLine,
   sharedJobsText,
@@ -270,5 +276,26 @@ describe("fr35 undo copy", () => {
 
   it("fr35_outdated_text_for_undo", () => {
     expect(outdatedText("1200", outdated("undo"))).toBe("Outdated after undo.");
+  });
+});
+
+// Story 7.4 (FR-35, UX-DR38): the reset confirm and toast, worded from the server's move count.
+describe("fr35 reset copy", () => {
+  const tail = "the recommendations and the no-space parts. Best-location marks and keep-in-place marks stay. The next run is round 1.";
+
+  it("uxdr38_reset_labels", () => {
+    expect([RESET_ITEM, RESET_TITLE, RESET_CONFIRM, MORE_ACTIONS]).toEqual(["Reset…", "Reset plan", "Reset plan", "More actions"]);
+  });
+
+  it("uxdr38_reset_question_for_0_1_and_18_moves", () => {
+    expect(resetQuestion(18)).toBe(`Reset removes all 18 moves, ${tail}`);
+    expect(resetQuestion(1)).toBe(`Reset removes 1 move, ${tail}`);
+    expect(resetQuestion(0)).toBe(`Reset removes ${tail}`);
+  });
+
+  it("uxdr38_reset_toast_for_0_1_and_18_moves", () => {
+    expect(resetToast(18)).toBe("Plan reset. 18 moves removed; marks kept. The next run is round 1.");
+    expect(resetToast(1)).toBe("Plan reset. 1 move removed; marks kept. The next run is round 1.");
+    expect(resetToast(0)).toBe("Plan reset. 0 moves removed; marks kept. The next run is round 1.");
   });
 });

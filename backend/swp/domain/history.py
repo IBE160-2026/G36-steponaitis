@@ -1,10 +1,13 @@
-"""Slice: undo the last move (FR-35, AD-5); Story 7.4 adds reset here.
+"""Slice: undo the last move and reset the planning copy (FR-35, AD-5).
 
 The step log is the only truth: undo drops the last step and every view replays the rest.
 Runs, best marks, keep marks and `next_move_number` never change, so move numbers are
 never reused. `revalidate` cannot tell that a step was removed, so undo stores
 `outdated(undo)` itself on every open recommendation of the latest run and on the undone
 step's recommendation.
+
+Reset deletes every step and run and restarts move numbering at 1; best marks, keep marks
+and `recent_commands` stay, so idempotency still works and the import never changes.
 """
 
 from swp.domain.analysis import Analysis
@@ -12,7 +15,9 @@ from swp.domain.commands import (
     Applied,
     CommandContext,
     Event,
+    PlanReset,
     RecommendationsOutdated,
+    Reset,
     StepUndone,
     Undo,
 )
@@ -79,3 +84,19 @@ def undo(
     if count:
         events.append(RecommendationsOutdated(count=count, cause="undo"))
     return Applied(state=after.model_copy(update={"runs": runs}), events=events)
+
+
+def reset(
+    state: PlanState,
+    _command: Reset,
+    _ctx: CommandContext,
+    data: ImportData,
+    _analysis: Analysis,
+) -> Applied:
+    """Delete every step and run and set `next_move_number` to 1; a no-op (no events) when
+    there is nothing to reset. `moves_removed` counts effective moves, not raw steps."""
+    if not state.steps and not state.runs and state.next_move_number == 1:
+        return Applied(state=state)
+    moves_removed = len(replay(data, state.steps).moves)
+    after = state.model_copy(update={"steps": [], "runs": [], "next_move_number": 1})
+    return Applied(state=after, events=[PlanReset(moves_removed=moves_removed)])

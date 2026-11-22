@@ -17,6 +17,7 @@ from swp.domain.commands import (
     CommandContext,
     Event,
     ManualMove,
+    Reset,
     RunRecommendations,
     SetKeep,
     Undo,
@@ -146,6 +147,11 @@ def undo_command(move_number: int) -> Undo:
 def undo_step(state: PlanState, data: ImportData, analysis: Analysis) -> Applied:
     """Undo the last step of `state` (FR-35)."""
     return command(state, undo_command(state.steps[-1].move_number), data, analysis)
+
+
+def reset_step(state: PlanState, data: ImportData, analysis: Analysis) -> Applied:
+    """Reset the planning copy of `state` (FR-35)."""
+    return command(state, Reset(command_id=uuid.uuid4(), base_version=1), data, analysis)
 
 
 def play_steps(data: ImportData, analysis: Analysis, through: int) -> tuple[PlanState, list[Event]]:

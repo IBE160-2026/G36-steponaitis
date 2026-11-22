@@ -508,7 +508,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"] | components["schemas"]["StepUndone"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"] | components["schemas"]["StepUndone"] | components["schemas"]["PlanReset"])[];
             /** Version */
             version: number;
         };
@@ -1050,6 +1050,19 @@ export interface components {
             /** Version */
             version: number;
         };
+        /**
+         * PlanReset
+         * @description The plan was reset; `moves_removed` effective moves were deleted (FR-35, AD-5).
+         */
+        PlanReset: {
+            /** Moves Removed */
+            moves_removed: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "plan_reset";
+        };
         /** PlanSummary */
         PlanSummary: {
             /** Apply All Count */
@@ -1092,6 +1105,8 @@ export interface components {
             last_edited_at: string;
             /** Last Edited By */
             last_edited_by: string;
+            /** Move Count */
+            move_count: number;
             /** Name */
             name: string;
             /**
@@ -1242,6 +1257,24 @@ export interface components {
             kind: "removes_move";
             /** Move Number */
             move_number: number;
+        };
+        /**
+         * Reset
+         * @description Delete every step and run and restart move numbering; marks stay (FR-35, AD-5).
+         */
+        Reset: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "reset";
         };
         /**
          * RunDone
@@ -1756,7 +1789,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"] | components["schemas"]["Undo"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"] | components["schemas"]["Undo"] | components["schemas"]["Reset"];
             };
         };
         responses: {

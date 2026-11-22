@@ -80,6 +80,7 @@ class PlanSummary(BaseModel):
     empty_best_locations: int
     apply_all_count: int
     kept_in_place: int
+    move_count: int
     undo_preview: UndoPreview | None
     steps: list[StepSummary]
 
@@ -135,11 +136,12 @@ def build_summary(
     state: PlanState,
     copy: PlanningCopy,
     last_step: StepOutcome | None,
+    move_count: int,
     location_count: int,
     part_count: int,
 ) -> PlanSummary:
     """The summary of one plan from its stored fields, analysis, state, and the planning
-    copy and last-step outcome of one replay of its steps (AD-3, AD-5)."""
+    copy, last-step outcome and effective move count of one replay of its steps (AD-3, AD-5)."""
     best = best_counts(copy, state.best_marks)
     return PlanSummary(
         id=id,
@@ -161,6 +163,7 @@ def build_summary(
         empty_best_locations=best.empty,
         apply_all_count=apply_all_count(state),
         kept_in_place=len(state.keep_marks),
+        move_count=move_count,
         undo_preview=undo_preview(last_step),
         steps=steps(analysis, state, location_count=location_count, part_count=part_count),
     )

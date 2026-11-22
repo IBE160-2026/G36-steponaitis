@@ -52,6 +52,7 @@ function summary(overrides: Partial<PlanSummary> = {}): PlanSummary {
     empty_best_locations: 0,
     apply_all_count: 0,
     kept_in_place: 0,
+    move_count: 0,
     undo_preview: null,
     steps: [],
     ...overrides,
