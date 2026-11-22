@@ -115,3 +115,6 @@
 - [ ] 2026-11-22 [5-4-rule-3-with-its-limits](943-2026-11-22-14-21-40-5-4-rule-3-with-its-limits.md) — FR-26: skal en del som var partner i et tidligere regel 3-flytt kunne flyttes av en svakere gruppe senere i samme kjøring? (Story 5.4, krav-beslutning)
 - [ ] 2026-11-22 [5-7-recommendations-page](940-2026-11-22-16-04-41-5-7-recommendations-page.md) — oppfølgingsreview Story 5.7: fokus etter andre kjøring og etter klikk på Apply er ikke testet
 - [ ] 2026-11-22 [5-7-recommendations-page](940-2026-11-22-16-04-41-5-7-recommendations-page.md) — tilgjengelighet: Recommendations-lista har regel-overskrifter og «Show more»-knapper inne i en listbox (ikke tillatt i ARIA); akseptkriteriene ber om oppsettet (Story 5.7)
+- [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — AGENTS.md mangler porten med alle tre nettlesere, `e2e:reset-db` og `ruff format --check`; oppdater med bmad-project-context (Story 5.8)
+- [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — DOM-enhetstest for DataTable krever `@testing-library/react` og `jsdom`; installasjonen ble nektet, så avgjør om de skal tillates (Story 5.8)
+- [ ] 2026-11-22 [5-8-milestone-1-gate](939-2026-11-22-18-19-39-5-8-milestone-1-gate.md) — oppfølgingsreview Story 5.8 anbefalt
