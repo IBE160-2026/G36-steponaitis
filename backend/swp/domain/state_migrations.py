@@ -12,7 +12,7 @@ type Doc = dict[str, Any]
 type Upcaster = Callable[[Doc], Doc]
 Kind = Literal["state", "analysis", "data"]
 
-CURRENT_VERSIONS: Mapping[Kind, int] = {"state": 1, "analysis": 1, "data": 2}
+CURRENT_VERSIONS: Mapping[Kind, int] = {"state": 2, "analysis": 1, "data": 2}
 
 
 def _data_v1_to_v2(doc: Doc) -> Doc:
@@ -20,9 +20,16 @@ def _data_v1_to_v2(doc: Doc) -> Doc:
     return {**doc, "virtual_locations": []}
 
 
+def _state_v1_to_v2(doc: Doc) -> Doc:
+    """State v2 stores outdated recommendations with their cause and the rule 3 partner
+    (and the "no space" partner aisle); every new field defaults, so a v1 state needs no
+    change: its rule 3 entries simply have no partner (FR-28, FR-29)."""
+    return dict(doc)
+
+
 # UPCASTERS[kind][i] upcasts version i + 1 to i + 2. Append only; never edit an entry.
 UPCASTERS: Mapping[Kind, tuple[Upcaster, ...]] = {
-    "state": (),
+    "state": (_state_v1_to_v2,),
     "analysis": (),
     "data": (_data_v1_to_v2,),
 }

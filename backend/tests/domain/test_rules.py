@@ -483,11 +483,29 @@ def test_fr26_answer_key_round1_rule_3(data: ImportData, analysis: Analysis) -> 
     )
 
     assert moves == [
-        RuleMove(rule="rule_3", part="8100", from_location="B-01-02-01", to_location="C-01-03-01"),
-        RuleMove(rule="rule_3", part="8500", from_location="B-01-02-02", to_location="D-01-03-01"),
-        RuleMove(rule="rule_3", part="3050", from_location="B-01-02-03", to_location="D-01-03-02"),
+        RuleMove(
+            rule="rule_3",
+            part="8100",
+            from_location="B-01-02-01",
+            to_location="C-01-03-01",
+            partner="8200",
+        ),
+        RuleMove(
+            rule="rule_3",
+            part="8500",
+            from_location="B-01-02-02",
+            to_location="D-01-03-01",
+            partner="8600",
+        ),
+        RuleMove(
+            rule="rule_3",
+            part="3050",
+            from_location="B-01-02-03",
+            to_location="D-01-03-02",
+            partner="30400",
+        ),
     ]
-    assert no_space == [NoSpace(part="6600", rule="rule_3")]
+    assert no_space == [NoSpace(part="6600", rule="rule_3", partner="7000", aisle="A")]
 
 
 def test_fr26_blocks_and_silent_skips(data: ImportData, analysis: Analysis) -> None:
@@ -539,7 +557,7 @@ def test_fr26_loop_limit_round2(data: ImportData, analysis: Analysis) -> None:
         ("2400", "C-01-01-02", "A-01-01-03"),
         ("8400", "C-01-02-02", "D-01-03-03"),
     ]
-    assert no_space == [NoSpace(part="6600", rule="rule_3")]
+    assert no_space == [NoSpace(part="6600", rule="rule_3", partner="7000", aisle="A")]
 
 
 def test_fr26_slow_mover_never_offered_best(data: ImportData, analysis: Analysis) -> None:
@@ -553,19 +571,29 @@ def test_fr26_slow_mover_never_offered_best(data: ImportData, analysis: Analysis
         moves, no_space = _rule_3(data, classes, state, [], earlier)
         return [m for m in moves if m.part == "6600"], [n for n in no_space if n.part == "6600"]
 
-    assert outcome_6600(analysis) == ([], [NoSpace(part="6600", rule="rule_3")])
+    assert outcome_6600(analysis) == (
+        [],
+        [NoSpace(part="6600", rule="rule_3", partner="7000", aisle="A")],
+    )
 
     def with_class(movement_class: str) -> Analysis:
         parts = dict(analysis.parts)
         parts["6600"] = parts["6600"].model_copy(update={"movement_class": movement_class})
         return analysis.model_copy(update={"parts": parts})
 
-    assert outcome_6600(with_class("dead")) == ([], [NoSpace(part="6600", rule="rule_3")])
+    assert outcome_6600(with_class("dead")) == (
+        [],
+        [NoSpace(part="6600", rule="rule_3", partner="7000", aisle="A")],
+    )
     # For contrast: a medium mover takes the best location.
     assert outcome_6600(with_class("medium")) == (
         [
             RuleMove(
-                rule="rule_3", part="6600", from_location="C-01-02-03", to_location="A-01-01-03"
+                rule="rule_3",
+                part="6600",
+                from_location="C-01-02-03",
+                to_location="A-01-01-03",
+                partner="7000",
             )
         ],
         [],

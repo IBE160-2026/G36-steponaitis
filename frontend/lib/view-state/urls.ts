@@ -1,5 +1,6 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
-// the open part panel `?part=`, UX-DR24) are built and read here and nowhere else.
+// the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
+// recommendations tab link (`?tab=`) is built here too; Story 5.7 reads it.
 
 import type { StepKey } from "@/lib/view-state/steps";
 
@@ -18,6 +19,14 @@ export function planStepHref(planId: string, step: StepKey, params?: LocationPar
   }
   const search = query.toString();
   return search ? `${path}?${search}` : path;
+}
+
+/** The tabs of the Recommendations step (Open · Applied · Outdated · No space). */
+export type RecommendationsTab = "open" | "applied" | "outdated" | "no-space";
+
+/** `/plans/<id>/recommendations?tab=<tab>`: the Recommendations step on one tab. */
+export function recommendationsTabHref(planId: string, tab: RecommendationsTab): string {
+  return `${planStepHref(planId, "recommendations")}?${new URLSearchParams({ tab })}`;
 }
 
 export type SearchParamsInput = URLSearchParams | Record<string, string | string[] | undefined>;

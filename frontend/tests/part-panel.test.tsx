@@ -9,11 +9,9 @@ import {
   PartFacts,
   PartPanel,
   PartPanelFrame,
-  picksLine,
-  sharedJobsText,
-  thresholdText,
 } from "@/components/common/part-panel";
 import type { LocationRef, PartDetail } from "@/lib/api/plans";
+import { picksLine, sharedJobsText, thresholdText } from "@/lib/copy";
 import { parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 import { NO_CURRENT_LOCATION as PARTS_NO_CURRENT_LOCATION } from "@/modules/parts/parts-page";
 

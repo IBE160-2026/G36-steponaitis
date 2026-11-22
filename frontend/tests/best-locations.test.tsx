@@ -4,14 +4,16 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextRadioIndex, SegmentedControl } from "@/components/common/segmented-control";
 import type { BestMark, CommandEvent, LocationRow, LocationsView, PlanSummary } from "@/lib/api/plans";
 import { SAVING_REASON } from "@/lib/commands";
+import { MARKS_CHANGED } from "@/lib/copy";
+import { recommendationsTabHref } from "@/lib/view-state/urls";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
 import {
   aisleAction,
   BestLocationsView,
   CHOOSE_AISLE,
   levelAction,
-  MARKS_CHANGED,
   NO_MARKS,
+  outdatedCount,
   readMode,
   sendMarkChange,
 } from "@/modules/best-locations/best-locations-page";
@@ -274,5 +276,36 @@ describe("uxdr best locations step", () => {
       expect(send).toHaveBeenCalledWith(body);
       expect(notify.mock.calls.map(([message]) => message)).toEqual(toasts);
     }
+  });
+
+  it("fr29_toast_counts_outdated_recommendations_with_view", async () => {
+    const body = { type: "remove_best_mark", mark: AISLE_A } as const;
+    const removed: CommandEvent = { type: "mark_removed", mark: AISLE_A };
+    const marks: CommandEvent = { type: "recommendations_outdated", count: 2, cause: "marks" };
+    const filled: CommandEvent = { type: "recommendations_outdated", count: 1, cause: "filled" };
+    expect(outdatedCount([removed, marks, filled])).toBe(3);
+    expect(outdatedCount([removed])).toBe(0);
+
+    const onView = vi.fn();
+    for (const [events, message, hasView] of [
+      [[removed, marks, filled], "Best-location marks changed · 3 recommendations are now outdated", true],
+      [[removed, { ...marks, count: 1 }], "Best-location marks changed · 1 recommendation is now outdated", true],
+      [[removed], MARKS_CHANGED, false],
+    ] as const) {
+      const notify = vi.fn();
+      const send = vi.fn(async () => ({ outcome: "confirmed" as const, events: [...events] }));
+      await sendMarkChange(send, body, notify, onView);
+      expect(notify).toHaveBeenCalledTimes(1);
+      const [text, options] = notify.mock.calls[0];
+      expect(text).toBe(message);
+      if (hasView) {
+        expect(options.action.label).toBe("View");
+        options.action.onClick();
+      } else {
+        expect(options).toBeUndefined();
+      }
+    }
+    expect(onView).toHaveBeenCalledTimes(2);
+    expect(recommendationsTabHref(PLAN, "outdated")).toBe(`/plans/${PLAN}/recommendations?tab=outdated`);
   });
 });

@@ -9,7 +9,7 @@ from typing import Annotated, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
-from swp.domain.state import BestMark, PlanState, Rule
+from swp.domain.state import BestMark, OutdatedCause, PlanState, Rule
 from swp.domain.values import CODE_MAX_LENGTH
 
 
@@ -127,8 +127,22 @@ class RunDone(BaseModel):
     no_space: int
 
 
+class RecommendationsOutdated(BaseModel):
+    """`count` open recommendations of the latest run became outdated by `cause` (AD-7)."""
+
+    type: Literal["recommendations_outdated"] = "recommendations_outdated"
+    count: int
+    cause: OutdatedCause
+
+
 Event = Annotated[
-    MarkSet | MarkRemoved | MoveMade | MovesCombined | MoveRemoved | RunDone,
+    MarkSet
+    | MarkRemoved
+    | MoveMade
+    | MovesCombined
+    | MoveRemoved
+    | RunDone
+    | RecommendationsOutdated,
     Field(discriminator="type"),
 ]
 """Every event a command can produce (closed union)."""

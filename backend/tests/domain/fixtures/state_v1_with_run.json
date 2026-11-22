@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "best_marks": [{"kind": "aisle", "aisle": "A"}],
+  "keep_marks": [],
+  "runs": [
+    {
+      "id": "4c6e0d9e-0000-5000-8000-000000000001",
+      "round": 1,
+      "created_at": "2026-11-22T12:00:00Z",
+      "created_by": "planner",
+      "recommendations": [
+        {
+          "id": "4c6e0d9e-0000-5000-8000-000000000001:1",
+          "number": 1,
+          "rule": "rule_1",
+          "part": "1100",
+          "from_location": "C-01-01-01",
+          "to_location": "A-01-01-03",
+          "status": "open"
+        },
+        {
+          "id": "4c6e0d9e-0000-5000-8000-000000000001:2",
+          "number": 2,
+          "rule": "rule_3",
+          "part": "8100",
+          "from_location": "B-01-02-01",
+          "to_location": "C-01-03-01",
+          "status": "open"
+        }
+      ],
+      "no_space": [{"part": "6600", "rule": "rule_3"}]
+    }
+  ],
+  "steps": [],
+  "next_move_number": 1,
+  "recent_commands": []
+}

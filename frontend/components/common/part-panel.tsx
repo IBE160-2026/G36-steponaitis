@@ -16,14 +16,15 @@
 import { useSearchParams } from "next/navigation";
 import { type KeyboardEvent, type ReactNode, type Ref, useCallback, useEffect, useId, useRef, useState } from "react";
 
-import { CLASS_LABELS, ClassGlyph } from "@/components/common/class-glyph";
+import { ClassGlyph } from "@/components/common/class-glyph";
 import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
 import { LocationChip } from "@/components/common/location-chip";
 import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
-import { type ClassThreshold, type PartDetail, usePlanPart } from "@/lib/api/plans";
+import { type PartDetail, usePlanPart } from "@/lib/api/plans";
 import { type PlanQueryLike, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import { CLASS_LABELS, picksLine, sharedJobsText } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 import type { StepKey } from "@/lib/view-state/steps";
 import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
@@ -63,24 +64,6 @@ export function ManualMoveButton({
       {MANUAL_MOVE_LABEL}
     </Button>
   );
-}
-
-/** "24 or more", "6–23", "1–5" or "0", from the server's limits (never hard-coded). */
-export function thresholdText(threshold: ClassThreshold): string {
-  const min = formatNumber(threshold.min_picks);
-  if (threshold.max_picks === null) return `${min} or more`;
-  if (threshold.max_picks === threshold.min_picks) return min;
-  return `${min}–${formatNumber(threshold.max_picks)}`;
-}
-
-/** "61 picks in the period (24 or more)"; singular "pick" for 1. */
-export function picksLine(picks: number, threshold: ClassThreshold): string {
-  return `${formatNumber(picks)} ${picks === 1 ? "pick" : "picks"} in the period (${thresholdText(threshold)})`;
-}
-
-/** "8 shared jobs" (singular "1 shared job"). */
-export function sharedJobsText(count: number): string {
-  return `${formatNumber(count)} ${count === 1 ? "shared job" : "shared jobs"}`;
 }
 
 /**

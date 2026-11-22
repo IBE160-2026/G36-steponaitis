@@ -34,6 +34,28 @@ class PartAnalysis(BaseModel):
     movement_class: MovementClass
 
 
+class ClassThreshold(BaseModel):
+    """The pick limits of a movement class; `max_picks` is None for the open-ended class."""
+
+    min_picks: int
+    max_picks: int | None
+
+
+def class_threshold(settings: AnalysisSettings, movement_class: MovementClass) -> ClassThreshold:
+    """The limits of `movement_class` from the plan's settings snapshot (never hard-coded)."""
+    if movement_class == "fast":
+        return ClassThreshold(min_picks=settings.fast_min_picks, max_picks=None)
+    if movement_class == "medium":
+        return ClassThreshold(
+            min_picks=settings.medium_min_picks, max_picks=settings.fast_min_picks - 1
+        )
+    if movement_class == "slow":
+        return ClassThreshold(
+            min_picks=settings.slow_min_picks, max_picks=settings.medium_min_picks - 1
+        )
+    return ClassThreshold(min_picks=0, max_picks=settings.slow_min_picks - 1)
+
+
 class PickGroup(BaseModel):
     part_a: str
     part_b: str

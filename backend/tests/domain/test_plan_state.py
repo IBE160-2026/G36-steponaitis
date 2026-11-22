@@ -89,9 +89,32 @@ def test_nfr12_state_v1_fixture_upcasts_to_new() -> None:
 
     upcast_doc = upcast("state", doc)
 
-    assert upcast_doc == doc
+    assert doc["schema_version"] == 1
+    assert upcast_doc == {**doc, "schema_version": CURRENT_VERSIONS["state"]} != doc
     assert PlanState.model_validate(upcast_doc) == PlanState.new()
-    assert PlanState.new().model_dump(mode="json") == doc
+    assert PlanState.new().model_dump(mode="json") == upcast_doc
+    assert PlanState.new().schema_version == CURRENT_VERSIONS["state"] == 2
+
+
+def test_nfr12_state_v1_with_run_upcasts_to_v2() -> None:
+    doc = json.loads((FIXTURES / "state_v1_with_run.json").read_text(encoding="utf-8"))
+    assert doc["schema_version"] == 1
+
+    state = PlanState.model_validate(upcast("state", doc))
+
+    assert state.schema_version == 2
+    [run] = state.runs
+    rule_1, rule_3 = run.recommendations
+    assert (rule_1.rule, rule_1.status, rule_1.outdated, rule_1.partner) == (
+        "rule_1",
+        "open",
+        None,
+        None,
+    )
+    assert (rule_3.rule, rule_3.status, rule_3.partner) == ("rule_3", "open", None)
+    assert run.no_space == [NoSpace(part="6600", rule="rule_3")]
+    assert run.no_space[0].partner is None and run.no_space[0].aisle is None
+    assert PlanState.model_validate(state.model_dump(mode="json")) == state
 
 
 def test_nfr12_data_v1_fixture_upcasts() -> None:

@@ -14,6 +14,7 @@ from swp.app.plans import DEFAULT_USER, PLAN_NOT_FOUND
 from swp.domain.apply import apply
 from swp.domain.commands import Command, CommandContext, CommandResult
 from swp.domain.errors import DomainError
+from swp.domain.recommendations import revalidate
 from swp.domain.state import PlanState
 from swp.store.plans import PlanBusy, PlanInputs, get_plan_inputs, plan_for_update
 
@@ -59,14 +60,16 @@ def _run(
             applied = apply(plan.state, command, ctx, inputs.data, inputs.analysis)
             if not applied.events:
                 return CommandResult(version=plan.version, events=[])
-            result = CommandResult(version=plan.version + 1, events=applied.events)
+            revalidated = revalidate(inputs.data, inputs.analysis, applied.state)
+            events = [*applied.events, *revalidated.events]
+            result = CommandResult(version=plan.version + 1, events=events)
             entry: dict[str, object] = {
                 "command_id": str(command.command_id),
                 "base_version": command.base_version,
                 "result": result.model_dump(mode="json"),
             }
-            recent = [*applied.state.recent_commands, entry][-RECENT_COMMANDS:]
-            state = applied.state.model_copy(update={"recent_commands": recent})
+            recent = [*revalidated.state.recent_commands, entry][-RECENT_COMMANDS:]
+            state = revalidated.state.model_copy(update={"recent_commands": recent})
             if writer.save_state(state, last_edited_by=ctx.user, last_edited_at=ctx.now):
                 return result
     raise DomainError("internal", NOT_SAVED)

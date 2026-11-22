@@ -5,10 +5,11 @@
 
 import Link from "next/link";
 
-import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
+import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SettingsList } from "@/components/common/settings-list";
 import { type PlanSummary, usePlanSummary } from "@/lib/api/plans";
+import { CLASS_LABELS } from "@/lib/copy";
 import { formatDate, formatNumber } from "@/lib/format";
 import { planSettingsHref } from "@/lib/view-state/urls";
 

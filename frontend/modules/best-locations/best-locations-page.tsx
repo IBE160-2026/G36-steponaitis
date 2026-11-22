@@ -6,6 +6,7 @@
 // counts. Every change goes through lib/commands; best status, counts and marks come only from the
 // refetched server views, rendered as one version-consistent set.
 
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
 import { Button } from "@/components/common/button";
@@ -14,9 +15,10 @@ import { Icon } from "@/components/common/icons";
 import { ALL_AISLES, type LocationFilters, LocationsTable, NO_FILTERS } from "@/components/common/locations-table";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SegmentedControl } from "@/components/common/segmented-control";
-import { showToast } from "@/components/common/toast";
+import { showToast, type ToastOptions } from "@/components/common/toast";
 import {
   type BestMark,
+  type CommandEvent,
   type LocationRow,
   type LocationsView as LocationsData,
   type PlanSummary,
@@ -24,13 +26,14 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import { marksChangedText, VIEW_LABEL } from "@/lib/copy";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
+import { recommendationsTabHref } from "@/lib/view-state/urls";
 import { bestCountsLine, hasLocationMark, levelsInAisle, markLabel, sameMark } from "./marks";
 
 export type MarkingMode = "aisle" | "level" | "single";
 export type LevelScope = "aisle" | "all";
 
-export const MARKS_CHANGED = "Best-location marks changed.";
 export const NO_MARKS = "No best locations yet. The tool never guesses: mark a whole aisle, a level or single locations.";
 export const CHOOSE_AISLE = "Choose an aisle in the aisle filter.";
 
@@ -73,17 +76,28 @@ export function levelAction(level: string, scope: LevelScope, aisle: string, mar
   return { mark, text: `Mark level ${level} ${where}`, reason: alreadyMarked(marks, mark) };
 }
 
+/** How many recommendations a command outdated: the sum of its `recommendations_outdated` counts. */
+export function outdatedCount(events: readonly CommandEvent[]): number {
+  return events.reduce((sum, event) => (event.type === "recommendations_outdated" ? sum + event.count : sum), 0);
+}
+
 /**
  * Sends one mark change; the toast shows only for a confirmed change that produced events
- * ("dropped"/"busy" and a confirmed no-op show none).
+ * ("dropped"/"busy" and a confirmed no-op show none). When the change outdated recommendations,
+ * the toast counts them and offers **View** (`onView`, the Outdated tab); there is no Undo.
  */
 export async function sendMarkChange(
   send: (body: CommandBody) => Promise<SendResult>,
   body: CommandBody,
-  notify: (message: string) => void = showToast,
+  notify: (message: string, options?: ToastOptions) => void = showToast,
+  onView?: () => void,
 ): Promise<SendResult> {
   const result = await send(body);
-  if (result.outcome === "confirmed" && result.events.length > 0) notify(MARKS_CHANGED);
+  if (result.outcome === "confirmed" && result.events.length > 0) {
+    const count = outdatedCount(result.events);
+    const options = count > 0 && onView ? { action: { label: VIEW_LABEL, onClick: onView } } : undefined;
+    notify(marksChangedText(count), options);
+  }
   return result;
 }
 
@@ -93,6 +107,7 @@ export function BestLocationsView({
   view,
   disabledReason,
   onSend,
+  onViewOutdated,
 }: {
   planId: string;
   summary: PlanSummary;
@@ -100,6 +115,8 @@ export function BestLocationsView({
   /** "Saving the last change…" while a command is unconfirmed (lib/commands). */
   disabledReason?: string;
   onSend: (body: CommandBody) => Promise<SendResult>;
+  /** Opens the Outdated recommendations (the mark toast's **View**). */
+  onViewOutdated?: () => void;
 }) {
   // Mounted only once the views have loaded (client side), so reading storage here is safe.
   const [mode, setMode] = useState<MarkingMode>(() => readMode(planId));
@@ -113,7 +130,7 @@ export function BestLocationsView({
   const chosenLevel = levelOptions.includes(level) ? level : (levelOptions[0] ?? "");
 
   async function change(body: CommandBody) {
-    await sendMarkChange(onSend, body);
+    await sendMarkChange(onSend, body, showToast, onViewOutdated);
   }
 
   function changeMode(next: MarkingMode) {
@@ -244,6 +261,7 @@ export function BestLocationsPage({ planId }: { planId: string }) {
   const locations = usePlanLocations(planId);
   const data = useConsistentPlanQueries([summary, locations]);
   const { sendWithEvents, disabledReason } = usePlanCommands(planId);
+  const router = useRouter();
   if (data) {
     const [summaryData, view] = data;
     return (
@@ -253,6 +271,7 @@ export function BestLocationsPage({ planId }: { planId: string }) {
         view={view}
         disabledReason={disabledReason}
         onSend={sendWithEvents}
+        onViewOutdated={() => router.push(recommendationsTabHref(planId, "outdated"))}
       />
     );
   }

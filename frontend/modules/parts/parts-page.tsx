@@ -8,13 +8,14 @@
 import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
 
 import { BinSwatch } from "@/components/common/bin-swatch";
-import { CLASS_LABELS, ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
+import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
 import { Icon } from "@/components/common/icons";
 import { NO_CURRENT_LOCATION, usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
 import { type PartRow, type PartsView as PartsData, usePlanParts } from "@/lib/api/plans";
+import { CLASS_LABELS } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { LocationParams } from "@/lib/view-state/urls";

@@ -3,7 +3,8 @@
 // Plan reads (Story 1.9, AD-3): the plan summary behind every plan surface, the saved-plans list
 // used by the `/` redirect, the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
-// preview (Story 4.3) and before/after (Story 4.6). All are GETs and never change the plan (FR-9).
+// preview (Story 4.3) and before/after (Story 4.6), plus the recommendations view's types
+// (Story 5.5). All are GETs and never change the plan (FR-9).
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -49,6 +50,20 @@ export type TargetPart = components["schemas"]["TargetPart"];
 export type BeforeAfterView = components["schemas"]["BeforeAfterView"];
 export type AisleBeforeAfter = components["schemas"]["AisleBeforeAfter"];
 export type BeforeAfterCount = components["schemas"]["Count"];
+/** The latest run's recommendations and "no space" entries (FR-28, FR-29), in server order. */
+export type RecommendationsView = components["schemas"]["RecommendationsView"];
+export type RunMeta = components["schemas"]["RunMeta"];
+export type RecommendationRow = components["schemas"]["RecommendationRow"];
+export type NoSpaceRow = components["schemas"]["NoSpaceRow"];
+export type AppliedInfo = components["schemas"]["AppliedInfo"];
+export type OutdatedInfo = components["schemas"]["OutdatedInfo"];
+export type NoSpaceCause = components["schemas"]["NoSpaceCause"];
+export type ClassReason = components["schemas"]["ClassReason"];
+export type PickGroupReason = components["schemas"]["PickGroupReason"];
+/** A recommendation's reason: its class and picks (rules 1, 2) or its pick group (rule 3). */
+export type RecommendationReason = ClassReason | PickGroupReason;
+/** `recommendations_outdated{count, cause}`: a command outdated this many recommendations. */
+export type RecommendationsOutdatedEvent = components["schemas"]["RecommendationsOutdated"];
 
 export const PLANS_KEY = ["plans"] as const;
 

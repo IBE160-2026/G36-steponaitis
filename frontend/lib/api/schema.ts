@@ -175,6 +175,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Recommendations */
+        get: operations["get_plan_recommendations_api_plans__plan_id__recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/search": {
         parameters: {
             query?: never;
@@ -277,6 +294,16 @@ export interface components {
             slow_min_picks: number;
         };
         /**
+         * AppliedInfo
+         * @description The effective move that applied a recommendation.
+         */
+        AppliedInfo: {
+            /** Move Number */
+            move_number: number;
+            /** Round */
+            round: number;
+        };
+        /**
          * ApplyRecommendation
          * @description Apply one recommendation of the latest run as a move (FR-30, AD-7).
          */
@@ -339,6 +366,25 @@ export interface components {
             slow: number;
         };
         /**
+         * ClassReason
+         * @description Rules 1 and 2: the part's class, its picks and the class threshold.
+         */
+        ClassReason: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "class";
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Picks */
+            picks: number;
+            threshold: components["schemas"]["ClassThreshold"];
+        };
+        /**
          * ClassThreshold
          * @description The pick limits of a movement class; `max_picks` is None for the open-ended class.
          */
@@ -367,7 +413,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"])[];
             /** Version */
             version: number;
         };
@@ -645,6 +691,35 @@ export interface components {
              */
             kind: "new";
         };
+        /**
+         * NoSpaceCause
+         * @description Where the rule looked: rule 1 any best location, rule 2 any location outside best
+         *     ones, rule 3 the partner's `aisle` (outside best ones for a slow or dead mover).
+         */
+        NoSpaceCause: {
+            /** Aisle */
+            aisle: string | null;
+            /** Outside Best */
+            outside_best: boolean;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3";
+        };
+        /** NoSpaceRow */
+        NoSpaceRow: {
+            cause: components["schemas"]["NoSpaceCause"];
+            /** Part */
+            part: string;
+            /** Reason */
+            reason: (components["schemas"]["ClassReason"] | components["schemas"]["PickGroupReason"]) | null;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3";
+        };
         /** Occupancy */
         Occupancy: {
             /** Empty */
@@ -655,6 +730,28 @@ export interface components {
             occupied: number;
             /** Occupied Percent */
             occupied_percent: string;
+        };
+        /**
+         * OutdatedInfo
+         * @description Why a recommendation is outdated: the stored cause, or the derived `moved_back` (an
+         *     applied move that FR-34 removed). Only the fields of the cause are set, the rest are
+         *     None: `location` and `move_number` for `filled`, `partner` and `aisle` for
+         *     `partner_aisle`, `move_number` for `moved_back`.
+         */
+        OutdatedInfo: {
+            /** Aisle */
+            aisle: string | null;
+            /**
+             * Cause
+             * @enum {string}
+             */
+            cause: "moved" | "filled" | "marks" | "partner_aisle" | "moved_back";
+            /** Location */
+            location: string | null;
+            /** Move Number */
+            move_number: number | null;
+            /** Partner */
+            partner: string | null;
         };
         /** PartDetail */
         PartDetail: {
@@ -750,6 +847,25 @@ export interface components {
             /** Part */
             part: string;
         };
+        /**
+         * PickGroupReason
+         * @description Rule 3: the partner, the partner's aisle and the pair's shared jobs.
+         */
+        PickGroupReason: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "pick_group";
+            /** Min Shared Jobs */
+            min_shared_jobs: number;
+            /** Partner */
+            partner: string;
+            /** Partner Aisle */
+            partner_aisle: string | null;
+            /** Shared Jobs */
+            shared_jobs: number;
+        };
         /** PickGroupRow */
         PickGroupRow: {
             part_a: components["schemas"]["PickGroupPart"];
@@ -829,6 +945,61 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** RecommendationRow */
+        RecommendationRow: {
+            applied: components["schemas"]["AppliedInfo"] | null;
+            /** From Location */
+            from_location: string;
+            /** Id */
+            id: string;
+            /** Number */
+            number: number;
+            outdated: components["schemas"]["OutdatedInfo"] | null;
+            /** Part */
+            part: string;
+            /** Reason */
+            reason: (components["schemas"]["ClassReason"] | components["schemas"]["PickGroupReason"]) | null;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "applied" | "outdated";
+            /** To Location */
+            to_location: string;
+        };
+        /**
+         * RecommendationsOutdated
+         * @description `count` open recommendations of the latest run became outdated by `cause` (AD-7).
+         */
+        RecommendationsOutdated: {
+            /**
+             * Cause
+             * @enum {string}
+             */
+            cause: "moved" | "filled" | "marks" | "partner_aisle";
+            /** Count */
+            count: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "recommendations_outdated";
+        };
+        /** RecommendationsView */
+        RecommendationsView: {
+            /** No Space */
+            no_space: components["schemas"]["NoSpaceRow"][];
+            /** Recommendations */
+            recommendations: components["schemas"]["RecommendationRow"][];
+            run: components["schemas"]["RunMeta"] | null;
+            /** Version */
+            version: number;
+        };
         /** RemoveBestMark */
         RemoveBestMark: {
             /** Base Version */
@@ -876,6 +1047,20 @@ export interface components {
              * @enum {string}
              */
             type: "run_done";
+        };
+        /** RunMeta */
+        RunMeta: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: string;
+            /** Id */
+            id: string;
+            /** Round */
+            round: number;
         };
         /**
          * RunRecommendations
@@ -1450,6 +1635,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PickGroupsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_recommendations_api_plans__plan_id__recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationsView"];
                 };
             };
             /** @description Error */

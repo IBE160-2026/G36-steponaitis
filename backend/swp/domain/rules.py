@@ -43,6 +43,8 @@ class RuleMove(BaseModel):
     part: str
     from_location: str
     to_location: str
+    partner: str | None = None
+    """Rule 3 only: the partner of the pick group the move serves."""
 
 
 def _empty_pool(
@@ -196,14 +198,23 @@ def rule_3(
         if source is None or _blocked(copy, analysis, state, group, mover, source, partner):
             continue
         best = False if parts[mover].movement_class in {"slow", "dead"} else None
-        pool = _empty_pool(data, copy, state, best=best, aisle=current_aisle(copy, partner))
+        aisle = current_aisle(copy, partner)
+        pool = _empty_pool(data, copy, state, best=best, aisle=aisle)
         target = next((code for code in pool if code not in taken), None)
         handled.add(mover)
         if target is None:
-            no_space.append(NoSpace(part=mover, rule="rule_3"))
+            no_space.append(NoSpace(part=mover, rule="rule_3", partner=partner, aisle=aisle))
             continue
         taken.add(target)
-        moves.append(RuleMove(rule="rule_3", part=mover, from_location=source, to_location=target))
+        moves.append(
+            RuleMove(
+                rule="rule_3",
+                part=mover,
+                from_location=source,
+                to_location=target,
+                partner=partner,
+            )
+        )
     return moves, no_space
 
 
@@ -251,6 +262,7 @@ def run(
             part=move.part,
             from_location=move.from_location,
             to_location=move.to_location,
+            partner=move.partner,
         )
         for number, move in enumerate(moves, start=1)
     ]

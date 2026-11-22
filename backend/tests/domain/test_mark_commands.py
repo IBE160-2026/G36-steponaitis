@@ -112,6 +112,7 @@ def test_fr10_command_union_is_closed() -> None:
         "moves_combined",
         "move_removed",
         "run_done",
+        "recommendations_outdated",
     }
     with pytest.raises(ValidationError):
         TypeAdapter(Command).validate_python(

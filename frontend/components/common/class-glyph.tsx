@@ -1,15 +1,9 @@
 // Movement-class glyph (UX-DR3): filled SVG shapes, never emoji or Unicode symbols.
 // fast = triangle up, medium = diamond, slow = triangle down, dead = ring with a 45° slash.
 
-export type MovementClass = "fast" | "medium" | "slow" | "dead";
+import type { MovementClass } from "@/lib/copy";
 
-/** Glossary names of the movement classes. */
-export const CLASS_LABELS: Record<MovementClass, string> = {
-  fast: "Fast-moving",
-  medium: "Medium-moving",
-  slow: "Slow-moving",
-  dead: "Dead stock",
-};
+export type { MovementClass };
 
 type ClassGlyphProps = {
   movementClass: MovementClass;

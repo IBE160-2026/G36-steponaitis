@@ -58,6 +58,21 @@ RecommendationRule = Literal["rule_1", "rule_2", "rule_3"]
 """The rule that made a recommendation or a "no space" entry."""
 
 
+OutdatedCause = Literal["moved", "filled", "marks", "partner_aisle"]
+"""A stored cause that made an open recommendation outdated, in AD-7's check order."""
+
+
+class Outdated(BaseModel):
+    """Why a recommendation is outdated (AD-7): sticky until the next run. `filled` records
+    the target `location` and the effective move that filled it (None when none did)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    cause: OutdatedCause
+    location: str | None = None
+    move_number: int | None = None
+
+
 class Recommendation(BaseModel):
     """One recommendation of a run (FR-24): move `part` from `from_location` to
     `to_location`. `id` is `"<run_id>:<number>"`; numbers are never reassigned (AD-14)."""
@@ -70,7 +85,10 @@ class Recommendation(BaseModel):
     part: str
     from_location: str
     to_location: str
-    status: Literal["open"] = "open"
+    status: Literal["open", "outdated"] = "open"
+    outdated: Outdated | None = None
+    partner: str | None = None
+    """Rule 3 only: the partner of the pick group the move serves (None before v2)."""
 
 
 class NoSpace(BaseModel):
@@ -80,6 +98,10 @@ class NoSpace(BaseModel):
 
     part: str
     rule: RecommendationRule
+    partner: str | None = None
+    """Rule 3 only: the partner of the pick group (None before v2)."""
+    aisle: str | None = None
+    """Rule 3 only: the partner's aisle at run time, where no location was free."""
 
 
 class Run(BaseModel):
@@ -101,7 +123,7 @@ BestMark = Annotated[AisleMark | LevelMark | LocationMark, Field(discriminator="
 
 
 class PlanState(BaseModel):
-    schema_version: int = 1
+    schema_version: int = 2
     best_marks: list[BestMark] = Field(default_factory=list)
     keep_marks: list[str] = Field(default_factory=list)
     runs: list[Run] = Field(default_factory=list)

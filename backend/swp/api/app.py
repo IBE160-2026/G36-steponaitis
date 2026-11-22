@@ -17,6 +17,7 @@ from swp.api.routers import (
     parts,
     pick_groups,
     plans,
+    recommendations,
     search,
     session,
 )
@@ -50,5 +51,6 @@ def create_app() -> FastAPI:
     app.include_router(search.router, prefix="/api")
     app.include_router(moves.router, prefix="/api")
     app.include_router(before_after.router, prefix="/api")
+    app.include_router(recommendations.router, prefix="/api")
     app.include_router(session.router, prefix="/api")
     return app

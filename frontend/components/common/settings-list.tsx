@@ -1,8 +1,8 @@
 // The plan's analysis settings, read-only (FR-18, UX-DR22). Used by the overview and settings
 // modules. Every number comes from the plan's stored snapshot, never from the config file.
 
-import { CLASS_LABELS } from "@/components/common/class-glyph";
 import type { AnalysisSettings } from "@/lib/api/plans";
+import { CLASS_LABELS } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 
 export type SettingsRow = { term: string; value: string };
