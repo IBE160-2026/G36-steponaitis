@@ -134,3 +134,4 @@
 - [ ] 2026-11-22 [7-1-keep-a-part-in-place](931-2026-11-22-22-00-31-7-1-keep-a-part-in-place.md) — oppfølgingsreview Story 7.1: tre middels rettelser (når fanene vises, tester av detaljer for delene som holdes på plass, test av utdatert rad) er ikke gjennomgått på nytt
 - [ ] 2026-11-22 [7-1-keep-a-part-in-place](931-2026-11-22-22-00-31-7-1-keep-a-part-in-place.md) — tastaturfokus forsvinner mens Keep in place, Apply og Manual move… lagrer, fordi den felles `Button` bytter element når den er deaktivert (Story 7.1)
 - [ ] 2026-11-22 [7-1-keep-a-part-in-place](931-2026-11-22-22-00-31-7-1-keep-a-part-in-place.md) — nålen for delene som holdes på plass i vegg-tooltipen venter til epic 10 (Story 7.1)
+- [ ] 2026-11-22 [7-2-apply-a-recommendation-with-another-location](930-2026-11-22-22-35-58-7-2-apply-a-recommendation-with-another-location.md) — oppfølgingsreview Story 7.2: rettelsene i plasseringspopupen er ikke gjennomgått på nytt
