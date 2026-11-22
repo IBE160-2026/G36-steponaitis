@@ -93,3 +93,4 @@
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 5: plan-visningene laster `transactions` unødig — endre lesingen eller AD-4
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 6: krev test av brukerstien når en review-rettelse endrer når delt tilstand nullstilles
 - [ ] 2026-11-22 [epic-2-retrospektiv](961-2026-11-22-03-05-56-epic-2-retrospektiv.md) — retro Epic 2, punkt 7: avgjør når de åpne action items fra Epic 1 skal planlegges (10 av 11 åpne)
+- [ ] 2026-11-22 CI-kjøring 44974484407 forsøk 1 — feil: `e2e/part-panel-search.spec.ts:34` (uj7) feiler på `toHaveURL(...?part=...)` linje 63 i CI, også på retry; samme kode var grønn i kjøring 44956503991 (flaky). Tiltak: fersk subagent med bmad-build-auto gjør testen og/eller søkeflyten deterministisk. Utfall: venter
