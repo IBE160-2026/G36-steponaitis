@@ -57,8 +57,9 @@ describe("fr8 saved-plans list", () => {
   it("fr8_ad20_saved_plans_and_open_urls_are_built_in_view_state", () => {
     expect(SAVED_PLANS_HREF).toBe("/plans");
     expect(NEW_PLAN_HREF).toBe("/plans/new");
-    expect(planOpenHref("8d3c")).toBe("/plans/8d3c/overview");
-    expect(planOpenHref("a b")).toBe("/plans/a%20b/overview");
+    // Story 6.2: the bare plan URL, which opens the plan's stored last view.
+    expect(planOpenHref("8d3c")).toBe("/plans/8d3c");
+    expect(planOpenHref("a b")).toBe("/plans/a%20b");
   });
 
   it("fr8_columns_in_order_with_local_dates", () => {

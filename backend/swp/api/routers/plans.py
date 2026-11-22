@@ -3,7 +3,6 @@
 The GETs only read: they never change `version` or `last_edited_*` (FR-9).
 """
 
-import uuid
 from datetime import UTC, datetime
 from typing import Annotated
 
@@ -63,5 +62,7 @@ def list_plans() -> list[SavedPlanRow]:
 
 
 @router.get("/plans/{plan_id}", responses=error_responses(404, 422))
-def get_plan_summary(plan_id: uuid.UUID) -> PlanSummary:
-    return plans.summary(plan_id)
+def get_plan_summary(plan_id: str) -> PlanSummary:
+    # A string, not uuid.UUID: an id that is no UUID names no plan, so it is `plan_not_found`
+    # (404) like an unknown one, not `validation_failed` (epic-1 retro item 4).
+    return plans.summary(plans.parse_plan_id(plan_id))

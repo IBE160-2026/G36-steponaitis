@@ -632,6 +632,7 @@ describe("fr10 save status and plan plate", () => {
       best_locations: 0,
       empty_best_locations: 0,
       apply_all_count: 0,
+      undo_preview: null,
       steps: [],
     };
     const effects = { notify: vi.fn(), navigate: vi.fn() };

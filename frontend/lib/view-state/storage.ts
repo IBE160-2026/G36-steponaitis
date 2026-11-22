@@ -22,3 +22,8 @@ export function writeStored(key: string, value: string): void {
 export function bestLocationsModeKey(planId: string): string {
   return `swp:best-locations-mode:${planId}`;
 }
+
+/** The plan's last flow-step view (`{step, query}` JSON, Story 6.2, AD-20). */
+export function planViewKey(planId: string): string {
+  return `swp:plan:${planId}:view`;
+}

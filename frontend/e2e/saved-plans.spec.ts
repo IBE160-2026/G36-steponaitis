@@ -67,6 +67,8 @@ test.describe("uj3 saved plans", () => {
     await expect(table(page).locator(`tr[data-row-index="${editedIndex + 1}"]`)).toBeFocused();
     await page.keyboard.press("ArrowUp");
     await expect(row(page, edited)).toBeFocused();
+    // Opening goes through the bare `/plans/<id>` (Story 6.2), which replaces itself with the
+    // plan's last view in this browser: the overview, since this browser never opened it.
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(new RegExp(`/plans/${edited.id}/overview$`));
     await expect(main.getByRole("heading", { name: "Overview", level: 1 })).toBeVisible();
@@ -103,8 +105,9 @@ test.describe("uj3 saved plans", () => {
     await expect(menu).toBeVisible();
     await expect(table(page).locator("tr:focus")).toHaveCount(0);
     await expect(page).toHaveURL(/\/plans$/);
-    // Open, chosen with the keyboard.
+    // Open, chosen with the keyboard; it links to the bare plan URL (Story 6.2).
     await expect(open).toBeFocused();
+    await expect(open).toHaveAttribute("href", `/plans/${edited.id}`);
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(new RegExp(`/plans/${edited.id}/overview$`));
   });

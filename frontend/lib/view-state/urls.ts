@@ -1,9 +1,11 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
 // the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
 // recommendations tab (`?tab=`, Story 5.7) is built and parsed here too, as are the saved-plans
-// list (`/plans`, FR-8) and New Plan (`/plans/new`).
+// list (`/plans`, FR-8) and New Plan (`/plans/new`). So is the plan's last view, kept per browser
+// (`swp:plan:<id>:view`, Story 6.2), which the bare `/plans/<id>` opens.
 
-import type { StepKey } from "@/lib/view-state/steps";
+import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
+import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
 
 /**
  * The view state carried in the URL: the Locations aisle filter and a location to focus, and the
@@ -17,8 +19,16 @@ export const SAVED_PLANS_HREF = "/plans";
 /** New Plan (FR-1). */
 export const NEW_PLAN_HREF = "/plans/new";
 
+/** The query keys that make up a plan view (and the only ones its stored last view keeps). */
+export const VIEW_QUERY_KEYS = ["aisle", "loc", "part", "tab", "rec", "move"] as const;
+
+export type ViewQueryKey = (typeof VIEW_QUERY_KEYS)[number];
+
+/** A view's query values: any of the view keys, each one string. */
+export type ViewQuery = Partial<Record<ViewQueryKey, string>>;
+
 /** `/plans/<id>/<step>`, with only the non-empty `params` appended as a query. */
-export function planStepHref(planId: string, step: StepKey, params?: LocationParams): string {
+export function planStepHref(planId: string, step: StepKey, params?: ViewQuery): string {
   const path = `/plans/${encodeURIComponent(planId)}/${step}`;
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params ?? {})) {
@@ -29,11 +39,59 @@ export function planStepHref(planId: string, step: StepKey, params?: LocationPar
 }
 
 /**
- * Where opening a saved plan goes (FR-9): its overview today. Story 6.2 makes this the plan's
- * stored last view; every "open this plan" goes through here.
+ * Where opening a saved plan goes (FR-9): the bare `/plans/<id>`, which replaces itself with the
+ * plan's stored last view (`storedPlanViewHref`). Every "open this plan" goes through here.
  */
 export function planOpenHref(planId: string): string {
-  return planStepHref(planId, "overview");
+  return `/plans/${encodeURIComponent(planId)}`;
+}
+
+function asStepKey(view: unknown): StepKey | undefined {
+  return FLOW_STEPS.find((step) => step.key === view)?.key;
+}
+
+/** Only the view keys of `query`, each a non-empty string; everything else is dropped. */
+function viewQuery(query: (key: ViewQueryKey) => unknown): ViewQuery {
+  const kept: ViewQuery = {};
+  for (const key of VIEW_QUERY_KEYS) {
+    const value = query(key);
+    if (typeof value === "string" && value) kept[key] = value;
+  }
+  return kept;
+}
+
+/**
+ * Remember the view at `pathname` + `search` as its plan's last view (AD-20). Only flow-step
+ * paths `/plans/<id>/<step>` count: settings, the list, New Plan and the bare plan URL are not
+ * recorded. Only the view keys of the query are kept. Stays in this browser; never sent anywhere.
+ */
+export function rememberPlanView(pathname: string, search: string | URLSearchParams): void {
+  const path = parsePlanPath(pathname);
+  const step = path ? asStepKey(path.view) : undefined;
+  if (!path || !step) return;
+  const params = new URLSearchParams(search);
+  const query = viewQuery((key) => params.get(key));
+  writeStored(planViewKey(path.planId), JSON.stringify({ step, query }));
+}
+
+/**
+ * The href of the plan's stored last view; the overview when nothing is stored, storage is
+ * blocked or the stored value is not valid JSON of a known step (AD-20).
+ */
+export function storedPlanViewHref(planId: string): string {
+  const raw = readStored(planViewKey(planId));
+  let stored: unknown = null;
+  try {
+    stored = raw === null ? null : JSON.parse(raw);
+  } catch {
+    stored = null;
+  }
+  if (typeof stored !== "object" || stored === null) return planStepHref(planId, "overview");
+  const { step, query } = stored as { step?: unknown; query?: unknown };
+  const key = asStepKey(step);
+  if (!key) return planStepHref(planId, "overview");
+  const values = typeof query === "object" && query !== null ? (query as Record<string, unknown>) : {};
+  return planStepHref(planId, key, viewQuery((name) => (Object.hasOwn(values, name) ? values[name] : undefined)));
 }
 
 /** The tabs of the Recommendations step (Open · Applied · Outdated · No space). */

@@ -91,13 +91,31 @@ class EffectiveMove(BaseModel):
     steps: tuple[int, ...]
 
 
+UndoKind = Literal["reverts_move", "splits_combined_move", "restores_removed_move"]
+"""What undoing the last step does to the effective moves (AD-5): the step stood as its own
+move (`reverts_move`), it was combined into a move (`splits_combined_move`) or it removed
+a move (`restores_removed_move`)."""
+
+
+@dataclass(frozen=True)
+class StepOutcome:
+    """How the fold took one step (FR-34): `kind` as its undo would read it, and the
+    effective move it affected (its own number when it was appended as its own move)."""
+
+    step: Step
+    kind: UndoKind
+    move_number: int
+
+
 @dataclass(frozen=True)
 class Replay:
-    """The result of replaying the step log on the import."""
+    """The result of replaying the step log on the import. `last` is how the fold took the
+    log's last step (None without steps): the data of the undo preview (AD-5)."""
 
     copy: PlanningCopy
     moves: tuple[EffectiveMove, ...]
     current_locations: Mapping[str, str | None]
+    last: StepOutcome | None = None
 
 
 @dataclass
@@ -136,11 +154,12 @@ class _Stock:
         return tuple(line for lines in self._lines.values() for line in lines)
 
 
-def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) -> None:
+def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) -> StepOutcome:
     """Add `step` to the effective moves (FR-34): combine it with the part's latest move in
     the same round that ends where the step starts, when that move's target held none of
     the part; drop the move when it returns to its first from-location. "Latest" is by
-    the step that last set the move's target, not by the move's place in the list."""
+    the step that last set the move's target, not by the move's place in the list.
+    Return which of the three it did."""
     latest = max(
         (
             index
@@ -156,7 +175,7 @@ def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) 
         first = moves[latest].move
         if step.to_location == first.from_location:
             del moves[latest]
-            return
+            return StepOutcome(step, "restores_removed_move", first.move_number)
         combined = first.model_copy(
             update={
                 "to_location": step.to_location,
@@ -166,7 +185,7 @@ def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) 
             }
         )
         moves[latest] = _Open(combined, target_was_empty, at)
-        return
+        return StepOutcome(step, "splits_combined_move", first.move_number)
     moves.append(
         _Open(
             EffectiveMove(
@@ -184,6 +203,7 @@ def _fold_move(moves: list[_Open], step: Step, target_was_empty: bool, at: int) 
             at,
         )
     )
+    return StepOutcome(step, "reverts_move", step.move_number)
 
 
 class _CurrentLocations(Mapping[str, str | None]):
@@ -222,6 +242,7 @@ class StepFold:
         self._stock = _Stock(data.inventory)
         self._moves: list[_Open] = []
         self._count = 0
+        self._last: StepOutcome | None = None
         for step in steps:
             self.add(step)
 
@@ -229,7 +250,7 @@ class StepFold:
         """Fold the next step of the log."""
         target_was_empty = self._stock.quantity(step.part, step.to_location) == 0
         self._stock.move(step.part, step.from_location, step.to_location)
-        _fold_move(self._moves, step, target_was_empty, self._count)
+        self._last = _fold_move(self._moves, step, target_was_empty, self._count)
         self._count += 1
 
     def replay(self) -> Replay:
@@ -241,6 +262,7 @@ class StepFold:
             copy=copy,
             moves=tuple(item.move for item in self._moves),
             current_locations=_CurrentLocations(copy, tuple(parts)),
+            last=self._last,
         )
 
 

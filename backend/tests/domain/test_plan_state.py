@@ -212,3 +212,37 @@ def test_nfr12_runs_are_typed() -> None:
     ):
         with pytest.raises(ValidationError):
             PlanState.model_validate({**doc, "runs": [{**run, **bad}]})
+
+
+@pytest.mark.parametrize(
+    "fixture", sorted(FIXTURES.glob("state_v*.json")), ids=lambda path: path.stem
+)
+def test_nfr12_every_state_fixture_opens(fixture: Path) -> None:
+    """Every stored state version still opens (NFR-12, AD-4): upcast, validate, round-trip."""
+    doc = json.loads(fixture.read_text(encoding="utf-8"))
+
+    upcast_doc = upcast("state", doc)
+    state = PlanState.model_validate(upcast_doc)
+
+    assert state.schema_version == CURRENT_VERSIONS["state"]
+    dumped = state.model_dump(mode="json")
+    assert PlanState.model_validate(upcast("state", dumped)) == state
+    if doc["schema_version"] == CURRENT_VERSIONS["state"]:
+        assert upcast_doc == doc
+        assert dumped == doc
+
+
+def test_nfr12_state_v2_fixture_is_rich() -> None:
+    """The current-version fixture covers every stored field 6.2 reopens (FR-9)."""
+    state = PlanState.model_validate(
+        json.loads((FIXTURES / "state_v2.json").read_text(encoding="utf-8"))
+    )
+
+    assert {type(mark) for mark in state.best_marks} == {AisleMark, LevelMark, LocationMark}
+    assert state.keep_marks
+    [run] = state.runs
+    assert {rec.status for rec in run.recommendations} == {"open", "outdated"}
+    assert all(rec.outdated for rec in run.recommendations if rec.status == "outdated")
+    assert run.no_space
+    assert [step.swap_id for step in state.steps].count("swap-1") == 2
+    assert state.next_move_number > max(step.move_number for step in state.steps)

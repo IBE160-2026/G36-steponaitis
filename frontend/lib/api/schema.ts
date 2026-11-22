@@ -999,6 +999,7 @@ export interface components {
             settings: components["schemas"]["AnalysisSettings"];
             /** Steps */
             steps: components["schemas"]["StepSummary"][];
+            undo_preview: components["schemas"]["UndoPreview"] | null;
             /**
              * Uploaded At
              * Format: date-time
@@ -1266,6 +1267,36 @@ export interface components {
             picks: number | null;
             /** Stock */
             stock: string;
+        };
+        /**
+         * UndoEffect
+         * @description What undoing the last step does (AD-5): `reverts_move` takes back move `move_number`
+         *     (the step's own), `splits_combined_move` takes the step out of combined move
+         *     `move_number`, `restores_removed_move` brings back removed move `move_number`.
+         */
+        UndoEffect: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "reverts_move" | "splits_combined_move" | "restores_removed_move";
+            /** Move Number */
+            move_number: number;
+        };
+        /**
+         * UndoPreview
+         * @description The last step of the log and what undoing it would do (AD-5); never stored.
+         */
+        UndoPreview: {
+            effect: components["schemas"]["UndoEffect"];
+            /** From Location */
+            from_location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** To Location */
+            to_location: string;
         };
     };
     responses: never;

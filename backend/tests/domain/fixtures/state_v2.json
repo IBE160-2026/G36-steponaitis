@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "best_marks": [
+    {"kind": "aisle", "aisle": "A"},
+    {"kind": "level", "level": "01", "aisle": "B"},
+    {"kind": "location", "location": "C-01-01-01"}
+  ],
+  "keep_marks": ["8100"],
+  "runs": [
+    {
+      "id": "4c6e0d9e-0000-5000-8000-000000000001",
+      "round": 1,
+      "created_at": "2026-11-22T12:00:00Z",
+      "created_by": "planner",
+      "recommendations": [
+        {
+          "id": "4c6e0d9e-0000-5000-8000-000000000001:1",
+          "number": 1,
+          "rule": "rule_1",
+          "part": "1100",
+          "from_location": "C-01-01-01",
+          "to_location": "A-01-01-03",
+          "status": "open",
+          "outdated": null,
+          "partner": null
+        },
+        {
+          "id": "4c6e0d9e-0000-5000-8000-000000000001:2",
+          "number": 2,
+          "rule": "rule_1",
+          "part": "1200",
+          "from_location": "B-01-01-02",
+          "to_location": "A-01-02-02",
+          "status": "outdated",
+          "outdated": {"cause": "moved", "location": null, "move_number": null},
+          "partner": null
+        },
+        {
+          "id": "4c6e0d9e-0000-5000-8000-000000000001:3",
+          "number": 3,
+          "rule": "rule_3",
+          "part": "8100",
+          "from_location": "B-01-02-01",
+          "to_location": "C-01-03-01",
+          "status": "outdated",
+          "outdated": {"cause": "filled", "location": "C-01-03-01", "move_number": null},
+          "partner": "8500"
+        }
+      ],
+      "no_space": [
+        {"part": "6600", "rule": "rule_3", "partner": "6700", "aisle": "D"},
+        {"part": "1300", "rule": "rule_1", "partner": null, "aisle": null}
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "move_number": 1,
+      "part": "1100",
+      "from_location": "C-01-01-01",
+      "to_location": "A-01-01-03",
+      "rule": "rule_1",
+      "round": 1,
+      "recommendation_id": "4c6e0d9e-0000-5000-8000-000000000001:1",
+      "swap_id": null
+    },
+    {
+      "move_number": 2,
+      "part": "1200",
+      "from_location": "B-01-01-02",
+      "to_location": "C-01-03-02",
+      "rule": "manual",
+      "round": 1,
+      "recommendation_id": null,
+      "swap_id": null
+    },
+    {
+      "move_number": 3,
+      "part": "9100",
+      "from_location": "D-01-02-02",
+      "to_location": "D-01-02-03",
+      "rule": "manual",
+      "round": 1,
+      "recommendation_id": null,
+      "swap_id": "swap-1"
+    },
+    {
+      "move_number": 4,
+      "part": "9200",
+      "from_location": "D-01-02-03",
+      "to_location": "D-01-02-02",
+      "rule": "manual",
+      "round": 1,
+      "recommendation_id": null,
+      "swap_id": "swap-1"
+    }
+  ],
+  "next_move_number": 6,
+  "recent_commands": []
+}

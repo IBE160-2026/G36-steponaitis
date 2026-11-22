@@ -13,7 +13,7 @@ from swp.domain.classify import classify_parts
 from swp.domain.errors import DomainError
 from swp.domain.import_data import NormalizedImport
 from swp.domain.pick_groups import find_pick_groups
-from swp.domain.planning import planning_copy
+from swp.domain.planning import replay
 from swp.domain.state import PlanState
 from swp.domain.views.summary import PlanSummary, build_summary
 from swp.store import plans as store
@@ -110,6 +110,14 @@ def get(plan_id: uuid.UUID) -> StoredPlan | None:
     return store.get_plan(plan_id)
 
 
+def parse_plan_id(raw: str) -> uuid.UUID:
+    """The plan id in a URL; raise `plan_not_found` when it is not a UUID (no plan has it)."""
+    try:
+        return uuid.UUID(raw)
+    except ValueError:
+        raise DomainError("plan_not_found", PLAN_NOT_FOUND) from None
+
+
 def require(plan_id: uuid.UUID) -> StoredPlan:
     """The stored plan with its import; raise `plan_not_found` for an unknown id."""
     plan = store.get_plan(plan_id)
@@ -121,6 +129,7 @@ def require(plan_id: uuid.UUID) -> StoredPlan:
 def summary(plan_id: uuid.UUID) -> PlanSummary:
     """The plan summary (read-only, FR-9); raise `plan_not_found` for an unknown id."""
     plan = require(plan_id)
+    replayed = replay(plan.imported.data, plan.state.steps)
     return build_summary(
         id=plan.id,
         name=plan.name,
@@ -134,7 +143,8 @@ def summary(plan_id: uuid.UUID) -> PlanSummary:
         version=plan.version,
         analysis=plan.analysis,
         state=plan.state,
-        copy=planning_copy(plan.imported.data, plan.state),
+        copy=replayed.copy,
+        last_step=replayed.last,
         location_count=len(plan.imported.data.locations),
         part_count=len(plan.imported.data.parts),
     )

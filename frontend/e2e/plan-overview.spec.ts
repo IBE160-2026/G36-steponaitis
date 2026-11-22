@@ -108,10 +108,12 @@ test.describe("uj1 plan overview", () => {
     await expect(page.getByRole("navigation", { name: "Plan steps" }).locator("[aria-current]")).toHaveCount(0);
   });
 
-  test("uj1 overview shows the error for a malformed plan id", async ({ page }) => {
+  test("uj1 malformed plan id is plan not found and opens saved plans", async ({ page }) => {
+    // Epic-1 retro item 4: an id that is no UUID names no plan (404 `plan_not_found`).
     await page.goto("/plans/abc/overview");
-    await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
-    await expect(page).toHaveURL(/\/plans\/abc\/overview$/);
+    await expect(page.getByText("This plan was deleted.")).toBeVisible();
+    await expect(page).toHaveURL(/\/plans$/);
+    await expect(page.getByRole("main").getByRole("heading", { name: "Saved plans", level: 1 })).toBeVisible();
   });
 
   test("uj1 unknown plan shows plan was deleted and opens saved plans", async ({ page }) => {
@@ -138,6 +140,7 @@ test.describe("uj1 plan overview", () => {
 
     await page.goto("/plans");
     await page.getByRole("table", { name: "Saved plans" }).getByRole("row", { name: plan.name }).click();
+    // The bare plan URL replaces itself with the overview: nothing is stored for this plan yet.
     await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/overview$`));
     await expect(page.getByRole("main").getByText(`Opening ${plan.name}…`)).toBeVisible();
     await expect(page.getByRole("main").locator("svg")).toHaveCount(0);
@@ -166,6 +169,7 @@ test.describe("uj1 plan overview", () => {
     await expect(page).toHaveURL(/\/plans$/);
     const table = page.getByRole("table", { name: "Saved plans" });
     await table.getByRole("row", { name }).click();
+    // Reopened on its last view in this browser (Story 6.2): the overview it was left on.
     await expect(page).toHaveURL(createdUrl);
     await expect(plate(page)).toContainText(name);
   });

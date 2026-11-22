@@ -27,6 +27,7 @@ from swp.domain.planning import (
     total_stock,
 )
 from swp.domain.state import AisleMark, PlanState, Rule, Run, Step
+from swp.domain.views.summary import undo_preview
 from tests.domain.answer_key import answer_key_import, empty_analysis, expected
 
 RULES: dict[str, Rule] = {"1": "rule_1", "2": "rule_2", "3": "rule_3", "Manual": "manual"}
@@ -477,3 +478,72 @@ def test_ad5_item36_reset_shape_passes() -> None:
     )
 
     check_step_invariants(before, PlanState(next_move_number=1))
+
+
+def _preview(data: ImportData, steps: Sequence[Step]) -> dict[str, object] | None:
+    preview = undo_preview(replay(data, steps).last)
+    return None if preview is None else preview.model_dump(mode="json")
+
+
+def test_ad5_undo_preview_null_without_steps(data: ImportData) -> None:
+    assert replay(data, []).last is None
+    assert _preview(data, []) is None
+
+
+def test_ad5_undo_preview_reverts_move(data: ImportData) -> None:
+    steps = [_step(3, "0100", "A-01-01-01", "C-01-03-02")]
+
+    assert _preview(data, steps) == {
+        "move_number": 3,
+        "part": "0100",
+        "from_location": "A-01-01-01",
+        "to_location": "C-01-03-02",
+        "effect": {"kind": "reverts_move", "move_number": 3},
+    }
+
+
+def test_ad5_undo_preview_splits_combined_move(data: ImportData) -> None:
+    steps = [
+        _step(4, "0100", "A-01-01-01", "C-01-03-02"),
+        _step(7, "0100", "C-01-03-02", "B-01-03-02"),
+    ]
+
+    assert _preview(data, steps) == {
+        "move_number": 7,
+        "part": "0100",
+        "from_location": "C-01-03-02",
+        "to_location": "B-01-03-02",
+        "effect": {"kind": "splits_combined_move", "move_number": 4},
+    }
+
+
+def test_ad5_undo_preview_restores_removed_move(data: ImportData) -> None:
+    steps = [
+        _step(4, "0100", "A-01-01-01", "C-01-03-02"),
+        _step(5, "1200", "A-01-02-01", "B-01-01-02"),
+        _step(6, "0100", "C-01-03-02", "A-01-01-01"),
+    ]
+
+    assert _preview(data, steps) == {
+        "move_number": 6,
+        "part": "0100",
+        "from_location": "C-01-03-02",
+        "to_location": "A-01-01-01",
+        "effect": {"kind": "restores_removed_move", "move_number": 4},
+    }
+
+
+def test_ad5_undo_preview_reads_only_the_last_step(data: ImportData) -> None:
+    # A combined move earlier in the log does not matter: the last step stands alone.
+    steps = [
+        _step(1, "0100", "A-01-01-01", "C-01-03-02"),
+        _step(2, "0100", "C-01-03-02", "B-01-03-02"),
+        _step(3, "1200", "A-01-02-01", "B-01-01-02"),
+    ]
+
+    preview = _preview(data, steps)
+
+    assert preview is not None
+    assert preview["effect"] == {"kind": "reverts_move", "move_number": 3}
+    fold = StepFold(data, steps)
+    assert fold.replay().last == replay(data, steps).last

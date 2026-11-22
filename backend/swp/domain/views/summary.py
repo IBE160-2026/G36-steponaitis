@@ -14,6 +14,8 @@ from pydantic import AwareDatetime, BaseModel
 from swp.domain.analysis import Analysis, AnalysisSettings
 from swp.domain.planning import (
     PlanningCopy,
+    StepOutcome,
+    UndoKind,
     best_counts,
     current_round,
     latest_run,
@@ -57,6 +59,39 @@ class StepSummary(BaseModel):
     count: int | None
 
 
+class UndoEffect(BaseModel):
+    """What undoing the last step does (AD-5): `reverts_move` takes back move `move_number`
+    (the step's own), `splits_combined_move` takes the step out of combined move
+    `move_number`, `restores_removed_move` brings back removed move `move_number`."""
+
+    kind: UndoKind
+    move_number: int
+
+
+class UndoPreview(BaseModel):
+    """The last step of the log and what undoing it would do (AD-5); never stored."""
+
+    move_number: int
+    part: str
+    from_location: str
+    to_location: str
+    effect: UndoEffect
+
+
+def undo_preview(last: StepOutcome | None) -> UndoPreview | None:
+    """The undo preview of the log's last step as the replay folded it; None without steps."""
+    if last is None:
+        return None
+    step = last.step
+    return UndoPreview(
+        move_number=step.move_number,
+        part=step.part,
+        from_location=step.from_location,
+        to_location=step.to_location,
+        effect=UndoEffect(kind=last.kind, move_number=last.move_number),
+    )
+
+
 class PlanSummary(BaseModel):
     id: uuid.UUID
     name: str
@@ -76,6 +111,7 @@ class PlanSummary(BaseModel):
     best_locations: int
     empty_best_locations: int
     apply_all_count: int
+    undo_preview: UndoPreview | None
     steps: list[StepSummary]
 
 
@@ -129,10 +165,12 @@ def build_summary(
     analysis: Analysis,
     state: PlanState,
     copy: PlanningCopy,
+    last_step: StepOutcome | None,
     location_count: int,
     part_count: int,
 ) -> PlanSummary:
-    """The summary of one plan from its stored fields, analysis, state and planning copy."""
+    """The summary of one plan from its stored fields, analysis, state, and the planning
+    copy and last-step outcome of one replay of its steps (AD-3, AD-5)."""
     best = best_counts(copy, state.best_marks)
     return PlanSummary(
         id=id,
@@ -153,5 +191,6 @@ def build_summary(
         best_locations=best.best,
         empty_best_locations=best.empty,
         apply_all_count=apply_all_count(state),
+        undo_preview=undo_preview(last_step),
         steps=steps(analysis, state, location_count=location_count, part_count=part_count),
     )

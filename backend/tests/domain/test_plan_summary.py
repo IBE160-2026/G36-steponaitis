@@ -9,7 +9,7 @@ from swp.domain.analysis import (
     PickGroup,
     build_analysis,
 )
-from swp.domain.planning import planning_copy
+from swp.domain.planning import replay
 from swp.domain.state import AisleMark, Outdated, PlanState, Recommendation, Run, Step
 from swp.domain.views.summary import STEP_KEYS, PlanSummary, build_summary
 from tests.domain.answer_key import answer_key_import
@@ -41,7 +41,8 @@ def _summary(state: PlanState | None = None, **analysis_fields: object) -> PlanS
         version=1,
         analysis=analysis,
         state=state,
-        copy=planning_copy(answer_key_import().data, state),
+        copy=(replayed := replay(answer_key_import().data, state.steps)).copy,
+        last_step=replayed.last,
         location_count=2_000,
         part_count=350,
     )
@@ -61,6 +62,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
     assert body["best_locations"] == 0
     assert body["empty_best_locations"] == 0
     assert body["apply_all_count"] == 0
+    assert body["undo_preview"] is None
     assert set(body) == {
         "id",
         "name",
@@ -80,6 +82,7 @@ def test_fr7_summary_fields_of_new_plan() -> None:
         "best_locations",
         "empty_best_locations",
         "apply_all_count",
+        "undo_preview",
         "steps",
     }
 
@@ -231,3 +234,26 @@ def test_fr7_recommendations_checked_when_none_open() -> None:
 
     assert _recommendations_step(_summary(state)) == (True, None)
     assert _recommendations_step(_summary(PlanState(runs=[_run_with()]))) == (True, None)
+
+
+def test_ad5_undo_preview_in_summary_from_last_step() -> None:
+    step = Step(
+        move_number=2,
+        part="0100",
+        from_location="A-01-01-01",
+        to_location="C-01-03-02",
+        rule="manual",
+        round=0,
+    )
+    state = PlanState(steps=[step], next_move_number=3)
+
+    preview = _summary(state).undo_preview
+
+    assert preview is not None
+    assert preview.model_dump(mode="json") == {
+        "move_number": 2,
+        "part": "0100",
+        "from_location": "A-01-01-01",
+        "to_location": "C-01-03-02",
+        "effect": {"kind": "reverts_move", "move_number": 2},
+    }

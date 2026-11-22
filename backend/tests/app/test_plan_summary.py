@@ -145,12 +145,15 @@ def test_fr9_unknown_plan_not_found(empty_tables: str) -> None:
     assert response.json()["error"]["message"] == "This plan does not exist."
 
 
-def test_fr9_bad_id_validation_failed(empty_tables: str) -> None:
+def test_fr9_bad_id_plan_not_found(empty_tables: str) -> None:
+    """Epic-1 retro item 4: an id that is no UUID names no plan, so it is `plan_not_found`."""
     with TestClient(create_app()) as client:
-        response = client.get("/api/plans/abc")
+        responses = [client.get(f"/api/plans/{bad}") for bad in ("abc", "1", "not-a-uuid-at-all")]
 
-    assert response.status_code == 422
-    assert response.json()["error"]["code"] == "validation_failed"
+    for response in responses:
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "plan_not_found"
+        assert response.json()["error"]["message"] == "This plan does not exist."
 
 
 def test_fr22_summary_and_locations_carry_stored_marks(empty_tables: str) -> None:
