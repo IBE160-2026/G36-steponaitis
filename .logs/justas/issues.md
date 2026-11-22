@@ -113,3 +113,5 @@
 - [ ] 2026-11-22 [5-1-run-rule-1-and-store-the-run](946-2026-11-22-13-11-56-5-1-run-rule-1-and-store-the-run.md) — oppfølgingsreview Story 5.1 (to middels funn rettet etter review: HTTP-test for kjøreresultat, `RunRecommendations`)
 - [ ] 2026-11-22 [5-1-run-rule-1-and-store-the-run](946-2026-11-22-13-11-56-5-1-run-rule-1-and-store-the-run.md) — koder for best-markeringer har ingen lengdegrense (utsatt i Story 5.1)
 - [ ] 2026-11-22 [5-4-rule-3-with-its-limits](943-2026-11-22-14-21-40-5-4-rule-3-with-its-limits.md) — FR-26: skal en del som var partner i et tidligere regel 3-flytt kunne flyttes av en svakere gruppe senere i samme kjøring? (Story 5.4, krav-beslutning)
+- [ ] 2026-11-22 [5-7-recommendations-page](940-2026-11-22-16-04-41-5-7-recommendations-page.md) — oppfølgingsreview Story 5.7: fokus etter andre kjøring og etter klikk på Apply er ikke testet
+- [ ] 2026-11-22 [5-7-recommendations-page](940-2026-11-22-16-04-41-5-7-recommendations-page.md) — tilgjengelighet: Recommendations-lista har regel-overskrifter og «Show more»-knapper inne i en listbox (ikke tillatt i ARIA); akseptkriteriene ber om oppsettet (Story 5.7)
