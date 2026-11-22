@@ -47,6 +47,7 @@ def build_search_view(
             version=version, query=query, parts=[], part_count=0, locations=[], location_count=0
         )
     copy = planning_copy(data, state)
+    marks = state.best_marks
     classified = {part: analysis.parts[part] for part in data.parts if part in analysis.parts}
     parts = [
         part
@@ -67,7 +68,8 @@ def build_search_view(
         ],
         part_count=len(parts),
         locations=[
-            LocationMatch(location=location_ref(copy, code)) for code in locations[:SEARCH_LIMIT]
+            LocationMatch(location=location_ref(copy, code, marks))
+            for code in locations[:SEARCH_LIMIT]
         ],
         location_count=len(locations),
     )

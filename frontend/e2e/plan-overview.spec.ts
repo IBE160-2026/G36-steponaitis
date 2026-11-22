@@ -54,6 +54,12 @@ test.describe("uj1 plan overview", () => {
     await expect(main.getByText("2026-09-30", { exact: true })).toBeVisible();
     await expect(main.getByText(uploaded, { exact: true })).toBeVisible();
     await expect(main.getByText("2025-10-01 to 2026-09-30", { exact: true })).toBeVisible();
+    // FR-22: the sample plan has no marks yet, so both best counts are 0.
+    for (const term of ["Best locations", "Empty best locations"]) {
+      const fact = main.locator("dt", { hasText: new RegExp(`^${term}$`) });
+      await expect(fact).toBeVisible();
+      await expect(fact.locator("xpath=following-sibling::dd[1]")).toHaveText("0");
+    }
     const classes = main.locator("li[data-class]");
     await expect(classes).toHaveCount(4);
     for (const [index, text] of ["Fast-moving80", "Medium-moving249", "Slow-moving580", "Dead stock636"].entries()) {

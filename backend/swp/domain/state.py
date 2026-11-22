@@ -6,21 +6,27 @@ older stored document validates after `state_migrations.upcast`.
 
 from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AisleMark(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     kind: Literal["aisle"] = "aisle"
     aisle: str
 
 
 class LevelMark(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     kind: Literal["level"] = "level"
     level: str
     aisle: str | None = None
 
 
 class LocationMark(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     kind: Literal["location"] = "location"
     location: str
 
@@ -38,6 +44,12 @@ class PlanState(BaseModel):
     steps: list[dict[str, object]] = Field(default_factory=list)
     next_move_number: int = 1
     recent_commands: list[dict[str, object]] = Field(default_factory=list)
+
+    @field_validator("best_marks")
+    @classmethod
+    def _unique_marks(cls, marks: list[BestMark]) -> list[BestMark]:
+        """Marks are a set of values: duplicates collapse to the first occurrence."""
+        return list(dict.fromkeys(marks))
 
     @classmethod
     def new(cls) -> Self:

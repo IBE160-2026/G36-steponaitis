@@ -162,6 +162,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AisleMark */
+        AisleMark: {
+            /** Aisle */
+            aisle: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "aisle";
+        };
         /** AisleOccupancy */
         AisleOccupancy: {
             /** Aisle */
@@ -271,6 +281,18 @@ export interface components {
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
         };
+        /** LevelMark */
+        LevelMark: {
+            /** Aisle */
+            aisle?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "level";
+            /** Level */
+            level: string;
+        };
         /** LocationContent */
         LocationContent: {
             /** Description */
@@ -279,6 +301,16 @@ export interface components {
             part: string;
             /** Stock */
             stock: string;
+        };
+        /** LocationMark */
+        LocationMark: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "location";
+            /** Location */
+            location: string;
         };
         /** LocationMatch */
         LocationMatch: {
@@ -306,6 +338,8 @@ export interface components {
         LocationRow: {
             /** Contents */
             contents: components["schemas"]["LocationContent"][];
+            /** Covering Marks */
+            covering_marks: (components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"])[];
             location: components["schemas"]["LocationRef"];
             /** Occupied */
             occupied: boolean;
@@ -445,6 +479,8 @@ export interface components {
         };
         /** PlanSummary */
         PlanSummary: {
+            /** Best Locations */
+            best_locations: number;
             class_counts: components["schemas"]["ClassCounts"];
             /**
              * Created At
@@ -460,6 +496,8 @@ export interface components {
              * Format: date
              */
             data_as_of: string;
+            /** Empty Best Locations */
+            empty_best_locations: number;
             /**
              * Id
              * Format: uuid

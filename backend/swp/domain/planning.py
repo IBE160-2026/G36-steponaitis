@@ -1,12 +1,13 @@
 """Kernel: the shared facts about the plan as it is now (AD-1, AD-3, FR-13, FR-14).
 
 This module holds the only implementations of the planning copy, stock per location,
-empty/occupied, current and other locations, and the aisle of a location. Every view
+empty/occupied, current and other locations, the aisle of a location, and which
+locations the best-location marks cover (AD-4, FR-21, FR-22). Every view
 imports these and never re-derives them. In Epic 2 the planning copy is the import itself;
 Epic 4 makes `planning_copy` replay the plan's moves without changing `PlanningCopy`.
 """
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from decimal import Decimal
 from types import MappingProxyType
@@ -14,7 +15,7 @@ from types import MappingProxyType
 from pydantic import BaseModel
 
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
-from swp.domain.state import PlanState
+from swp.domain.state import BestMark, PlanState
 
 ZERO = Decimal(0)
 _NO_STOCK: Mapping[str, Decimal] = MappingProxyType({})
@@ -103,6 +104,40 @@ def aisle_of(copy: PlanningCopy, location: str) -> str:
     return copy.locations[location].aisle
 
 
+def covering_marks(copy: PlanningCopy, location: str, marks: Sequence[BestMark]) -> list[BestMark]:
+    """The marks, in the given order, that cover `location` (none for an unknown code).
+
+    An aisle mark covers its aisle, a level mark its level in one aisle (or in all aisles
+    when `aisle` is None), a location mark its one code; matching is exact string equality.
+    """
+    loc = copy.locations.get(location)
+    if loc is None:
+        return []
+    return [
+        mark
+        for mark in marks
+        if (mark.kind == "aisle" and mark.aisle == loc.aisle)
+        or (mark.kind == "level" and mark.level == loc.level and mark.aisle in (None, loc.aisle))
+        or (mark.kind == "location" and mark.location == location)
+    ]
+
+
+def is_best(copy: PlanningCopy, location: str, marks: Sequence[BestMark]) -> bool:
+    """A location is best when any mark covers it."""
+    return bool(covering_marks(copy, location, marks))
+
+
+class BestCounts(BaseModel):
+    best: int
+    empty: int
+
+
+def best_counts(copy: PlanningCopy, marks: Sequence[BestMark]) -> BestCounts:
+    """The number of best locations and of best locations that are empty."""
+    best = [code for code in copy.locations if is_best(copy, code, marks)]
+    return BestCounts(best=len(best), empty=sum(1 for code in best if is_empty(copy, code)))
+
+
 class LocationRef(BaseModel):
     """A location on the wire (AD-3)."""
 
@@ -114,8 +149,8 @@ class LocationRef(BaseModel):
     is_best: bool
 
 
-def location_ref(copy: PlanningCopy, code: str) -> LocationRef:
-    """The wire reference of a location; `is_best` is false until Epic 3."""
+def location_ref(copy: PlanningCopy, code: str, marks: Sequence[BestMark]) -> LocationRef:
+    """The wire reference of a location, best when any of `marks` covers it."""
     location = copy.locations[code]
     return LocationRef(
         code=code,
@@ -123,5 +158,5 @@ def location_ref(copy: PlanningCopy, code: str) -> LocationRef:
         level=location.level,
         section=location.section,
         position=location.position,
-        is_best=False,
+        is_best=is_best(copy, code, marks),
     )

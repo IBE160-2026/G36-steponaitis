@@ -52,6 +52,7 @@ def build_parts_view(
 ) -> PartsView:
     """The roster of the plan as it is now, in `ordering.part_order`."""
     copy = planning_copy(data, state)
+    marks = state.best_marks
     listed = {part: analysis.parts[part] for part in data.parts if part in analysis.parts}
     group_counts = Counter(
         part for group in analysis.pick_groups for part in (group.part_a, group.part_b)
@@ -69,8 +70,12 @@ def build_parts_view(
                 description=data.parts[part],
                 total_stock=totals[part],
                 total_stock_sort_rank=stock_rank[totals[part]],
-                current_location=location_ref(copy, current) if current is not None else None,
-                other_locations=[location_ref(copy, code) for code in other_locations(copy, part)],
+                current_location=location_ref(copy, current, marks)
+                if current is not None
+                else None,
+                other_locations=[
+                    location_ref(copy, code, marks) for code in other_locations(copy, part)
+                ],
                 movement_class=listed[part].movement_class,
                 picks=listed[part].picks,
                 pick_group_count=group_counts[part],
@@ -149,6 +154,7 @@ def build_part_detail(
     if facts is None or part not in data.parts:
         raise DomainError("not_found", f"No part {part} in this plan.")
     copy = planning_copy(data, state)
+    marks = state.best_marks
     current = current_location(copy, part)
     groups = []
     for group in pick_group_order(analysis.pick_groups):
@@ -166,9 +172,11 @@ def build_part_detail(
         picks=facts.picks,
         class_threshold=class_threshold(analysis.settings, facts.movement_class),
         total_stock=total_stock(copy, part),
-        current_location=location_ref(copy, current) if current is not None else None,
+        current_location=location_ref(copy, current, marks) if current is not None else None,
         other_locations=[
-            StockedLocation(location=location_ref(copy, code), stock=stock_at(copy, part, code))
+            StockedLocation(
+                location=location_ref(copy, code, marks), stock=stock_at(copy, part, code)
+            )
             for code in other_locations(copy, part)
         ],
         pick_groups=groups,

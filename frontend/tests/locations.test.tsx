@@ -29,6 +29,7 @@ function row(code: string, overrides: { occupied?: boolean; is_best?: boolean } 
     walk_path: "1250",
     occupied,
     contents: occupied ? [{ part: "0100", description: "Wiper blade - Volvo V70", stock: "4" }] : [],
+    covering_marks: overrides.is_best ? [{ kind: "location", location: code }] : [],
   };
 }
 

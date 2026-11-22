@@ -71,7 +71,7 @@ def test_fr14_zero_stock_location_is_empty(copy) -> None:
 
 def test_fr13_aisle_of_and_location_ref(copy) -> None:
     assert aisle_of(copy, "B-01-01-02") == "B"
-    ref = location_ref(copy, "B-01-01-02")
+    ref = location_ref(copy, "B-01-01-02", [])
     assert isinstance(ref, LocationRef)
     assert ref.code == "B-01-01-02"
     assert ref.aisle == "B"

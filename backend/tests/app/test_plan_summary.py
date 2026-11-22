@@ -1,5 +1,6 @@
 """FR-7/FR-8/FR-9: the plan summary and saved-plans list only read the database."""
 
+import dataclasses
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -9,8 +10,10 @@ from sqlalchemy import select, update
 from swp.api.app import create_app
 from swp.app import plans
 from swp.app.imports import read_import
+from swp.domain.state import AisleMark
 from swp.store.db import get_engine
 from swp.store.models import PlanRow
+from swp.store.plans import insert_plan_with_import
 from tests.app.test_create_plan import SAME_ORIGIN, _multipart, _small_files
 from tests.app.test_import_readers import _data_files
 
@@ -48,6 +51,8 @@ def test_fr7_summary_from_sample_files(empty_tables: str) -> None:
     assert body["current_round"] == 0
     assert body["version"] == 1
     assert body["class_counts"] == {"fast": 80, "medium": 249, "slow": 580, "dead": 636}
+    assert body["best_locations"] == 0
+    assert body["empty_best_locations"] == 0
     assert [s["checked"] for s in body["steps"]] == [True] * 4 + [False] * 4
     counts = {s["key"]: s["count"] for s in body["steps"]}
     assert counts["locations"] == 2_000
@@ -146,3 +151,35 @@ def test_fr9_bad_id_validation_failed(empty_tables: str) -> None:
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "validation_failed"
+
+
+def test_fr22_summary_and_locations_carry_stored_marks(empty_tables: str) -> None:
+    created = plans.require(_create("Source", NOW))
+    data = created.imported.data
+    aisle = min(location.aisle for location in data.locations.values())
+    marked = dataclasses.replace(
+        created,
+        id=uuid.uuid4(),
+        import_id=(import_id := uuid.uuid4()),
+        imported=dataclasses.replace(created.imported, id=import_id),
+        state=created.state.model_copy(update={"best_marks": [AisleMark(aisle=aisle)]}),
+    )
+    insert_plan_with_import(marked)
+    in_aisle = {code for code, location in data.locations.items() if location.aisle == aisle}
+    stocked = {line.location for line in data.inventory if line.quantity > 0}
+
+    with TestClient(create_app()) as client:
+        summary = client.get(f"/api/plans/{marked.id}")
+        locations = client.get(f"/api/plans/{marked.id}/locations")
+
+    assert summary.status_code == 200, summary.text
+    assert summary.json()["best_locations"] == len(in_aisle) > 0
+    assert summary.json()["empty_best_locations"] == len(in_aisle - stocked)
+    assert locations.status_code == 200, locations.text
+    for row in locations.json()["locations"]:
+        if row["location"]["code"] in in_aisle:
+            assert row["location"]["is_best"] is True
+            assert row["covering_marks"] == [{"kind": "aisle", "aisle": aisle}]
+        else:
+            assert row["location"]["is_best"] is False
+            assert row["covering_marks"] == []

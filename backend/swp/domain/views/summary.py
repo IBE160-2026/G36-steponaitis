@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import AwareDatetime, BaseModel
 
 from swp.domain.analysis import Analysis, AnalysisSettings
+from swp.domain.planning import PlanningCopy, best_counts
 from swp.domain.state import PlanState
 
 StepKey = Literal[
@@ -65,6 +66,8 @@ class PlanSummary(BaseModel):
     period_start: date
     period_end: date
     class_counts: ClassCounts
+    best_locations: int
+    empty_best_locations: int
     steps: list[StepSummary]
 
 
@@ -117,10 +120,12 @@ def build_summary(
     version: int,
     analysis: Analysis,
     state: PlanState,
+    copy: PlanningCopy,
     location_count: int,
     part_count: int,
 ) -> PlanSummary:
-    """The summary of one plan from its stored fields, analysis and state."""
+    """The summary of one plan from its stored fields, analysis, state and planning copy."""
+    best = best_counts(copy, state.best_marks)
     return PlanSummary(
         id=id,
         name=name,
@@ -137,5 +142,7 @@ def build_summary(
         period_start=analysis.period_start,
         period_end=analysis.period_end,
         class_counts=class_counts(analysis),
+        best_locations=best.best,
+        empty_best_locations=best.empty,
         steps=steps(analysis, state, location_count=location_count, part_count=part_count),
     )

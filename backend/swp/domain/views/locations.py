@@ -10,8 +10,14 @@ from pydantic import BaseModel
 
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import aisle_order, location_order
-from swp.domain.planning import LocationRef, is_occupied, location_ref, planning_copy
-from swp.domain.state import PlanState
+from swp.domain.planning import (
+    LocationRef,
+    covering_marks,
+    is_occupied,
+    location_ref,
+    planning_copy,
+)
+from swp.domain.state import BestMark, PlanState
 from swp.domain.values import Dec
 
 
@@ -26,6 +32,7 @@ class LocationRow(BaseModel):
     walk_path: Dec
     occupied: bool
     contents: list[LocationContent]
+    covering_marks: list[BestMark]
 
 
 class Occupancy(BaseModel):
@@ -72,10 +79,11 @@ def build_locations_view(data: ImportData, state: PlanState, version: int) -> Lo
         ]
         rows.append(
             LocationRow(
-                location=location_ref(copy, code),
+                location=location_ref(copy, code, state.best_marks),
                 walk_path=copy.locations[code].walk_path,
                 occupied=is_occupied(copy, code),
                 contents=contents,
+                covering_marks=covering_marks(copy, code, state.best_marks),
             )
         )
     aisles = []

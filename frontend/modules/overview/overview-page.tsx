@@ -1,7 +1,7 @@
 "use client";
 
-// Overview (FR-7, FR-18, UX-DR21/22): the plan's dates, period, parts per movement class and the
-// settings it was computed with.
+// Overview (FR-7, FR-18, FR-22, UX-DR21/22): the plan's dates, period, best and empty best
+// location counts (from the server), parts per movement class and the settings it was computed with.
 
 import Link from "next/link";
 
@@ -21,6 +21,8 @@ export function OverviewView({ summary }: { summary: PlanSummary }) {
     { term: "Data as of", value: formatDate(summary.data_as_of) },
     { term: "Uploaded", value: formatDate(summary.uploaded_at) },
     { term: "Period", value: `${formatDate(summary.period_start)} to ${formatDate(summary.period_end)}` },
+    { term: "Best locations", value: formatNumber(summary.best_locations) },
+    { term: "Empty best locations", value: formatNumber(summary.empty_best_locations) },
   ];
   return (
     <div className="flex max-w-[960px] flex-col gap-6 px-page-gutter py-5">

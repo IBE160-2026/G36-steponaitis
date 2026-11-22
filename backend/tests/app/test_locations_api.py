@@ -23,9 +23,10 @@ def test_fr14_locations_endpoint_on_sample(empty_tables: str) -> None:
     rows = body["locations"]
     assert len(rows) == 2_000
     assert len({row["location"]["code"] for row in rows}) == 2_000
-    assert set(rows[0]) == {"location", "walk_path", "occupied", "contents"}
+    assert set(rows[0]) == {"location", "walk_path", "occupied", "contents", "covering_marks"}
     assert set(rows[0]["location"]) == {"code", "aisle", "level", "section", "position", "is_best"}
     assert isinstance(rows[0]["walk_path"], str)
+    assert not any(row["location"]["is_best"] or row["covering_marks"] for row in rows)
     with_contents = next(row for row in rows if row["contents"])
     assert set(with_contents["contents"][0]) == {"part", "description", "stock"}
     assert isinstance(with_contents["contents"][0]["stock"], str)

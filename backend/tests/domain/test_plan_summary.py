@@ -9,8 +9,10 @@ from swp.domain.analysis import (
     PickGroup,
     build_analysis,
 )
+from swp.domain.planning import planning_copy
 from swp.domain.state import AisleMark, PlanState
 from swp.domain.views.summary import STEP_KEYS, PlanSummary, build_summary
+from tests.domain.answer_key import answer_key_import
 
 SETTINGS = AnalysisSettings(
     period_months=12,
@@ -25,6 +27,7 @@ DATA_AS_OF = date(2026, 9, 30)
 
 def _summary(state: PlanState | None = None, **analysis_fields: object) -> PlanSummary:
     analysis = build_analysis(DATA_AS_OF, SETTINGS).model_copy(update=analysis_fields)
+    state = state if state is not None else PlanState.new()
     return build_summary(
         id=uuid.UUID(int=1),
         name="Demo",
@@ -37,7 +40,8 @@ def _summary(state: PlanState | None = None, **analysis_fields: object) -> PlanS
         last_edited_at=NOW,
         version=1,
         analysis=analysis,
-        state=state if state is not None else PlanState.new(),
+        state=state,
+        copy=planning_copy(answer_key_import().data, state),
         location_count=2_000,
         part_count=350,
     )
@@ -54,6 +58,8 @@ def test_fr7_summary_fields_of_new_plan() -> None:
     assert body["current_round"] == 0
     assert body["version"] == 1
     assert body["class_counts"] == {"fast": 0, "medium": 0, "slow": 0, "dead": 0}
+    assert body["best_locations"] == 0
+    assert body["empty_best_locations"] == 0
     assert set(body) == {
         "id",
         "name",
@@ -70,6 +76,8 @@ def test_fr7_summary_fields_of_new_plan() -> None:
         "period_start",
         "period_end",
         "class_counts",
+        "best_locations",
+        "empty_best_locations",
         "steps",
     }
 
@@ -122,3 +130,10 @@ def test_fr7_current_round_is_highest_run_round() -> None:
 
     assert _summary(state).current_round == 3
     assert _summary(PlanState(runs=[{"other": 1}])).current_round == 0
+
+
+def test_fr22_summary_carries_best_and_empty_best_counts() -> None:
+    body = _summary(PlanState(best_marks=[AisleMark(aisle="A")])).model_dump(mode="json")
+
+    assert body["best_locations"] == 9
+    assert body["empty_best_locations"] == 1

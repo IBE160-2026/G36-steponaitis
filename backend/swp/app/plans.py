@@ -13,6 +13,7 @@ from swp.domain.classify import classify_parts
 from swp.domain.errors import DomainError
 from swp.domain.import_data import NormalizedImport
 from swp.domain.pick_groups import find_pick_groups
+from swp.domain.planning import planning_copy
 from swp.domain.state import PlanState
 from swp.domain.views.summary import PlanSummary, build_summary
 from swp.store import plans as store
@@ -133,6 +134,7 @@ def summary(plan_id: uuid.UUID) -> PlanSummary:
         version=plan.version,
         analysis=plan.analysis,
         state=plan.state,
+        copy=planning_copy(plan.imported.data, plan.state),
         location_count=len(plan.imported.data.locations),
         part_count=len(plan.imported.data.parts),
     )

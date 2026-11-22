@@ -41,6 +41,8 @@ function summary(overrides: Partial<PlanSummary> = {}): PlanSummary {
     period_start: "2025-10-01",
     period_end: "2026-09-30",
     class_counts: { fast: 1584, medium: 12, slow: 3, dead: 0 },
+    best_locations: 0,
+    empty_best_locations: 0,
     steps: [],
     ...overrides,
   };
@@ -118,6 +120,15 @@ describe("fr7 overview", () => {
     expect(markup.match(/<svg[^>]*data-class=/g)).toHaveLength(4);
     expect(body).toContain("Fast-moving 24 or more picks");
     expect(markup).toContain(`href="${planSettingsHref(PLAN_ID)}"`);
+  });
+
+  it("fr22_overview_shows_best_and_empty_best_counts", () => {
+    expect(text(html(<OverviewView summary={summary()} />))).toContain(
+      "Best locations 0 Empty best locations 0",
+    );
+    const body = text(html(<OverviewView summary={summary({ best_locations: 1234, empty_best_locations: 7 })} />));
+    expect(body).toContain("Best locations 1,234");
+    expect(body).toContain("Empty best locations 7");
   });
 
   it("fr7_overview_opening_text_uses_the_cached_plan_name", () => {
