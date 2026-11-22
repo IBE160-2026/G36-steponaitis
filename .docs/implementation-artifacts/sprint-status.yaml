@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-22-2026 11:39
+last_updated: 11-22-2026 11:52
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -67,7 +67,7 @@ development_status:
   4-2-make-a-manual-move-command-and-preview: done
   4-3-manual-move-dialog-from-the-part-panel: done
   4-4-views-follow-the-planning-copy: done
-  4-5-before-after-counts-in-the-domain: in-progress
+  4-5-before-after-counts-in-the-domain: done
   4-6-before-after-page: backlog
   epic-4-retrospective: optional
 
