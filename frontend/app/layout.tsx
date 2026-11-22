@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/common/app-shell";
+import { Launcher } from "@/modules/launcher/launcher";
 
 import "./globals.css";
 import { Providers } from "./providers";
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en">
       <body>
         <Providers>
-          <AppShell>{children}</AppShell>
+          <AppShell launcher={<Launcher />}>{children}</AppShell>
         </Providers>
       </body>
     </html>

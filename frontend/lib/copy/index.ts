@@ -166,6 +166,9 @@ export function appliedToast(event: MoveMadeEvent): string {
   return `${appliedText(event)} · ${event.part} ${event.from_location} → ${event.to_location}`;
 }
 
+/** Why Apply all is disabled when the latest run has nothing open to apply (FR-30). */
+export const NO_OPEN_TO_APPLY = "No open recommendations to apply.";
+
 /** The Apply all confirm question (UX-DR34). */
 export function applyAllQuestion(count: number, round: number): string {
   return `Apply ${recommendationsCount(count)} from round ${formatNumber(round)}? Undo reverses them one move at a time.`;

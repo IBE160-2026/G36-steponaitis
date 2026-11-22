@@ -251,6 +251,7 @@ export function ManualMoveDialog({ planId, detail, open, onOpenChange, returnFoc
       <Dialog.Portal>
         <Dialog.Overlay className={`fixed inset-0 z-50 bg-ink/45 ${FADE}`} />
         <Dialog.Content
+          aria-modal="true"
           className={`fixed top-1/2 left-1/2 z-50 w-[calc(100vw-32px)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-surface p-5 text-ink shadow-overlay ${FADE}`}
           onOpenAutoFocus={(event) => {
             event.preventDefault();

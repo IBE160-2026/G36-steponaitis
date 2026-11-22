@@ -41,6 +41,7 @@ import {
   appliedToast,
   applyAllQuestion,
   applyAllToast,
+  NO_OPEN_TO_APPLY,
   noSpaceText,
   outdatedText,
   reasonSegments,
@@ -75,7 +76,6 @@ import {
 
 export const RUN_LABEL = "Run recommendations";
 export const RUNNING_LABEL = "Running…";
-export const NO_OPEN_TO_APPLY = "No open recommendations to apply.";
 export const LOADING_PART = "Loading the part…";
 export const NO_BEST_NOTE = "Rule 1 and rule 2 need best locations. Rule 3 runs without them.";
 export const NO_RUN = "No run yet. Run recommendations to start round 1 on the planning copy as it is now.";

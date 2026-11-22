@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { NoSpaceRow, PlanSummary, RecommendationRow, RecommendationsView, RunMeta } from "@/lib/api/plans";
 import { SAVING_REASON } from "@/lib/commands";
+import { NO_OPEN_TO_APPLY } from "@/lib/copy";
 import { parseRecommendationsTab, type RecommendationsTab } from "@/lib/view-state/urls";
 import {
   bandViews,
@@ -23,7 +24,6 @@ import {
   eyebrowText,
   failedRunText,
   NO_BEST_NOTE,
-  NO_OPEN_TO_APPLY,
   NO_RUN,
   RecommendationsView as View,
 } from "@/modules/recommendations/recommendations-page";

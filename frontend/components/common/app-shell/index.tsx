@@ -8,7 +8,8 @@ import { RememberPlanView } from "@/components/common/app-shell/remember-plan-vi
 import { PlanSaveStatus } from "@/components/common/app-shell/save-status";
 import { Toolbar } from "@/components/common/app-shell/toolbar";
 
-export function AppShell({ children }: { children: ReactNode }) {
+/** `launcher` is the toolbar's launcher slot (Story 6.5), passed in by app/layout.tsx. */
+export function AppShell({ children, launcher }: { children: ReactNode; launcher?: ReactNode }) {
   return (
     <>
       <a
@@ -17,7 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <Toolbar />
+      <Toolbar launcher={launcher} />
       <Suspense fallback={null}>
         <RememberPlanView />
       </Suspense>

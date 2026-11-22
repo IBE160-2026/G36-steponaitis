@@ -4,9 +4,11 @@
 // plan plate and the flow bar. Sticky while the viewport is at least 500px tall; below that it
 // scrolls with the page. It lives in the root layout, so it learns the open plan from the URL
 // (AD-20) and reads only the plan summary and saved-plans queries (AD-3). Off plan paths the steps are plain text.
+// On plan paths the launcher slot (Story 6.5) follows the flow bar; the toolbar never imports a module.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { FlowBar } from "@/components/common/app-shell/flow-bar";
 import { PlanPlate, planMenuItems } from "@/components/common/app-shell/plan-plate";
@@ -47,7 +49,12 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   );
 }
 
-export function Toolbar() {
+export type ToolbarProps = {
+  /** The launcher's grid button (app/layout.tsx passes it in); rendered after the flow bar on plan paths only. */
+  launcher?: ReactNode;
+};
+
+export function Toolbar({ launcher }: ToolbarProps) {
   const planPath = parsePlanPath(usePathname() ?? "");
   return (
     <header
@@ -60,7 +67,14 @@ export function Toolbar() {
           Smart Warehouse Planner
         </span>
       </Link>
-      {planPath ? <PlanToolbarParts key={planPath.planId} planId={planPath.planId} view={planPath.view} /> : <FlowBar />}
+      {planPath ? (
+        <>
+          <PlanToolbarParts key={planPath.planId} planId={planPath.planId} view={planPath.view} />
+          {launcher}
+        </>
+      ) : (
+        <FlowBar />
+      )}
     </header>
   );
 }

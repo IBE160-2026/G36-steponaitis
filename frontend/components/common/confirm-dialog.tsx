@@ -1,8 +1,9 @@
 "use client";
 
 // Confirm dialog (UX-DR16): Cancel comes first and has the focus when the dialog opens; the
-// destructive action names what is lost. Focus returns to the opener on close (radix default),
-// unless `onCloseAutoFocus` places it (call `event.preventDefault()` there to skip the default).
+// destructive action names what is lost (a non-destructive confirm, Apply all, uses the primary
+// button). Focus returns to the opener on close (radix default), unless `onCloseAutoFocus` places
+// it (call `event.preventDefault()` there to skip the default).
 
 import { AlertDialog } from "radix-ui";
 import type { ReactNode } from "react";
@@ -21,6 +22,8 @@ type ConfirmDialogProps = {
   onConfirm: () => void;
   /** Runs when the dialog closes, before focus returns to the opener; see AlertDialog.Content. */
   onCloseAutoFocus?: (event: Event) => void;
+  /** The confirm action loses something (default): the destructive button. `false` gives the primary one. */
+  destructive?: boolean;
 };
 
 const FADE =
@@ -34,6 +37,7 @@ export function ConfirmDialog({
   confirmLabel,
   onConfirm,
   onCloseAutoFocus,
+  destructive = true,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -53,7 +57,7 @@ export function ConfirmDialog({
                 </AlertDialog.Cancel>
               ) : (
                 <AlertDialog.Action key={kind} asChild>
-                  <Button variant="destructive" onClick={onConfirm}>
+                  <Button variant={destructive ? "destructive" : "primary"} onClick={onConfirm}>
                     {confirmLabel}
                   </Button>
                 </AlertDialog.Action>
