@@ -1,7 +1,8 @@
 """The locations table behind GET /api/plans/{id}/locations (FR-14, AD-3, AD-14, AD-15).
 
 Pure: one planning copy per request, every row and every occupancy count built from it; it
-never writes. Lists every location in the import once, in `ordering.location_order`.
+never writes. Lists every location in the import once, in `ordering.location_order`, the
+plan's marks in `ordering.mark_order` and the import's distinct levels in `level_key` order.
 """
 
 from decimal import ROUND_HALF_UP, Decimal
@@ -9,7 +10,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pydantic import BaseModel
 
 from swp.domain.import_data import ImportData
-from swp.domain.ordering import aisle_order, location_order
+from swp.domain.ordering import aisle_order, level_key, location_order, mark_order
 from swp.domain.planning import (
     LocationRef,
     covering_marks,
@@ -51,6 +52,8 @@ class LocationsView(BaseModel):
     locations: list[LocationRow]
     aisles: list[AisleOccupancy]
     warehouse: Occupancy
+    marks: list[BestMark]
+    levels: list[str]
 
 
 def occupied_percent(occupied: int, total: int) -> str:
@@ -96,4 +99,12 @@ def build_locations_view(data: ImportData, state: PlanState, version: int) -> Lo
         )
     total, occupied, empty, pct = _occupancy(rows)
     warehouse = Occupancy(locations=total, occupied=occupied, empty=empty, occupied_percent=pct)
-    return LocationsView(version=version, locations=rows, aisles=aisles, warehouse=warehouse)
+    levels = {location.level for location in copy.locations.values()}
+    return LocationsView(
+        version=version,
+        locations=rows,
+        aisles=aisles,
+        warehouse=warehouse,
+        marks=mark_order(state.best_marks, copy.locations),
+        levels=sorted(levels, key=level_key(levels)),
+    )

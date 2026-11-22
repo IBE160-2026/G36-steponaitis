@@ -377,8 +377,12 @@ export interface components {
         LocationsView: {
             /** Aisles */
             aisles: components["schemas"]["AisleOccupancy"][];
+            /** Levels */
+            levels: string[];
             /** Locations */
             locations: components["schemas"]["LocationRow"][];
+            /** Marks */
+            marks: (components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"])[];
             /** Version */
             version: number;
             warehouse: components["schemas"]["Occupancy"];

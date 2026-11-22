@@ -8,8 +8,16 @@ import { type FullConfig, request } from "@playwright/test";
 // build with nothing to compile, so there it is a cheap warm-up.
 
 const PLAN = "00000000-0000-0000-0000-000000000000";
-// One built step per route file, plus "best-locations" for the `[step]` placeholder route.
-const PLAN_STEPS = ["overview", "parts", "locations", "pick-groups", "settings", "best-locations"];
+// One built step per route file, plus "recommendations" for the `[step]` placeholder route.
+const PLAN_STEPS = [
+  "overview",
+  "parts",
+  "locations",
+  "pick-groups",
+  "best-locations",
+  "settings",
+  "recommendations",
+];
 
 export default async function warmRoutes(config: FullConfig): Promise<void> {
   const baseURL = config.projects[0]?.use.baseURL;

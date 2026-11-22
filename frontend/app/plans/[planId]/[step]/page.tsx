@@ -1,4 +1,4 @@
-// Steps 2 to 8 until their epics build them; an unknown step is a 404.
+// The steps not built yet (until their epics build them); an unknown step is a 404.
 
 import { notFound } from "next/navigation";
 

@@ -31,6 +31,8 @@ export type PartPickGroup = components["schemas"]["PartPickGroup"];
 export type SearchView = components["schemas"]["SearchView"];
 export type PartMatch = components["schemas"]["PartMatch"];
 export type LocationMatch = components["schemas"]["LocationMatch"];
+/** A best-location mark (AD-4): a whole aisle, a level (in one aisle or all aisles) or one location. */
+export type BestMark = LocationsView["marks"][number];
 
 /** The body of `POST /api/plans/{id}/commands` (AD-6): one of the closed command union. */
 export type Command =

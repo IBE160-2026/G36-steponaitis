@@ -1,16 +1,16 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import type { LocationRow, LocationsView as LocationsData } from "@/lib/api/plans";
-import { parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 import {
   aisleFromParams,
   countLine,
   filterLocations,
-  LocationsView,
   NO_FILTERS,
   occupancyLine,
-} from "@/modules/locations/locations-page";
+} from "@/components/common/locations-table";
+import type { LocationRow, LocationsView as LocationsData } from "@/lib/api/plans";
+import { parseLocationParams, planStepHref } from "@/lib/view-state/urls";
+import { LocationsView } from "@/modules/locations/locations-page";
 
 // Story 2.4: the locations table with occupancy (FR-14, UX-DR9, UX-DR27, UX-DR57). Rendered to
 // static markup; Vitest has no DOM, so filtering and URL handling are tested as pure helpers.
@@ -112,6 +112,8 @@ describe("uxdr57 occupancy in words", () => {
       { aisle: "C", locations: 1, occupied: 1, empty: 0, occupied_percent: "100.0" },
     ],
     warehouse: { locations: 5, occupied: 3, empty: 2, occupied_percent: "60.0" },
+    marks: [{ kind: "location", location: "B-01" }, { kind: "location", location: "B-02" }],
+    levels: ["1"],
   };
 
   it("uxdr57_occupancy_in_words", () => {

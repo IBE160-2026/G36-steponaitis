@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterable, Mapping
 
 from swp.domain.analysis import PartAnalysis, PickGroup
 from swp.domain.import_data import LocationData
+from swp.domain.state import AisleMark, BestMark, LevelMark, LocationMark
 
 
 def pick_group_order(groups: Iterable[PickGroup]) -> list[PickGroup]:
@@ -42,3 +43,30 @@ def location_order(locations: Mapping[str, LocationData]) -> list[str]:
         return (location.aisle, by_level(location.level), location.walk_path, code)
 
     return sorted(locations, key=key)
+
+
+def mark_order(marks: Iterable[BestMark], locations: Mapping[str, LocationData]) -> list[BestMark]:
+    """Aisle marks (by aisle); then level marks (by `level_key` over the import's levels, all
+    aisles before one aisle, then by aisle); then location marks (by `location_order`
+    position, codes not in the import last, by code)."""
+    marks = list(marks)
+    numeric = all(location.level.isdecimal() for location in locations.values())
+    by_level = level_key(location.level for location in locations.values())
+
+    def level_sort(mark: LevelMark) -> tuple[object, ...]:
+        # A text level against an all-numeric import has no numeric key: it sorts last.
+        if numeric and not mark.level.isdecimal():
+            level: tuple[object, ...] = (1, (mark.level,))
+        else:
+            level = (0, by_level(mark.level))
+        return (level, mark.aisle is not None, mark.aisle or "")
+
+    position = {code: index for index, code in enumerate(location_order(locations))}
+    return [
+        *sorted((m for m in marks if isinstance(m, AisleMark)), key=lambda m: m.aisle),
+        *sorted((m for m in marks if isinstance(m, LevelMark)), key=level_sort),
+        *sorted(
+            (m for m in marks if isinstance(m, LocationMark)),
+            key=lambda m: (m.location not in position, position.get(m.location, 0), m.location),
+        ),
+    ]

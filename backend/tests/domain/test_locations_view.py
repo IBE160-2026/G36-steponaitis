@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
 from swp.domain.ordering import location_order
-from swp.domain.state import PlanState
+from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState
 from swp.domain.views.locations import LocationsView, build_locations_view, occupied_percent
 from tests.domain.answer_key import answer_key_import, expected
 
@@ -125,3 +125,73 @@ def test_fr14_occupied_percent_rounding() -> None:
     assert occupied_percent(0, 5) == "0.0"
     assert occupied_percent(5, 5) == "100.0"
     assert occupied_percent(8, 9) == "88.9"
+
+
+def test_fr21_locations_view_lists_marks_in_order() -> None:
+    marks = [
+        LocationMark(location="ZZ-99"),
+        LocationMark(location="B-01-02-01"),
+        LevelMark(level="2", aisle="B"),
+        AisleMark(aisle="C"),
+        LevelMark(level="10", aisle=None),
+        LocationMark(location="A-01-01-02"),
+        LevelMark(level="2", aisle=None),
+        AisleMark(aisle="A"),
+        LevelMark(level="1", aisle="A"),
+    ]
+    state = PlanState.new().model_copy(update={"best_marks": marks})
+    view = build_locations_view(answer_key_import().data, state, 2)
+    assert view.marks == [
+        AisleMark(aisle="A"),
+        AisleMark(aisle="C"),
+        LevelMark(level="1", aisle="A"),
+        LevelMark(level="2", aisle=None),
+        LevelMark(level="2", aisle="B"),
+        LevelMark(level="10", aisle=None),
+        LocationMark(location="A-01-01-02"),
+        LocationMark(location="B-01-02-01"),
+        LocationMark(location="ZZ-99"),
+    ]
+    assert _view().marks == []
+
+
+def test_fr21_locations_view_lists_levels() -> None:
+    data = answer_key_import().data
+    levels = {location.level for location in data.locations.values()}
+    view = _view()
+    assert sorted(view.levels) == sorted(levels)
+    assert len(view.levels) == len(levels)
+    assert view.levels == sorted(levels, key=int)
+    data = ImportData(
+        locations={
+            "A-10": _location("A", "10", "0"),
+            "A-2": _location("A", "2", "0"),
+            "B-2": _location("B", "2", "0"),
+        },
+        inventory=[],
+        parts={},
+        transactions=[],
+    )
+    assert build_locations_view(data, PlanState.new(), 1).levels == ["2", "10"]
+
+
+def test_fr21_text_level_mark_over_numeric_import_sorts_last() -> None:
+    state = PlanState.new().model_copy(
+        update={"best_marks": [LevelMark(level="X"), LevelMark(level="2")]}
+    )
+    view = build_locations_view(answer_key_import().data, state, 2)
+    assert view.marks == [LevelMark(level="2"), LevelMark(level="X")]
+
+
+def test_fr21_text_levels_list_in_str_order() -> None:
+    data = ImportData(
+        locations={
+            "A-B": _location("A", "B", "0"),
+            "A-A": _location("A", "A", "0"),
+            "A-10": _location("A", "10", "0"),
+        },
+        inventory=[],
+        parts={},
+        transactions=[],
+    )
+    assert build_locations_view(data, PlanState.new(), 1).levels == ["10", "A", "B"]

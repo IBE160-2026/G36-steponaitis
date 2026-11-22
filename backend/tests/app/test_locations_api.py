@@ -6,6 +6,7 @@ import uuid
 from fastapi.testclient import TestClient
 
 from swp.api.app import create_app
+from tests.app.test_create_plan import SAME_ORIGIN
 from tests.app.test_parts_api import _sample_plan
 from tests.app.test_plan_summary import _row
 
@@ -18,7 +19,9 @@ def test_fr14_locations_endpoint_on_sample(empty_tables: str) -> None:
 
     assert response.status_code == 200, response.text
     body = response.json()
-    assert set(body) == {"version", "locations", "aisles", "warehouse"}
+    assert set(body) == {"version", "locations", "aisles", "warehouse", "marks", "levels"}
+    assert body["marks"] == []
+    assert body["levels"]
     assert body["version"] == 1
     rows = body["locations"]
     assert len(rows) == 2_000
@@ -64,3 +67,29 @@ def test_nfr8_locations_view_under_one_second(empty_tables: str) -> None:
 
     assert response.status_code == 200
     assert elapsed < 1.0, f"{elapsed:.2f} s"
+
+
+def test_fr21_locations_endpoint_lists_marks(empty_tables: str) -> None:
+    level_1 = {"kind": "level", "level": "1", "aisle": None}
+    aisle_a = {"kind": "aisle", "aisle": "A"}
+    with TestClient(create_app()) as client:
+        plan_id = _sample_plan(client)
+        for base_version, mark in enumerate((level_1, aisle_a), start=1):
+            response = client.post(
+                f"/api/plans/{plan_id}/commands",
+                json={
+                    "type": "set_best_mark",
+                    "command_id": str(uuid.uuid4()),
+                    "base_version": base_version,
+                    "mark": mark,
+                },
+                headers=SAME_ORIGIN,
+            )
+            assert response.status_code == 200, response.text
+        body = client.get(f"/api/plans/{plan_id}/locations").json()
+
+    assert body["version"] == 3
+    assert body["marks"] == [aisle_a, level_1]
+    rows = [row for row in body["locations"] if row["location"]["aisle"] == "A"]
+    assert rows
+    assert all(row["location"]["is_best"] for row in rows)
