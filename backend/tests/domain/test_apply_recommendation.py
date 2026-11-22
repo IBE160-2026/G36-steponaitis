@@ -7,9 +7,6 @@ import pytest
 from swp.domain.analysis import Analysis
 from swp.domain.apply import apply
 from swp.domain.commands import (
-    ApplyRecommendation,
-    Command,
-    ManualMove,
     MoveMade,
     RemoveBestMark,
     SetBestMark,
@@ -19,39 +16,21 @@ from swp.domain.import_data import ImportData
 from swp.domain.planning import replay
 from swp.domain.recommendations import applied_step, outdated_cause
 from swp.domain.state import AisleMark, BestMark, PlanState, Recommendation, Run, Step
-from tests.domain.answer_key import expected
-from tests.domain.test_rules import CTX, MARKS, _run
-
-
-def _after_run_1(data: ImportData, analysis: Analysis) -> tuple[PlanState, str]:
-    """Answer-key plan, aisle A marked, run 1 done; returns the state and rec #1's id."""
-    state = _run(data, analysis, PlanState(best_marks=MARKS)).state
-    return state, state.runs[-1].recommendations[0].id
-
-
-def _apply(rec_id: str) -> ApplyRecommendation:
-    return ApplyRecommendation(command_id=uuid.uuid4(), base_version=1, recommendation_id=rec_id)
-
-
-def _manual(part: str, from_location: str, to_location: str) -> ManualMove:
-    return ManualMove.model_validate(
-        {
-            "command_id": uuid.uuid4(),
-            "base_version": 1,
-            "part": part,
-            "from": from_location,
-            "to": to_location,
-        }
-    )
-
-
-def _do(state: PlanState, command: Command, data: ImportData, analysis: Analysis) -> PlanState:
-    return apply(state, command, CTX, data, analysis).state
+from tests.domain.answer_key import (
+    CTX,
+    MARKS,
+    after_run_1,
+    apply_command,
+    do,
+    expected,
+    manual_command,
+    run_command,
+)
 
 
 def _rejected(state: PlanState, rec_id: str, data: ImportData, analysis: Analysis) -> DomainError:
     with pytest.raises(DomainError) as raised:
-        apply(state, _apply(rec_id), CTX, data, analysis)
+        apply(state, apply_command(rec_id), CTX, data, analysis)
     assert raised.value.code == "command_rejected"
     return raised.value
 
@@ -60,9 +39,9 @@ def test_fr30_apply_answer_key_step2(data: ImportData, analysis: Analysis) -> No
     step = expected()["steps"][1]
     assert step["action"] == "apply"
     move = step["expect_move"]
-    state, rec_id = _after_run_1(data, analysis)
+    state, rec_id = after_run_1(data, analysis)
 
-    applied = apply(state, _apply(rec_id), CTX, data, analysis)
+    applied = apply(state, apply_command(rec_id), CTX, data, analysis)
 
     assert applied.state.steps == [
         Step(
@@ -94,10 +73,12 @@ def test_fr30_apply_answer_key_step2(data: ImportData, analysis: Analysis) -> No
 def test_ad5_manual_move_after_apply_gets_run_round(data: ImportData, analysis: Analysis) -> None:
     step = expected()["steps"][2]
     assert step["action"] == "manual_move"
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _apply(rec_id), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, apply_command(rec_id), data, analysis)
 
-    applied = apply(state, _manual(step["part"], step["from"], step["to"]), CTX, data, analysis)
+    applied = apply(
+        state, manual_command(step["part"], step["from"], step["to"]), CTX, data, analysis
+    )
 
     [event] = applied.events
     assert isinstance(event, MoveMade)
@@ -110,7 +91,7 @@ def test_ad5_manual_move_after_apply_gets_run_round(data: ImportData, analysis: 
 
 
 def test_ad7_apply_unknown_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
 
     error = _rejected(state, "nope", data, analysis)
 
@@ -124,8 +105,8 @@ def test_ad7_apply_without_run_rejected(data: ImportData, analysis: Analysis) ->
 
 
 def test_ad7_apply_earlier_run_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _run(data, analysis, state).state
+    state, rec_id = after_run_1(data, analysis)
+    state = run_command(data, analysis, state).state
     assert state.runs[-1].round == 2
 
     error = _rejected(state, rec_id, data, analysis)
@@ -134,8 +115,8 @@ def test_ad7_apply_earlier_run_rejected(data: ImportData, analysis: Analysis) ->
 
 
 def test_ad7_apply_twice_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _apply(rec_id), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, apply_command(rec_id), data, analysis)
 
     error = _rejected(state, rec_id, data, analysis)
 
@@ -143,8 +124,8 @@ def test_ad7_apply_twice_rejected(data: ImportData, analysis: Analysis) -> None:
 
 
 def test_fr29_apply_moved_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _manual("1100", "C-01-01-01", "B-01-04-01"), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, manual_command("1100", "C-01-01-01", "B-01-04-01"), data, analysis)
 
     error = _rejected(state, rec_id, data, analysis)
 
@@ -153,8 +134,8 @@ def test_fr29_apply_moved_rejected(data: ImportData, analysis: Analysis) -> None
 
 
 def test_fr29_apply_filled_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _manual("1200", "B-01-01-02", "A-01-01-03"), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, manual_command("1200", "B-01-01-02", "A-01-01-03"), data, analysis)
 
     error = _rejected(state, rec_id, data, analysis)
 
@@ -163,9 +144,9 @@ def test_fr29_apply_filled_rejected(data: ImportData, analysis: Analysis) -> Non
 
 
 def test_fr29_apply_marks_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
+    state, rec_id = after_run_1(data, analysis)
     remove = RemoveBestMark(command_id=uuid.uuid4(), base_version=1, mark=MARKS[0])
-    state = _do(state, remove, data, analysis)
+    state = do(state, remove, data, analysis)
     assert state.best_marks == []
 
     error = _rejected(state, rec_id, data, analysis)
@@ -175,7 +156,7 @@ def test_fr29_apply_marks_rejected(data: ImportData, analysis: Analysis) -> None
 
 
 def test_fr32_apply_kept_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
+    state, rec_id = after_run_1(data, analysis)
     state = state.model_copy(update={"keep_marks": ["1100"]})
 
     error = _rejected(state, rec_id, data, analysis)
@@ -184,10 +165,10 @@ def test_fr32_apply_kept_rejected(data: ImportData, analysis: Analysis) -> None:
 
 
 def test_ad7_applied_is_derived_not_stored(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
+    state, rec_id = after_run_1(data, analysis)
     assert applied_step(state, rec_id) is None
 
-    after = _do(state, _apply(rec_id), data, analysis)
+    after = do(state, apply_command(rec_id), data, analysis)
 
     assert applied_step(after, rec_id) == after.steps[0]
     assert after.runs == state.runs
@@ -195,9 +176,9 @@ def test_ad7_applied_is_derived_not_stored(data: ImportData, analysis: Analysis)
 
 
 def test_fr29_apply_marks_from_best_rejected(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
+    state, rec_id = after_run_1(data, analysis)
     mark_c = SetBestMark(command_id=uuid.uuid4(), base_version=1, mark=AisleMark(aisle="C"))
-    state = _do(state, mark_c, data, analysis)
+    state = do(state, mark_c, data, analysis)
 
     error = _rejected(state, rec_id, data, analysis)
 
@@ -206,23 +187,26 @@ def test_fr29_apply_marks_from_best_rejected(data: ImportData, analysis: Analysi
 
 def test_fr29_apply_after_earlier_round_move_allowed(data: ImportData, analysis: Analysis) -> None:
     # Round 0: 1100 moves C-01-01-01 -> C-01-03-01 (not best) before run 1.
-    state = _do(
-        PlanState(best_marks=MARKS), _manual("1100", "C-01-01-01", "C-01-03-01"), data, analysis
+    state = do(
+        PlanState(best_marks=MARKS),
+        manual_command("1100", "C-01-01-01", "C-01-03-01"),
+        data,
+        analysis,
     )
     assert state.steps[0].round == 0
-    state = _run(data, analysis, state).state
+    state = run_command(data, analysis, state).state
     rec = state.runs[-1].recommendations[0]
     assert (rec.part, rec.from_location) == ("1100", "C-01-03-01")
 
-    after = _do(state, _apply(rec.id), data, analysis)
+    after = do(state, apply_command(rec.id), data, analysis)
 
     assert after.steps[-1].recommendation_id == rec.id
     assert after.steps[-1].round == 1
 
 
 def test_fr29_apply_cause_order_moved_before_filled(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _manual("1100", "C-01-01-01", "A-01-01-03"), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, manual_command("1100", "C-01-01-01", "A-01-01-03"), data, analysis)
 
     error = _rejected(state, rec_id, data, analysis)
 
@@ -230,8 +214,8 @@ def test_fr29_apply_cause_order_moved_before_filled(data: ImportData, analysis: 
 
 
 def test_fr29_apply_outdated_wins_over_kept(data: ImportData, analysis: Analysis) -> None:
-    state, rec_id = _after_run_1(data, analysis)
-    state = _do(state, _manual("1200", "B-01-01-02", "A-01-01-03"), data, analysis)
+    state, rec_id = after_run_1(data, analysis)
+    state = do(state, manual_command("1200", "B-01-01-02", "A-01-01-03"), data, analysis)
     state = state.model_copy(update={"keep_marks": ["1100"]})
 
     error = _rejected(state, rec_id, data, analysis)

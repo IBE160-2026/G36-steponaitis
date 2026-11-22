@@ -30,7 +30,7 @@ from swp.domain.recommendations import (
 )
 from swp.domain.state import AisleMark, Outdated, PlanState, Recommendation
 from swp.domain.state_migrations import upcast
-from tests.domain.test_rules import CTX, MARKS, _run
+from tests.domain.answer_key import CTX, MARKS, run_command
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -68,7 +68,7 @@ def _remove_aisle_a() -> RemoveBestMark:
 @pytest.fixture
 def run_1(data: ImportData, analysis: Analysis) -> PlanState:
     """Answer-key plan, aisle A marked, run 1 done."""
-    return _run(data, analysis, PlanState(best_marks=MARKS)).state
+    return run_command(data, analysis, PlanState(best_marks=MARKS)).state
 
 
 def _rec(state: PlanState, number: int) -> Recommendation:
@@ -149,7 +149,9 @@ def test_fr28_no_space_causes(run_1: PlanState, data: ImportData, analysis: Anal
 
 
 def test_fr28_no_space_rule_2_cause(data: ImportData, analysis: Analysis) -> None:
-    state = _run(data, analysis, PlanState(best_marks=[AisleMark(aisle=a) for a in "ABCD"])).state
+    state = run_command(
+        data, analysis, PlanState(best_marks=[AisleMark(aisle=a) for a in "ABCD"])
+    ).state
 
     rule_2 = [n for n in _view(state, data, analysis).no_space if n.rule == "rule_2"]
 
@@ -286,7 +288,7 @@ def test_fr29_outdated_is_sticky(run_1: PlanState, data: ImportData, analysis: A
     assert _rec(state, 1).status == "outdated"
     assert _rejected_cause(state, _rec(state, 1).id, data, analysis) == [{"cause": "filled"}]
 
-    fresh = _run(data, analysis, state).state
+    fresh = run_command(data, analysis, state).state
     assert fresh.runs[-1].round == 2
     assert all(r.status == "open" for r in fresh.runs[-1].recommendations)
     assert all(r.status == "open" for r in _view(fresh, data, analysis).recommendations)

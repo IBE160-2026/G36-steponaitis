@@ -42,10 +42,40 @@ Checks:
 | Python lint (ruff) | `npm run lint:py` |
 | Layer rules (import-linter) | `npm run lint:imports` |
 | Frontend lint and module boundaries (ESLint) | `npm run lint` |
+| Python format (ruff) | `uv run --directory backend --locked ruff format --check` |
 | TypeScript typecheck | `npm run typecheck` |
 | Tests (pytest and Vitest) | `npm test` |
-| End-to-end (Playwright, Chromium) | `npm run e2e -- --project=chromium` |
+| End-to-end, all browsers (Playwright: Chromium, Firefox, Edge) | `npm run e2e` |
+| End-to-end, Chromium only (what CI runs) | `npm run e2e -- --project=chromium` |
 
-Before the first end-to-end run, install the browser once: `npx --workspace frontend playwright install chromium`.
+Before the first end-to-end run, install the browsers once: `npx --workspace frontend playwright install chromium firefox`. The Edge project uses the installed Microsoft Edge; if it is missing, install it from https://www.microsoft.com/edge or with `npx --workspace frontend playwright install msedge`. Playwright builds and starts the app itself on port 3000 (stop `npm run dev` first) against `backend/var/e2e.db`, which is deleted each time Playwright starts the server itself (a server already running on port 3000 is reused as it is).
 
 CI (`.github/workflows/ci.yml`) runs these same checks on every push, plus `tests/app` against Postgres 17. To run that locally, start Postgres (for example `docker run -d --name swp-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=swp_test -p 55432:5432 postgres:17`) and run `uv run --directory backend --locked pytest tests/app --database-url postgresql://postgres:postgres@localhost:55432/swp_test`; without `--database-url`, `tests/app` uses a temporary SQLite file. `docker run -d` returns before Postgres is ready, so wait until `docker exec swp-pg pg_isready` succeeds before running pytest, and remove the container afterwards with `docker rm -f swp-pg`.
+
+## Milestone 1 demo
+
+A step-by-step walk through milestone 1 (Epics 1–5) on the synthetic files in `data/sample/`. The public deployment holds synthetic data only; real company data is never uploaded there or committed here.
+
+1. **Install:** `npm install` (Node.js 24, uv and Python 3.12 as in *Run locally*).
+2. **Start:** `npm run dev`, then open http://localhost:3000.
+3. **New Plan:** choose **New Plan**, type a plan name and pick the three files from `data/sample/`: `Locations.xlsx` for Locations, `Inventory.xlsx` for Inventory and `transactions.xlsx` for Transactions. Press **New Plan**. The plan opens on **Overview** with "Data as of 2026-09-30".
+4. **Look around:** **Parts** lists every part with its class (fast, medium, slow, dead) and picks; **Pick groups** lists the parts that are picked together; **Locations** shows occupancy per aisle.
+5. **Best locations:** open **Best locations**. With **Whole aisle** selected, pick aisle `A` and press **Mark aisle A**. Then choose **Level**, pick level `1`, choose **in all aisles** and press **Mark level 1 in all aisles**.
+6. **Run recommendations:** open **Recommendations** and press **Run recommendations**. Round 1 lists the moves under rule 1, rule 2 and rule 3, each with its reason in numbers, plus the "no space" entries.
+7. **Apply:** select a recommendation and press **Apply** (or `Alt`/`⌥`+`A`). A toast confirms "Applied · move 1, round 1 · …". **Apply all (n)** applies every open recommendation of the run at once.
+8. **Manual move (optional):** search for a part (`Ctrl`+`/`), open it, press **Manual move…**, type an empty to-location and confirm.
+9. **Before/after:** open **Before/after** to see, per aisle, which parts moved in and out, fast-moving parts in best locations, pick groups kept together and occupancy, before → after.
+10. **Run every check:**
+
+    ```sh
+    npm run lint:py
+    uv run --directory backend --locked ruff format --check
+    npm run lint:imports
+    npm run lint
+    npm run typecheck
+    npm test
+    npx --workspace frontend playwright install chromium firefox   # once; Edge as above
+    npm run e2e
+    ```
+
+    `npm test` includes the answer-key suite (`backend/tests/domain/test_answer_key.py`: answer-key steps 1–14; steps 15–20, the move list, the final current locations, the final before/after and the settled check show as skipped until Epics 7 and 8) and the timing check (`backend/tests/app/test_nfr8_timing.py`: import under 10 s, a run under 5 s, one command plus the plan views under 1 s in total). `npm run e2e` includes `frontend/e2e/m1-flow.spec.ts`, which in Chromium, Firefox and Edge goes through New Plan, Overview, Parts, Pick groups, the aisle A and level 1 marks, a run, applying one recommendation, one manual move and Before/after.

@@ -9,8 +9,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // run, and the flow bar then checks Recommendations. The button is Story 5.7, so the command goes
 // through the command API here.
 
-test.skip(({ browserName }) => browserName !== "chromium", "The apply all journey runs in Chromium.");
-
 type CommandResult = { version: number; events: { type: string }[] };
 
 async function command(

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, type Locator, type Page, test } from "./support/test";
+import { type APIRequestContext, expect, type Locator, type Page, test, toasts } from "./support/test";
 
 import { type Detail, enterTarget, getJson, locationRows, planVersion, type RosterRow } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
@@ -9,8 +9,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // only from the search field; a part with no stock cannot be moved; a part opens from the
 // Locations table. AD-12: a bare proxy 500 and a 503 after the server applied the command both
 // retry to one change (Story 4.3; FR-15, FR-33, FR-34, NFR-10, UX-DR24, UX-DR26, AD-12).
-
-test.skip(({ browserName }) => browserName !== "chromium", "The manual move journeys run in Chromium.");
 
 const NO_STOCK = "No current location (no stock above zero)";
 const RETRYING = "The last change was not saved yet. Trying again.";
@@ -131,7 +129,7 @@ test("uj1 makes a manual move from the part panel and moves it back", async ({ p
 
   // Enter confirms: the toast names the move, the panel shows the new current location.
   await page.keyboard.press("Enter");
-  await expect(page.getByText(`Moved ${part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Moved ${part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);
   await expect(moveButton).toBeFocused();
   await expect(panel.locator(`[data-location-chip="${target.code}"]`)).toBeVisible();
@@ -152,7 +150,7 @@ test("uj1 makes a manual move from the part panel and moves it back", async ({ p
   await page.keyboard.press("Escape");
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Enter");
-  await expect(page.getByText(`Removed move 1: ${part} returns to ${from}.`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Removed move 1: ${part} returns to ${from}.`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);
   await expect(panel.locator(`[data-location-chip="${from}"]`)).toBeVisible();
   expect(await planVersion(request, planId)).toBe(before + 2);
@@ -188,7 +186,7 @@ test("uj1 moves a part from a chosen other location", async ({ page, request }) 
   await enterTarget(page, dialog, target.code.toLowerCase(), "to an empty location");
   await page.keyboard.press("Escape");
   await page.keyboard.press("Enter");
-  await expect(page.getByText(`Moved ${part}: ${chosen} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Moved ${part}: ${chosen} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("complementary", { name: part }).locator(`[data-location-chip="${target.code}"]`)).toBeVisible();
 });
@@ -246,7 +244,7 @@ test("uj7 opens a part from the locations table and moves it", async ({ page, re
   await enterTarget(page, dialog, target.code, "to an empty location");
   await page.keyboard.press("Escape");
   await page.keyboard.press("Enter");
-  await expect(page.getByText(`Moved ${part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Moved ${part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true })).toBeVisible();
 
   // The Locations table shows the part at the target after the refetch.
   const targetRow = table.locator("tbody tr").filter({ has: page.getByText(target.code, { exact: true }) });
@@ -295,7 +293,7 @@ test("ad12 retries a command after a proxy 500 without the error envelope", asyn
   await expect(panelButton).toHaveAccessibleDescription(saving);
   release();
   await expect(
-    page.getByText(`Moved ${detail.part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true }),
+    toasts(page).getByText(`Moved ${detail.part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("save-status")).toContainText("Saved automatically");
   expect(posts).toBe(2);
@@ -329,7 +327,7 @@ test("ad12 a 503 after the server applied the command retries to one version bum
   await enterTarget(page, dialog, target.code, "to an empty location");
   await page.keyboard.press("Escape");
   await page.keyboard.press("Enter");
-  const toast = page.getByText(`Moved ${detail.part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true });
+  const toast = toasts(page).getByText(`Moved ${detail.part}: ${from} → ${target.code} (Manual, round 0).`, { exact: true });
   await expect(toast).toBeVisible();
   await expect(page.getByTestId("save-status")).toContainText("Saved automatically");
   await expect(toast).toHaveCount(1);

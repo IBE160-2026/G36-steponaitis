@@ -2,19 +2,13 @@
 only)."""
 
 import uuid
-from datetime import UTC, datetime
-from typing import Any
 
 from swp.domain.analysis import Analysis
 from swp.domain.apply import apply
 from swp.domain.commands import (
-    Applied,
-    ApplyRecommendation,
-    CommandContext,
     ManualMove,
     MoveMade,
     RunDone,
-    RunRecommendations,
 )
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import fewest_picks_order, location_code_order
@@ -26,13 +20,18 @@ from swp.domain.state import (
     NoSpace,
     PlanState,
     Recommendation,
-    Run,
     Step,
 )
-from tests.domain.answer_key import expected
-
-CTX = CommandContext(now=datetime(2026, 11, 22, 12, 0, tzinfo=UTC), user="planner")
-MARKS = [AisleMark(aisle="A")]
+from tests.domain.answer_key import (
+    CTX,
+    MARKS,
+    apply_recommendation,
+    expected,
+    expected_run_outcome,
+    manual_step,
+    run_command,
+    run_outcome,
+)
 
 
 def _rule_1(
@@ -63,40 +62,15 @@ def _rule_3(
     return rule_3(data, copy, analysis, state, earlier_moves or [], earlier_no_space or [])
 
 
-def _expected_outcome(
-    step: dict[str, Any],
-) -> tuple[list[tuple[int, str, str, str, str]], list[tuple[str, str]]]:
-    """A run step of `expected.json` in `_outcome`'s shape."""
-    return (
-        [
-            (n, f"rule_{r['rule']}", r["part"], r["from"], r["to"])
-            for n, r in enumerate(step["recommendations_in_order"], start=1)
-        ],
-        [(n["part"], f"rule_{n['rule']}") for n in step["no_space"]],
-    )
-
-
-def _run(
-    data: ImportData, analysis: Analysis, state: PlanState, command_id: uuid.UUID | None = None
-) -> Applied:
-    command = RunRecommendations(command_id=command_id or uuid.uuid4(), base_version=1)
-    return apply(state, command, CTX, data, analysis)
-
-
-def _outcome(run: Run) -> tuple[list[tuple[int, str, str, str, str]], list[tuple[str, str]]]:
-    recs = [(r.number, r.rule, r.part, r.from_location, r.to_location) for r in run.recommendations]
-    return recs, [(n.part, n.rule) for n in run.no_space]
-
-
 def test_fr24_answer_key_round1(data: ImportData, analysis: Analysis) -> None:
     step = expected()["steps"][0]
 
-    applied = _run(data, analysis, PlanState(best_marks=MARKS))
+    applied = run_command(data, analysis, PlanState(best_marks=MARKS))
 
     run = applied.state.runs[-1]
     assert run.round == step["round"] == 1
-    assert _outcome(run) == _expected_outcome(step)
-    assert _outcome(run) == (
+    assert run_outcome(run) == expected_run_outcome(step)
+    assert run_outcome(run) == (
         [
             (1, "rule_1", "1100", "C-01-01-01", "A-01-01-03"),
             (2, "rule_2", "4400", "A-01-03-02", "B-01-03-03"),
@@ -117,11 +91,11 @@ def test_fr24_answer_key_round1(data: ImportData, analysis: Analysis) -> None:
 def test_fr23_run_is_deterministic(data: ImportData, analysis: Analysis) -> None:
     state = PlanState(best_marks=MARKS)
 
-    first = _run(data, analysis, state, uuid.UUID(int=1)).state.runs[-1]
-    second = _run(data, analysis, state, uuid.UUID(int=2)).state.runs[-1]
+    first = run_command(data, analysis, state, uuid.UUID(int=1)).state.runs[-1]
+    second = run_command(data, analysis, state, uuid.UUID(int=2)).state.runs[-1]
 
     assert first.id != second.id
-    assert _outcome(first) == _outcome(second)
+    assert run_outcome(first) == run_outcome(second)
     assert _rule_1(data, analysis, state) == _rule_1(data, analysis, state)
 
 
@@ -179,7 +153,7 @@ def test_fr27_location_code_order_is_plain_str_order() -> None:
 def test_fr23_run_identity_and_metadata(data: ImportData, analysis: Analysis) -> None:
     command_id = uuid.UUID(int=42)
 
-    applied = _run(data, analysis, PlanState(best_marks=MARKS), command_id)
+    applied = run_command(data, analysis, PlanState(best_marks=MARKS), command_id)
 
     run = applied.state.runs[-1]
     run_id = str(uuid.uuid5(command_id, "run:1"))
@@ -205,7 +179,7 @@ def test_fr23_run_identity_and_metadata(data: ImportData, analysis: Analysis) ->
 def test_fr23_new_run_prunes_unreferenced_and_bumps_round(
     data: ImportData, analysis: Analysis
 ) -> None:
-    run_1 = _run(data, analysis, PlanState(best_marks=MARKS), uuid.UUID(int=1)).state.runs[0]
+    run_1 = run_command(data, analysis, PlanState(best_marks=MARKS), uuid.UUID(int=1)).state.runs[0]
     extra = Recommendation(
         id=f"{run_1.id}:2",
         number=2,
@@ -226,7 +200,7 @@ def test_fr23_new_run_prunes_unreferenced_and_bumps_round(
     )
     state = PlanState(best_marks=MARKS, runs=[run_1], steps=[step], next_move_number=2)
 
-    applied = _run(data, analysis, state, uuid.UUID(int=2))
+    applied = run_command(data, analysis, state, uuid.UUID(int=2))
 
     old, new = applied.state.runs
     assert (old.id, old.round, old.created_at, old.created_by) == (
@@ -242,7 +216,7 @@ def test_fr23_new_run_prunes_unreferenced_and_bumps_round(
     # 1100 is now in A-01-01-03 (best); aisle A has no empty location left. Rule 2's and
     # rule 3's moves are not applied, so they come again; 1100 freed C-01-01-01, which is
     # now the first empty location in 8200's aisle.
-    assert _outcome(new) == (
+    assert run_outcome(new) == (
         [
             (1, "rule_2", "4400", "A-01-03-02", "B-01-03-03"),
             (2, "rule_2", "9000", "A-01-01-02", "B-01-04-01"),
@@ -260,8 +234,8 @@ def test_fr23_new_run_prunes_unreferenced_and_bumps_round(
 
 
 def test_ad5_step_after_run_gets_its_round(data: ImportData, analysis: Analysis) -> None:
-    after_run = _run(data, analysis, PlanState(best_marks=MARKS)).state
-    after_run = _run(data, analysis, after_run).state
+    after_run = run_command(data, analysis, PlanState(best_marks=MARKS)).state
+    after_run = run_command(data, analysis, after_run).state
     move = ManualMove(
         command_id=uuid.uuid4(),
         base_version=1,
@@ -299,7 +273,7 @@ def test_fr25_answer_key_round1_rule_2(data: ImportData, analysis: Analysis) -> 
 
 
 def test_fr25_freed_best_not_offered_in_same_run(data: ImportData, analysis: Analysis) -> None:
-    run = _run(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
+    run = run_command(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
 
     freed = {r.from_location for r in run.recommendations if r.rule == "rule_2"}
     assert freed == {"A-01-03-02", "A-01-01-02", "A-01-01-01", "A-01-03-01"}
@@ -308,39 +282,20 @@ def test_fr25_freed_best_not_offered_in_same_run(data: ImportData, analysis: Ana
     assert not freed & {r.to_location for r in run.recommendations}
 
 
-def _apply_rec(state: PlanState, part: str, data: ImportData, analysis: Analysis) -> PlanState:
-    [rec] = [r for r in state.runs[-1].recommendations if r.part == part]
-    command = ApplyRecommendation(command_id=uuid.uuid4(), base_version=1, recommendation_id=rec.id)
-    return apply(state, command, CTX, data, analysis).state
-
-
-def _manual(
-    state: PlanState, part: str, source: str, target: str, data: ImportData, analysis: Analysis
-) -> PlanState:
-    command = ManualMove(
-        command_id=uuid.uuid4(),
-        base_version=1,
-        part=part,
-        from_location=source,
-        to_location=target,
-    )
-    return apply(state, command, CTX, data, analysis).state
-
-
 def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
     steps = expected()["steps"]
-    state = _run(data, analysis, PlanState(best_marks=MARKS)).state  # step 1
-    state = _apply_rec(state, "1100", data, analysis)  # step 2
+    state = run_command(data, analysis, PlanState(best_marks=MARKS)).state  # step 1
+    state = apply_recommendation(state, "1100", data, analysis)  # step 2
     for part, source, target in [
         ("9300", "B-01-03-02", "C-01-01-01"),  # step 3
         ("9100", "D-01-02-02", "D-01-02-03"),  # step 4
         ("9200", "D-01-02-03", "D-01-02-02"),  # step 5
     ]:
-        state = _manual(state, part, source, target, data, analysis)
+        state = manual_step(state, part, source, target, data, analysis)
     # Step 6: the keep command is Epic 7, so the mark is set in the state.
     state = state.model_copy(update={"keep_marks": ["0500"]})
     for index, part in [(6, "8100"), (7, "8500"), (8, "3050")]:  # steps 7-9
-        state = _apply_rec(state, part, data, analysis)
+        state = apply_recommendation(state, part, data, analysis)
         move = steps[index]["expect_move"]
         assert (state.steps[-1].part, state.steps[-1].rule, state.steps[-1].round) == (
             part,
@@ -352,16 +307,16 @@ def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
             move["to"],
         )
     for part in ["4400", "9000", "0100"]:  # steps 10-12
-        state = _apply_rec(state, part, data, analysis)
+        state = apply_recommendation(state, part, data, analysis)
     assert {step.round for step in state.steps} == {1}
 
-    applied = _run(data, analysis, state)  # step 13
+    applied = run_command(data, analysis, state)  # step 13
 
     step = steps[12]
     run = applied.state.runs[-1]
     assert run.round == step["round"] == 2
-    assert _outcome(run) == _expected_outcome(step)
-    assert _outcome(run) == (
+    assert run_outcome(run) == expected_run_outcome(step)
+    assert run_outcome(run) == (
         [
             (1, "rule_1", "1200", "B-01-01-02", "A-01-01-01"),
             (2, "rule_1", "10240", "B-01-01-03", "A-01-01-02"),
@@ -376,9 +331,9 @@ def test_fr25_answer_key_rounds(data: ImportData, analysis: Analysis) -> None:
 def test_fr25_no_space_under_rule_2(data: ImportData, analysis: Analysis) -> None:
     marks = [AisleMark(aisle=aisle) for aisle in "ABCD"]
 
-    run = _run(data, analysis, PlanState(best_marks=marks)).state.runs[-1]
+    run = run_command(data, analysis, PlanState(best_marks=marks)).state.runs[-1]
 
-    assert _outcome(run) == (
+    assert run_outcome(run) == (
         [],
         [(part, "rule_2") for part in ["4400", "9000", "9300", "0100", "0500", "6600"]],
     )
@@ -511,7 +466,7 @@ def test_fr26_answer_key_round1_rule_3(data: ImportData, analysis: Analysis) -> 
 def test_fr26_blocks_and_silent_skips(data: ImportData, analysis: Analysis) -> None:
     step = expected()["steps"][0]
 
-    run = _run(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
+    run = run_command(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
 
     outcome = {r.part for r in run.recommendations} | {n.part for n in run.no_space}
     rule_3 = {r.part for r in run.recommendations if r.rule == "rule_3"} | {
@@ -533,7 +488,7 @@ def test_fr26_tie_moves_later_part_number(data: ImportData, analysis: Analysis) 
     assert analysis.parts["30400"].picks == analysis.parts["3050"].picks
     assert "30400" < "3050"
 
-    run = _run(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
+    run = run_command(data, analysis, PlanState(best_marks=MARKS)).state.runs[-1]
 
     [rec] = [r for r in run.recommendations if r.part in {"3050", "30400"}]
     assert (rec.rule, rec.part, rec.to_location) == ("rule_3", "3050", "D-01-03-02")
@@ -548,7 +503,7 @@ def test_fr26_loop_limit_round2(data: ImportData, analysis: Analysis) -> None:
         ("8500", "B-01-02-02", "D-01-03-01"),
         ("3050", "B-01-02-03", "D-01-03-02"),
     ]:
-        state = _manual(state, part, source, target, data, analysis)
+        state = manual_step(state, part, source, target, data, analysis)
 
     moves, no_space = _rule_3(data, analysis, state)
 
@@ -602,7 +557,9 @@ def test_fr26_slow_mover_never_offered_best(data: ImportData, analysis: Analysis
 
 def _8300_in_aisle_b(data: ImportData, analysis: Analysis) -> PlanState:
     """8300 moved next to 8100 in aisle B."""
-    return _manual(PlanState(best_marks=MARKS), "8300", "D-01-01-01", "B-01-03-03", data, analysis)
+    return manual_step(
+        PlanState(best_marks=MARKS), "8300", "D-01-01-01", "B-01-03-03", data, analysis
+    )
 
 
 def test_fr26_loop_limit_weaker_partner_does_not_block(
@@ -641,7 +598,9 @@ def test_fr26_medium_mover_may_take_best(data: ImportData, analysis: Analysis) -
 
 
 def test_fr26_kept_mover_blocked(data: ImportData, analysis: Analysis) -> None:
-    run = _run(data, analysis, PlanState(best_marks=MARKS, keep_marks=["8100"])).state.runs[-1]
+    run = run_command(data, analysis, PlanState(best_marks=MARKS, keep_marks=["8100"])).state.runs[
+        -1
+    ]
 
     rule_3 = [(r.part, r.to_location) for r in run.recommendations if r.rule == "rule_3"]
     assert rule_3 == [("8500", "D-01-03-01"), ("3050", "D-01-03-02")]

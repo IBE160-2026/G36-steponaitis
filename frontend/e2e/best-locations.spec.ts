@@ -1,14 +1,12 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, type Locator, type Page, test } from "./support/test";
+import { type APIRequestContext, expect, type Locator, type Page, test, toasts } from "./support/test";
 
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1: the planner opens the Best locations step, marks a whole aisle and a level in all aisles,
 // marks and unmarks a single location, reloads, removes a mark and sees the counts on Overview
 // (Story 3.4; FR-21, FR-22, FR-10, UX-DR: segmented control, marks list, toast, save status).
-
-test.skip(({ browserName }) => browserName !== "chromium", "The best locations journey runs in Chromium.");
 
 type Row = { location: { code: string; aisle: string; level: string; is_best: boolean } };
 type View = { locations: Row[]; levels: string[]; marks: unknown[] };
@@ -37,7 +35,7 @@ async function expectCounts(page: Page, request: APIRequestContext, planId: stri
 /** Waits for the confirmed change: the toast and the "Saved automatically" status. */
 async function expectSaved(page: Page) {
   // A replaced toast may still be leaving while the new one shows.
-  await expect(page.getByText(TOAST, { exact: true }).last()).toBeVisible();
+  await expect(toasts(page).getByText(TOAST, { exact: true }).last()).toBeVisible();
   await expect(page.getByTestId("save-status")).toContainText("Saved automatically");
   // The plan plate's tooltip in the toolbar says so too (shown on hover; read without hovering).
   await expect(page.getByRole("banner").locator('[role="tooltip"]')).toContainText("Saved automatically");

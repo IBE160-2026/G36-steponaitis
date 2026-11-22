@@ -8,8 +8,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // UJ-1 climax (Story 4.6, FR-37, UX-DR51): the Before/after page shows what a manual move changes,
 // per aisle; the flow bar never checks the Before/after step.
 
-test.skip(({ browserName }) => browserName !== "chromium", "The planning copy journeys run in Chromium.");
-
 type Count = { before: number; after: number };
 type BeforeAfter = { aisles: { aisle: string; occupied: Count }[] };
 

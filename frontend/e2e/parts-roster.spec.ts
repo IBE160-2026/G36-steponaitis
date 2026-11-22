@@ -8,8 +8,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // with ties in server order, and one tab stop with arrow-key row movement (Story 2.3; FR-13,
 // AD-14, UX-DR18, UX-DR23, UX-DR24).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The parts journey runs in Chromium.");
-
 const CLASS_LABELS = { fast: "Fast-moving", medium: "Medium-moving", slow: "Slow-moving", dead: "Dead stock" };
 
 type Row = {
@@ -89,4 +87,12 @@ test("uj7 reads the parts roster, filters by class, sorts by picks and moves by 
   await page.keyboard.press("Tab");
   const insideTable = await table.evaluate((element) => element.contains(document.activeElement));
   expect(insideTable).toBe(false);
+
+  // Opening a row after the sort opens the sorted row's part (Enter on row 2, then a click on row 1).
+  expect(ties.length).toBeGreaterThan(1);
+  await body.nth(1).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`[?&]part=${encodeURIComponent(ties[1].part)}(&|$)`));
+  await body.first().click();
+  await expect(page).toHaveURL(new RegExp(`[?&]part=${encodeURIComponent(ties[0].part)}(&|$)`));
 });

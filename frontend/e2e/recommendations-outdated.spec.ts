@@ -1,14 +1,12 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, test } from "./support/test";
+import { type APIRequestContext, expect, test, toasts } from "./support/test";
 
 import { getJson, planVersion } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1 (Story 5.5; FR-29, AD-7, UX-DR14, UX-DR28): after a run, removing a best-location mark
 // outdates recommendations; the toast counts them and **View** opens the Outdated tab.
-
-test.skip(({ browserName }) => browserName !== "chromium", "The outdated recommendations journey runs in Chromium.");
 
 type Recommendations = {
   version: number;
@@ -37,7 +35,7 @@ test("uj1 sees recommendations outdated by a mark change", async ({ page, reques
   await main.getByRole("button", { name: "Remove mark Aisle A" }).click();
 
   // The toast shows once the command is confirmed, so the server already holds the outdated status.
-  const toast = page.getByText(/^Best-location marks changed · /);
+  const toast = toasts(page).getByText(/^Best-location marks changed · /);
   await expect(toast).toBeVisible();
   const after = await getJson<Recommendations>(request, `/api/plans/${planId}/recommendations`);
   const outdated = after.recommendations.filter((rec) => rec.outdated?.cause === "marks").length;

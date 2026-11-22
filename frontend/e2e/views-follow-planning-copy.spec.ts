@@ -16,8 +16,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // UJ-1, UJ-6 and AD-12: the plan views follow a manual move made from the part panel, and the
 // panel only shows a part at the version of the page around it (Story 4.4; FR-13, FR-14, FR-20).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The planning copy journeys run in Chromium.");
-
 type LocationsView = { aisles: (Occupancy & { aisle: string })[] };
 type GroupPart = { part: string; aisle: string | null };
 type PickGroupsView = { pick_groups: { part_a: GroupPart; part_b: GroupPart; same_aisle: boolean }[] };

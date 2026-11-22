@@ -20,7 +20,17 @@ export default defineConfig({
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", use: { ...devices["Desktop Firefox"] } },
-    { name: "msedge", use: { ...devices["Desktop Edge"], channel: "msedge" } },
+    {
+      name: "msedge",
+      // Edge on macOS fails CVDisplayLinkCreateWithCGDisplay under Playwright, so its GPU compositor
+      // never produces a frame: requestAnimationFrame never fires and every "stable" check hangs.
+      // Software compositing (--disable-gpu) renders frames normally. Only on macOS.
+      use: {
+        ...devices["Desktop Edge"],
+        channel: "msedge",
+        launchOptions: { args: process.platform === "darwin" ? ["--disable-gpu"] : [] },
+      },
+    },
   ],
   webServer: {
     // A production build (`next build` + `next start`) and a multi-worker backend: dev-mode React

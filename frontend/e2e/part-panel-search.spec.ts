@@ -8,8 +8,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // panel from a search result, a roster row or the pick groups table, and follows a location chip
 // to the Locations table (Story 2.6; FR-13, FR-15, FR-20, UX-DR8, UX-DR11, UX-DR24, UX-DR25).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The part panel journey runs in Chromium.");
-
 type Ref = { code: string; aisle: string };
 type Threshold = { min_picks: number; max_picks: number | null };
 type Detail = {

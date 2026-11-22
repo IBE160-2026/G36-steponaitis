@@ -7,8 +7,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // UJ-6: the planner opens the Pick groups step and reads which parts are picked together and
 // whether each pair sits in the same aisle (Story 2.5; FR-20, UX-DR29).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The pick groups journey runs in Chromium.");
-
 type Part = { part: string; description: string; aisle: string | null };
 type Row = { part_a: Part; part_b: Part; shared_jobs: number; same_aisle: boolean };
 type View = { version: number; pick_groups: Row[] };

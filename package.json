@@ -11,10 +11,11 @@
   "scripts": {
     "postinstall": "uv sync --directory backend --locked",
     "dev": "concurrently --kill-others --names backend,frontend --prefix-colors blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
-    "dev:backend": "uv run --directory backend --locked uvicorn swp.main:app --host 127.0.0.1 --port 8000 --reload --reload-dir swp",
+    "dev:backend": "uv run --directory backend --locked uvicorn swp.main:app --host 127.0.0.1 --port 8000 --timeout-keep-alive 75 --no-access-log --reload --reload-dir swp",
     "dev:frontend": "npm run dev --workspace frontend",
     "e2e:serve": "npm run build --workspace frontend && concurrently --kill-others --names backend,frontend --prefix-colors blue,green \"npm:e2e:backend\" \"npm:e2e:frontend\"",
-    "e2e:backend": "uv run --directory backend --locked swp db upgrade && uv run --directory backend --locked uvicorn swp.main:app --host 127.0.0.1 --port 8000 --workers 4",
+    "e2e:backend": "npm run e2e:reset-db && uv run --directory backend --locked swp db upgrade && uv run --directory backend --locked uvicorn swp.main:app --host 127.0.0.1 --port 8000 --timeout-keep-alive 75 --workers 4",
+    "e2e:reset-db": "node -e \"for (const f of ['e2e.db', 'e2e.db-journal', 'e2e.db-wal', 'e2e.db-shm']) require('fs').rmSync(require('path').join('backend', 'var', f), { force: true })\"",
     "e2e:frontend": "npm run start --workspace frontend",
     "lint:py": "uv run --directory backend --locked ruff check .",
     "lint:imports": "uv run --directory backend --locked lint-imports",

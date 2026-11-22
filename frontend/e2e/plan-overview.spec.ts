@@ -13,8 +13,6 @@ import {
 // UJ-1: after New Plan the planner lands on the overview, opens the settings and comes back to
 // the latest plan from `/` (Story 1.9; FR-7, FR-8, FR-9, FR-18, AD-12, AD-20, UX-DR5/6/21/22).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The overview journey runs in Chromium.");
-
 const STEP_COUNT = 8;
 
 async function localDate(page: Page, instant: string): Promise<string> {

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, test } from "./support/test";
+import { type APIRequestContext, expect, test, toasts } from "./support/test";
 
 import { getJson, planVersion } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
@@ -9,8 +9,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // page, reads the rows by keyboard, applies one, meets a 409 for a row applied elsewhere, and
 // applies the rest. Retro item 26: the Apply button, its toast, the 409 path and the views
 // refreshing after apply (handed over by Story 5.2) are all checked here.
-
-test.skip(({ browserName }) => browserName !== "chromium", "The recommendations journey runs in Chromium.");
 
 type Row = {
   id: string;
@@ -110,7 +108,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   const detail = main.getByRole("region", { name: "Selected recommendation" });
   await detail.getByRole("button", { name: "Apply", exact: true }).click();
   await expect(
-    page.getByText(`Applied · move 1, round 1 · ${first.part} ${first.from_location} → ${first.to_location}`, {
+    toasts(page).getByText(`Applied · move 1, round 1 · ${first.part} ${first.from_location} → ${first.to_location}`, {
       exact: true,
     }),
   ).toBeVisible();
@@ -133,7 +131,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   await expect(eyebrow).toHaveText(eyebrowOf(taken));
   await command(request, planId, { type: "apply", recommendation_id: taken.id });
   await detail.getByRole("button", { name: "Apply", exact: true }).click();
-  await expect(page.getByText(`Recommendation #${taken.number} is already applied.`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Recommendation #${taken.number} is already applied.`, { exact: true })).toBeVisible();
   await expect(listbox.getByRole("option", { name: new RegExp(`^#${taken.number}, `) })).toHaveCount(0);
   await main.getByRole("tab", { name: /^Applied, / }).click();
   await expect(listbox.getByRole("option", { name: new RegExp(`^#${taken.number}, `) })).toHaveAccessibleName(
@@ -149,7 +147,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   await options.first().focus();
   await page.keyboard.press("Alt+KeyA");
   await expect(
-    page.getByText(`Applied · move 3, round 1 · ${keyed.part} ${keyed.from_location} → ${keyed.to_location}`, {
+    toasts(page).getByText(`Applied · move 3, round 1 · ${keyed.part} ${keyed.from_location} → ${keyed.to_location}`, {
       exact: true,
     }),
   ).toBeVisible();
@@ -204,7 +202,7 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   );
   await expect(confirm.getByRole("button", { name: "Cancel" })).toBeFocused();
   await confirm.getByRole("button", { name: "Apply all" }).click();
-  await expect(page.getByText(/^Applied \d+ recommendations? from round 1\./)).toBeVisible();
+  await expect(toasts(page).getByText(/^Applied \d+ recommendations? from round 1\./)).toBeVisible();
   await expect(main.getByRole("button", { name: "Apply all (0)" })).toHaveAttribute("aria-disabled", "true");
   const nav = page.getByRole("navigation", { name: "Plan steps" });
   await expect(nav.getByRole("link", { name: /^Recommendations\s*, step 6/ })).toHaveAccessibleName(

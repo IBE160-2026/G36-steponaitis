@@ -9,8 +9,6 @@ import { createSamplePlan } from "./support/sample-plan";
 // occupancy, and opens a location from a `?aisle=&loc=` URL (Story 2.4; FR-14, UX-DR9, UX-DR27,
 // UX-DR57).
 
-test.skip(({ browserName }) => browserName !== "chromium", "The locations journey runs in Chromium.");
-
 type Row = {
   location: { code: string; aisle: string };
   occupied: boolean;

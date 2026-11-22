@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import type { MovementClass } from "@/components/common/class-glyph";
-import { DataTable, nextRowIndex, nextSort } from "@/components/common/data-table";
+import { DataTable, enterOpensRow, nextRowIndex, nextSort, shownRows } from "@/components/common/data-table";
 import type { PartRow, PartsView as PartsData } from "@/lib/api/plans";
 import { compareNumber, compareText, sortRows } from "@/lib/sort";
 import { COLUMNS, countLine, filterByClass, NO_CURRENT_LOCATION, PartsView, whyLine } from "@/modules/parts/parts-page";
@@ -156,6 +156,25 @@ describe("uxdr18 data table keyboard", () => {
     expect(nextRowIndex("Enter", 1, 3)).toBe("open");
     expect(nextRowIndex("a", 1, 3)).toBeNull();
     expect(nextRowIndex("ArrowDown", 0, 0)).toBeNull();
+  });
+
+  it("fr13_open_after_sort_uses_the_sorted_row", () => {
+    const rows = [{ id: "a", n: 2 }, { id: "b", n: 3 }, { id: "c", n: 1 }];
+    const columns = [{ key: "n", header: "Number", sortValue: (r: (typeof rows)[number]) => r.n, cell: () => null }];
+    // Row 0 of the table is what a click or Enter on row 0 opens.
+    expect(shownRows(rows, columns, null)[0].id).toBe("a");
+    expect(shownRows(rows, columns, nextSort(null, "n"))[0].id).toBe("c");
+    expect(shownRows(rows, columns, nextSort(nextSort(null, "n"), "n"))[0].id).toBe("b");
+    // A sort on a column that does not sort keeps the given order.
+    expect(shownRows(rows, columns, { key: "id", direction: "ascending" }).map((r) => r.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("fr13_enter_on_a_link_or_button_inside_a_row_does_not_open_it", () => {
+    const row = new EventTarget();
+    const button = new EventTarget();
+    expect(enterOpensRow(row, row)).toBe(true);
+    expect(enterOpensRow(button, row)).toBe(false);
+    expect(enterOpensRow(null, row)).toBe(false);
   });
 
   it("uxdr18_one_tab_stop_and_sortable_heads", () => {

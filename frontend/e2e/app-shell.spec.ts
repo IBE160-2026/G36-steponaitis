@@ -14,8 +14,6 @@ const STEPS = [
   "Move list",
 ];
 
-test.skip(({ browserName }) => browserName !== "chromium", "The app-shell journey runs in Chromium.");
-
 function stepNames(texts: string[]): string[] {
   return texts.map((text) => text.replace(/^\d+/, "").replace(/, step \d+(, done)?$/, "").trim());
 }

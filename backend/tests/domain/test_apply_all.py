@@ -15,10 +15,18 @@ from swp.domain.import_data import ImportData
 from swp.domain.planning import applied_step, latest_run, open_recommendations
 from swp.domain.recommendations import revalidate
 from swp.domain.state import Outdated, PlanState, Step
-from tests.domain.answer_key import expected
-from tests.domain.test_apply_recommendation import _after_run_1, _apply, _do, _manual
-from tests.domain.test_rules import CTX, MARKS, _apply_rec, _run
-from tests.domain.test_rules import _manual as _manual_step
+from tests.domain.answer_key import (
+    CTX,
+    MARKS,
+    after_run_1,
+    apply_command,
+    apply_recommendation,
+    do,
+    expected,
+    manual_command,
+    manual_step,
+    run_command,
+)
 
 
 def _apply_all(state: PlanState, data: ImportData, analysis: Analysis) -> Applied:
@@ -27,18 +35,18 @@ def _apply_all(state: PlanState, data: ImportData, analysis: Analysis) -> Applie
 
 def _answer_key_after_run_2(data: ImportData, analysis: Analysis) -> PlanState:
     """Answer-key steps 1-13 (as `test_fr25_answer_key_rounds`), 0500 kept in the state."""
-    state = _run(data, analysis, PlanState(best_marks=MARKS)).state  # step 1
-    state = _apply_rec(state, "1100", data, analysis)  # step 2
+    state = run_command(data, analysis, PlanState(best_marks=MARKS)).state  # step 1
+    state = apply_recommendation(state, "1100", data, analysis)  # step 2
     for part, source, target in [
         ("9300", "B-01-03-02", "C-01-01-01"),  # step 3
         ("9100", "D-01-02-02", "D-01-02-03"),  # step 4
         ("9200", "D-01-02-03", "D-01-02-02"),  # step 5
     ]:
-        state = _manual_step(state, part, source, target, data, analysis)
+        state = manual_step(state, part, source, target, data, analysis)
     state = state.model_copy(update={"keep_marks": ["0500"]})  # step 6 (keep is Epic 7)
     for part in ["8100", "8500", "3050", "4400", "9000", "0100"]:  # steps 7-12
-        state = _apply_rec(state, part, data, analysis)
-    return _run(data, analysis, state).state  # step 13
+        state = apply_recommendation(state, part, data, analysis)
+    return run_command(data, analysis, state).state  # step 13
 
 
 def _numbers(state: PlanState) -> dict[int, str]:
@@ -81,7 +89,7 @@ def test_fr30_apply_all(data: ImportData, analysis: Analysis) -> None:
 
 
 def test_fr30_apply_all_after_run_1(data: ImportData, analysis: Analysis) -> None:
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
 
     applied = _apply_all(state, data, analysis)
 
@@ -93,7 +101,7 @@ def test_fr30_apply_all_after_run_1(data: ImportData, analysis: Analysis) -> Non
 
 
 def test_fr30_apply_all_kept_part_skipped(data: ImportData, analysis: Analysis) -> None:
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
     state = state.model_copy(update={"keep_marks": ["0500"]})  # rec #5
 
     applied = _apply_all(state, data, analysis)
@@ -108,8 +116,8 @@ def test_fr30_apply_all_kept_part_skipped(data: ImportData, analysis: Analysis) 
 
 
 def test_fr30_apply_all_already_outdated_skipped(data: ImportData, analysis: Analysis) -> None:
-    state, _ = _after_run_1(data, analysis)
-    state = _do(state, _manual("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
+    state, _ = after_run_1(data, analysis)
+    state = do(state, manual_command("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
     state = revalidate(data, analysis, state).state  # as the service does after the move
     assert latest_run(state).recommendations[0].status == "outdated"  # type: ignore[union-attr]
 
@@ -125,8 +133,8 @@ def test_fr30_apply_all_already_outdated_skipped(data: ImportData, analysis: Ana
 
 def test_fr30_apply_all_revalidates_first(data: ImportData, analysis: Analysis) -> None:
     """A recommendation outdated by a move not yet revalidated is stored and counted."""
-    state, _ = _after_run_1(data, analysis)
-    state = _do(state, _manual("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
+    state, _ = after_run_1(data, analysis)
+    state = do(state, manual_command("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
 
     applied = _apply_all(state, data, analysis)
 
@@ -140,7 +148,7 @@ def test_fr30_apply_all_revalidates_first(data: ImportData, analysis: Analysis) 
 
 def test_fr30_apply_all_outdated_during_fold(data: ImportData, analysis: Analysis) -> None:
     """Rec #3 targets rec #2's location (state fixture): applying #2 fills it mid-fold."""
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
     run = latest_run(state)
     assert run is not None
     shared = run.recommendations[1].to_location
@@ -169,8 +177,8 @@ def test_fr30_apply_all_outdated_during_fold(data: ImportData, analysis: Analysi
 
 
 def test_fr30_apply_all_already_applied_not_listed(data: ImportData, analysis: Analysis) -> None:
-    state, rec_1 = _after_run_1(data, analysis)
-    state = _do(state, _apply(rec_1), data, analysis)
+    state, rec_1 = after_run_1(data, analysis)
+    state = do(state, apply_command(rec_1), data, analysis)
 
     applied = _apply_all(state, data, analysis)
 
@@ -189,7 +197,7 @@ def test_fr30_apply_all_without_run_is_noop(data: ImportData, analysis: Analysis
 
 
 def test_fr30_apply_all_nothing_left_is_noop(data: ImportData, analysis: Analysis) -> None:
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
     done = _apply_all(state, data, analysis).state
 
     again = _apply_all(done, data, analysis)
@@ -201,10 +209,10 @@ def test_fr30_apply_all_nothing_left_is_noop(data: ImportData, analysis: Analysi
 def test_fr30_apply_all_only_kept_or_outdated_is_noop(data: ImportData, analysis: Analysis) -> None:
     """Every open rec kept and the rest outdated: nothing applied, the input state returned
     (even the fold's own revalidate is dropped)."""
-    state, _ = _after_run_1(data, analysis)
+    state, _ = after_run_1(data, analysis)
     parts = [rec.part for rec in latest_run(state).recommendations]  # type: ignore[union-attr]
     state = state.model_copy(update={"keep_marks": parts[1:]})
-    state = _do(state, _manual("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
+    state = do(state, manual_command("9100", "D-01-02-02", "A-01-01-03"), data, analysis)
 
     applied = _apply_all(state, data, analysis)
 

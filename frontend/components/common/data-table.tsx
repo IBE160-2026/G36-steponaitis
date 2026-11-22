@@ -6,8 +6,21 @@
 // `↑`/`↓` move between rows, `Home`/`End` jump, `Enter` or a click opens a row when `onOpen` is
 // given (a click on a link or button inside the row keeps its own action).
 // `focusKey` (UX-DR9) focuses a shown row and scrolls it into view, once per key value.
+// Rows are memoized: after a command the refetched view keeps unchanged rows (TanStack Query's
+// structural sharing), so only changed rows re-render. Re-rendering every row of a 2,000-row table
+// after each command took over a second in Firefox.
 
-import { type KeyboardEvent, type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  memo,
+  type MouseEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Icon } from "@/components/common/icons";
 import { type SortDirection, type SortValue, sortRows } from "@/lib/sort";
@@ -76,14 +89,70 @@ function toValue<T>(column: DataTableColumn<T>): (row: T) => SortValue {
   return (row) => Number(value(row));
 }
 
+/** The rows in shown order: the user's sort when its column sorts, else the given order. Row `i`
+ * of the table (and of `onOpen`) is `shownRows(...)[i]`. */
+export function shownRows<T>(rows: readonly T[], columns: readonly DataTableColumn<T>[], sort: SortState): T[] {
+  const sortColumn = sort ? columns.find((column) => column.key === sort.key && column.sortValue) : undefined;
+  return sort && sortColumn ? sortRows(rows, toValue(sortColumn), sort.direction) : [...rows];
+}
+
+/** Whether `Enter` opens the row: only when the row itself has the focus, never from a link or
+ * button inside it, which keeps its own action (retro item 15). */
+export function enterOpensRow(target: EventTarget | null, row: EventTarget | null): boolean {
+  return target !== null && target === row;
+}
+
+type RowProps<T> = {
+  row: T;
+  index: number;
+  isActive: boolean;
+  columns: readonly DataTableColumn<T>[];
+  clickable: boolean;
+  onFocus: (index: number) => void;
+  onKeyDown: (event: KeyboardEvent<HTMLTableRowElement>, index: number) => void;
+  onClick: (event: MouseEvent<HTMLTableRowElement>, index: number) => void;
+};
+
+// A row's cells depend only on `row` and `columns` (cells close over nothing else that changes
+// without a new `columns`), so equal props mean equal output.
+const DataTableRow = memo(function DataTableRow<T>({
+  row,
+  index,
+  isActive,
+  columns,
+  clickable,
+  onFocus,
+  onKeyDown,
+  onClick,
+}: RowProps<T>) {
+  return (
+    <tr
+      data-row-index={index}
+      tabIndex={isActive ? 0 : -1}
+      onFocus={() => onFocus(index)}
+      onKeyDown={(event) => onKeyDown(event, index)}
+      onClick={clickable ? (event) => onClick(event, index) : undefined}
+      className={cn("border-b border-hairline align-top", clickable && "cursor-pointer")}
+    >
+      {columns.map((column) => (
+        <td
+          key={column.key}
+          className={cn("h-table-row px-2 py-1", column.align === "end" && "text-right tabular-nums", column.className)}
+        >
+          {column.cell(row)}
+        </td>
+      ))}
+    </tr>
+  );
+}) as <T>(props: RowProps<T>) => ReactNode;
+
 export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, className }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
   const [active, setActive] = useState(0);
   const body = useRef<HTMLTableSectionElement>(null);
   const focused = useRef<string | undefined>(undefined);
 
-  const sortColumn = sort ? columns.find((column) => column.key === sort.key && column.sortValue) : undefined;
-  const shown = sort && sortColumn ? sortRows(rows, toValue(sortColumn), sort.direction) : [...rows];
+  const shown = shownRows(rows, columns, sort);
   const activeIndex = Math.min(active, Math.max(shown.length - 1, 0));
   const focusIndex = focusKey === undefined ? -1 : shown.findIndex((row) => rowKey(row) === focusKey);
 
@@ -122,7 +191,7 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
     const next = nextRowIndex(event.key, index, shown.length);
     if (next === null) return;
     if (next === "open") {
-      if (!onOpen) return;
+      if (!onOpen || !enterOpensRow(event.target, event.currentTarget)) return;
       event.preventDefault();
       onOpen(shown[index]);
       return;
@@ -130,6 +199,21 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
     event.preventDefault();
     focusRow(next);
   }
+
+  // The memoized rows get stable handlers that call the latest render's functions.
+  const latest = useRef({ onClick, onKeyDown });
+  useLayoutEffect(() => {
+    latest.current = { onClick, onKeyDown };
+  });
+  const rowFocus = useCallback((index: number) => setActive(index), []);
+  const rowClick = useCallback(
+    (event: MouseEvent<HTMLTableRowElement>, index: number) => latest.current.onClick(event, index),
+    [],
+  );
+  const rowKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLTableRowElement>, index: number) => latest.current.onKeyDown(event, index),
+    [],
+  );
 
   return (
     <table aria-label={label} className={cn("w-full border-collapse type-body", className)}>
@@ -177,28 +261,17 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
       </thead>
       <tbody ref={body}>
         {shown.map((row, index) => (
-          <tr
+          <DataTableRow
             key={rowKey(row)}
-            data-row-index={index}
-            tabIndex={index === activeIndex ? 0 : -1}
-            onFocus={() => setActive(index)}
-            onKeyDown={(event) => onKeyDown(event, index)}
-            onClick={onOpen ? (event) => onClick(event, index) : undefined}
-            className={cn("border-b border-hairline align-top", onOpen && "cursor-pointer")}
-          >
-            {columns.map((column) => (
-              <td
-                key={column.key}
-                className={cn(
-                  "h-table-row px-2 py-1",
-                  column.align === "end" && "text-right tabular-nums",
-                  column.className,
-                )}
-              >
-                {column.cell(row)}
-              </td>
-            ))}
-          </tr>
+            row={row}
+            index={index}
+            isActive={index === activeIndex}
+            columns={columns}
+            clickable={onOpen !== undefined}
+            onFocus={rowFocus}
+            onKeyDown={rowKeyDown}
+            onClick={rowClick}
+          />
         ))}
       </tbody>
     </table>

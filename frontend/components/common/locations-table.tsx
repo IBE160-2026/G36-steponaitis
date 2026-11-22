@@ -5,7 +5,7 @@
 // filter bar + table with controlled filters and optional extra columns. Filters only read server
 // flags; occupancy and best are always words, never colour alone.
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
 
 import { DataTable, type DataTableColumn } from "@/components/common/data-table";
 import type { LocationRow, LocationsView, Occupancy } from "@/lib/api/plans";
@@ -159,12 +159,14 @@ export function ToggleGroup<V extends string>({
   );
 }
 
+const NO_EXTRA_COLUMNS: readonly DataTableColumn<LocationRow>[] = [];
+
 /** The aisle, occupancy and best filters, the count line and the Locations table. */
 export function LocationsTable({
   view,
   filters,
   onFiltersChange,
-  extraColumns = [],
+  extraColumns = NO_EXTRA_COLUMNS,
   focusKey,
   onOpenPart,
 }: {
@@ -180,6 +182,11 @@ export function LocationsTable({
 }) {
   const rows = filterLocations(view.locations, filters);
   const aisleSelect = useId();
+  // Stable while its inputs are, so the table's memoized rows skip unchanged locations.
+  const columns = useMemo(
+    () => [...(onOpenPart ? locationColumns(onOpenPart) : LOCATION_COLUMNS), ...extraColumns],
+    [onOpenPart, extraColumns],
+  );
   return (
     <>
       <div className="flex flex-wrap items-center gap-4">
@@ -219,7 +226,7 @@ export function LocationsTable({
       </p>
       <DataTable
         label="Locations"
-        columns={[...(onOpenPart ? locationColumns(onOpenPart) : LOCATION_COLUMNS), ...extraColumns]}
+        columns={columns}
         rows={rows}
         rowKey={(row) => row.location.code}
         focusKey={focusKey}

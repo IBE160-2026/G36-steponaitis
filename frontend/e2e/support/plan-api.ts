@@ -1,4 +1,4 @@
-import { type APIRequestContext, expect, type Locator, type Page } from "@playwright/test";
+import { type APIRequestContext, expect, type Locator, type Page, toasts } from "./test";
 
 // Shared by the journeys that read plan views through the API and make manual moves.
 
@@ -33,16 +33,16 @@ export async function enterTarget(page: Page, dialog: Locator, code: string, eff
 
 /**
  * In an open part panel: Manual move… → type `to` → confirm (Esc closes the option list, Enter
- * confirms); waits for the move's toast.
+ * confirms); waits for the move's toast (the plan's current round, 0 before the first run).
  */
-export async function moveFromPanel(page: Page, panel: Locator, part: string, from: string, to: string) {
+export async function moveFromPanel(page: Page, panel: Locator, part: string, from: string, to: string, round = 0) {
   await panel.getByRole("button", { name: "Manual move…" }).click();
   const dialog = page.getByRole("dialog", { name: `Manual move · ${part}` });
   await expect(dialog.getByRole("combobox", { name: "To-location" })).toBeFocused();
   await enterTarget(page, dialog, to, "to an empty location");
   await page.keyboard.press("Escape");
   await page.keyboard.press("Enter");
-  await expect(page.getByText(`Moved ${part}: ${from} → ${to} (Manual, round 0).`, { exact: true })).toBeVisible();
+  await expect(toasts(page).getByText(`Moved ${part}: ${from} → ${to} (Manual, round ${round}).`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);
 }
 
