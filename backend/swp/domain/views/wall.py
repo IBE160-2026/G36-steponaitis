@@ -1,5 +1,5 @@
-"""The wall view of one aisle behind GET /api/plans/{id}/wall?aisle= (FR-42, FR-14, FR-22,
-AD-3, AD-14, AD-15).
+"""The wall view of one aisle behind GET /api/plans/{id}/wall?aisle= and the whole-warehouse
+view behind GET /api/plans/{id}/warehouse (FR-42, FR-14, FR-22, AD-3, AD-14, AD-15).
 
 Pure and plan-scoped: one planning copy per request, every cell and every count built from
 it; it never writes. The frontend joins `locations` to the import's wall layout by code and
@@ -108,6 +108,37 @@ class WallView(BaseModel):
     round: int
     locations: list[WallLocation]
     rail_levels: list[str]
+    moves: list[WallMove]
+    aisles: list[AisleCounts]
+    warehouse: WarehouseCounts
+
+
+class WarehouseLocation(BaseModel):
+    """One location of the whole-warehouse mini-walls: occupancy and the top part's class
+    (None when empty). Kept compact so a 25,000-location import stays under 4 MB."""
+
+    code: str
+    occupied: bool
+    movement_class: MovementClass | None
+
+
+class WarehouseRun(BaseModel):
+    """The latest run: its round and its number of recommendations."""
+
+    round: int
+    recommendations: int
+
+
+class WarehouseView(BaseModel):
+    """The whole warehouse as the plan is now (FR-42, AD-3, AD-15): every location in
+    `location_order` with its occupancy and top class, every wall move entry of all aisles in
+    wall order, the latest run (None before any run), and the same per-aisle and warehouse
+    counts as the wall view, all from one replay at `version`."""
+
+    version: int
+    round: int
+    run: WarehouseRun | None
+    locations: list[WarehouseLocation]
     moves: list[WallMove]
     aisles: list[AisleCounts]
     warehouse: WarehouseCounts
@@ -260,6 +291,43 @@ def _counts(facts: Sequence[_Fact]) -> WarehouseCounts:
     )
 
 
+def _aisle_counts(
+    facts: dict[str, _Fact], entries: Sequence[_MoveEntry], marks: Sequence[BestMark]
+) -> tuple[list[AisleCounts], WarehouseCounts]:
+    """Per-aisle counts in aisle order, and the warehouse counts, from one replay's facts."""
+    moves = _moves_per_aisle(entries)
+    aisles = [
+        AisleCounts(
+            aisle=name,
+            moves=moves.get(name, 0),
+            aisle_marked=any(isinstance(m, AisleMark) and m.aisle == name for m in marks),
+            **_counts([fact for fact in facts.values() if fact.aisle == name]).model_dump(),
+        )
+        for name in aisle_order(fact.aisle for fact in facts.values())
+    ]
+    return aisles, _counts(list(facts.values()))
+
+
+def _facts(copy: PlanningCopy, codes: Sequence[str], marks: Sequence[BestMark]) -> dict[str, _Fact]:
+    return {
+        code: _Fact(
+            aisle=copy.locations[code].aisle,
+            occupied=is_occupied(copy, code),
+            best=is_best(copy, code, marks),
+        )
+        for code in codes
+    }
+
+
+def _top_class(analysis: Analysis, copy: PlanningCopy, code: str) -> MovementClass | None:
+    """The class of the top part (`part_order` first) of the stock at `code`, or None."""
+    stocked = [part for part, stock in copy.contents_of(code).items() if stock > 0]
+    if not stocked:
+        return None
+    entries = {part: analysis.parts.get(part, _UNCLASSIFIED) for part in stocked}
+    return entries[part_order(entries)[0]].movement_class
+
+
 def _wall_location(
     data: ImportData, analysis: Analysis, state: PlanState, copy: PlanningCopy, code: str
 ) -> WallLocation:
@@ -285,25 +353,9 @@ def build_wall_view(
         raise DomainError("not_found", AISLE_NOT_FOUND)
     marks = state.best_marks
     codes = location_order(copy.locations)
-    facts = {
-        code: _Fact(
-            aisle=copy.locations[code].aisle,
-            occupied=is_occupied(copy, code),
-            best=is_best(copy, code, marks),
-        )
-        for code in codes
-    }
+    facts = _facts(copy, codes, marks)
     entries = _move_entries(copy, state, replayed.moves)
-    moves = _moves_per_aisle(entries)
-    aisles = [
-        AisleCounts(
-            aisle=name,
-            moves=moves.get(name, 0),
-            aisle_marked=any(isinstance(m, AisleMark) and m.aisle == name for m in marks),
-            **_counts([fact for fact in facts.values() if fact.aisle == name]).model_dump(),
-        )
-        for name in aisle_order(fact.aisle for fact in facts.values())
-    ]
+    aisles, warehouse = _aisle_counts(facts, entries, marks)
     rows = [
         _wall_location(data, analysis, state, copy, code)
         for code in codes
@@ -323,5 +375,40 @@ def build_wall_view(
             if aisle in entry.aisles
         ],
         aisles=aisles,
-        warehouse=_counts(list(facts.values())),
+        warehouse=warehouse,
+    )
+
+
+def build_warehouse_view(
+    data: ImportData, analysis: Analysis, state: PlanState, version: int
+) -> WarehouseView:
+    """Every location's occupancy and top class, every wall move entry (all aisles, in wall
+    order) and the same per-aisle and warehouse counts as the wall view, from one replay."""
+    replayed = replay(data, state.steps)
+    copy = replayed.copy
+    marks = state.best_marks
+    codes = location_order(copy.locations)
+    facts = _facts(copy, codes, marks)
+    entries = _move_entries(copy, state, replayed.moves)
+    aisles, warehouse = _aisle_counts(facts, entries, marks)
+    latest = latest_run(state)
+    return WarehouseView(
+        version=version,
+        round=current_round(state),
+        run=(
+            WarehouseRun(round=latest.round, recommendations=len(latest.recommendations))
+            if latest is not None
+            else None
+        ),
+        locations=[
+            WarehouseLocation(
+                code=code,
+                occupied=facts[code].occupied,
+                movement_class=_top_class(analysis, copy, code) if facts[code].occupied else None,
+            )
+            for code in codes
+        ],
+        moves=[_wall_move(data, analysis, state, copy, entry) for entry in entries],
+        aisles=aisles,
+        warehouse=warehouse,
     )

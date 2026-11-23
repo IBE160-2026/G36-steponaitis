@@ -1,7 +1,7 @@
 // Wall primitives (Story 10.2, FR-42): shared by the Locations wall, the front page and, later,
-// wall crops (Story 10.5), the whole-warehouse view (Story 10.6) and marking (Story 10.7). The
-// keyboard grid, its navigation and the tooltip are Story 10.3's; the moves layer is Story 10.4's
-// (Story 10.5 reuses it for the wall crops).
+// wall crops (Story 10.5), the whole-warehouse view (Story 10.6, its mini-walls and route) and
+// marking (Story 10.7). The keyboard grid, its navigation and the tooltip are Story 10.3's; the
+// moves layer is Story 10.4's (Story 10.5 reuses it for the wall crops).
 
 export { BIN_HEIGHT, BIN_WIDTH, Bin, CODE_MIN_WIDTH } from "./bin";
 export { CLASS_FILL } from "./class-fill";
@@ -36,6 +36,7 @@ export {
 export {
   cellGeometry,
   type CellGeometry,
+  MOVE_ARROW,
   NOTE_HEIGHT,
   NOTE_WIDTH,
   WallHoverNote,

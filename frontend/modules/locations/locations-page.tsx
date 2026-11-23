@@ -18,6 +18,12 @@
 // move) selects one; a marker, a cell with moves or a drawer row selects it everywhere (URL, wall,
 // drawer) and scrolls the other side into view. The tabs and Open as list drop the selection.
 //
+// Whole warehouse (Story 10.6): the header's One aisle | Whole warehouse control (next to the search
+// field in both scopes) and the whole-warehouse figure button switch scope. Whole warehouse shows
+// the plan's warehouse view: four figures, nine aisle cards with mini-walls and the selected move as
+// one route; a card opens its aisle. An explicit `?aisle=` or `?loc=` always opens One aisle;
+// otherwise the plan's stored scope decides (`aisle-choice.ts`).
+//
 // **Open as list** (`?mode=list`) shows the milestone 1 table: every location in server order with
 // its aisle, level, Walk Path, occupied or empty, best or not, and the parts stored there, with the
 // whole-warehouse and per-aisle occupancy lines. Filters only read server flags; occupancy is always
@@ -51,6 +57,7 @@ import {
   usePlanRecommendations,
   usePlanSummary,
   usePlanWall,
+  usePlanWarehouse,
   type WallView,
 } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
@@ -73,10 +80,11 @@ import {
   wallMoveQuery,
 } from "@/lib/view-state/urls";
 
-import { chooseAisle, readStoredAisle, storeAisle } from "./aisle-choice";
+import { chooseAisle, chooseScope, readStoredWall, storeAisle, storeWall, type WallScope } from "./aisle-choice";
 import { aisleTabId, AisleTabs } from "./aisle-tabs";
 import { AisleWall, type AisleWallProps } from "./aisle-wall";
 import { joinedRow, MovesDrawer } from "./moves-drawer";
+import { ScopeControl, WholeWarehouse } from "./warehouse-view";
 
 /** List mode: only `?mode=list` (a `?loc=` link without it opens the wall at that location). */
 export function isListMode(params: LocationParams): boolean {
@@ -160,6 +168,20 @@ export function LocationsView({
   );
 }
 
+/** The wall's page header: the title, then the One aisle | Whole warehouse control and the search field. */
+function LocationsHeader({ controls, search }: { controls?: ReactNode; search?: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <h1 className="type-page-title">Locations</h1>
+      <div className="flex min-w-0 flex-wrap items-center justify-end gap-4">
+        {controls}
+        {/* The search field is `w-full max-w-[360px]`: a fixed box keeps it beside the control. */}
+        {search && <div className="w-[360px] max-w-full">{search}</div>}
+      </div>
+    </div>
+  );
+}
+
 export function LocationsWall({
   planId,
   view,
@@ -171,6 +193,9 @@ export function LocationsWall({
   search,
   grid = {},
   drawer,
+  onScopeChange,
+  focusScope = false,
+  onScopeFocused,
 }: {
   planId: string;
   view: WallView;
@@ -186,6 +211,11 @@ export function LocationsWall({
   grid?: Omit<AisleWallProps, "layout" | "wall">;
   /** The "Moves touching aisle" drawer under the Key. */
   drawer?: ReactNode;
+  /** The One aisle | Whole warehouse control and the whole-warehouse figure button (Story 10.6). */
+  onScopeChange?: (scope: WallScope) => void;
+  /** Focus the control's checked radio once mounted (after a scope switch), then `onScopeFocused`. */
+  focusScope?: boolean;
+  onScopeFocused?: () => void;
 }) {
   const idPrefix = useId();
   const panelId = `${idPrefix}-panel`;
@@ -193,15 +223,27 @@ export function LocationsWall({
   const aisleLayout = layout?.aisles.find((entry) => entry.aisle === view.aisle);
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <h1 className="type-page-title">Locations</h1>
-        {search}
-      </div>
-      <div className="flex flex-col gap-2">
+      <LocationsHeader
+        controls={
+          <ScopeControl
+            scope="aisle"
+            onChange={(scope) => onScopeChange?.(scope)}
+            focusOnMount={focusScope}
+            onFocused={onScopeFocused}
+          />
+        }
+        search={search}
+      />
+      <div className="flex flex-col items-start gap-2">
         <AisleTabs aisles={view.aisles} selected={selected} onSelect={onSelect} idPrefix={idPrefix} panelId={panelId} />
-        <p className="type-body text-ink" data-whole-warehouse="">
+        <button
+          type="button"
+          onClick={() => onScopeChange?.("warehouse")}
+          className="rounded-sm text-left type-body text-ink underline decoration-border underline-offset-4 hover:decoration-ink"
+          data-whole-warehouse=""
+        >
           {wholeWarehouseFigure(view.warehouse)}
-        </p>
+        </button>
       </div>
       <section
         role="tabpanel"
@@ -240,11 +282,135 @@ export function LocationsWall({
   );
 }
 
+type ScopeSwitch = {
+  /** Whole warehouse: keeps the stored aisle and, from One aisle, the selected move. */
+  toWarehouse: (moveQuery: Pick<LocationParams, "rec" | "move">) => void;
+  /** One aisle on `aisle` (a card, or the control on the chosen aisle; none while the layout is not here). */
+  toAisle: (aisle?: string) => void;
+  /** Set by a switch: the newly mounted control takes focus, then calls `onFocused`. */
+  focusControl: boolean;
+  onFocused: () => void;
+};
+
 function WallMode({ planId, params, importId }: { planId: string; params: LocationParams; importId: string }) {
   const layout = useImportLayout(importId);
   const aisles = layout.data?.aisles.map((entry) => entry.aisle) ?? [];
   // Read on each render: any aisle the wall opens on (tab, deep link, Open as wall) is stored below.
-  const aisle = chooseAisle(params.aisle, readStoredAisle(planId), aisles);
+  const stored = readStoredWall(planId);
+  const aisle = chooseAisle(params.aisle, stored.aisle, aisles);
+  // The chosen scope lives here, seeded from storage; storage only remembers it (it may be blocked).
+  const [chosen, setChosen] = useState<WallScope>(() => chooseScope(params, stored.scope));
+  // A new explicit `?aisle=` / `?loc=` chooses One aisle (only when the URL changes: a switch to
+  // Whole warehouse drops `aisle` from the URL one render after it sets the scope).
+  const urlKey = locationUrlKey(params.aisle, params.loc);
+  const [seenUrl, setSeenUrl] = useState(urlKey);
+  if (seenUrl !== urlKey) {
+    setSeenUrl(urlKey);
+    if (params.aisle !== undefined || params.loc !== undefined) setChosen("aisle");
+  }
+  const scope = chooseScope(params, chosen);
+  const [focusControl, setFocusControl] = useState(false);
+
+  const switchScope: ScopeSwitch = {
+    toWarehouse: (moveQuery) => {
+      storeWall(planId, "warehouse");
+      setChosen("warehouse");
+      setFocusControl(true);
+      window.history.replaceState(null, "", planStepHref(planId, "locations", { part: params.part, ...moveQuery }));
+    },
+    toAisle: (next) => {
+      storeWall(planId, "aisle", next);
+      setChosen("aisle");
+      setFocusControl(true);
+      window.history.replaceState(
+        null,
+        "",
+        planStepHref(planId, "locations", { aisle: next, part: params.part, rec: params.rec, move: params.move }),
+      );
+    },
+    focusControl,
+    onFocused: () => setFocusControl(false),
+  };
+
+  if (scope === "warehouse") {
+    return <WarehouseMode planId={planId} params={params} layout={layout} aisle={aisle} switchScope={switchScope} />;
+  }
+  return <AisleMode planId={planId} params={params} layout={layout} aisle={aisle} switchScope={switchScope} />;
+}
+
+function WarehouseMode({
+  planId,
+  params,
+  layout,
+  aisle,
+  switchScope,
+}: {
+  planId: string;
+  params: LocationParams;
+  layout: ReturnType<typeof useImportLayout>;
+  /** The aisle One aisle would open on (the stored one, else the first). */
+  aisle: string | undefined;
+  switchScope: ScopeSwitch;
+}) {
+  const warehouse = usePlanWarehouse(planId, true);
+  const panel = usePartPanel(planId, "locations");
+  const data = usePanelPlanData(planId, warehouse, panel.part);
+  // `?rec=` / `?move=` select one of the warehouse's move entries; any other id selects nothing.
+  const selectedMove = data?.view.moves.find((move) => isSelectedWallMove(move, params));
+  // The header stays mounted while the view loads or fails, so One aisle is always reachable.
+  return (
+    <WithPartPanel
+      planId={planId}
+      part={panel.part}
+      detail={data?.detail}
+      detailError={data?.detailError}
+      onClose={panel.close}
+    >
+      <div className="flex flex-col gap-4 px-page-gutter py-5">
+        <LocationsHeader
+          controls={
+            <ScopeControl
+              scope="warehouse"
+              onChange={(next) => {
+                if (next === "aisle") switchScope.toAisle(aisle);
+              }}
+              focusOnMount={switchScope.focusControl}
+              onFocused={switchScope.onFocused}
+            />
+          }
+          search={<SearchField planId={planId} onOpenPart={panel.open} />}
+        />
+        {showsLoadError(layout.error) && <PlanLoadError message={layout.error.message} />}
+        {data ? (
+          <WholeWarehouse
+            view={data.view}
+            layout={layout.data}
+            selectedMove={selectedMove}
+            onSelectAisle={switchScope.toAisle}
+          />
+        ) : showsLoadError(warehouse.error) ? (
+          <PlanLoadError message={warehouse.error.message} />
+        ) : (
+          !showsLoadError(layout.error) && <PlanOpening planId={planId} />
+        )}
+      </div>
+    </WithPartPanel>
+  );
+}
+
+function AisleMode({
+  planId,
+  params,
+  layout,
+  aisle,
+  switchScope,
+}: {
+  planId: string;
+  params: LocationParams;
+  layout: ReturnType<typeof useImportLayout>;
+  aisle: string | undefined;
+  switchScope: ScopeSwitch;
+}) {
   const wall = usePlanWall(planId, aisle ?? "", aisle !== undefined);
   const panel = usePartPanel(planId, "locations");
   const data = usePanelPlanData(planId, wall, panel.part);
@@ -345,6 +511,11 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
         selected={aisle}
         onSelect={select}
         onOpenList={openList}
+        onScopeChange={(next) => {
+          if (next === "warehouse") switchScope.toWarehouse(selectedMove ? wallMoveQuery(selectedMove) : {});
+        }}
+        focusScope={switchScope.focusControl}
+        onScopeFocused={switchScope.onFocused}
         part={panel.part}
         search={
           <SearchField

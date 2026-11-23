@@ -349,6 +349,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/warehouse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Warehouse */
+        get: operations["get_plan_warehouse_api_plans__plan_id__warehouse_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/session": {
         parameters: {
             query?: never;
@@ -1962,6 +1979,50 @@ export interface components {
             /** Occupied Percent */
             occupied_percent: string;
         };
+        /**
+         * WarehouseLocation
+         * @description One location of the whole-warehouse mini-walls: occupancy and the top part's class
+         *     (None when empty). Kept compact so a 25,000-location import stays under 4 MB.
+         */
+        WarehouseLocation: {
+            /** Code */
+            code: string;
+            /** Movement Class */
+            movement_class: ("fast" | "medium" | "slow" | "dead") | null;
+            /** Occupied */
+            occupied: boolean;
+        };
+        /**
+         * WarehouseRun
+         * @description The latest run: its round and its number of recommendations.
+         */
+        WarehouseRun: {
+            /** Recommendations */
+            recommendations: number;
+            /** Round */
+            round: number;
+        };
+        /**
+         * WarehouseView
+         * @description The whole warehouse as the plan is now (FR-42, AD-3, AD-15): every location in
+         *     `location_order` with its occupancy and top class, every wall move entry of all aisles in
+         *     wall order, the latest run (None before any run), and the same per-aisle and warehouse
+         *     counts as the wall view, all from one replay at `version`.
+         */
+        WarehouseView: {
+            /** Aisles */
+            aisles: components["schemas"]["AisleCounts"][];
+            /** Locations */
+            locations: components["schemas"]["WarehouseLocation"][];
+            /** Moves */
+            moves: components["schemas"]["WallMove"][];
+            /** Round */
+            round: number;
+            run: components["schemas"]["WarehouseRun"] | null;
+            /** Version */
+            version: number;
+            warehouse: components["schemas"]["WarehouseCounts"];
+        };
     };
     responses: never;
     parameters: never;
@@ -2938,6 +2999,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WallView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_warehouse_api_plans__plan_id__warehouse_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WarehouseView"];
                 };
             };
             /** @description Error */

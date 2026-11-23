@@ -26,6 +26,8 @@ import {
 
 const CASING = "var(--color-slot-empty)";
 const ACCENT = "var(--color-accent)";
+/** The selected move's arrow colours: a dark casing under the violet accent (Story 10.6's route reuses them). */
+export const MOVE_ARROW = { casing: CASING, accent: ACCENT } as const;
 const LIFT_SHADOW = "drop-shadow(0 6px 10px rgba(0,0,0,0.45))";
 
 /** A mark's stable React key: its move, its kind and the end it is drawn on. */

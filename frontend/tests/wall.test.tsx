@@ -360,7 +360,7 @@ describe("fr42 wall aisle choice", () => {
     vi.stubGlobal("localStorage", storage(values));
     expect(readStoredAisle("p1")).toBeNull();
     storeAisle("p1", "B");
-    expect(values[planWallStorageKey("p1")]).toBe('{"aisle":"B"}');
+    expect(values[planWallStorageKey("p1")]).toBe('{"aisle":"B","scope":"aisle"}');
     expect(planWallStorageKey("p1")).toBe("swp:plan:p1:wall");
     expect(readStoredAisle("p1")).toBe("B");
     expect(readStoredAisle("p2")).toBeNull();

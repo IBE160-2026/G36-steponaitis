@@ -5,7 +5,7 @@
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
 // preview (Story 4.3), before/after (Story 4.6), the recommendations view (Stories 5.5,
 // 5.7), a recommendation's other locations (Story 7.2), the move list (Story 8.3) and an aisle's
-// wall (Story 10.2). The reads are GETs and never
+// wall (Story 10.2) and the whole warehouse (Story 10.6). The reads are GETs and never
 // change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -100,6 +100,12 @@ export type WallMoveStatus = WallMove["status"];
 /** An aisle's counts on the wall: occupancy, best, its aisle mark, and `moves`: the number of wall move entries touching it (latest-run recommendations plus current-round manual moves). */
 export type AisleCounts = components["schemas"]["AisleCounts"];
 export type WarehouseCounts = components["schemas"]["WarehouseCounts"];
+/** The whole warehouse (Story 10.6): every location's occupancy and top class, every wall move entry, the latest run and the same counts as the wall. */
+export type WarehouseView = components["schemas"]["WarehouseView"];
+/** One location of the mini-walls: occupied or not, and the top part's class (null when empty). */
+export type WarehouseLocation = components["schemas"]["WarehouseLocation"];
+/** The latest run: its round and its number of recommendations. */
+export type WarehouseRun = components["schemas"]["WarehouseRun"];
 
 export const PLANS_KEY = ["plans"] as const;
 
@@ -139,6 +145,11 @@ export function planMoveListKey(planId: string) {
 /** Under `['plan', planId]`, so a confirmed command refetches every aisle's wall. */
 export function planWallKey(planId: string, aisle: string) {
   return [...planRootKey(planId), "wall", aisle] as const;
+}
+
+/** Under `['plan', planId]`, so a confirmed command refetches the whole warehouse. */
+export function planWarehouseKey(planId: string) {
+  return [...planRootKey(planId), "warehouse"] as const;
 }
 
 /** Under `planRecommendationsKey`, so the command refetch of `['plan', planId]` refreshes it. */
@@ -209,6 +220,15 @@ export function usePlanWall(planId: string, aisle: string, enabled: boolean) {
     enabled,
     placeholderData: keepPreviousData,
   });
+}
+
+export function fetchPlanWarehouse(planId: string): Promise<WarehouseView> {
+  return getJson<WarehouseView>(`/api/plans/${encodeURIComponent(planId)}/warehouse`);
+}
+
+/** The whole warehouse (Story 10.6); runs only while `enabled` (Whole warehouse is shown). */
+export function usePlanWarehouse(planId: string, enabled: boolean) {
+  return useQuery({ queryKey: planWarehouseKey(planId), queryFn: () => fetchPlanWarehouse(planId), enabled });
 }
 
 export function fetchPlanPickGroups(planId: string): Promise<PickGroupsView> {

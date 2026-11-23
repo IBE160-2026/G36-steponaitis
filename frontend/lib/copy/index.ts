@@ -489,6 +489,43 @@ export function wholeWarehouseFigure(counts: WarehouseCounts): string {
   ].join(" · ");
 }
 
+// The whole-warehouse view (Story 10.6, UX-DR45/58).
+
+/** The Locations wall's One aisle | Whole warehouse control. */
+export const LOCATIONS_VIEW_LABEL = "Locations view";
+export const SCOPE_LABELS = { aisle: "One aisle", warehouse: "Whole warehouse" } as const;
+
+/** "79.2% occupied": the whole warehouse's first figure. */
+export function warehouseOccupiedFigure(counts: WarehouseCounts): string {
+  return `${percentText(counts.occupied_percent)} occupied`;
+}
+
+/** "416 empty locations". */
+export function warehouseEmptyFigure(counts: WarehouseCounts): string {
+  return plural(counts.empty, "empty location", "empty locations");
+}
+
+/** "174 best locations · 7 of them empty". */
+export function warehouseBestFigure(counts: WarehouseCounts): string {
+  return `${plural(counts.best, "best location", "best locations")} · ${formatNumber(counts.empty_best)} of them empty`;
+}
+
+/** "19 recommendations in round 1", or "No recommendations yet" before any run. */
+export function warehouseRunFigure(run: { round: number; recommendations: number } | null): string {
+  if (run === null) return "No recommendations yet";
+  return `${plural(run.recommendations, "recommendation", "recommendations")} in round ${formatNumber(run.round)}`;
+}
+
+/** "194 of 228 · 34 empty": an aisle card's counts. */
+export function aisleCardLine(counts: AisleCounts): string {
+  return `${formatNumber(counts.occupied)} of ${formatNumber(counts.locations)} · ${formatNumber(counts.empty)} empty`;
+}
+
+/** "Selected move: 4410281 · G-14-04-02 → A-02-01-01": the route's text line. */
+export function selectedMoveLine(move: { part: string; from_location: { code: string }; to_location: { code: string } }): string {
+  return `Selected move: ${move.part} · ${move.from_location.code} → ${move.to_location.code}`;
+}
+
 /**
  * "86.8% occupied · 198 of 228 locations · 30 empty · 117 best locations (3 empty) · Walk Path 0–2,270":
  * the open aisle's line, its Walk Path range from the layout.

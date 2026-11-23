@@ -27,7 +27,7 @@ from swp.domain.state import (
     Step,
 )
 from swp.domain.views.locations import build_locations_view
-from swp.domain.views.wall import AISLE_NOT_FOUND, build_wall_view
+from swp.domain.views.wall import AISLE_NOT_FOUND, build_wall_view, build_warehouse_view
 
 RUN_ID = "run-1"
 
@@ -397,3 +397,80 @@ def test_fr42_wall_unknown_aisle_not_found(data: ImportData, analysis: Analysis)
         build_wall_view(data, analysis, PlanState.new(), 1, "Z")
     assert raised.value.code == "not_found"
     assert raised.value.message == AISLE_NOT_FOUND
+
+
+def test_fr42_warehouse_view_counts_equal_the_wall_view(
+    data: ImportData, analysis: Analysis
+) -> None:
+    state = _with_steps(
+        PlanState(
+            runs=[_run(_rec(1, "0100", "A-01-01-01", "B-01-03-03"))],
+            best_marks=[AisleMark(aisle="A"), LocationMark(location="B-01-03-03")],
+        ),
+        _step(1, "6600", "C-01-02-03", "C-01-03-01"),
+    )
+    wall = build_wall_view(data, analysis, state, 7, "A")
+    view = build_warehouse_view(data, analysis, state, 7)
+    assert view.version == 7
+    assert view.round == wall.round == 1
+    assert view.aisles == wall.aisles
+    assert view.warehouse == wall.warehouse
+
+
+def test_fr42_warehouse_view_top_class_per_location(data: ImportData, analysis: Analysis) -> None:
+    extra = [
+        InventoryLine(part="1200", location="A-01-01-01", quantity=Decimal(3)),
+        InventoryLine(part="5000", location="A-01-01-01", quantity=Decimal(0)),
+    ]
+    two_parts = data.model_copy(update={"inventory": [*data.inventory, *extra]})
+    view = build_warehouse_view(two_parts, analysis, PlanState.new(), 1)
+    assert [row.code for row in view.locations] == location_order(data.locations)
+    rows = {row.code: row for row in view.locations}
+    assert (rows["A-01-01-01"].occupied, rows["A-01-01-01"].movement_class) == (
+        True,
+        analysis.parts["1200"].movement_class,
+    )
+    assert (rows["A-01-01-03"].occupied, rows["A-01-01-03"].movement_class) == (False, None)
+    assert (rows["B-01-03-03"].occupied, rows["B-01-03-03"].movement_class) == (False, None)
+    wall = build_wall_view(two_parts, analysis, PlanState.new(), 1, "B")
+    for cell in wall.locations:
+        row = rows[cell.location.code]
+        assert row.occupied == cell.occupied
+        top = cell.top_part.movement_class if cell.top_part is not None else None
+        assert row.movement_class == top
+
+
+def test_fr42_warehouse_view_moves_across_all_aisles(data: ImportData, analysis: Analysis) -> None:
+    recs = [
+        _rec(1, "0100", "A-01-01-01", "B-01-03-03"),
+        _rec(2, "0600", "A-01-02-02", "A-01-01-03"),
+        _rec(3, "6600", "C-01-02-03", "C-01-03-01"),
+    ]
+    state = _with_steps(
+        PlanState(runs=[_run(*recs)]),
+        _step(1, "6600", "C-01-02-03", "D-01-03-01", rec=3),
+        _step(2, "1200", "B-01-01-02", "B-01-03-03"),
+    )
+    view = build_warehouse_view(data, analysis, state, 3)
+    assert [(m.kind, m.number, m.move_number, m.status) for m in view.moves] == [
+        ("recommendation", 1, None, "open"),
+        ("recommendation", 2, None, "open"),
+        ("recommendation", 3, 1, "applied"),
+        ("manual", None, 2, "manual"),
+    ]
+    assert view.moves[2].to_location.code == "D-01-03-01"
+    for counts in view.aisles:
+        wall = build_wall_view(data, analysis, state, 3, counts.aisle)
+        assert [m for m in view.moves if m in wall.moves] == wall.moves
+
+
+def test_fr42_warehouse_view_run(data: ImportData, analysis: Analysis) -> None:
+    before = build_warehouse_view(data, analysis, PlanState.new(), 1)
+    assert (before.run, before.round, before.moves) == (None, 0, [])
+    recs = [
+        _rec(1, "0100", "A-01-01-01", "B-01-03-03"),
+        _rec(2, "0600", "A-01-02-02", "A-01-01-03"),
+    ]
+    after = build_warehouse_view(data, analysis, PlanState(runs=[_run(*recs)]), 2)
+    assert after.run is not None
+    assert (after.run.round, after.run.recommendations, after.round) == (1, 2, 1)

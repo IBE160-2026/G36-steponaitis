@@ -1,13 +1,17 @@
 """FR-42/FR-14/FR-22: GET /api/plans/{id}/wall?aisle= on the sample data; it never writes."""
 
 import uuid
+from decimal import Decimal
 from typing import Any
 
 from fastapi.testclient import TestClient
 
 from swp.api.app import create_app
+from swp.app import plans
+from swp.domain.import_data import InventoryLine
 from tests.app.test_apply_command import _answer_key_after_run, _command, _state
 from tests.app.test_create_plan import SAME_ORIGIN
+from tests.app.test_layout_api import NOW, _max_size_import
 from tests.app.test_manual_move_api import _move
 from tests.app.test_parts_api import _sample_plan
 from tests.app.test_plan_summary import _row
@@ -209,3 +213,66 @@ def test_fr42_wall_unknown_aisle_and_plan(empty_tables: str) -> None:
     assert empty_aisle.json()["error"]["code"] == "validation_failed"
     assert missing_plan.status_code == 404
     assert missing_plan.json()["error"]["code"] == "plan_not_found"
+
+
+def test_fr42_warehouse_endpoint_on_sample(empty_tables: str) -> None:
+    with TestClient(create_app()) as client:
+        plan_id = _sample_plan(client)
+        before = _row(uuid.UUID(plan_id))
+        response = client.get(f"/api/plans/{plan_id}/warehouse")
+        wall = client.get(f"/api/plans/{plan_id}/wall", params={"aisle": "A"}).json()
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert set(body) == {"version", "round", "run", "locations", "moves", "aisles", "warehouse"}
+    assert (body["version"], body["round"], body["run"], body["moves"]) == (1, 0, None, [])
+    assert len(body["locations"]) == 2_000
+    assert set(body["locations"][0]) == {"code", "occupied", "movement_class"}
+    assert body["aisles"] == wall["aisles"]
+    assert body["warehouse"] == wall["warehouse"]
+    rows = {row["code"]: row for row in body["locations"]}
+    for cell in wall["locations"]:
+        row = rows[cell["location"]["code"]]
+        top = cell["top_part"]["movement_class"] if cell["top_part"] else None
+        assert (row["occupied"], row["movement_class"]) == (cell["occupied"], top)
+    assert _row(uuid.UUID(plan_id)) == before
+
+
+def test_fr42_warehouse_endpoint_after_a_run(empty_tables: str) -> None:
+    with TestClient(create_app()) as client:
+        plan_id, _rec_id = _answer_key_after_run(client)
+        body = client.get(f"/api/plans/{plan_id}/warehouse").json()
+
+    recs = _state(plan_id).runs[-1].recommendations
+    assert body["run"] == {"round": 1, "recommendations": len(recs)}
+    assert [m["number"] for m in body["moves"]] == [r.number for r in recs]
+    assert body["version"] == 3
+
+
+def test_fr42_warehouse_endpoint_unknown_plan(empty_tables: str) -> None:
+    with TestClient(create_app()) as client:
+        missing = client.get(f"/api/plans/{uuid.uuid4()}/warehouse")
+
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "plan_not_found"
+
+
+def test_fr42_warehouse_endpoint_max_size_under_4_mb(empty_tables: str) -> None:
+    imported = _max_size_import()
+    # Worst case for size: every location stocked, so every row carries a class.
+    stocked = [
+        InventoryLine(part=f"P{n % 100:03}", location=code, quantity=Decimal(1))
+        for n, code in enumerate(imported.data.locations)
+    ]
+    parts = {f"P{n:03}": f"Part {n}" for n in range(100)}
+    data = imported.data.model_copy(update={"inventory": stocked, "parts": parts})
+    created = plans.create("Max", imported.model_copy(update={"data": data}), now=NOW)
+
+    with TestClient(create_app()) as client:
+        response = client.get(f"/api/plans/{created.id}/warehouse")
+
+    assert response.status_code == 200, response.text
+    rows = response.json()["locations"]
+    assert len(rows) == 25_000
+    assert all(row["occupied"] and row["movement_class"] for row in rows)
+    assert len(response.content) < 4_000_000, len(response.content)
