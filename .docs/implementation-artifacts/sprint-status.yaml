@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 15:05
+last_updated: 11-23-2026 15:11
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -129,7 +129,7 @@ development_status:
   11-1-colour-maths-and-presets: done
   11-2-key-colours-as-live-css-variables-kept-in-the-browser: done
   11-3-change-a-colour-from-the-key: done
-  epic-11-retrospective: optional
+  epic-11-retrospective: done
 
   epic-12: backlog
   12-1-drag-commands-expand-into-manual-moves-on-the-server: backlog
@@ -859,3 +859,53 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-93-make-the-colour-store-keep-html-and-memo"
+    epic: 11
+    action: "Make the colour store keep <html> and memory in step: setKeyColour applies
+      every differing variable, and keeps unsaved in-memory changes when writes fail;
+      add Vitest for two tabs and two changes under failing writes, and an e2e Esc
+      check (R1-R3, R6, R7)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-94-pin-key_colour_of-with-a-test-per-key-en"
+    epic: 11
+    action: "Pin KEY_COLOUR_OF with a test per Key entry that a pick changes the right
+      variable, including Selected changing --colour-selection and --colour-selected-tint
+      (R4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-95-use-one-exported-rrggbb-predicate-in-lib"
+    epic: 11
+    action: "Use one exported #RRGGBB predicate in lib/colours for setKeyColour/previewKeyColour,
+      the hex field and the rule the inline parser mirrors (R5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-96-reconcile-epics-md-epic-11-and-epic-11-c"
+    epic: 11
+    action: "Reconcile epics.md Epic 11 and epic-11-context with as-built: popover
+      in components/common/wall, title without the glyph in its name, theme tokens
+      alias --colour-*, Selection recolours accent and selected-tint chrome; confirm
+      the best-on-light jump (issues.md:191) (A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-97-decide-whether-every-key-shows-all-six-c"
+    epic: 11
+    action: "Decide whether every Key shows all six colour buttons (six extra tab
+      stops in the recommendation detail) or only the entries its surface draws (epic-10
+      item 88 R10), and record it in UX-DR48 (A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-11-retro-item-98-before-epic-12-schedule-epic-10-items-89"
+    epic: 11
+    action: "Before Epic 12 schedule epic-10 items 89 (split WallGrid/AisleMode) and
+      84 (Firefox crash) and the delete-plan.spec.ts:63 flake (epic-4 item 37) as
+      stories, and add the epic-6 item 58 runbook guard that recurred in Story 11.3
+      (B1, P1-P3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
