@@ -139,7 +139,8 @@ export function planMovePreviewKey(planId: string, part: string, from: string, t
   return [...planRootKey(planId), "move-preview", part, from, to] as const;
 }
 
-async function getJson<T>(url: string): Promise<T> {
+/** GET `url` as JSON; an error status throws its AD-11 error, a network failure `internal`. */
+export async function getJson<T>(url: string): Promise<T> {
   let response: Response;
   try {
     response = await fetch(url);

@@ -92,6 +92,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/imports/{import_id}/layout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Import Layout */
+        get: operations["get_import_layout_api_imports__import_id__layout_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans": {
         parameters: {
             query?: never;
@@ -359,6 +376,24 @@ export interface components {
             moved_out: string[];
             occupied: components["schemas"]["Count"];
             pick_groups_together: components["schemas"]["Count"];
+        };
+        /** AisleLayout */
+        AisleLayout: {
+            /** Aisle */
+            aisle: string;
+            /** Cells */
+            cells: components["schemas"]["LayoutCell"][];
+            /** Runs */
+            runs: components["schemas"]["LayoutRun"][];
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "columns" | "code" | "walk_path";
+            /** Walk Path First */
+            walk_path_first: string;
+            /** Walk Path Last */
+            walk_path_last: string;
         };
         /** AisleMark */
         AisleMark: {
@@ -691,6 +726,38 @@ export interface components {
             part: string;
             /** Picks */
             picks: number | null;
+        };
+        /**
+         * LayoutCell
+         * @description One logical cell: a location, or a gap (`location` null) where a section has none.
+         */
+        LayoutCell: {
+            /** Column */
+            column: number;
+            /** Gap */
+            gap: boolean;
+            location: components["schemas"]["LocationRef"] | null;
+            /** Row */
+            row: number;
+            /** Run */
+            run: number;
+        };
+        /**
+         * LayoutRun
+         * @description One run of an aisle: its levels top to bottom (row 0 first), width and sections.
+         */
+        LayoutRun: {
+            /** Columns */
+            columns: number;
+            /** Levels */
+            levels: string[];
+            /** Sections */
+            sections: components["schemas"]["SectionSpan"][];
+        };
+        /** LayoutView */
+        LayoutView: {
+            /** Aisles */
+            aisles: components["schemas"]["AisleLayout"][];
         };
         /** LevelMark */
         LevelMark: {
@@ -1555,6 +1622,18 @@ export interface components {
             /** Version */
             version: number;
         };
+        /**
+         * SectionSpan
+         * @description A section label over `columns` columns of a run, from `first_column`.
+         */
+        SectionSpan: {
+            /** Columns */
+            columns: number;
+            /** First Column */
+            first_column: number;
+            /** Section */
+            section: string;
+        };
         /** Session */
         Session: {
             /** Feature Auth */
@@ -1942,6 +2021,46 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    get_import_layout_api_imports__import_id__layout_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                import_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LayoutView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
         };

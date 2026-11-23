@@ -25,12 +25,22 @@ def fewest_picks_order(parts: Mapping[str, PartAnalysis]) -> list[str]:
     return sorted(parts, key=lambda part: (parts[part].picks, part))
 
 
-def level_key(levels: Iterable[str]) -> Callable[[str], tuple[int, str] | tuple[str]]:
-    """The sort key for Level values: numeric when every value in `levels` is all decimal
-    digits (`isdecimal`, which `int` always accepts), else `str` order."""
-    if all(level.isdecimal() for level in levels):
-        return lambda level: (int(level), level)
-    return lambda level: (level,)
+SortKey = Callable[[str], tuple[int, str] | tuple[str]]
+"""The key `identifier_key` and `level_key` return."""
+
+
+def identifier_key(values: Iterable[str]) -> SortKey:
+    """The sort key for Level, Section or Position values: numeric when every value in
+    `values` is all decimal digits (`isdecimal`, which `int` always accepts), else `str`
+    order. Equal numbers (`"1"`, `"01"`) tie-break in `str` order."""
+    if all(value.isdecimal() for value in values):
+        return lambda value: (int(value), value)
+    return lambda value: (value,)
+
+
+def level_key(levels: Iterable[str]) -> SortKey:
+    """The sort key for Level values (`identifier_key` over `levels`)."""
+    return identifier_key(levels)
 
 
 def aisle_order(aisles: Iterable[str]) -> list[str]:
