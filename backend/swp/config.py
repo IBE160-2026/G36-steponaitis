@@ -6,6 +6,8 @@ from pathlib import Path
 from pydantic import PositiveInt, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from swp.domain.accounts import password_error
+
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 VAR_DIR = BACKEND_DIR / "var"
 DEFAULT_DATABASE_URL = f"sqlite:///{VAR_DIR / 'swp.db'}"
@@ -29,6 +31,9 @@ class Settings(BaseSettings):
     # HS256 key for the `swp_session` JWT (env JWT_SECRET, AD-10). The default is for local
     # runs only; production must set its own (checked at startup from Story 9.7).
     jwt_secret: str = DEFAULT_JWT_SECRET
+    # Password of the seeded `demo` account (env DEMO_PASSWORD, AD-10); used only when the
+    # account is first created.
+    demo_password: str = "demo"
 
     @field_validator("database_url")
     @classmethod
@@ -37,6 +42,15 @@ class Settings(BaseSettings):
         if url.startswith("postgresql://"):
             return "postgresql+psycopg://" + url.removeprefix("postgresql://")
         return url
+
+    @field_validator("demo_password")
+    @classmethod
+    def _demo_password_can_log_in(cls, password: str) -> str:
+        # A password the Log in form would refuse fails at startup instead.
+        error = password_error(password)
+        if error is not None:
+            raise ValueError(f"DEMO_PASSWORD: {error}")
+        return password
 
 
 @lru_cache

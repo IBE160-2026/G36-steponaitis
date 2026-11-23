@@ -340,7 +340,10 @@ NOT_FOUND_ERROR = {"code": "not_found", "message": "Not found.", "details": []}
 
 def _user_count() -> int:
     with get_engine().connect() as conn:
-        return conn.execute(select(func.count()).select_from(UserRow)).scalar_one()
+        # Not counting the `demo` account the lifespan seeds (FR-50).
+        return conn.execute(
+            select(func.count()).select_from(UserRow).where(UserRow.username_key != "demo")
+        ).scalar_one()
 
 
 @pytest.fixture

@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     if args.command == "db" and args.db_command == "upgrade":
-        bootstrap(upgrade=True, seed=False)
+        bootstrap(upgrade=True, seed=True)
     elif args.command == "openapi":
         from swp.api.app import create_app
 

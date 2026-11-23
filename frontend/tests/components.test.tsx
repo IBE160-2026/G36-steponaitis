@@ -49,9 +49,10 @@ describe("nfr10 class glyphs are SVG shapes", () => {
 });
 
 describe("nfr10 icon set", () => {
-  it("renders all twelve UI icons as outline svgs at a 1.6px stroke", () => {
+  it("renders all thirteen UI icons as outline svgs at a 1.6px stroke", () => {
     expect(ICON_NAMES).toEqual([
       "search", "grid", "lock", "clock", "pin", "palette", "warning", "check", "link", "chevron", "plus", "close",
+      "play",
     ]);
     for (const name of ICON_NAMES) {
       const markup = html(<Icon name={name} />);

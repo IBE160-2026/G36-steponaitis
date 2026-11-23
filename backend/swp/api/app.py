@@ -32,7 +32,7 @@ from swp.config import get_settings
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     if get_settings().app_env == "local":
-        bootstrap(upgrade=True, seed=False)
+        bootstrap(upgrade=True, seed=True)
     yield
 
 

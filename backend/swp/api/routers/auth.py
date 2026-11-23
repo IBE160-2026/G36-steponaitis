@@ -1,4 +1,5 @@
-"""POST /api/auth/signup, /login and /logout: accounts and the session (FR-39, FR-40, AD-10).
+"""POST /api/auth/signup, /login, /logout and /demo: accounts and the session (FR-39, FR-40,
+FR-50, AD-10).
 
 With `FEATURE_AUTH` off, every /api/auth/* path is `not_found`.
 """
@@ -77,6 +78,23 @@ def login(body: LoginRequest, response: Response) -> LoginResponse:
 )
 def logout(response: Response) -> None:
     clear_session_cookie(response)
+
+
+def require_demo_feature() -> None:
+    if not auth.demo_enabled():
+        raise DomainError("not_found", NOT_FOUND)
+
+
+@router.post(
+    "/demo",
+    dependencies=[Depends(require_demo_feature)],
+    responses=error_responses(403, 404),
+)
+def demo(response: Response) -> LoginResponse:
+    """Demo version: log in as `demo` with no password and no throttle (FR-50)."""
+    logged_in = auth.demo_login(now=datetime.now(UTC))
+    set_session_cookie(response, logged_in.token)
+    return LoginResponse(user=logged_in.username)
 
 
 @router.api_route("/{path:path}", methods=ALL_METHODS, include_in_schema=False)

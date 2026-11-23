@@ -3,7 +3,7 @@
 // writes the copy; the pages only show it. Create account focuses the first failing field; a wrong
 // login clears and focuses the password. Success refreshes the session and opens the saved-plans
 // list, or the page that was open when the session ended (Story 9.3); Log out clears the cached
-// data and opens Log in.
+// data and opens Log in. Demo version (Story 9.5, FR-50) logs in as `demo` with no password.
 
 import { ApiError, internalError, parseErrorBody } from "@/lib/api/errors";
 import type { components } from "@/lib/api/schema";
@@ -27,6 +27,7 @@ export const USERNAME_HINT = "Letters and numbers. Must not be taken.";
 export const LOGIN_TITLE = "Log in";
 export const LOGIN_LEAD = "Plans are shared by everyone who logs in.";
 export const LOGOUT_LABEL = "Log out";
+export const DEMO_VERSION_LABEL = "Demo version";
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -63,6 +64,11 @@ export function postSignup(form: SignupForm, fetchImpl: FetchLike = fetch): Prom
 /** POST the credentials; resolves with the stored username, rejects with an `ApiError`. */
 export function postLogin(form: LoginForm, fetchImpl: FetchLike = fetch): Promise<LoginResponse> {
   return postJson<LoginResponse>("/api/auth/login", form, fetchImpl);
+}
+
+/** POST /api/auth/demo (FR-50): log in as `demo` with no password; rejects with an `ApiError`. */
+export function postDemo(fetchImpl: FetchLike = fetch): Promise<LoginResponse> {
+  return postJson<LoginResponse>("/api/auth/demo", {}, fetchImpl);
 }
 
 /** POST /api/auth/logout: the server clears the session cookie (204). */
@@ -159,6 +165,25 @@ export async function runLogin(form: LoginForm, effects: LoginEffects): Promise<
     const apiError = error instanceof ApiError ? error : internalError();
     if (apiError.code === "unauthenticated") return { kind: "wrong-login", message: apiError.message };
     return { kind: "failed", message: apiError.message };
+  }
+  await effects.invalidateSession();
+  effects.navigate();
+  return { kind: "logged-in", user: loggedIn.user };
+}
+
+export type DemoEffects = Omit<LoginEffects, "post"> & { post?: () => Promise<LoginResponse> };
+
+/**
+ * Demo version (FR-50): POST once; on success refresh the session, then open the same page as a
+ * successful Log in. Any error is one message for the whole form.
+ */
+export async function runDemo(effects: DemoEffects): Promise<LoginOutcome> {
+  const post = effects.post ?? (() => postDemo());
+  let loggedIn: LoginResponse;
+  try {
+    loggedIn = await post();
+  } catch (error) {
+    return { kind: "failed", message: (error instanceof ApiError ? error : internalError()).message };
   }
   await effects.invalidateSession();
   effects.navigate();

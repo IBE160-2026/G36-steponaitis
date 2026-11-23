@@ -10,6 +10,7 @@ import {
   type LucideIcon,
   Palette,
   Pin,
+  Play,
   Plus,
   Search,
   TriangleAlert,
@@ -29,6 +30,7 @@ const ICONS = {
   chevron: ChevronDown,
   plus: Plus,
   close: X,
+  play: Play,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

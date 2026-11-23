@@ -92,3 +92,27 @@ def test_fr39_max_plans_must_be_positive(
 
     with pytest.raises(ValidationError):
         config.Settings()
+
+
+def test_fr50_demo_password_defaults_to_demo(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEMO_PASSWORD", raising=False)
+
+    assert config.Settings().demo_password == "demo"
+
+
+def test_fr50_demo_password_from_env(fresh_settings: None, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEMO_PASSWORD", "s3cret")
+
+    assert config.Settings().demo_password == "s3cret"
+
+
+@pytest.mark.parametrize("password", ["abc", "a" * 65, "€" * 25], ids=["3", "65", "75-bytes"])
+def test_fr50_demo_password_that_could_not_log_in_fails(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch, password: str
+) -> None:
+    monkeypatch.setenv("DEMO_PASSWORD", password)
+
+    with pytest.raises(ValidationError, match="DEMO_PASSWORD"):
+        config.Settings()

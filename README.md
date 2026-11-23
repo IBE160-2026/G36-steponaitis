@@ -35,6 +35,8 @@ npm run dev   # FastAPI on http://127.0.0.1:8000, Next.js on http://localhost:30
 
 Open http://localhost:3000. The browser calls `/api/*` on port 3000, which Next.js forwards to the backend. The local SQLite database is created at `backend/var/swp.db`.
 
+To try accounts, start with `FEATURE_AUTH=true npm run dev`: every page then needs a login. Log in as `demo` with the password `demo`; this account is created when the backend starts (set `DEMO_PASSWORD` before the first start to choose another password). A local install has no Demo version button.
+
 Checks:
 
 | Check | Command |

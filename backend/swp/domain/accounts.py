@@ -23,7 +23,8 @@ PASSWORD_MAX = 64
 PASSWORD_MAX_BYTES = 72  # bcrypt reads at most 72 bytes.
 
 # Reserved by casefold: `planner` is the M1 default user, `demo` the seeded demo account.
-RESERVED_USERNAMES = frozenset({"planner", "demo"})
+DEMO_USERNAME = "demo"  # the seeded demo account (FR-50, AD-10); already casefolded
+RESERVED_USERNAMES = frozenset({"planner", DEMO_USERNAME})
 
 TAKEN = "That username is taken. Try another."
 USERNAME_EMPTY = "Enter a username."

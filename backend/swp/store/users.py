@@ -7,6 +7,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
+from swp.domain.accounts import DEMO_USERNAME
 from swp.store.db import transaction
 from swp.store.models import UserRow
 
@@ -73,5 +74,5 @@ def count_accounts() -> int:
     """The number of accounts, not counting the seeded `demo` account (AD-18)."""
     with transaction() as session:
         return session.execute(
-            select(func.count()).select_from(UserRow).where(UserRow.username_key != "demo")
+            select(func.count()).select_from(UserRow).where(UserRow.username_key != DEMO_USERNAME)
         ).scalar_one()

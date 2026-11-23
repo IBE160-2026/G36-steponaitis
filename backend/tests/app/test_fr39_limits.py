@@ -73,21 +73,12 @@ def _signup(client: TestClient, username: str, password: str = "secret"):
     )
 
 
-def _seed_demo_user() -> None:
-    assert user_store.insert_user(
-        user_store.StoredUser(
-            id=uuid.uuid4(),
-            username="demo",
-            username_key="demo",
-            password_hash="not-a-real-hash",
-            created_at=NOW,
-        )
-    )
-
-
 def _user_count() -> int:
+    """Accounts, not counting the `demo` account the lifespan seeds (FR-50)."""
     with get_engine().connect() as conn:
-        return conn.execute(select(func.count()).select_from(UserRow)).scalar_one()
+        return conn.execute(
+            select(func.count()).select_from(UserRow).where(UserRow.username_key != "demo")
+        ).scalar_one()
 
 
 def _one_plan() -> plans.StoredPlan:
@@ -109,7 +100,8 @@ def _reuse(client: TestClient, import_id: uuid.UUID, name: str = "Second"):
 def test_fr39_account_limit_refuses_signup(
     demo_on: None, auth_on: None, client: TestClient
 ) -> None:
-    _seed_demo_user()  # the seeded demo account is not counted (AD-18)
+    # The lifespan seeded `demo` (FR-50); it is not counted (AD-18).
+    assert user_store.username_key_taken("demo")
     assert _signup(client, "a").status_code == 201
     assert _signup(client, "b").status_code == 201
 
@@ -118,7 +110,7 @@ def test_fr39_account_limit_refuses_signup(
     assert response.status_code == 409, response.text
     assert response.json() == {"error": ACCOUNT_LIMIT}
     assert "set-cookie" not in response.headers
-    assert _user_count() == 3
+    assert _user_count() == 2
 
 
 def test_fr39_account_limit_checked_before_fields(

@@ -1,6 +1,7 @@
 // The Log in and Create account card (UX-DR53): a 380px surface card with a border and
 // `rounded.lg` corners on the ground colour, the title in `page-title`, an optional lead, the form
-// and a link row to the other page. Shared by both pages (Stories 9.1 and 9.2).
+// and a link row to the other page, then an optional footer. Shared by both pages (Stories 9.1, 9.2
+// and 9.5).
 
 import Link from "next/link";
 import { type ReactNode, useId } from "react";
@@ -15,9 +16,11 @@ export type AuthCardProps = {
   linkPrompt: string;
   linkHref: string;
   linkLabel: string;
+  /** Optional content after the link row (Log in's "or" rule and Demo version, Story 9.5). */
+  footer?: ReactNode;
 };
 
-export function AuthCard({ title, lead, children, linkPrompt, linkHref, linkLabel }: AuthCardProps) {
+export function AuthCard({ title, lead, children, linkPrompt, linkHref, linkLabel, footer }: AuthCardProps) {
   const titleId = `${useId()}-title`;
   return (
     <div className="flex justify-center px-page-gutter py-10">
@@ -38,6 +41,7 @@ export function AuthCard({ title, lead, children, linkPrompt, linkHref, linkLabe
             {linkLabel}
           </Link>
         </p>
+        {footer}
       </section>
     </div>
   );

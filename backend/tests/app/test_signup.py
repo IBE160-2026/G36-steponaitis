@@ -51,14 +51,18 @@ def _signup(
     )
 
 
+# The TestClient lifespan (APP_ENV=local) seeds `demo` (FR-50); these tests count the others.
+NOT_DEMO = UserRow.username_key != "demo"
+
+
 def _rows() -> list[UserRow]:
     with get_engine().connect() as conn:
-        return list(conn.execute(select(UserRow)).all())  # type: ignore[arg-type]
+        return list(conn.execute(select(UserRow).where(NOT_DEMO)).all())  # type: ignore[arg-type]
 
 
 def _user_count() -> int:
     with get_engine().connect() as conn:
-        return conn.execute(select(func.count()).select_from(UserRow)).scalar_one()
+        return conn.execute(select(func.count()).select_from(UserRow).where(NOT_DEMO)).scalar_one()
 
 
 def _error(response) -> dict[str, object]:

@@ -9,13 +9,16 @@ import { type Session, SESSION_KEY } from "@/lib/api/session";
 import { isAuthPath, LOGIN_HREF, SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
 import {
   afterLoginHref,
+  DEMO_VERSION_LABEL,
   fieldErrorsOf,
   firstFailingField,
   LOGIN_LEAD,
   LOGIN_TITLE,
+  postDemo,
   postLogin,
   postLogout,
   postSignup,
+  runDemo,
   runLogin,
   runLogout,
   runSignup,
@@ -416,6 +419,88 @@ describe("fr40 log in requests", () => {
     await expect(postLogout(logoutFetch)).resolves.toBeUndefined();
     expect(logoutFetch).toHaveBeenCalledOnce();
     expect((logoutFetch.mock.calls[0] as unknown as [string, RequestInit])[0]).toBe("/api/auth/logout");
+  });
+});
+
+describe("fr50 demo version", () => {
+  it("fr50_run_demo_refreshes_the_session_then_opens_saved_plans", async () => {
+    const calls: string[] = [];
+    const outcome = await runDemo({
+      post: async () => {
+        calls.push("post");
+        return { user: "demo" };
+      },
+      invalidateSession: async () => {
+        await Promise.resolve();
+        calls.push("invalidate");
+      },
+      navigate: () => calls.push("navigate"),
+    });
+    expect(outcome).toEqual({ kind: "logged-in", user: "demo" });
+    expect(calls).toEqual(["post", "invalidate", "navigate"]);
+  });
+
+  it("fr50_run_demo_failure_is_one_message_and_never_navigates", async () => {
+    const navigate = vi.fn();
+    const invalidateSession = vi.fn();
+    const outcome = await runDemo({
+      post: async () => Promise.reject(new ApiError(404, "not_found", "Not found.")),
+      invalidateSession,
+      navigate,
+    });
+    expect(outcome).toEqual({ kind: "failed", message: "Not found." });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(invalidateSession).not.toHaveBeenCalled();
+
+    const network = await runDemo({
+      post: async () => Promise.reject(new TypeError("network")),
+      invalidateSession,
+      navigate,
+    });
+    expect(network).toEqual({ kind: "failed", message: "Something went wrong. Try again." });
+
+    // The page keeps both fields and shows the message in the one alert.
+    const before: LoginFormState = { values: { username: "Kari7", password: "secret" }, formError: null, passwordShown: false };
+    const after = afterFailedLogin(before, outcome as Exclude<typeof outcome, { kind: "logged-in" }>);
+    expect(after).toEqual({ ...before, formError: "Not found." });
+    const markup = html(
+      <LoginCard values={after.values} formError={after.formError} passwordShown={false} demo />,
+    );
+    expect(markup.match(/role="alert"/g)).toHaveLength(1);
+    expect(inputTag(markup, "password")).toContain('value="secret"');
+  });
+
+  it("fr50_post_demo_sends_one_empty_json_post", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ user: "demo" }), { status: 200 }));
+    await expect(postDemo(fetchImpl)).resolves.toEqual({ user: "demo" });
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect([url, init.method, init.body]).toEqual(["/api/auth/demo", "POST", "{}"]);
+  });
+
+  it("fr50_card_shows_or_rule_and_full_width_demo_button_only_when_demo_is_on", () => {
+    expect(DEMO_VERSION_LABEL).toBe("Demo version");
+    const off = html(<LoginCard values={{ username: "", password: "" }} passwordShown={false} />);
+    expect(off).not.toContain(DEMO_VERSION_LABEL);
+    expect(off).not.toContain(">or<");
+
+    const on = html(<LoginCard values={{ username: "", password: "" }} passwordShown={false} demo />);
+    const button = on.match(new RegExp(`<button[^>]*>(?:(?!</button>).)*${DEMO_VERSION_LABEL}</button>`));
+    expect(button, "demo button").not.toBeNull();
+    expect(button![0]).toContain("w-full");
+    expect(button![0]).toContain("border-border"); // tertiary
+    expect(button![0]).toContain('data-icon="play"');
+    expect(button![0]).toContain('type="button"');
+    // The "or" rule sits after the Create account link and before the button.
+    const or = on.indexOf(">or<");
+    expect(or).toBeGreaterThan(on.indexOf(">Create account</a>"));
+    expect(or).toBeLessThan(on.indexOf(DEMO_VERSION_LABEL));
+    expect(on.match(/<span aria-hidden="true" class="h-px flex-1 bg-border"><\/span>/g)).toHaveLength(2);
+  });
+
+  it("fr50_busy_disables_log_in_and_demo_version", () => {
+    const markup = html(<LoginCard values={{ username: "", password: "" }} passwordShown={false} demo busy />);
+    expect(markup.match(/aria-disabled="true"/g)).toHaveLength(2);
   });
 });
 

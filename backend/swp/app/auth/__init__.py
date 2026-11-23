@@ -14,6 +14,7 @@ import jwt
 from swp.app.limits import ensure_account_room
 from swp.config import get_settings
 from swp.domain.accounts import (
+    DEMO_USERNAME,
     LOGIN_LOCKED,
     PASSWORD_MAX_BYTES,
     TAKEN,
@@ -43,6 +44,10 @@ class SignedUp:
 
 def auth_enabled() -> bool:
     return get_settings().feature_auth
+
+
+def demo_enabled() -> bool:
+    return get_settings().feature_demo
 
 
 def cookie_secure() -> bool:
@@ -138,6 +143,40 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
         login_attempts.record_failure(key, now)
         raise DomainError("unauthenticated", WRONG_LOGIN)
     login_attempts.clear(key)
+    return SignedUp(username=user.username, token=session_token(user.id, now=now))
+
+
+def seed_demo_account(*, now: datetime) -> None:
+    """Create the `demo` account with `DEMO_PASSWORD` once (FR-50, AD-10); the only seed.
+
+    An existing `demo` row is never changed. A concurrent seed that wins the unique
+    constraint counts as success.
+    """
+    if store.username_key_taken(DEMO_USERNAME):
+        return
+    store.insert_user(
+        store.StoredUser(
+            id=uuid.uuid4(),
+            username=DEMO_USERNAME,
+            username_key=DEMO_USERNAME,
+            password_hash=hash_password(get_settings().demo_password),
+            created_at=now,
+        )
+    )
+
+
+def demo_login(*, now: datetime) -> SignedUp:
+    """A session as `demo` with no password and no throttle (FR-50, Demo version).
+
+    Seeds the account first when it is missing, so the button survives a database reset.
+    Never reads or writes `login_attempts`.
+    """
+    user = store.get_user_by_key(DEMO_USERNAME)
+    if user is None:
+        seed_demo_account(now=now)
+        user = store.get_user_by_key(DEMO_USERNAME)
+    if user is None:  # the seed above always leaves a row; kept for the type checker
+        raise DomainError("internal", "The demo account could not be opened. Try again.")
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 
