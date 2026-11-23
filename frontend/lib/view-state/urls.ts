@@ -23,6 +23,14 @@ export const SIGNUP_HREF = "/signup";
 /** Log in (FR-40, Story 9.2). */
 export const LOGIN_HREF = "/login";
 
+/** The start page `/`: the demo front page on the public deployment, else the saved-plans list (Story 9.6). */
+export const FRONT_PAGE_HREF = "/";
+
+/** True on `/` only: the page that shows the demo front page (FR-50, Story 9.6). */
+export function isFrontPagePath(pathname: string): boolean {
+  return pathname === FRONT_PAGE_HREF;
+}
+
 /** True on the Log in and Create account pages, whose toolbar holds only the logo and name. */
 export function isAuthPath(pathname: string): boolean {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;

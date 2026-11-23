@@ -3,12 +3,14 @@
 // writes the copy; the pages only show it. Create account focuses the first failing field; a wrong
 // login clears and focuses the password. Success refreshes the session and opens the saved-plans
 // list, or the page that was open when the session ended (Story 9.3); Log out clears the cached
-// data and opens Log in. Demo version (Story 9.5, FR-50) logs in as `demo` with no password.
+// data and opens Log in, or the demo front page when FEATURE_DEMO is on (Story 9.6). Demo version
+// (Story 9.5, FR-50) logs in as `demo` with no password.
 
 import { ApiError, internalError, parseErrorBody } from "@/lib/api/errors";
 import type { components } from "@/lib/api/schema";
+import type { Session } from "@/lib/api/session";
 import { sessionExpiry } from "@/lib/api/session-expiry";
-import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
+import { FRONT_PAGE_HREF, LOGIN_HREF, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 export type SignupForm = components["schemas"]["SignupRequest"];
 export type SignupResponse = components["schemas"]["SignupResponse"];
@@ -190,6 +192,14 @@ export async function runDemo(effects: DemoEffects): Promise<LoginOutcome> {
   return { kind: "logged-in", user: loggedIn.user };
 }
 
+/**
+ * Where Log out goes (FR-40, Story 9.6): the demo front page when FEATURE_DEMO is on, else Log in.
+ * An unknown session (a failed read) counts as demo off.
+ */
+export function logoutHref(session: Pick<Session, "feature_demo"> | null | undefined): string {
+  return session?.feature_demo === true ? FRONT_PAGE_HREF : LOGIN_HREF;
+}
+
 export type LogoutOutcome = { kind: "logged-out" } | { kind: "failed"; message: string };
 
 export type LogoutEffects = {
@@ -198,11 +208,14 @@ export type LogoutEffects = {
   clearCache: () => void;
   /** Set the cached session to logged out (the guard then hides the app). */
   setLoggedOut: () => void;
-  /** Open Log in. */
+  /** Open Log in, or the demo front page with FEATURE_DEMO on (`logoutHref`). */
   navigate: () => void;
 };
 
-/** Log out: POST, then clear the cache, mark the session logged out and open Log in. */
+/**
+ * Log out: POST, then clear the cache, mark the session logged out and open Log in, or the demo
+ * front page with FEATURE_DEMO on (`logoutHref`).
+ */
 export async function runLogout(effects: LogoutEffects): Promise<LogoutOutcome> {
   const post = effects.post ?? (() => postLogout());
   try {

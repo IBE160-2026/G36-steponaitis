@@ -6,12 +6,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Toolbar } from "@/components/common/app-shell/toolbar";
 import { ApiError } from "@/lib/api/errors";
 import { type Session, SESSION_KEY } from "@/lib/api/session";
-import { isAuthPath, LOGIN_HREF, SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
+import { FRONT_PAGE_HREF, isAuthPath, LOGIN_HREF, SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
 import {
   afterLoginHref,
   DEMO_VERSION_LABEL,
   fieldErrorsOf,
   firstFailingField,
+  logoutHref,
   LOGIN_LEAD,
   LOGIN_TITLE,
   postDemo,
@@ -26,11 +27,17 @@ import {
   type SignupForm,
   USERNAME_HINT,
 } from "@/modules/auth/api";
-import { AuthGuard, followGuard, guardDecision } from "@/modules/auth/auth-guard";
+import { AuthGuard, followGuard, followGuardAfterLogout, guardDecision, leaveTo } from "@/modules/auth/auth-guard";
+import {
+  DEMO_VERSION_BUSY_REASON,
+  DemoVersionButton,
+  DemoVersionButtonView,
+  pressDemoVersion,
+} from "@/modules/auth/demo-version-button";
 import { afterFailedLogin, focusAfterFailedLogin, LoginCard, type LoginFormState } from "@/modules/auth/login-page";
 import { PasswordInput } from "@/modules/auth/password-input";
 import { focusField, SignupCard, type SignupFieldRefs } from "@/modules/auth/signup-page";
-import { avatarInitials, UserMenu } from "@/modules/auth/user-menu";
+import { avatarInitials, logOutAndLeave, UserMenu } from "@/modules/auth/user-menu";
 import { SessionExpiry } from "@/lib/api/session-expiry";
 
 // Story 9.1: Create account (FR-39, UX-DR53). Story 9.2: Log in, Log out and the page guard (FR-40).
@@ -607,6 +614,102 @@ describe("fr40 log out", () => {
     expect(withQueryClient(<Toolbar account={account} />)).toMatch(/ml-auto[^>]*><button type="button">Account/);
     nav.pathname = LOGIN_HREF;
     expect(withQueryClient(<Toolbar account={account} />)).not.toContain("Account");
+  });
+});
+
+describe("fr50 front page guard and Log out (Story 9.6)", () => {
+  const DEMO_ON: Session = { ...AUTH_ON, feature_demo: true };
+
+  it("fr50_guard_lets_slash_through_only_with_demo_on", () => {
+    expect(guardDecision(FRONT_PAGE_HREF, { isPending: false, data: DEMO_ON })).toBe("render");
+    expect(guardDecision(FRONT_PAGE_HREF, { isPending: false, data: { ...DEMO_ON, user: "demo" } })).toBe("render");
+    expect(guardDecision(FRONT_PAGE_HREF, { isPending: true })).toBe("wait");
+    // Demo off: `/` still needs a login (Story 9.2); other pages need one with demo on too.
+    expect(guardDecision(FRONT_PAGE_HREF, { isPending: false, data: AUTH_ON })).toBe("redirect");
+    expect(guardDecision(SAVED_PLANS_HREF, { isPending: false, data: DEMO_ON })).toBe("redirect");
+    // Demo on with auth off has no front page; the guard renders `/` as for any page with auth off.
+    expect(guardDecision(FRONT_PAGE_HREF, { isPending: false, data: { ...DEMO_ON, feature_auth: false } })).toBe(
+      "render",
+    );
+  });
+
+  it("fr40_logout_href_is_the_front_page_with_demo_on_else_login", () => {
+    expect(logoutHref(DEMO_ON)).toBe("/");
+    expect(logoutHref(AUTH_ON)).toBe(LOGIN_HREF);
+    expect(logoutHref(undefined)).toBe(LOGIN_HREF);
+  });
+
+  async function logOutWith(session: Session) {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(SESSION_KEY, session);
+    queryClient.setQueryData(["plans"], []);
+    const router = { replace: vi.fn() };
+    const outcome = await logOutAndLeave({ session, queryClient, router, post: async () => {} });
+    return { outcome, router, queryClient };
+  }
+
+  it("fr40_user_menu_log_out_opens_the_front_page_with_demo_on_and_login_with_demo_off", async () => {
+    const on = await logOutWith({ ...DEMO_ON, user: "demo" });
+    expect(on.outcome).toEqual({ kind: "logged-out" });
+    expect(on.router.replace).toHaveBeenCalledExactlyOnceWith("/");
+    expect(on.queryClient.getQueryData<Session>(SESSION_KEY)?.user).toBeNull();
+    expect(on.queryClient.getQueryData(["plans"])).toBeUndefined();
+    followGuardAfterLogout("render", "/", { replace: vi.fn() }); // arrive; ends the hold
+
+    const off = await logOutWith({ ...AUTH_ON, user: "Kari7" });
+    expect(off.router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+    followGuardAfterLogout("render", LOGIN_HREF, { replace: vi.fn() });
+  });
+
+  it("fr40_guard_leaves_log_out_its_own_navigation_then_resumes", () => {
+    const router = { replace: vi.fn() };
+    leaveTo("/");
+    // The page being left sees a logged-out session: Log out navigates, not the guard.
+    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router)).toBe(true);
+    expect(router.replace).not.toHaveBeenCalled();
+    // The front page opens: the hold ends and the guard works as before.
+    expect(followGuardAfterLogout("render", "/", router)).toBe(false);
+    followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router);
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+    // Session expiry never sets the hold, so a 401 still opens Log in.
+    router.replace.mockReset();
+    followGuardAfterLogout("redirect", "/plans/p1/overview", router);
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+  });
+
+  it("fr50_demo_version_button_is_tertiary_with_play_and_disabled_with_a_reason_while_busy", () => {
+    const idle = withQueryClient(<DemoVersionButton />);
+    expect(idle).toMatch(/<button[^>]*border-border[^>]*>.*data-icon="play".*Demo version<\/button>/);
+    expect(idle).not.toContain("aria-disabled");
+    const busy = html(<DemoVersionButtonView busy />);
+    expect(busy).toContain('aria-disabled="true"');
+    expect(busy).toContain(DEMO_VERSION_BUSY_REASON);
+  });
+
+  it("fr50_demo_version_button_success_navigates_after_invalidating_and_stays_busy", async () => {
+    const calls: string[] = [];
+    const outcome = await pressDemoVersion({
+      post: async () => ({ user: "demo" }),
+      invalidateSession: async () => calls.push("invalidate"),
+      navigate: () => calls.push("navigate"),
+      setBusy: (busy) => calls.push(`busy:${busy}`),
+      notify: (message) => calls.push(`toast:${message}`),
+    });
+    expect(outcome).toEqual({ kind: "logged-in", user: "demo" });
+    expect(calls).toEqual(["busy:true", "invalidate", "navigate"]);
+  });
+
+  it("fr50_demo_version_button_failure_toasts_and_re_enables", async () => {
+    const calls: string[] = [];
+    const outcome = await pressDemoVersion({
+      post: async () => Promise.reject(new ApiError(404, "not_found", "Not found.", [])),
+      invalidateSession: async () => calls.push("invalidate"),
+      navigate: () => calls.push("navigate"),
+      setBusy: (busy) => calls.push(`busy:${busy}`),
+      notify: (message) => calls.push(`toast:${message}`),
+    });
+    expect(outcome).toEqual({ kind: "failed", message: "Not found." });
+    expect(calls).toEqual(["busy:true", "busy:false", "toast:Not found."]);
   });
 });
 

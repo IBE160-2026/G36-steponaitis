@@ -4,10 +4,10 @@
 // FEATURE_AUTH on and a user. A 34px ink disc with the username's first two letters opens a white
 // menu with "Logged in as", the username and Log out. Keyboard is radix's: Enter, Space or
 // ArrowDown open it, the arrows move, `Esc` closes it and returns focus to the avatar. Log out
-// posts logout, clears every cached query, marks the session logged out and opens Log in. Passed
-// into the toolbar as a slot by app/layout.tsx.
+// posts logout, clears every cached query, marks the session logged out and opens Log in (the demo
+// front page with FEATURE_DEMO on, Story 9.6). Passed into the toolbar as a slot by app/layout.tsx.
 
-import { useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { DropdownMenu } from "radix-ui";
 import { useRef } from "react";
@@ -15,9 +15,9 @@ import { useRef } from "react";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "@/components/common/menu-styles";
 import { showToast } from "@/components/common/toast";
 import { type Session, SESSION_KEY, useSession } from "@/lib/api/session";
-import { LOGIN_HREF } from "@/lib/view-state/urls";
 
-import { LOGOUT_LABEL, runLogout } from "./api";
+import { LOGOUT_LABEL, type LogoutOutcome, logoutHref, runLogout } from "./api";
+import { leaveTo } from "./auth-guard";
 
 export const USER_MENU_LABEL = "User menu";
 export const LOGGED_IN_AS = "Logged in as";
@@ -28,6 +28,35 @@ export const LOGGED_IN_AS = "Logged in as";
  */
 export function avatarInitials(username: string): string {
   return Array.from(Array.from(username).slice(0, 2).join("").toUpperCase()).slice(0, 2).join("");
+}
+
+export type LogOutDeps = {
+  /** The session as it was before Log out (its `feature_demo` picks the page to open). */
+  session: Session | undefined;
+  queryClient: Pick<QueryClient, "removeQueries" | "setQueryData">;
+  router: { replace: (href: string) => void };
+  post?: () => Promise<void>;
+};
+
+/**
+ * Log out from the avatar menu: post, clear every cached query but the session, mark the session
+ * logged out and open Log in, or the demo front page with FEATURE_DEMO on (Story 9.6).
+ */
+export function logOutAndLeave({ session, queryClient, router, post }: LogOutDeps): Promise<LogoutOutcome> {
+  const target = logoutHref(session);
+  return runLogout({
+    post,
+    // Every query but the session goes; the session stays cached, set to logged out, so the
+    // guard hides the app at once instead of waiting for a refetch.
+    clearCache: () => queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== SESSION_KEY[0] }),
+    // The guard leaves the page being left to Log out's own navigation (Story 9.6).
+    setLoggedOut: () => {
+      leaveTo(target);
+      queryClient.setQueryData<Session>(SESSION_KEY, (current) => (current ? { ...current, user: null } : current));
+    },
+    // Replace, as the guard does: the guarded page leaves no history entry behind.
+    navigate: () => router.replace(target),
+  });
 }
 
 export function UserMenu() {
@@ -42,15 +71,7 @@ export function UserMenu() {
   async function logOut() {
     if (inFlight.current) return;
     inFlight.current = true;
-    const outcome = await runLogout({
-      // Every query but the session goes; the session stays cached, set to logged out, so the
-      // guard hides the app at once instead of waiting for a refetch.
-      clearCache: () => queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== SESSION_KEY[0] }),
-      setLoggedOut: () =>
-        queryClient.setQueryData<Session>(SESSION_KEY, (current) => (current ? { ...current, user: null } : current)),
-      // Replace, as the guard does: the guarded page leaves no history entry behind.
-      navigate: () => router.replace(LOGIN_HREF),
-    });
+    const outcome = await logOutAndLeave({ session: session.data, queryClient, router });
     inFlight.current = false;
     if (outcome.kind === "failed") showToast(outcome.message);
   }

@@ -1,10 +1,11 @@
-// The start page (FR-8, AD-20): `/` opens the saved-plans list. A server redirect keeps `/` out
-// of the client bundle and lets the browser Back button skip it.
+// The start page `/` (FR-8, FR-50, AD-20, Story 9.6): the demo front page on the public deployment
+// (FEATURE_DEMO on, no session), else the saved-plans list. The flags come from GET /api/session at
+// runtime, so HomePage decides on the client. Demo version reaches the front page as a slot, so
+// modules/front-page never imports modules/auth.
 
-import { redirect } from "next/navigation";
+import { DemoVersionButton } from "@/modules/auth/demo-version-button";
+import { HomePage } from "@/modules/front-page/home-page";
 
-import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
-
-export default function HomePage() {
-  redirect(SAVED_PLANS_HREF);
+export default function Page() {
+  return <HomePage demoAction={<DemoVersionButton />} />;
 }
