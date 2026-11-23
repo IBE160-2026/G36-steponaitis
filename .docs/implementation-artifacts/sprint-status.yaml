@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 12:50
+last_updated: 11-23-2026 13:02
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -123,7 +123,7 @@ development_status:
   10-5-wall-crops-in-the-recommendation-detail: done
   10-6-whole-warehouse-view: done
   10-7-mark-best-locations-on-the-wall: done
-  epic-10-retrospective: optional
+  epic-10-retrospective: done
 
   epic-11: backlog
   11-1-colour-maths-and-presets: backlog
@@ -785,3 +785,77 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-84-find-and-fix-the-firefox-page-crash-in-t"
+    epic: 10
+    action: "Find and fix the Firefox page crash in the recommendation detail at 1300px
+      (recommendations-page.spec.ts:231, 10.5 narrow-crop path) and keep the test
+      green in all three browsers (B1)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-85-keep-the-selected-move-and-chosen-aisle"
+    epic: 10
+    action: "Keep the selected move and chosen aisle across scope and aisle switches:
+      toAisle opens the move's aisle, selectMove and Edit best-location marks use
+      the chosen aisle, drop the dead ?part=, with tests (R1, R2, R14, V3)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-86-fix-locations-loading-deep-link-and-focu"
+    epic: 10
+    action: "Fix Locations loading, deep-link and focus gaps: One aisle header while
+      the wall loads or fails, drop ?loc= after pinning, drawer refocus when the version
+      jumps by more than one, with tests (R3, R4, R5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-87-make-level-mode-marking-accessible-one-r"
+    epic: 10
+    action: "Make Level-mode marking accessible: one roving tab stop with distinct
+      names per run, disable Remove mark while the next aisle loads, tests for tab
+      order and the Mark to Unmark preview (R6, V1, V2, V4, V5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-88-close-the-low-wall-findings-r7-r13-and-a"
+    epic: 10
+    action: "Close the low wall findings R7-R13 and add the deferred tests for tooltip
+      placement geometry, cross-selection scrolling and the live crop resize (10.3,
+      10.4, 10.5 deferrals)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-89-before-epics-11-12-split-wallgrid-and-ai"
+    epic: 10
+    action: "Before Epics 11-12 split WallGrid and AisleMode, build marking row geometry
+      from model.ts, share the Best locations header, move wallOf and wall test fixtures
+      into e2e/support and tests/support, move marking strings to lib/copy (A2, A3,
+      A4)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-90-decide-the-10-1-layout-limits-confirm-th"
+    epic: 10
+    action: "Decide the 10.1 layout limits: confirm the sparse-grid fallback and whether
+      3.66 MB against the 4 MB limit needs a smaller encoding or a recorded margin
+      (issues.md:176-177)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-91-reconcile-epics-md-epic-10-and-the-spine"
+    epic: 10
+    action: "Reconcile epics.md Epic 10 and the spine with the as-built wall: end-cap
+      arrow, sparse-grid fallback, marks in the wall view, Unmark preview, warehouse
+      4 MB test, Manual move top part only, UX-DR-only test names (A4, A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
+  - id: "epic-10-retro-item-92-run-the-10-3-10-6-follow-up-reviews-and"
+    epic: 10
+    action: "Run the 10.3-10.6 follow-up reviews and fix 10.2's frontmatter, run each
+      UI story's e2e in Firefox and msedge before done, check a file for other copies
+      when a review patch fixes a pattern, and give the open 10.x issues.md lines
+      an owner (P1-P3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
