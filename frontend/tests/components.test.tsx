@@ -9,6 +9,7 @@ import { CONFIRM_BUTTON_ORDER } from "@/components/common/confirm-dialog";
 import { Icon, ICON_NAMES } from "@/components/common/icons";
 import { Input, InputError } from "@/components/common/input";
 import { toastDurationMs } from "@/components/common/toast";
+import { planStepHref } from "@/lib/view-state/urls";
 
 // Shared components (UX-DR3, UX-DR6, UX-DR10, UX-DR11, UX-DR14, UX-DR16) under NFR-10 (WCAG 2.2 AA)
 // and NFR-11 (English UI, glossary terms). Rendered to static markup; Vitest has no DOM.
@@ -160,9 +161,10 @@ describe("nfr11 flow bar steps", () => {
   });
 
   it("links steps only when hrefFor is given", () => {
-    const markup = html(<FlowBar hrefFor={(step) => `/plans/p1/${step}`} />);
+    const markup = html(<FlowBar hrefFor={(step) => planStepHref("p1", step)} />);
     expect(markup.match(/<a /g)).toHaveLength(8);
-    expect(markup).toContain('href="/plans/p1/move-list"');
+    expect(markup).toContain('href="/plans/p1/print"');
+    expect(markup).not.toContain('href="/plans/p1/move-list"');
   });
 });
 

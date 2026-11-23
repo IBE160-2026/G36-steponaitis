@@ -10,6 +10,9 @@ import type {
   ClassThreshold,
   CommandEvent,
   LocationRef,
+  MoveListHeader,
+  MoveListLine,
+  MoveListRound,
   NoSpaceCause,
   OutdatedInfo,
   RecommendationReason,
@@ -18,7 +21,7 @@ import type {
   StepUndoneEvent,
   UndoPreview,
 } from "@/lib/api/plans";
-import { formatDate, formatNumber, formatTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatNumber, formatTime } from "@/lib/format";
 
 /** The saved-plans list's title, also the label of New Plan's list of saved plans (FR-2, FR-8). */
 export const SAVED_PLANS_TITLE = "Saved plans";
@@ -153,6 +156,14 @@ export function marksChangedText(outdatedCount: number): string {
   const verb = outdatedCount === 1 ? "is" : "are";
   return `Best-location marks changed · ${plural(outdatedCount, "recommendation", "recommendations")} ${verb} now outdated`;
 }
+
+/** A move's rule as words: "Rule 1", "Rule 2", "Rule 3" or "Manual" (the move toast, the move list). */
+export const RULE_LABELS: Record<MoveListLine["rule"], string> = {
+  rule_1: "Rule 1",
+  rule_2: "Rule 2",
+  rule_3: "Rule 3",
+  manual: "Manual",
+};
 
 type MoveMadeEvent = Extract<CommandEvent, { type: "move_made" }>;
 type RunDoneEvent = Extract<CommandEvent, { type: "run_done" }>;
@@ -331,4 +342,71 @@ export function resetQuestion(moveCount: number): string {
 /** The toast after a reset: "Plan reset. 18 moves removed; marks kept. The next run is round 1." */
 export function resetToast(movesRemoved: number): string {
   return `Plan reset. ${plural(movesRemoved, "move", "moves")} removed; marks kept. The next run is round 1.`;
+}
+
+// Move list (Story 8.3, FR-38, UX-DR52): the print view's header, round bands, rule cells and
+// footnotes. Rounds, lines, their order and swap marks are the server's (AD-3, AD-17); only the
+// words are made here.
+
+export const MOVE_LIST_TITLE = "Move list";
+/** The only primary button of the print view. */
+export const PRINT_LABEL = "Print";
+/** Why Print is disabled while it fetches the latest move list before printing. */
+export const PRINT_BUSY = "Getting the latest moves…";
+export const BACK_TO_RECOMMENDATIONS = "Back to Recommendations";
+/** A failed move-list fetch without a server message. */
+export const MOVE_LIST_LOAD_FAILED = "The move list could not be loaded.";
+/** The empty move list, also why Print is disabled then. */
+export const NO_MOVES_TO_PRINT = "There are no moves to print.";
+/** The tick-box column: "✓" on paper, "Done" for screen readers. */
+export const TICK_HEAD = "✓";
+export const TICK_HEAD_SR = "Done";
+/** The column heads after the tick box, in order. */
+export const MOVE_LIST_COLUMNS = ["Round", "Part", "Description", "From", "To", "Rule", "Note"] as const;
+/** The band of a round with moves made by a run: "one walk · from-location before to-location". */
+export const ROUND_BAND_NOTE = "one walk · from-location before to-location";
+export const WALK_PATH_FOOTNOTE =
+  "Lines follow Walk Path; moves out of a location come before moves into it, except in a swap.";
+export const SWAP_FOOTNOTE = "Swap: set one bin aside, move the other into its place, then put the first one in.";
+
+/** "Move list · Plan A". */
+export function moveListTitle(name: string): string {
+  return `${MOVE_LIST_TITLE} · ${name}`;
+}
+
+/** "1 round" / "3 rounds". */
+export function roundsCount(count: number): string {
+  return plural(count, "round", "rounds");
+}
+
+/** "Data as of 2026-10-30 · uploaded 2026-11-22 · 2 rounds" (the upload date in the viewer's zone). */
+export function moveListDataLine(header: Pick<MoveListHeader, "data_as_of" | "uploaded_at" | "rounds">): string {
+  return `Data as of ${formatDate(header.data_as_of)} · uploaded ${formatDate(header.uploaded_at)} · ${roundsCount(header.rounds)}`;
+}
+
+/** "Generated 2026-11-23 14:05 · Smart Warehouse Planner" (in the viewer's zone). */
+export function moveListGeneratedLine(generatedAt: string): string {
+  return `Generated ${formatDateTime(generatedAt)} · Smart Warehouse Planner`;
+}
+
+/** A round band's tag: "ROUND 2". */
+export function roundBandTag(round: number): string {
+  return `ROUND ${formatNumber(round)}`;
+}
+
+/** A round band's words after the tag: the server's label (round 0) or the one-walk note. */
+export function roundBandNote(round: Pick<MoveListRound, "label">): string {
+  return round.label ?? ROUND_BAND_NOTE;
+}
+
+/** A line's rule cell: "Rule 1", or "Manual · Swap 1/2" for a swap line. */
+export function ruleCellText(line: Pick<MoveListLine, "rule" | "swap">): string {
+  const label = RULE_LABELS[line.rule];
+  if (!line.swap) return label;
+  return `${label} · Swap ${formatNumber(line.swap.index)}/${formatNumber(line.swap.size)}`;
+}
+
+/** The swap's locations under the rule cell: "A-02-01-01 ↔ G-14-04-02"; null for an ordinary line. */
+export function swapLocationsText(line: Pick<MoveListLine, "swap">): string | null {
+  return line.swap ? `${line.swap.locations[0]} ↔ ${line.swap.locations[1]}` : null;
 }

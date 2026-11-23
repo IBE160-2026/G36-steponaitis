@@ -5,7 +5,7 @@
 // import, FR-2). So is the plan's last view, kept per browser (`swp:plan:<id>:view`, Story 6.2),
 // which the bare `/plans/<id>` opens.
 
-import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
+import { type StepKey, stepFromKey, stepFromSegment, stepSegment } from "@/lib/view-state/steps";
 import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
 
 /**
@@ -33,9 +33,9 @@ export type ViewQueryKey = (typeof VIEW_QUERY_KEYS)[number];
 /** A view's query values: any of the view keys, each one string. */
 export type ViewQuery = Partial<Record<ViewQueryKey, string>>;
 
-/** `/plans/<id>/<step>`, with only the non-empty `params` appended as a query. */
+/** `/plans/<id>/<segment>` of `step` (`print` for Move list), with only the non-empty `params` appended as a query. */
 export function planStepHref(planId: string, step: StepKey, params?: ViewQuery): string {
-  const path = `/plans/${encodeURIComponent(planId)}/${step}`;
+  const path = `/plans/${encodeURIComponent(planId)}/${stepSegment(step)}`;
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value) query.append(key, value);
@@ -52,10 +52,6 @@ export function planOpenHref(planId: string): string {
   return `/plans/${encodeURIComponent(planId)}`;
 }
 
-function asStepKey(view: unknown): StepKey | undefined {
-  return FLOW_STEPS.find((step) => step.key === view)?.key;
-}
-
 /** Only the view keys of `query`, each a non-empty string; everything else is dropped. */
 function viewQuery(query: (key: ViewQueryKey) => unknown): ViewQuery {
   const kept: ViewQuery = {};
@@ -68,12 +64,12 @@ function viewQuery(query: (key: ViewQueryKey) => unknown): ViewQuery {
 
 /**
  * Remember the view at `pathname` + `search` as its plan's last view (AD-20). Only flow-step
- * paths `/plans/<id>/<step>` count: settings, the list, New Plan and the bare plan URL are not
+ * paths `/plans/<id>/<segment>` count (`/print` is recorded as `move-list`): settings, the list, New Plan and the bare plan URL are not
  * recorded. Only the view keys of the query are kept. Stays in this browser; never sent anywhere.
  */
 export function rememberPlanView(pathname: string, search: string | URLSearchParams): void {
   const path = parsePlanPath(pathname);
-  const step = path ? asStepKey(path.view) : undefined;
+  const step = path ? stepFromSegment(path.view) : undefined;
   if (!path || !step) return;
   const params = new URLSearchParams(search);
   const query = viewQuery((key) => params.get(key));
@@ -94,7 +90,7 @@ export function storedPlanViewHref(planId: string): string {
   }
   if (typeof stored !== "object" || stored === null) return planStepHref(planId, "overview");
   const { step, query } = stored as { step?: unknown; query?: unknown };
-  const key = asStepKey(step);
+  const key = stepFromKey(step);
   if (!key) return planStepHref(planId, "overview");
   const values = typeof query === "object" && query !== null ? (query as Record<string, unknown>) : {};
   return planStepHref(planId, key, viewQuery((name) => (Object.hasOwn(values, name) ? values[name] : undefined)));

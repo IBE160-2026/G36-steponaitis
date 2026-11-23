@@ -4,7 +4,7 @@
 // with its delete (Story 6.4), the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
 // preview (Story 4.3), before/after (Story 4.6), the recommendations view (Stories 5.5,
-// 5.7) and a recommendation's other locations (Story 7.2). The reads are GETs and never
+// 5.7), a recommendation's other locations (Story 7.2) and the move list (Story 8.3). The reads are GETs and never
 // change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -79,6 +79,14 @@ export type StepUndoneEvent = components["schemas"]["StepUndone"];
 /** `plan_reset{moves_removed}`: every step and run was deleted; marks stayed (FR-35). */
 export type PlanResetEvent = components["schemas"]["PlanReset"];
 
+/** The move list (FR-38): header and rounds with their lines, in server order (AD-3, AD-17). */
+export type MoveListView = components["schemas"]["MoveListView"];
+export type MoveListHeader = components["schemas"]["MoveListHeader"];
+export type MoveListRound = components["schemas"]["MoveListRound"];
+export type MoveListLine = components["schemas"]["MoveListLine"];
+/** A line's place in an intact swap: line `index` of `size`, between `locations[0]` and `locations[1]`. */
+export type MoveListSwap = components["schemas"]["MoveListSwap"];
+
 export const PLANS_KEY = ["plans"] as const;
 
 /** `['plan', planId]`: the prefix of every plan query key, the one place it is spelled out. */
@@ -108,6 +116,10 @@ export function planBeforeAfterKey(planId: string) {
 
 export function planRecommendationsKey(planId: string) {
   return [...planRootKey(planId), "recommendations"] as const;
+}
+
+export function planMoveListKey(planId: string) {
+  return [...planRootKey(planId), "move-list"] as const;
 }
 
 /** Under `planRecommendationsKey`, so the command refetch of `['plan', planId]` refreshes it. */
@@ -200,6 +212,22 @@ export function usePlanOtherLocations(planId: string, recId: string, enabled: bo
     queryKey: planOtherLocationsKey(planId, recId),
     queryFn: () => fetchPlanOtherLocations(planId, recId),
     enabled,
+  });
+}
+
+export function fetchPlanMoveList(planId: string): Promise<MoveListView> {
+  return getJson<MoveListView>(`/api/plans/${encodeURIComponent(planId)}/move-list`);
+}
+
+/**
+ * The move list (FR-38). Always fetched on mount, even with a cached view, so the print view shows
+ * a fresh `generated_at` (AD-17); under `['plan', planId]`, so a confirmed command refetches it.
+ */
+export function usePlanMoveList(planId: string) {
+  return useQuery({
+    queryKey: planMoveListKey(planId),
+    queryFn: () => fetchPlanMoveList(planId),
+    refetchOnMount: "always",
   });
 }
 

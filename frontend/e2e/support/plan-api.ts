@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { type APIRequestContext, expect, type Locator, type Page, toasts } from "./test";
 
 // Shared by the journeys that read plan views through the API and make manual moves.
@@ -23,6 +25,25 @@ export async function partDetail(request: APIRequestContext, planId: string, par
 
 export async function locationRows(request: APIRequestContext, planId: string): Promise<LocationRow[]> {
   return (await getJson<{ locations: LocationRow[] }>(request, `/api/plans/${planId}/locations`)).locations;
+}
+
+export type CommandResult = { version: number; events: { type: string }[] };
+
+/**
+ * Posts one command (AD-6) on the plan's current version with a fresh command id and expects 200.
+ * Shared by the journeys that set up a plan through the command API (retro epic-7 #64).
+ */
+export async function postCommand(
+  request: APIRequestContext,
+  planId: string,
+  body: Record<string, unknown>,
+): Promise<CommandResult> {
+  const response = await request.post(`/api/plans/${planId}/commands`, {
+    data: { command_id: randomUUID(), base_version: await planVersion(request, planId), ...body },
+    headers: { "Sec-Fetch-Site": "same-origin" },
+  });
+  expect(response.status(), await response.text()).toBe(200);
+  return (await response.json()) as CommandResult;
 }
 
 /** Types the whole code and waits for the allowed preview's effect line. */

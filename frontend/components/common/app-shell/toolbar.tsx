@@ -15,12 +15,8 @@ import { PlanPlate, planMenuItems } from "@/components/common/app-shell/plan-pla
 import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
-import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
+import { type StepKey, stepFromSegment } from "@/lib/view-state/steps";
 import { parsePlanPath, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
-
-function asStepKey(view: string): StepKey | undefined {
-  return FLOW_STEPS.find((step) => step.key === view)?.key;
-}
 
 function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   const summary = usePlanSummary(planId);
@@ -41,7 +37,7 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
         />
       )}
       <FlowBar
-        currentStep={asStepKey(view)}
+        currentStep={stepFromSegment(view)}
         doneSteps={doneSteps}
         hrefFor={(step) => planStepHref(planId, step)}
       />

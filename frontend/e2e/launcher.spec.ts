@@ -104,9 +104,17 @@ test.describe("uj8 launcher", () => {
     await expect(searchField(page)).toBeFocused();
 
     await page.keyboard.press("Enter");
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/move-list$`));
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/print$`));
     await expect(launcher(page)).toBeHidden();
     await expect(page.getByRole("heading", { name: "Move list", level: 1 })).toBeVisible();
+
+    // On `/print` the launcher marks Move list as the current step.
+    await page.keyboard.press("Control+k");
+    await expect(launcher(page)).toBeVisible();
+    const moveList = launcher(page).getByRole("group", { name: "Move list", exact: true });
+    await expect(moveList.getByText("You are here")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(launcher(page)).toBeHidden();
   });
 
   test("uj8 types rec and opens recommendations", async ({ page, request }) => {

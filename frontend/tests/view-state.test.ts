@@ -93,6 +93,25 @@ describe("ad20 plan view state", () => {
     expect(values).toEqual({});
   });
 
+  it("uxdr6_move_list_is_remembered_from_its_print_route", () => {
+    const values: Record<string, string> = {};
+    vi.stubGlobal("localStorage", storage(values));
+
+    rememberPlanView(`/plans/${PLAN}/print`, "");
+
+    expect(JSON.parse(values[planViewKey(PLAN)])).toEqual({ step: "move-list", query: {} });
+    expect(storedPlanViewHref(PLAN)).toBe(`/plans/${PLAN}/print`);
+  });
+
+  it("uxdr6_old_move_list_path_is_not_a_view", () => {
+    const values: Record<string, string> = {};
+    vi.stubGlobal("localStorage", storage(values));
+
+    rememberPlanView(`/plans/${PLAN}/move-list`, "");
+
+    expect(values).toEqual({});
+  });
+
   it("ad20_nothing_stored_opens_overview", () => {
     vi.stubGlobal("localStorage", storage({}));
 

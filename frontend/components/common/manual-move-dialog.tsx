@@ -32,6 +32,7 @@ import {
   usePlanLocations,
 } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
+import { RULE_LABELS } from "@/lib/copy";
 import { moveEventStep, moveUndoAction } from "@/lib/commands/undo";
 import { cn } from "@/lib/utils";
 
@@ -41,13 +42,6 @@ export const ENTER_TO = "Enter a to-location.";
 export const CHECKING = "Checking the move…";
 export const PREVIEW_DEBOUNCE_MS = 200;
 export const MATCH_LIMIT = 8;
-
-const RULE_LABELS: Record<"rule_1" | "rule_2" | "rule_3" | "manual", string> = {
-  rule_1: "Rule 1",
-  rule_2: "Rule 2",
-  rule_3: "Rule 3",
-  manual: "Manual",
-};
 
 /** The part's locations to move from: the current location first, then the other locations. */
 export function fromChoices(detail: Pick<PartDetail, "current_location" | "other_locations">): string[] {

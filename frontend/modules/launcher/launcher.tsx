@@ -57,7 +57,7 @@ import {
   YOU_ARE_HERE,
 } from "@/lib/launcher";
 import { cn } from "@/lib/utils";
-import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
+import { type StepKey, stepFromSegment } from "@/lib/view-state/steps";
 import { parsePlanPath, planOpenHref, planStepHref } from "@/lib/view-state/urls";
 
 export const LAUNCHER_LABEL = "Launcher";
@@ -90,10 +90,6 @@ type Item = LauncherResult<ResolvedAction>;
 /** A modal dialog other than the launcher is open: the shortcut is ignored then. */
 function otherModalOpen(): boolean {
   return document.querySelector('[role="dialog"][aria-modal="true"], [role="alertdialog"]') !== null;
-}
-
-function asStepKey(view: string): StepKey | undefined {
-  return FLOW_STEPS.find((step) => step.key === view)?.key;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -837,7 +833,7 @@ export function Launcher({ actions = LAUNCHER_ACTIONS }: { actions?: readonly La
     <PlanLauncher
       key={planPath.planId}
       planId={planPath.planId}
-      currentStep={asStepKey(planPath.view)}
+      currentStep={stepFromSegment(planPath.view)}
       actions={actions}
     />
   );

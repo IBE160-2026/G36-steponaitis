@@ -179,18 +179,20 @@ test.describe("uj1 plan overview", () => {
     await expect(plate(page)).toContainText(name);
   });
 
-  test("uj1 opens a step that is not built yet", async ({ page, request }) => {
+  test("uj1 opens the move list step on its print route", async ({ page, request }) => {
     const plan = await createPlan(request, `Steps ${randomUUID().slice(0, 8)}`);
     await page.goto(`/plans/${plan.id}/overview`);
     const nav = page.getByRole("navigation", { name: "Plan steps" });
     await nav.getByRole("link", { name: /^\d*Move list/ }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/move-list$`));
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/print$`));
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: "Move list", level: 1 })).toBeVisible();
-    await expect(main.getByText("This step is not built yet.")).toBeVisible();
     await expect(nav.locator('[aria-current="step"]')).toHaveCount(1);
     await expect(nav.locator('[aria-current="step"]')).toContainText("Move list");
+
+    await page.goto(`/plans/${plan.id}/move-list`);
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/print$`));
 
     const response = await page.goto(`/plans/${plan.id}/nope`);
     expect(response?.status()).toBe(404);
