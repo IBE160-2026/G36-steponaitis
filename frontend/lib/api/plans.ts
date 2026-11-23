@@ -93,7 +93,9 @@ export type WallView = components["schemas"]["WallView"];
 export type WallLocation = components["schemas"]["WallLocation"];
 /** A part with stock at a wall location, most picks first; `top_part` is the first. */
 export type WallPart = components["schemas"]["WallPart"];
-/** An aisle's counts on the wall: occupancy, best, the latest run's moves touching it, and its aisle mark. */
+export type WallMove = components["schemas"]["WallMove"];
+export type WallMoveStatus = WallMove["status"];
+/** An aisle's counts on the wall: occupancy, best, its aisle mark, and `moves`: the number of wall move entries touching it (latest-run recommendations plus current-round manual moves). */
 export type AisleCounts = components["schemas"]["AisleCounts"];
 export type WarehouseCounts = components["schemas"]["WarehouseCounts"];
 

@@ -7,6 +7,11 @@
 // parts as the description. Gap cells are never focusable. Arrow keys, Page Up/Down, Home/End and
 // Ctrl+Home/End move through `nextCell`.
 //
+// Moves (Story 10.4): a cell's name ends with its move texts ("move 1, selected, leaves here"),
+// never `aria-selected`; a click or `Enter` on a cell with moves also selects its first move (unless
+// one of them is already selected), and a target whose move comes from another aisle says where
+// from in its tooltip and description.
+//
 // The tooltip (WCAG 1.4.13) shows on focus at once or after a 150 ms hover, stays while focus or
 // the pointer is on the cell or the tooltip (a short grace lets the pointer cross over), and `Esc`
 // hides it without moving focus. `Enter` or a click pins it as a non-modal dialog and focuses its
@@ -28,20 +33,24 @@ import {
 } from "react";
 
 import type { AisleLayout } from "@/lib/api/imports";
-import type { RecommendationRow, WallLocation } from "@/lib/api/plans";
+import type { RecommendationRow, WallLocation, WallMove } from "@/lib/api/plans";
 import {
+  cellMoveText,
   cellName,
   cellPartLine,
   descriptionLine,
   GAP_CELL_LABEL,
   levelName,
   markSourceText,
+  moveArrivesFromText,
+  moveFromOtherAisleText,
   partnerStripText,
   walkPathText,
   wallGridLabel,
 } from "@/lib/copy";
 
 import { cellRect, runHeight, runTops, type WallCellModel } from "./model";
+import { cellMoveSelection, marksByCode, moveKey, type MoveMark, scrollBehavior } from "./moves";
 import { firstCell, nextCell } from "./navigation";
 import { cellRecommendations, partnerStrips, recommendationLinks, WallTooltip } from "./wall-tooltip";
 
@@ -139,7 +148,33 @@ export type WallGridProps = {
   onOpenPart?: (part: string, opener: HTMLElement | null) => void;
   /** The pinned dialog's Manual move… for a location. */
   manualMove?: (props: WallManualMoveProps) => ReactNode;
+  /** The open aisle's move entries (server order) and their ends on this wall (`moveMarks`). */
+  moves?: readonly WallMove[];
+  marks?: readonly MoveMark[];
+  /** A click or `Enter` on a cell with moves selects one (by `moveKey`). */
+  onSelectMove?: (key: string) => void;
+  /** Scroll this cell into view (once per `seq`): a move selected in the drawer. */
+  scrollTo?: { code: string; seq: number };
 };
+
+/** A target's lines about a move from another aisle: the tooltip's and the description's. */
+export function crossAisleLines(
+  marks: readonly MoveMark[],
+  moves: readonly WallMove[],
+  aisle: string,
+): { tip: string; description: string }[] {
+  return marks.flatMap((mark) => {
+    if (mark.kind !== "target") return [];
+    const move = moves.find((candidate) => moveKey(candidate) === mark.key);
+    if (!move || move.from_location.aisle === aisle || move.number === null) return [];
+    return [
+      {
+        tip: moveFromOtherAisleText(move.from_location),
+        description: moveArrivesFromText(move.number, move.from_location.code),
+      },
+    ];
+  });
+}
 
 export function WallGrid({
   layout,
@@ -153,6 +188,10 @@ export function WallGrid({
   recommendationHref,
   onOpenPart,
   manualMove,
+  moves = [],
+  marks = [],
+  onSelectMove,
+  scrollTo,
 }: WallGridProps) {
   const id = useId();
   const tops = useMemo(() => runTops(layout), [layout]);
@@ -168,6 +207,8 @@ export function WallGrid({
       else touchingByCode.set(code, [row]);
     }
   }
+  const marksAt = marksByCode(marks);
+  const selectedMoveKey = marks.find((mark) => mark.selected)?.key;
   const located = cells.filter((cell): cell is WallCellModel & { code: string } => cell.code !== null);
 
   const [chosen, setChosen] = useState<string | undefined>(undefined);
@@ -208,6 +249,20 @@ export function WallGrid({
     if (selectedCode === undefined) return;
     cellElements.current.get(selectedCode)?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [selectedCode]);
+
+  // A move selected in the drawer: its cell scrolls into view inside the scroll box.
+  const scrollSeq = scrollTo?.seq;
+  const scrollCode = scrollTo?.code;
+  useEffect(() => {
+    if (scrollCode === undefined) return;
+    cellElements.current.get(scrollCode)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: scrollBehavior() });
+  }, [scrollSeq, scrollCode]);
+
+  /** A click or `Enter` on a cell: its first move is selected unless one of its moves already is. */
+  function selectCellMove(code: string) {
+    const key = cellMoveSelection(marksAt.get(code), selectedMoveKey);
+    if (key !== undefined) onSelectMove?.(key);
+  }
 
   function pin(code: string) {
     pinnedCell.current = cellElements.current.get(code) ?? null;
@@ -318,6 +373,7 @@ export function WallGrid({
       if (!byCode.has(cell.code)) return;
       event.preventDefault();
       pin(cell.code);
+      selectCellMove(cell.code);
       return;
     }
     if (event.key === "Escape") {
@@ -384,6 +440,7 @@ export function WallGrid({
   const shownLocation = tip.code === null ? undefined : byCode.get(tip.code);
   const touching = shownLocation && recommendations ? cellRecommendations(recommendations, shownLocation.location.code) : [];
   const labelId = `${id}-tip-label`;
+  const shownCross = shownLocation ? crossAisleLines(marksAt.get(shownLocation.location.code) ?? [], moves, layout.aisle) : [];
 
   return (
     <div className="pointer-events-none absolute inset-0" onFocus={onRootFocus} onBlur={onRootBlur} data-wall-grid-layer="">
@@ -465,6 +522,7 @@ export function WallGrid({
                             occupied: cell.occupied,
                             topClass: cell.parts[0],
                             selected,
+                            moves: (marksAt.get(code) ?? []).map(cellMoveText),
                           })}
                           aria-describedby={descriptionId}
                           aria-haspopup={entry ? "dialog" : undefined}
@@ -478,7 +536,9 @@ export function WallGrid({
                           onFocus={() => onCellFocus(code)}
                           onKeyDown={(event) => onCellKeyDown(event, { ...cell, code })}
                           onClick={() => {
-                            if (entry) pin(code);
+                            if (!entry) return;
+                            pin(code);
+                            selectCellMove(code);
                           }}
                           onPointerEnter={() => onCellPointerEnter(code)}
                           onPointerLeave={onPointerLeave}
@@ -492,6 +552,9 @@ export function WallGrid({
                                 <p key={`mark-${index}`}>{descriptionLine(markSourceText(mark))}</p>
                               ))}
                               <p>{descriptionLine(walkPathText(entry.walk_path))}</p>
+                              {crossAisleLines(marksAt.get(code) ?? [], moves, layout.aisle).map((line, index) => (
+                                <p key={`from-${index}`}>{descriptionLine(line.description)}</p>
+                              ))}
                               {partnerStrips(touchingByCode.get(code) ?? []).map((partner) => (
                                 <p key={`partner-${partner.id}`}>
                                   {descriptionLine(partnerStripText(partner.partner, partner.sharedJobs, partner.number))}
@@ -517,6 +580,7 @@ export function WallGrid({
             pinned={tip.pinned}
             labelId={labelId}
             partners={partnerStrips(touching)}
+            fromLines={shownCross.map((line) => line.tip)}
             links={recommendationHref ? recommendationLinks(touching, recommendationHref) : []}
             onOpenPart={(part) => onOpenPart?.(part, cellElements.current.get(shownLocation.location.code) ?? null)}
             manualMove={

@@ -4,7 +4,8 @@
 // end cap with the aisle's last Walk Path. Cells come from `wallCells`; this file owns only pixels.
 // Without a `label` the picture is `aria-hidden`: the keyboard grid over it (`WallGrid`, Story
 // 10.3) carries the names, focus, hover and clicks. The selected part's cell gets the Key's
-// Selected frame.
+// Selected frame. With move marks (Story 10.4) a lifted bin's cell shows its vacated slot, and the
+// moves layer (lifted bins, targets, the selected move's arrow) is drawn over the cells.
 
 import { useId } from "react";
 
@@ -31,6 +32,8 @@ import {
   type WallCellModel,
   wallNaturalSize,
 } from "./model";
+import type { MoveMark } from "./moves";
+import { cellGeometry, liftedCodes, VacatedOutline, WallMovesLayer } from "./moves-layer";
 import { Slot, SlotNone, SlotNoneHatch } from "./slot";
 
 const TAG_HEIGHT = 15;
@@ -61,6 +64,7 @@ function Cell({
   scale,
   hatchId,
   selected,
+  vacated,
 }: {
   cell: WallCellModel;
   x: number;
@@ -68,6 +72,8 @@ function Cell({
   scale: number;
   hatchId: string;
   selected: boolean;
+  /** The number of the move whose lifted bin left this slot (the bin is drawn by the moves layer). */
+  vacated?: string;
 }) {
   if (cell.code === null) {
     return (
@@ -86,7 +92,12 @@ function Cell({
       data-parts={cell.parts.length}
       data-selected={selected ? "" : undefined}
     >
-      {cell.occupied && top !== undefined ? (
+      {vacated !== undefined ? (
+        <>
+          <Slot x={x} y={y} />
+          <VacatedOutline x={x} y={y} number={vacated} />
+        </>
+      ) : cell.occupied && top !== undefined ? (
         <Bin parts={cell.parts} x={x} y={y} drawnWidth={BIN_WIDTH * scale} />
       ) : (
         <Slot x={x} y={y} />
@@ -120,6 +131,8 @@ export function WallPanel({
   scale = 1,
   label,
   selectedCode,
+  marks = [],
+  selectedEnds,
 }: {
   layout: AisleLayout;
   cells: readonly WallCellModel[];
@@ -131,6 +144,10 @@ export function WallPanel({
   label?: string;
   /** The location drawn with the Selected frame (the open part's current location). */
   selectedCode?: string;
+  /** The moves' ends on this wall (`moveMarks`, Story 10.4). */
+  marks?: readonly MoveMark[];
+  /** The selected move's from- and to-location codes: its arrow is drawn when both are on this wall. */
+  selectedEnds?: { from: string; to: string };
 }) {
   const id = useId();
   const louvre = `${id}-louvre`;
@@ -141,6 +158,14 @@ export function WallPanel({
   const left = PAD + LABEL_WIDTH;
   const runTops = runTopsOf(layout);
   const endCapY = size.height - PAD - 6;
+  const geometry = cellGeometry(layout, cells);
+  const lifted = liftedCodes(marks, geometry);
+  const vacated = new Map<string, string>();
+  for (const mark of marks) {
+    if (mark.kind === "lift" && lifted.has(mark.code) && !vacated.has(mark.code)) {
+      vacated.set(mark.code, String(mark.number ?? ""));
+    }
+  }
   return (
     <svg
       width={size.width * scale}
@@ -241,9 +266,13 @@ export function WallPanel({
             scale={scale}
             hatchId={hatch}
             selected={cell.code !== null && cell.code === selectedCode}
+            vacated={cell.code === null ? undefined : vacated.get(cell.code)}
           />
         );
       })}
+      {marks.length > 0 && (
+        <WallMovesLayer marks={marks} geometry={geometry} selectedEnds={selectedEnds} scale={scale} />
+      )}
       <text
         x={size.width - PAD - 4}
         y={endCapY}

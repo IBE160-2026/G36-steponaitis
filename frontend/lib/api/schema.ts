@@ -1842,6 +1842,50 @@ export interface components {
             /** Walk Path */
             walk_path: string;
         };
+        /**
+         * WallMove
+         * @description One move touching the open aisle (AD-3, AD-7, AD-14): a latest-run recommendation
+         *     (any status) or a current-round manual effective move (FR-34). `number` is the
+         *     recommendation's server number, `move_number` the effective move's number when applied
+         *     or manual. An applied recommendation keeps its own rule; its `to_location` is where the
+         *     effective move ends (the applied step's when moved back).
+         */
+        WallMove: {
+            /** Description */
+            description: string;
+            from_location: components["schemas"]["LocationRef"];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "recommendation" | "manual";
+            /** Move Number */
+            move_number: number | null;
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Number */
+            number: number | null;
+            /** Part */
+            part: string;
+            /** Picks */
+            picks: number;
+            /** Recommendation Id */
+            recommendation_id: string | null;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3" | "manual";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "kept" | "applied" | "outdated" | "manual";
+            to_location: components["schemas"]["LocationRef"];
+        };
         /** WallPart */
         WallPart: {
             /** Description */
@@ -1868,8 +1912,12 @@ export interface components {
             aisles: components["schemas"]["AisleCounts"][];
             /** Locations */
             locations: components["schemas"]["WallLocation"][];
+            /** Moves */
+            moves: components["schemas"]["WallMove"][];
             /** Rail Levels */
             rail_levels: string[];
+            /** Round */
+            round: number;
             /** Version */
             version: number;
             warehouse: components["schemas"]["WarehouseCounts"];

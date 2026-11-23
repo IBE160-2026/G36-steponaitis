@@ -10,6 +10,8 @@
 // Keys a control inside the row already handled (default prevented) and events from content
 // portaled out of the row (e.g. an open menu) never move or open rows.
 // `focusKey` (UX-DR9) focuses a shown row and scrolls it into view, once per key value.
+// `selectedKey` marks one row as selected (a tint and an accent bar, `data-selected`; a table row
+// has no `aria-selected`, so a cell says "selected" in words where it matters).
 // Rows are memoized: after a command the refetched view keeps unchanged rows (TanStack Query's
 // structural sharing), so only changed rows re-render. Re-rendering every row of a 2,000-row table
 // after each command took over a second in Firefox.
@@ -34,7 +36,7 @@ export type ColumnAlign = "start" | "end";
 export type SortKind = "number" | "text";
 
 /** What a cell knows about its row besides the data. */
-export type CellContext = { isActive: boolean };
+export type CellContext = { isActive: boolean; isSelected?: boolean };
 
 export type DataTableColumn<T> = {
   key: string;
@@ -55,6 +57,8 @@ export type DataTableProps<T> = {
   onOpen?: (row: T) => void;
   /** The key of a row to make active, focus and scroll into view (once per value) when shown. */
   focusKey?: string;
+  /** The key of the row drawn as selected. */
+  selectedKey?: string;
   className?: string;
 };
 
@@ -113,6 +117,7 @@ type RowProps<T> = {
   row: T;
   index: number;
   isActive: boolean;
+  isSelected: boolean;
   columns: readonly DataTableColumn<T>[];
   clickable: boolean;
   onFocus: (index: number) => void;
@@ -120,12 +125,13 @@ type RowProps<T> = {
   onClick: (event: MouseEvent<HTMLTableRowElement>, index: number) => void;
 };
 
-// A row's cells depend only on `row`, `isActive` and `columns` (cells close over nothing else that
+// A row's cells depend only on `row`, `isActive`, `isSelected` and `columns` (cells close over nothing else that
 // changes without a new `columns`), so equal props mean equal output.
 const DataTableRow = memo(function DataTableRow<T>({
   row,
   index,
   isActive,
+  isSelected,
   columns,
   clickable,
   onFocus,
@@ -135,25 +141,44 @@ const DataTableRow = memo(function DataTableRow<T>({
   return (
     <tr
       data-row-index={index}
+      data-selected={isSelected ? "" : undefined}
       tabIndex={isActive ? 0 : -1}
       onFocus={() => onFocus(index)}
       onKeyDown={(event) => onKeyDown(event, index)}
       onClick={clickable ? (event) => onClick(event, index) : undefined}
-      className={cn("border-b border-hairline align-top", clickable && "cursor-pointer")}
+      className={cn(
+        "border-b border-hairline align-top",
+        clickable && "cursor-pointer",
+        isSelected && "bg-selected-tint",
+      )}
     >
-      {columns.map((column) => (
+      {columns.map((column, columnIndex) => (
         <td
           key={column.key}
-          className={cn("h-table-row px-2 py-1", column.align === "end" && "text-right tabular-nums", column.className)}
+          className={cn(
+            "h-table-row px-2 py-1",
+            column.align === "end" && "text-right tabular-nums",
+            isSelected && columnIndex === 0 && "shadow-[inset_4px_0_0_var(--color-accent)]",
+            column.className,
+          )}
         >
-          {column.cell(row, { isActive })}
+          {column.cell(row, { isActive, isSelected })}
         </td>
       ))}
     </tr>
   );
 }) as <T>(props: RowProps<T>) => ReactNode;
 
-export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, className }: DataTableProps<T>) {
+export function DataTable<T>({
+  label,
+  columns,
+  rows,
+  rowKey,
+  onOpen,
+  focusKey,
+  selectedKey,
+  className,
+}: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
   const [active, setActive] = useState(0);
   const body = useRef<HTMLTableSectionElement>(null);
@@ -276,6 +301,7 @@ export function DataTable<T>({ label, columns, rows, rowKey, onOpen, focusKey, c
             row={row}
             index={index}
             isActive={index === activeIndex}
+            isSelected={selectedKey !== undefined && rowKey(row) === selectedKey}
             columns={columns}
             clickable={onOpen !== undefined}
             onFocus={rowFocus}

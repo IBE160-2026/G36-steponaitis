@@ -13,7 +13,37 @@ import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
  * aisle filter), a location to open (the wall pins its tooltip, the table focuses its row),
  * `mode=list` for the table (Story 10.2), and the part whose panel is open.
  */
-export type LocationParams = { aisle?: string; loc?: string; mode?: string; part?: string };
+export type LocationParams = {
+  aisle?: string;
+  loc?: string;
+  mode?: string;
+  part?: string;
+  /** The wall's selected move (Story 10.4): a recommendation by id, or a manual move by number. */
+  rec?: string;
+  move?: string;
+};
+
+/** The query that selects a wall move: `?rec=<recommendation id>` or `?move=<move number>`. */
+export function wallMoveQuery(move: {
+  kind: "recommendation" | "manual";
+  recommendation_id: string | null;
+  move_number: number | null;
+}): Pick<LocationParams, "rec" | "move"> {
+  if (move.kind === "recommendation" && move.recommendation_id !== null) return { rec: move.recommendation_id };
+  return move.move_number === null ? {} : { move: String(move.move_number) };
+}
+
+/** Whether `move` is the one `params` select (`?rec=` first, else `?move=`, which names only manual moves). */
+export function isSelectedWallMove(
+  move: { kind: "recommendation" | "manual"; recommendation_id: string | null; move_number: number | null },
+  params: Pick<LocationParams, "rec" | "move">,
+): boolean {
+  if (params.rec !== undefined) return move.recommendation_id === params.rec;
+  if (params.move !== undefined) {
+    return move.kind === "manual" && move.move_number !== null && String(move.move_number) === params.move;
+  }
+  return false;
+}
 
 /** The saved-plans list, the start page (FR-8, AD-20). */
 export const SAVED_PLANS_HREF = "/plans";
@@ -162,10 +192,10 @@ export function parseNewPlanFrom(searchParams: SearchParamsInput): string | unde
   return firstValue(searchParams, "from");
 }
 
-/** `?aisle=&loc=&mode=&part=` → `{aisle?, loc?, mode?, part?}`: the first value of each; empty values are dropped. */
+/** `?aisle=&loc=&mode=&part=&rec=&move=` → `{aisle?, loc?, mode?, part?, rec?, move?}`: the first value of each; empty values are dropped. */
 export function parseLocationParams(searchParams: SearchParamsInput): LocationParams {
   const params: LocationParams = {};
-  for (const key of ["aisle", "loc", "mode", "part"] as const) {
+  for (const key of ["aisle", "loc", "mode", "part", "rec", "move"] as const) {
     const value = firstValue(searchParams, key);
     if (value !== undefined) params[key] = value;
   }

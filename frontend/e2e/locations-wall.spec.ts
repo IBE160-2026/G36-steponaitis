@@ -568,3 +568,254 @@ test("uj1 hover shows a cell's tooltip and the pinned Manual move… starts from
   await expect(move).toHaveCount(0);
   await expect(cell).toBeFocused();
 });
+
+// UJ-1 with moves on the wall (Story 10.4; FR-42, UX-DR44, UX-DR46): lifted bins, targets, markers,
+// the selected move's arrow and hover note, and the "Moves touching aisle" drawer.
+
+type LocRef = { code: string; aisle: string; is_best: boolean };
+type Move = {
+  kind: "recommendation" | "manual";
+  recommendation_id: string | null;
+  number: number | null;
+  move_number: number | null;
+  part: string;
+  status: "open" | "kept" | "applied" | "outdated" | "manual";
+  from_location: LocRef;
+  to_location: LocRef;
+};
+type MovesWall = Wall & { round: number; moves: Move[] };
+
+async function movesWall(page: Page, planId: string, aisle: string): Promise<MovesWall> {
+  return getJson<MovesWall>(page.request, `/api/plans/${planId}/wall?aisle=${aisle}`);
+}
+
+/** The first aisle with at least two open recommendations moving within it, and those moves. */
+async function aisleWithInnerMoves(page: Page, planId: string): Promise<{ aisle: string; inner: Move[]; wall: MovesWall }> {
+  const first = await movesWall(page, planId, "A");
+  for (const { aisle } of first.aisles) {
+    const wall = aisle === "A" ? first : await movesWall(page, planId, aisle);
+    const inner = wall.moves.filter(
+      (move) => move.status === "open" && move.from_location.aisle === aisle && move.to_location.aisle === aisle,
+    );
+    if (inner.length >= 2) return { aisle, inner, wall };
+  }
+  throw new Error("no aisle with two open moves inside it");
+}
+
+const movesDrawer = (page: Page) => page.getByRole("main").locator("[data-moves-drawer]");
+
+test("uj1 moves on the wall: lifted bins, the drawer, linked selection and the drawer's actions", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Wall moves ${randomUUID().slice(0, 8)}`)).id;
+  await postCommand(request, planId, { type: "set_best_mark", mark: { kind: "level", level: "1", aisle: null } });
+  await postCommand(request, planId, { type: "run" });
+  const { aisle, inner, wall } = await aisleWithInnerMoves(page, planId);
+  const counts = wall.aisles.find((entry) => entry.aisle === aisle)!;
+  expect(counts.moves).toBe(wall.moves.length);
+  const [first, second] = inner;
+
+  await page.goto(`/plans/${planId}/locations?aisle=${aisle}`);
+  const main = page.getByRole("main");
+  const picture = main.locator(`[data-wall-panel="${aisle}"]`);
+  const markers = main.locator("[data-wall-markers]");
+  await expect(main.getByRole("grid", { name: `Aisle ${aisle} bin wall` })).toBeVisible();
+
+  // Every open move from this wall lifts its bin with its number; its target has the same number.
+  await expect(picture.locator(`[data-lifted="${first.number}"]`)).toHaveCount(1);
+  await expect(picture.locator(`[data-move-target="${first.number}"]`)).toHaveCount(1);
+  await expect(markers.locator(`[data-move-marker="${first.number}"]`)).toHaveCount(2);
+  await expect(picture.locator("[data-move-arrow]")).toHaveCount(0);
+  await expect(main.locator("[data-hover-note]")).toHaveCount(0);
+
+  // The tab and the drawer count the same moves.
+  const tab = main.getByRole("tablist", { name: "Aisles" }).getByRole("tab").filter({ hasText: new RegExp(`^${aisle}`) });
+  const noun = counts.moves === 1 ? "move" : "moves";
+  await expect(tab).toContainText(`${n(counts.moves)} ${noun}`);
+  const drawer = movesDrawer(page);
+  const toDecide = wall.moves.filter((move) => move.status === "open").length;
+  await expect(drawer.getByRole("heading")).toHaveText(
+    `Moves touching aisle ${aisle} · Round 1 · ${n(counts.moves)} ${noun} · ${n(toDecide)} to decide`,
+  );
+  await expect(drawer).toContainText("No move selected. Select a move on the wall or show all.");
+
+  // Show all, then Enter on a row selects that move everywhere.
+  await drawer.getByRole("button", { name: `Show all ${n(counts.moves)}` }).click();
+  const table = drawer.getByRole("table", { name: `Moves touching aisle ${aisle}` });
+  await expect(table).toBeVisible();
+  const rows = table.locator("tbody tr");
+  await expect(rows).toHaveCount(wall.moves.length);
+  const index = wall.moves.indexOf(wall.moves.find((move) => move.recommendation_id === first.recommendation_id)!);
+  await rows.nth(index).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(new RegExp(`[?&]rec=${encodeURIComponent(first.recommendation_id!)}(&|$)`));
+  await expect(picture.locator("[data-move-arrow]")).toHaveCount(1);
+  await expect(main.locator("[data-hover-note]")).toBeVisible();
+  await expect(main.locator("[data-hover-note]")).toContainText(`${first.part}`);
+  await expect(rows.nth(index)).toHaveAttribute("data-selected", "");
+  const grid = main.getByRole("grid", { name: `Aisle ${aisle} bin wall` });
+  await expect(grid.locator(`[data-grid-cell="${first.from_location.code}"]`)).toHaveAttribute(
+    "aria-label",
+    new RegExp(`move ${first.number}, selected, leaves here`),
+  );
+  await expect(grid.locator(`[data-grid-cell="${first.to_location.code}"]`)).toHaveAttribute(
+    "aria-label",
+    new RegExp(`move ${first.number}, selected, arrives here`),
+  );
+  await expect(grid.locator("[aria-selected]")).toHaveCount(0);
+
+  // Clicking another lifted bin selects its move in the drawer.
+  await grid.locator(`[data-grid-cell="${second.from_location.code}"]`).click();
+  await expect(page).toHaveURL(new RegExp(`[?&]rec=${encodeURIComponent(second.recommendation_id!)}(&|$)`));
+  await expect(drawer.locator("[data-selected-move]")).toHaveAttribute("data-selected-move", second.recommendation_id!);
+  await page.keyboard.press("Escape");
+
+  // Clicking a target marker selects its move in the URL and the drawer.
+  const firstMarkers = markers.locator(`[data-move-marker="${first.number}"]`);
+  await expect(firstMarkers).toHaveCount(2);
+  await firstMarkers.nth(1).click();
+  await expect(page).toHaveURL(new RegExp(`[?&]rec=${encodeURIComponent(first.recommendation_id!)}(&|$)`));
+  await expect(drawer.locator("[data-selected-move]")).toHaveAttribute("data-selected-move", first.recommendation_id!);
+  const secondIndex = wall.moves.findIndex((move) => move.recommendation_id === second.recommendation_id);
+  await rows.nth(secondIndex).click();
+  await expect(drawer.locator("[data-selected-move]")).toHaveAttribute("data-selected-move", second.recommendation_id!);
+
+  // Apply from the drawer: the marker becomes the applied check at the target, with Undo in the toast.
+  await drawer.locator("[data-drawer-apply]").click();
+  await expect(toasts(page).getByText(new RegExp(`^Applied · move \\d+, round 1 · ${second.part} `))).toBeVisible();
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true })).toHaveCount(1);
+  await expect(drawer.locator("[data-move-status]")).toHaveText(/^Applied · move \d+$/);
+  await expect(grid.locator(`[data-grid-cell="${second.to_location.code}"]`)).toHaveAttribute(
+    "aria-label",
+    new RegExp(`move ${second.number} applied, selected, arrived here`),
+  );
+  await expect(picture.locator(`[data-lifted="${second.number}"]`)).toHaveCount(0);
+  await expect(markers.locator('[data-move-marker="applied"][data-selected]')).toHaveCount(1);
+
+  // Keep in place from the drawer on the first move.
+  await rows.nth(index).click();
+  await expect(page).toHaveURL(new RegExp(`[?&]rec=${encodeURIComponent(first.recommendation_id!)}(&|$)`));
+  await drawer.getByRole("button", { name: "Keep in place" }).click();
+  await expect(toasts(page).getByText(`${first.part} is kept in place.`, { exact: false })).toBeVisible();
+  await expect(drawer.locator("[data-move-status]")).toHaveText("Kept in place");
+  await drawer.getByRole("button", { name: "Remove keep in place" }).click();
+  await expect(drawer.locator("[data-move-status]")).toHaveText("To decide");
+
+  // Other location ▾ from the drawer applies to the chosen location.
+  await drawer.getByRole("button", { name: "Other location" }).click();
+  const listbox = page.getByRole("listbox", { name: "Other locations" });
+  await expect(listbox).toBeFocused();
+  await expect(listbox.getByRole("option").first()).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(toasts(page).getByText(new RegExp(`^Applied · move \\d+, round 1 · ${first.part} `))).toBeVisible();
+  await expect(drawer.locator("[data-move-status]")).toHaveText(/^Applied · move \d+$/);
+
+  // Apply in the open table's row of another move still open now applies that move.
+  const now = await movesWall(page, planId, aisle);
+  const third = now.moves.find(
+    (move) =>
+      move.status === "open" &&
+      move.part !== first.part &&
+      move.part !== second.part &&
+      move.recommendation_id !== first.recommendation_id &&
+      move.recommendation_id !== second.recommendation_id,
+  )!;
+  expect(third).toBeDefined();
+  const thirdRow = rows.nth(now.moves.indexOf(third));
+  await thirdRow.getByRole("button", { name: "Apply" }).click();
+  await expect(toasts(page).getByText(new RegExp(`^Applied · move \\d+, round 1 · ${third.part} `))).toBeVisible();
+  await expect(thirdRow).toContainText(/Applied · move \d+/);
+});
+
+test("uj1 a manual move carries M on the wall and counts on its tab", async ({ page, request }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Wall manual ${randomUUID().slice(0, 8)}`)).id;
+  const wall = await wallOf(page, planId, "A");
+  let source: WallLocation | undefined;
+  for (const entry of wall.locations.filter((row) => row.parts.length === 1)) {
+    const detail = await partDetail(request, planId, entry.parts[0].part);
+    if (detail.other_locations.length === 0 && detail.current_location?.code === entry.location.code) {
+      source = entry;
+      break;
+    }
+  }
+  expect(source).toBeDefined();
+  const part = source!.parts[0].part;
+  const from = source!.location.code;
+  const to = wall.locations.find((row) => !row.occupied)!.location.code;
+
+  await page.goto(`/plans/${planId}/locations?aisle=A&part=${encodeURIComponent(part)}`);
+  const main = page.getByRole("main");
+  const tab = main.getByRole("tablist", { name: "Aisles" }).getByRole("tab").filter({ hasText: /^A/ });
+  await expect(tab).toContainText("0 moves");
+  await expect(movesDrawer(page)).toContainText("No moves touch aisle A.");
+  await moveFromPanel(page, page.getByRole("complementary", { name: part }), part, from, to);
+
+  const markers = main.locator("[data-wall-markers]");
+  await expect(markers.locator('[data-move-marker="M"]')).toHaveCount(1);
+  await expect(tab).toContainText("1 move");
+  await expect(movesDrawer(page).getByRole("heading")).toHaveText("Moves touching aisle A · Round 0 · 1 move · 0 to decide");
+  const grid = main.getByRole("grid", { name: "Aisle A bin wall" });
+  await expect(grid.locator(`[data-grid-cell="${to}"]`)).toHaveAttribute("aria-label", /manual move, arrived here$/);
+
+  // Selecting it by its row links `?move=`.
+  await movesDrawer(page).getByRole("button", { name: "Show all 1" }).click();
+  await movesDrawer(page).locator("tbody tr").first().click();
+  await expect(page).toHaveURL(/[?&]move=1(&|$)/);
+  await expect(markers.locator('[data-move-marker="M"][data-selected]')).toHaveCount(1);
+});
+
+test("uj1 an outdated recommendation shows the grey marker and no lift", async ({ page, request }) => {
+  test.setTimeout(150_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Wall outdated ${randomUUID().slice(0, 8)}`)).id;
+  await postCommand(request, planId, { type: "set_best_mark", mark: { kind: "level", level: "1", aisle: null } });
+  await postCommand(request, planId, { type: "run" });
+  const { aisle, inner, wall } = await aisleWithInnerMoves(page, planId);
+  const rec = inner[0];
+  // Fill its target with another part of the aisle by a manual move: the recommendation outdates.
+  const filler = wall.locations.find(
+    (row) =>
+      row.parts.length === 1 &&
+      row.parts[0].part !== rec.part &&
+      !wall.moves.some((move) => move.from_location.code === row.location.code),
+  )!;
+  await postCommand(request, planId, {
+    type: "manual_move",
+    part: filler.parts[0].part,
+    from: filler.location.code,
+    to: rec.to_location.code,
+  });
+  const after = await movesWall(page, planId, aisle);
+  expect(after.moves.find((move) => move.recommendation_id === rec.recommendation_id)!.status).toBe("outdated");
+
+  await page.goto(`/plans/${planId}/locations?aisle=${aisle}&rec=${encodeURIComponent(rec.recommendation_id!)}`);
+  const main = page.getByRole("main");
+  const picture = main.locator(`[data-wall-panel="${aisle}"]`);
+  await expect(main.getByRole("grid", { name: `Aisle ${aisle} bin wall` })).toBeVisible();
+  await expect(picture.locator(`[data-move-outdated="${rec.number}"]`)).toHaveCount(1);
+  await expect(picture.locator(`[data-lifted="${rec.number}"]`)).toHaveCount(0);
+  await expect(picture.locator(`[data-move-target="${rec.number}"]`)).toHaveCount(0);
+  await expect(main.locator(`[data-wall-markers] [data-move-marker="${rec.number}"]`)).toHaveAttribute(
+    "data-marker-kind",
+    "selected",
+  );
+  // With its row at the same version, the status names the cause.
+  await expect(movesDrawer(page).locator("[data-move-status]")).toHaveText(
+    `Outdated · ${rec.to_location.code} was filled by a manual move.`,
+  );
+  await expect(movesDrawer(page).locator("[data-drawer-apply]")).toHaveCount(0);
+  await expect(
+    main.getByRole("grid").locator(`[data-grid-cell="${rec.from_location.code}"]`),
+  ).toHaveAttribute("aria-label", new RegExp(`move ${rec.number} outdated, selected$`));
+
+  // An unknown `?rec=` selects nothing.
+  await page.goto(`/plans/${planId}/locations?aisle=${aisle}&rec=nope`);
+  await expect(main.getByRole("grid", { name: `Aisle ${aisle} bin wall` })).toBeVisible();
+  await expect(picture.locator("[data-move-arrow]")).toHaveCount(0);
+  await expect(movesDrawer(page)).toContainText("No move selected.");
+});

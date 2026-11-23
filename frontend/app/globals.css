@@ -320,6 +320,17 @@ tr[data-row-index]:focus-visible {
   scroll-margin: calc(var(--spacing-toolbar-height) + 8px) 8px 96px;
 }
 
+/* The lifted bin (Story 10.4, UX-DR44): it rises out of its slot with a transform transition
+   under 200 ms; instant under reduced motion (below). */
+[data-wall-moves] [data-lifted] {
+  transition: transform 180ms ease-out;
+}
+@starting-style {
+  [data-wall-moves] [data-lifted] {
+    transform: translate(4px, 6px);
+  }
+}
+
 /* Toasts: no transition longer than 200 ms (UX-DR57). */
 [data-sonner-toast],
 [data-sonner-toast] > * {
@@ -337,6 +348,9 @@ tr[data-row-index]:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  [data-wall-moves] [data-lifted] {
+    transition: none;
   }
 }
 

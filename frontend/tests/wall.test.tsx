@@ -119,6 +119,8 @@ const COUNTS_A: AisleCounts = {
 const WALL: WallView = {
   version: 3,
   aisle: "A",
+  round: 1,
+  moves: [],
   rail_levels: ["1"],
   locations: [
     located("A-01-02-01", "2", ["fast"], [single("A-01-02-01")]),

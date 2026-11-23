@@ -38,6 +38,7 @@ from swp.domain.import_data import ImportData
 from swp.domain.ordering import location_code_order, part_number_order
 from swp.domain.planning import (
     LocationRef,
+    RecommendationStatus,
     Replay,
     StepFold,
     aisle_of,
@@ -50,6 +51,7 @@ from swp.domain.planning import (
     is_empty,
     latest_run,
     location_ref,
+    recommendation_status,
     replay,
     run_baseline,
 )
@@ -403,9 +405,8 @@ class AppliedInfo(BaseModel):
     to_best: bool
 
 
-RowStatus = Literal["open", "applied", "kept", "outdated"]
-"""A row's view status (FR-32, AD-7): applied, then outdated, then kept, then open. `kept`
-(an open, unapplied, not-outdated recommendation of a kept part) is never stored."""
+RowStatus = RecommendationStatus
+"""A row's view status: the kernel's `recommendation_status` (FR-32, AD-7)."""
 
 ViewOutdatedCause = Literal[OutdatedCause, "moved_back"]
 """The stored causes plus the derived `moved_back`."""
@@ -560,26 +561,26 @@ def _reason(
 def _status(
     state: PlanState, replayed: Replay, rec: Recommendation, partner_aisle: str
 ) -> tuple[RowStatus, AppliedInfo | None, OutdatedInfo | None]:
-    step = applied_step(state, rec.id)
-    if step is not None:
-        move = next((m for m in replayed.moves if m.recommendation_id == rec.id), None)
-        if move is not None:
-            applied = AppliedInfo(
-                move_number=move.move_number,
-                round=move.round,
-                to_location=move.to_location,
-                to_best=is_best(replayed.copy, move.to_location, state.best_marks),
-            )
-            return "applied", applied, None
+    derived = recommendation_status(state, replayed.moves, rec)
+    if derived.move is not None:
+        move = derived.move
+        applied = AppliedInfo(
+            move_number=move.move_number,
+            round=move.round,
+            to_location=move.to_location,
+            to_best=is_best(replayed.copy, move.to_location, state.best_marks),
+        )
+        return "applied", applied, None
+    if derived.step is not None:
         moved_back = OutdatedInfo(
             cause="moved_back",
             location=None,
-            move_number=step.move_number,
+            move_number=derived.step.move_number,
             partner=None,
             aisle=None,
         )
         return "outdated", None, moved_back
-    if rec.status == "outdated" and rec.outdated is not None:
+    if derived.status == "outdated" and rec.outdated is not None:
         stored = rec.outdated
         partner_cause = stored.cause == "partner_aisle"
         info = OutdatedInfo(
@@ -590,9 +591,7 @@ def _status(
             aisle=partner_aisle if partner_cause else None,
         )
         return "outdated", None, info
-    if rec.part in state.keep_marks:
-        return "kept", None, None
-    return "open", None, None
+    return derived.status, None, None
 
 
 class _PartFacts(BaseModel):

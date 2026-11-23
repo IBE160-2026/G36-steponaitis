@@ -1,7 +1,8 @@
 "use client";
 
 // Aisle tabs (UX-DR48): one tab per aisle in server order, each with its letter plate, occupied %
-// and the latest run's moves touching it, and a BEST tag when an aisle mark names it. One tab
+// and the number of wall move entries touching it (latest-run recommendations plus current-round
+// manual moves), and a BEST tag when an aisle mark names it. One tab
 // stop; arrow keys, Home and End move between tabs and open the aisle.
 
 import { type KeyboardEvent, useRef } from "react";

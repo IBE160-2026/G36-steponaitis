@@ -35,9 +35,9 @@ import {
   OtherLocationList,
   type OtherLocationActionProps,
   OtherLocationMenu,
-} from "@/modules/recommendations/other-location";
+} from "@/components/common/other-location";
+import { applyReason } from "@/lib/commands/apply";
 import {
-  applyReason,
   emptyRunText,
   eyebrowText,
   failedRunText,

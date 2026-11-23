@@ -86,6 +86,8 @@ export type WallTooltipProps = {
   /** The id of the code line, which names the pinned dialog. */
   labelId: string;
   partners?: readonly WallPartner[];
+  /** A move target's "From G-14-04-02 (aisle G)" lines (Story 10.4). */
+  fromLines?: readonly string[];
   links?: readonly WallRecommendationLink[];
   /** A part line's button (pinned only): opens that part's PartPanel. */
   onOpenPart?: (part: string) => void;
@@ -103,6 +105,7 @@ export function WallTooltip({
   pinned,
   labelId,
   partners = [],
+  fromLines = [],
   links = [],
   onOpenPart,
   manualMove,
@@ -168,6 +171,11 @@ export function WallTooltip({
           ))}
         </ul>
       )}
+      {fromLines.map((line, index) => (
+        <p key={`from-${index}`} className="type-caption text-ink" data-tip-from="">
+          {line}
+        </p>
+      ))}
       {partners.map((partner) => (
         <p key={partner.id} className="rounded-sm bg-band px-2 py-1 type-meta text-ink" data-partner-strip={partner.partner}>
           {partnerStripText(partner.partner, partner.sharedJobs, partner.number)}

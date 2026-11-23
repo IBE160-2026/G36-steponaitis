@@ -8,6 +8,7 @@ never computes occupancy, best or counts itself.
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -16,17 +17,19 @@ from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
 from swp.domain.ordering import aisle_order, level_key, location_order, part_order
 from swp.domain.planning import (
+    EffectiveMove,
     LocationRef,
     PlanningCopy,
-    applied_step,
     covering_marks,
+    current_round,
     is_best,
     is_occupied,
     latest_run,
     location_ref,
-    planning_copy,
+    recommendation_status,
+    replay,
 )
-from swp.domain.state import AisleMark, BestMark, LevelMark, PlanState
+from swp.domain.state import AisleMark, BestMark, LevelMark, PlanState, Recommendation, Rule
 from swp.domain.values import Dec
 from swp.domain.views.common import occupied_percent
 
@@ -66,14 +69,46 @@ class WarehouseCounts(BaseModel):
 class AisleCounts(WarehouseCounts):
     aisle: str
     moves: int
+    """The number of wall move entries touching the aisle: latest-run recommendations plus
+    current-round manual moves (the same entries its wall's `moves` lists)."""
     aisle_marked: bool
+
+
+WallMoveKind = Literal["recommendation", "manual"]
+
+WallMoveStatus = Literal["open", "kept", "applied", "outdated", "manual"]
+"""A recommendation's derived status (`recommendation_status`), or `manual` for a manual
+effective move."""
+
+
+class WallMove(BaseModel):
+    """One move touching the open aisle (AD-3, AD-7, AD-14): a latest-run recommendation
+    (any status) or a current-round manual effective move (FR-34). `number` is the
+    recommendation's server number, `move_number` the effective move's number when applied
+    or manual. An applied recommendation keeps its own rule; its `to_location` is where the
+    effective move ends (the applied step's when moved back)."""
+
+    kind: WallMoveKind
+    recommendation_id: str | None
+    number: int | None
+    move_number: int | None
+    rule: Rule
+    part: str
+    description: str
+    movement_class: MovementClass
+    picks: int
+    from_location: LocationRef
+    to_location: LocationRef
+    status: WallMoveStatus
 
 
 class WallView(BaseModel):
     version: int
     aisle: str
+    round: int
     locations: list[WallLocation]
     rail_levels: list[str]
+    moves: list[WallMove]
     aisles: list[AisleCounts]
     warehouse: WarehouseCounts
 
@@ -97,24 +132,99 @@ def _parts_at(
     ]
 
 
-def _moves_per_aisle(copy: PlanningCopy, state: PlanState) -> dict[str, int]:
-    """Per aisle, the latest run's recommendations whose from-location or to-location (the
-    applied step's when applied) is in it; empty before the first run."""
-    counts: dict[str, int] = {}
+@dataclass(frozen=True)
+class _MoveEntry:
+    """A move entry before it is put on the wire: its source and the codes it touches."""
+
+    rec: Recommendation | None
+    move_number: int | None
+    rule: Rule
+    part: str
+    status: WallMoveStatus
+    from_location: str
+    to_location: str
+    aisles: frozenset[str]
+
+
+def _move_entries(
+    copy: PlanningCopy, state: PlanState, moves: Sequence[EffectiveMove]
+) -> list[_MoveEntry]:
+    """Every move entry of the plan, in wall order: the latest run's recommendations in
+    stored order, then the current round's manual effective moves (no recommendation id)
+    by move number. Each knows the aisles its from- and to-location are in."""
+
+    def aisles(*codes: str) -> frozenset[str]:
+        return frozenset(copy.locations[code].aisle for code in codes if code in copy.locations)
+
+    entries: list[_MoveEntry] = []
     latest = latest_run(state)
-    if latest is None:
-        return counts
-    for rec in latest.recommendations:
-        step = applied_step(state, rec.id)
-        to_location = step.to_location if step is not None else rec.to_location
-        touched = {
-            copy.locations[code].aisle
-            for code in (rec.from_location, to_location)
-            if code in copy.locations
-        }
-        for aisle in touched:
+    for rec in latest.recommendations if latest is not None else []:
+        derived = recommendation_status(state, moves, rec)
+        if derived.move is not None:
+            to_location = derived.move.to_location
+        elif derived.step is not None:
+            to_location = derived.step.to_location
+        else:
+            to_location = rec.to_location
+        entries.append(
+            _MoveEntry(
+                rec=rec,
+                move_number=derived.move.move_number if derived.move is not None else None,
+                rule=rec.rule,
+                part=rec.part,
+                status=derived.status,
+                from_location=rec.from_location,
+                to_location=to_location,
+                aisles=aisles(rec.from_location, to_location),
+            )
+        )
+    round_ = current_round(state)
+    manual = [m for m in moves if m.recommendation_id is None and m.round == round_]
+    for move in sorted(manual, key=lambda m: m.move_number):
+        entries.append(
+            _MoveEntry(
+                rec=None,
+                move_number=move.move_number,
+                rule=move.rule,
+                part=move.part,
+                status="manual",
+                from_location=move.from_location,
+                to_location=move.to_location,
+                aisles=aisles(move.from_location, move.to_location),
+            )
+        )
+    return entries
+
+
+def _moves_per_aisle(entries: Sequence[_MoveEntry]) -> dict[str, int]:
+    """Per aisle, the number of move entries touching it (the tab's "N moves")."""
+    counts: dict[str, int] = {}
+    for entry in entries:
+        for aisle in entry.aisles:
             counts[aisle] = counts.get(aisle, 0) + 1
     return counts
+
+
+def _wall_move(
+    data: ImportData, analysis: Analysis, state: PlanState, copy: PlanningCopy, entry: _MoveEntry
+) -> WallMove:
+    rec = entry.rec
+    facts = analysis.parts.get(entry.part, _UNCLASSIFIED)
+    marks = state.best_marks
+    return WallMove(
+        kind="recommendation" if rec is not None else "manual",
+        recommendation_id=rec.id if rec is not None else None,
+        number=rec.number if rec is not None else None,
+        move_number=entry.move_number,
+        rule=entry.rule,
+        part=entry.part,
+        description=data.parts.get(entry.part, ""),
+        movement_class=facts.movement_class,
+        picks=facts.picks,
+        from_location=location_ref(copy, entry.from_location, marks),
+        to_location=location_ref(copy, entry.to_location, marks),
+        status=entry.status,
+    )
 
 
 def _rail_levels(levels: Sequence[str], aisle: str, marks: Sequence[BestMark]) -> list[str]:
@@ -169,7 +279,8 @@ def build_wall_view(
 ) -> WallView:
     """The wall of `aisle` as the plan is now, with per-aisle and warehouse counts; raise
     `not_found` when the import has no location in `aisle`."""
-    copy = planning_copy(data, state)
+    replayed = replay(data, state.steps)
+    copy = replayed.copy
     if not any(location.aisle == aisle for location in copy.locations.values()):
         raise DomainError("not_found", AISLE_NOT_FOUND)
     marks = state.best_marks
@@ -182,7 +293,8 @@ def build_wall_view(
         )
         for code in codes
     }
-    moves = _moves_per_aisle(copy, state)
+    entries = _move_entries(copy, state, replayed.moves)
+    moves = _moves_per_aisle(entries)
     aisles = [
         AisleCounts(
             aisle=name,
@@ -202,8 +314,14 @@ def build_wall_view(
     return WallView(
         version=version,
         aisle=aisle,
+        round=current_round(state),
         locations=rows,
         rail_levels=_rail_levels(aisle_levels, aisle, marks),
+        moves=[
+            _wall_move(data, analysis, state, copy, entry)
+            for entry in entries
+            if aisle in entry.aisles
+        ],
         aisles=aisles,
         warehouse=_counts(list(facts.values())),
     )

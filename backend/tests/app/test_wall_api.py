@@ -36,8 +36,18 @@ def test_fr42_wall_endpoint_on_sample(empty_tables: str) -> None:
 
     assert response.status_code == 200, response.text
     body = response.json()
-    assert set(body) == {"version", "aisle", "locations", "rail_levels", "aisles", "warehouse"}
+    assert set(body) == {
+        "version",
+        "aisle",
+        "round",
+        "locations",
+        "rail_levels",
+        "moves",
+        "aisles",
+        "warehouse",
+    }
     assert (body["version"], body["aisle"], body["rail_levels"]) == (1, "A", [])
+    assert (body["round"], body["moves"]) == (0, [])
     rows = body["locations"]
     in_a = [row for row in table["locations"] if row["location"]["aisle"] == "A"]
     assert len(rows) == len(in_a) == 223
@@ -128,6 +138,30 @@ def test_fr42_wall_moves_after_a_run(empty_tables: str) -> None:
         for name in {rec.from_location[0], rec.to_location[0]}:
             expected[name] += 1
     assert moves == expected
+    assert wall["round"] == 1
+    assert len(wall["moves"]) == moves["A"]
+    in_a = [r for r in recs if "A" in {r.from_location[0], r.to_location[0]}]
+    assert [m["number"] for m in wall["moves"]] == [r.number for r in in_a]
+    first = wall["moves"][0]
+    assert set(first) == {
+        "kind",
+        "recommendation_id",
+        "number",
+        "move_number",
+        "rule",
+        "part",
+        "description",
+        "movement_class",
+        "picks",
+        "from_location",
+        "to_location",
+        "status",
+    }
+    assert (first["kind"], first["status"], first["move_number"]) == (
+        "recommendation",
+        "open",
+        None,
+    )
 
 
 def test_fr42_wall_follows_a_manual_move(empty_tables: str) -> None:
@@ -145,6 +179,10 @@ def test_fr42_wall_follows_a_manual_move(empty_tables: str) -> None:
 
     rows = {row["location"]["code"]: row for row in after["locations"]}
     assert after["version"] > before["version"]
+    [manual] = after["moves"]
+    assert (manual["kind"], manual["status"], manual["part"]) == ("manual", "manual", part)
+    assert manual["to_location"]["code"] == target["location"]["code"]
+    assert {c["aisle"]: c["moves"] for c in after["aisles"]}["A"] == 1
     assert rows[target["location"]["code"]]["occupied"] is True
     assert rows[target["location"]["code"]]["top_part"]["part"] == part
     assert rows[source["location"]["code"]]["parts"] == [

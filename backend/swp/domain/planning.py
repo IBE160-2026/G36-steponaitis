@@ -345,6 +345,40 @@ def applied_step(state: PlanState, recommendation_id: str) -> Step | None:
     return next((s for s in state.steps if s.recommendation_id == recommendation_id), None)
 
 
+RecommendationStatus = Literal["open", "applied", "kept", "outdated"]
+"""A recommendation's view status (FR-32, AD-7): applied, then outdated, then kept, then
+open. `kept` (an open, unapplied, not-outdated recommendation of a kept part) is never
+stored."""
+
+
+@dataclass(frozen=True)
+class DerivedStatus:
+    """A recommendation's derived status (AD-7): `step` is the step that applied it (None
+    when unapplied), `move` the effective move it still stands as (None when FR-34 removed
+    it: `moved_back`, which is outdated)."""
+
+    status: RecommendationStatus
+    step: Step | None
+    move: EffectiveMove | None
+
+
+def recommendation_status(
+    state: PlanState, moves: Sequence[EffectiveMove], rec: Recommendation
+) -> DerivedStatus:
+    """The one derivation of a recommendation's status from the step log, its replayed
+    effective `moves` and the stored status: applied (an effective move carries its id),
+    outdated (moved back, or stored outdated), kept (its part is kept in place), else open."""
+    step = applied_step(state, rec.id)
+    if step is not None:
+        move = next((m for m in moves if m.recommendation_id == rec.id), None)
+        return DerivedStatus("applied" if move is not None else "outdated", step, move)
+    if rec.status == "outdated" and rec.outdated is not None:
+        return DerivedStatus("outdated", None, None)
+    if rec.part in state.keep_marks:
+        return DerivedStatus("kept", None, None)
+    return DerivedStatus("open", None, None)
+
+
 def open_recommendations(state: PlanState) -> list[Recommendation]:
     """The latest run's recommendations with stored status `open` and no applied step, in
     stored order; empty before the first run. Kept parts are included (FR-30, AD-3)."""

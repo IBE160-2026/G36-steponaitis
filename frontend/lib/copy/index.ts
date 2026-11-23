@@ -22,6 +22,7 @@ import type {
   RunMeta,
   StepUndoneEvent,
   UndoPreview,
+  WallMove,
   WarehouseCounts,
 } from "@/lib/api/plans";
 import { formatDate, formatDateTime, formatNumber, formatTime } from "@/lib/format";
@@ -467,7 +468,7 @@ export function bestCountTag(count: number): string {
   return `${BEST_TAG} ${formatNumber(count)}`;
 }
 
-/** "7 moves" / "1 move": the latest run's moves touching an aisle, on its tab. */
+/** "7 moves" / "1 move": the moves touching an aisle (latest-run recommendations and this round's manual moves), on its tab. */
 export function aisleTabMoves(count: number): string {
   return plural(count, "move", "moves");
 }
@@ -543,7 +544,8 @@ function picksText(picks: number): string {
 
 /**
  * A wall cell's accessible name: "A-07-01-02, level 1, best location, occupied, fast-moving"
- * (the top part's class), ", selected" while its part's panel is open.
+ * (the top part's class), ", selected" while its part's panel is open, then its moves
+ * ("move 1, selected, leaves here").
  */
 export function cellName(cell: {
   code: string;
@@ -552,12 +554,15 @@ export function cellName(cell: {
   occupied: boolean;
   topClass?: MovementClass;
   selected?: boolean;
+  /** The cell's move texts (`cellMoveText`), in drawer order (Story 10.4). */
+  moves?: readonly string[];
 }): string {
   const words = [cell.code, `level ${cell.level}`];
   if (cell.best) words.push("best location");
   words.push(cell.occupied ? "occupied" : "empty");
   if (cell.occupied && cell.topClass !== undefined) words.push(classInSentence(cell.topClass));
   if (cell.selected) words.push("selected");
+  words.push(...(cell.moves ?? []));
   return words.join(", ");
 }
 
@@ -619,3 +624,168 @@ export const EMPTY_LOCATION_REASON = "This location is empty.";
 
 /** Why a Manual move… waits: its part is still loading. */
 export const LOADING_PART = "Loading the part…";
+
+// Moves on the wall (Story 10.4, FR-42, UX-DR44/46): the cell names' move texts, the cross-aisle
+// target lines, the selected move's hover note and the "Moves touching aisle" drawer. Every entry,
+// status and count is the server's wall view; only the words are made here.
+
+/** How one end of a move is drawn on a cell (and named in its accessible name). */
+export type MoveMarkKind = "lift" | "target" | "applied" | "manual" | "outdated";
+
+/** Which end of its move a mark is drawn on. */
+export type MoveMarkEnd = "from" | "to";
+
+/**
+ * A cell's move text, appended to its accessible name: "move 1, leaves here", "move 2, selected,
+ * arrives here", "move 3 applied, arrived here", "manual move, arrived here", "move 4 outdated".
+ * An applied or manual move drawn on its from-cell (its to-cell is in another aisle) "left here".
+ */
+export function cellMoveText(mark: {
+  kind: MoveMarkKind;
+  number: number | null;
+  selected: boolean;
+  end?: MoveMarkEnd;
+}): string {
+  const number = mark.number === null ? "" : formatNumber(mark.number);
+  const selected = mark.selected ? ", selected" : "";
+  switch (mark.kind) {
+    case "lift":
+      return `move ${number}${selected}, leaves here`;
+    case "target":
+      return `move ${number}${selected}, arrives here`;
+    case "applied":
+      return `move ${number} applied${selected}, ${mark.end === "from" ? "left here" : "arrived here"}`;
+    case "manual":
+      return `manual move${selected}, ${mark.end === "from" ? "left here" : "arrived here"}`;
+    case "outdated":
+      return `move ${number} outdated${selected}`;
+  }
+}
+
+/** A target's tooltip line when its move comes from another aisle: "From G-14-04-02 (aisle G)". */
+export function moveFromOtherAisleText(from: Pick<LocationRef, "code" | "aisle">): string {
+  return `From ${from.code} (aisle ${from.aisle})`;
+}
+
+/** The same in the cell's hidden description: "Recommendation 2 arrives here from G-14-04-02". */
+export function moveArrivesFromText(number: number, from: string): string {
+  return `Recommendation ${formatNumber(number)} arrives here from ${from}`;
+}
+
+/** "A-12-04-02 → A-14-02-01". */
+export function moveRouteText(move: Pick<WallMove, "from_location" | "to_location">): string {
+  return `${move.from_location.code} → ${move.to_location.code}`;
+}
+
+/** The joined recommendation's reason, when the versions agree (AD-12). */
+type MoveReason = RecommendationRow["reason"];
+
+/**
+ * The selected move's hover note (UX-DR44), two lines:
+ * "Rule 1 · 8044172 Oil filter - Toyota Corolla" ("Manual · …" for a manual move) and
+ * "33 picks (24 or more) · A-12-04-02 → A-14-02-01" (rule 3: "Partner 4410281 · 14 shared jobs ·
+ * from → to"; without a joined reason: "33 picks · from → to").
+ */
+export function hoverNoteLines(move: WallMove, reason?: MoveReason | null): [string, string] {
+  const first = `${RULE_LABELS[move.rule]} · ${move.part} ${move.description}`.trimEnd();
+  const route = moveRouteText(move);
+  let facts = picksText(move.picks);
+  if (move.kind === "recommendation" && reason) {
+    facts =
+      reason.kind === "class"
+        ? `${picksText(move.picks)} (${thresholdText(reason.threshold)})`
+        : `Partner ${reason.partner} · ${sharedJobsText(reason.shared_jobs)}`;
+  }
+  return [first, `${facts} · ${route}`];
+}
+
+/** "Moves touching aisle A". */
+export function movesDrawerTitle(aisle: string): string {
+  return `Moves touching aisle ${aisle}`;
+}
+
+/** The drawer heading: "Moves touching aisle A · Round 1 · 7 moves · 4 to decide". */
+export function movesDrawerHeading(aisle: string, round: number, moves: number, toDecide: number): string {
+  return [
+    movesDrawerTitle(aisle),
+    `Round ${formatNumber(round)}`,
+    plural(moves, "move", "moves"),
+    `${formatNumber(toDecide)} to decide`,
+  ].join(" · ");
+}
+
+/** The drawer with no entries: "No moves touch aisle A." */
+export function noMovesTouchText(aisle: string): string {
+  return `No moves touch aisle ${aisle}.`;
+}
+
+/** The collapsed drawer with nothing selected. */
+export const NO_MOVE_SELECTED = "No move selected. Select a move on the wall or show all.";
+
+/** The drawer's toggle: "Show all 7". */
+export function showAllMovesText(count: number): string {
+  return `Show all ${formatNumber(count)}`;
+}
+
+/** The drawer's link to the Recommendations step: "Open round 1". */
+export function openRoundText(round: number): string {
+  return `Open round ${formatNumber(round)}`;
+}
+
+/** The drawer table's accessible name. */
+export function movesTableLabel(aisle: string): string {
+  return movesDrawerTitle(aisle);
+}
+
+/** The drawer table's column heads, in order. */
+export const MOVES_TABLE_COLUMNS = {
+  rule: "Rule",
+  part: "Part",
+  classPicks: "Class · picks",
+  from: "From",
+  to: "To",
+  status: "Status",
+  action: "Action",
+} as const;
+
+/** "Fast-moving · 33 picks". */
+export function moveClassPicksText(move: Pick<WallMove, "movement_class" | "picks">): string {
+  return `${CLASS_LABELS[move.movement_class]} · ${picksText(move.picks)}`;
+}
+
+/** A move's marker text for screen readers in the drawer: "Move 1" (its server number) or "Manual move". */
+export function moveLabel(move: Pick<WallMove, "kind" | "number">): string {
+  if (move.kind === "manual" || move.number === null) return "Manual move";
+  return `Move ${formatNumber(move.number)}`;
+}
+
+/** A move's status in the drawer: "To decide", "Kept in place", "Applied · move 3", "Outdated", "Manual · move 5". */
+export function moveStatusText(move: Pick<WallMove, "status" | "move_number">): string {
+  const number = move.move_number === null ? "" : ` · move ${formatNumber(move.move_number)}`;
+  switch (move.status) {
+    case "open":
+      return "To decide";
+    case "kept":
+      return KEPT_IN_PLACE;
+    case "applied":
+      return `Applied${number}`;
+    case "outdated":
+      return "Outdated";
+    case "manual":
+      return `Manual${number}`;
+  }
+}
+
+/** An outdated move's status with its cause, when its recommendation row agrees: "Outdated · The best-location marks changed." */
+export function moveOutdatedStatusText(part: string, outdated: OutdatedInfo): string {
+  return `Outdated · ${outdatedText(part, outdated)}`;
+}
+
+/** The selected drawer row's extra word for screen readers. */
+export const SELECTED_ROW_TEXT = "selected";
+
+/** Between a route's from- and to-location, for screen readers (the arrow is decorative). */
+export const ROUTE_TO_TEXT = "to";
+
+/** The drawer's Apply. */
+export const APPLY_LABEL = "Apply";

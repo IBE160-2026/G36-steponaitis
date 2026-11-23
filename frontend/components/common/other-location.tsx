@@ -1,7 +1,8 @@
 "use client";
 
-// Other location ▾ (Story 7.2, FR-31, UX-DR36): a recommendation detail action that opens a
-// listbox of the server's allowed set (AD-3: the client never computes it). The listbox takes
+// Other location ▾ (Story 7.2, FR-31, UX-DR36): a recommendation action, shared by the
+// Recommendations detail and the wall's moves drawer (Story 10.4), that opens a listbox of the
+// server's allowed set (AD-3: the client never computes it). The listbox takes
 // focus when it opens; arrows, Home/End and typing only move the highlight; `Enter` or a click
 // applies the highlighted location; `Esc` closes and returns focus to the trigger. There is no
 // free-text entry: any other placement is a manual move.

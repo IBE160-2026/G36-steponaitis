@@ -25,9 +25,10 @@ import {
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { Button } from "@/components/common/button";
-import { ManualMoveAction } from "@/components/common/manual-move-dialog";
 import { Icon } from "@/components/common/icons";
 import { KeepInPlaceButton, KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
+import { ManualMoveAction } from "@/components/common/manual-move-dialog";
+import { OtherLocationAction, type OtherLocationActionProps } from "@/components/common/other-location";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { showToast, type ToastOptions } from "@/components/common/toast";
 import { UndoLastMove } from "@/components/common/undo-last-move";
@@ -40,15 +41,13 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
+import { applyCommand, applyOtherCommand, applyReason, sendApply as sendApplyFlow } from "@/lib/commands/apply";
 import { sendReset } from "@/lib/commands/reset";
-import { moveUndoAction } from "@/lib/commands/undo";
 import {
   appliedText,
-  appliedToast,
   applyAllQuestion,
   applyAllToast,
   KEPT_IN_PLACE,
-  keptApplyReason,
   NO_OPEN_TO_APPLY,
   noSpaceText,
   outdatedText,
@@ -93,7 +92,6 @@ import {
   tabItems,
   tabName,
 } from "./list";
-import { OtherLocationAction, type OtherLocationActionProps } from "./other-location";
 import { ResetPlanMenu } from "./reset-plan";
 
 export const RUN_LABEL = "Run recommendations";
@@ -118,14 +116,6 @@ export function eyebrowText(item: ListItem): string {
   if (item.kind === "kept-part") return `SELECTED · ${KEPT_IN_PLACE.toUpperCase()}`;
   const rule = `RULE ${ruleNumber(item.row.rule)}`;
   return item.kind === "rec" ? `SELECTED · #${formatNumber(item.row.number)} · ${rule}` : `SELECTED · NO SPACE · ${rule}`;
-}
-
-/** Why Apply is disabled: the outdated cause, else "<part> is kept in place.", else the saving
- * reason; undefined when it can apply. */
-export function applyReason(row: RecommendationRow, savingReason: string | undefined): string | undefined {
-  if (row.status === "outdated" && row.outdated) return outdatedText(row.part, row.outdated);
-  if (row.status === "kept") return keptApplyReason(row.part);
-  return savingReason;
 }
 
 function findEvent<T extends CommandEvent["type"]>(events: readonly CommandEvent[], type: T) {
@@ -652,10 +642,8 @@ export function RecommendationsView({
   /** Sends an apply (to the suggested or another location), toasts its `move_made` and moves focus. */
   async function sendApply(body: CommandBody) {
     const before = view.version;
-    const result = await onSend(body);
+    const result = await sendApplyFlow(onSend, body, notify);
     if (result.outcome !== "confirmed") return;
-    const moved = findEvent(result.events, "move_made");
-    if (moved) notify(appliedToast(moved), { action: moveUndoAction(moved, onSend, notify) });
     // The applied row leaves the tab: when focus was in the list or detail (or already fell to the
     // page), it moves to the selected row of the refreshed view.
     const active = typeof document === "undefined" ? null : document.activeElement;
@@ -663,11 +651,11 @@ export function RecommendationsView({
   }
 
   function apply(row: RecommendationRow) {
-    return sendApply({ type: "apply", recommendation_id: row.id });
+    return sendApply(applyCommand(row.id));
   }
 
   function applyOther(row: RecommendationRow, location: string) {
-    return sendApply({ type: "apply_other_location", recommendation_id: row.id, to_location: location });
+    return sendApply(applyOtherCommand(row.id, location));
   }
 
   async function keep(item: ListItem) {

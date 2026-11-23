@@ -13,6 +13,11 @@
 // latest run's recommendations touching the location, only while their version agrees with the
 // wall's (AD-12).
 //
+// Moves (Story 10.4): the wall draws the server's move entries of the open aisle, and the "Moves
+// touching aisle" drawer under the Key lists them. `?rec=` (a recommendation) or `?move=` (a manual
+// move) selects one; a marker, a cell with moves or a drawer row selects it everywhere (URL, wall,
+// drawer) and scrolls the other side into view. The tabs and Open as list drop the selection.
+//
 // **Open as list** (`?mode=list`) shows the milestone 1 table: every location in server order with
 // its aisle, level, Walk Path, occupied or empty, best or not, and the parts stored there, with the
 // whole-warehouse and per-aisle occupancy lines. Filters only read server flags; occupancy is always
@@ -35,9 +40,10 @@ import {
 } from "@/components/common/locations-table";
 import { usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
 import { ManualMoveAction } from "@/components/common/manual-move-dialog";
+import { OtherLocationAction } from "@/components/common/other-location";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
-import { Key, recommendationsAtVersion } from "@/components/common/wall";
+import { Key, moveKey, recommendationsAtVersion } from "@/components/common/wall";
 import { type LayoutView, useImportLayout } from "@/lib/api/imports";
 import {
   type LocationsView as LocationsData,
@@ -52,21 +58,25 @@ import {
   aisleHeading,
   EDIT_BEST_MARKS,
   EMPTY_LOCATION_REASON,
+  hoverNoteLines,
   OPEN_AS_LIST,
   OPEN_AS_WALL,
   wallAisleLine,
   wholeWarehouseFigure,
 } from "@/lib/copy";
 import {
+  isSelectedWallMove,
   type LocationParams,
   parseLocationParams,
   planStepHref,
   recommendationHref,
+  wallMoveQuery,
 } from "@/lib/view-state/urls";
 
 import { chooseAisle, readStoredAisle, storeAisle } from "./aisle-choice";
 import { aisleTabId, AisleTabs } from "./aisle-tabs";
 import { AisleWall, type AisleWallProps } from "./aisle-wall";
+import { joinedRow, MovesDrawer } from "./moves-drawer";
 
 /** List mode: only `?mode=list` (a `?loc=` link without it opens the wall at that location). */
 export function isListMode(params: LocationParams): boolean {
@@ -160,6 +170,7 @@ export function LocationsWall({
   part,
   search,
   grid = {},
+  drawer,
 }: {
   planId: string;
   view: WallView;
@@ -173,6 +184,8 @@ export function LocationsWall({
   search?: ReactNode;
   /** The wall grid's selection, `?loc=` pin, recommendations and actions. */
   grid?: Omit<AisleWallProps, "layout" | "wall">;
+  /** The "Moves touching aisle" drawer under the Key. */
+  drawer?: ReactNode;
 }) {
   const idPrefix = useId();
   const panelId = `${idPrefix}-panel`;
@@ -221,6 +234,7 @@ export function LocationsWall({
         </div>
         {aisleLayout && <AisleWall key={view.aisle} layout={aisleLayout} wall={view} {...grid} />}
         <Key />
+        {drawer}
       </section>
     </div>
   );
@@ -235,7 +249,10 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
   const panel = usePartPanel(planId, "locations");
   const data = usePanelPlanData(planId, wall, panel.part);
   const recommendations = usePlanRecommendations(planId);
-  const { disabledReason } = usePlanCommands(planId);
+  const { disabledReason, sendWithEvents } = usePlanCommands(planId);
+  // Which side asked for the last selection, so the other side scrolls to it.
+  const [wallScroll, setWallScroll] = useState<{ code: string; seq: number } | undefined>(undefined);
+  const [drawerScroll, setDrawerScroll] = useState<{ key: string; seq: number } | undefined>(undefined);
 
   // `?loc=` pins that location's dialog once per distinct value (a new link pins again).
   const [handledLoc, setHandledLoc] = useState<string | undefined>(undefined);
@@ -291,6 +308,28 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
   const selectedCode =
     panel.part !== undefined && data.detail?.part === panel.part ? data.detail.current_location?.code : undefined;
   const recRows = recommendationsAtVersion(recommendations.data, data.view.version);
+  const view = data.view;
+  // `?rec=` / `?move=` select an entry of the open aisle; any other id selects nothing.
+  const selectedMove = view.moves.find((move) => isSelectedWallMove(move, params));
+  const selectedMoveKey = selectedMove ? moveKey(selectedMove) : undefined;
+  const noteLines = selectedMove ? hoverNoteLines(selectedMove, joinedRow(selectedMove, recRows)?.reason) : undefined;
+
+  function selectMove(key: string, from: "wall" | "drawer") {
+    const move = view.moves.find((candidate) => moveKey(candidate) === key);
+    if (!move) return;
+    window.history.replaceState(
+      null,
+      "",
+      planStepHref(planId, "locations", { aisle: view.aisle, part: panel.part, ...wallMoveQuery(move) }),
+    );
+    if (from === "wall") {
+      setDrawerScroll((current) => ({ key, seq: (current?.seq ?? 0) + 1 }));
+    } else {
+      const code = move.from_location.aisle === view.aisle ? move.from_location.code : move.to_location.code;
+      setWallScroll((current) => ({ code, seq: (current?.seq ?? 0) + 1 }));
+    }
+  }
+
   return (
     <WithPartPanel
       planId={planId}
@@ -317,7 +356,27 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
             }}
           />
         }
+        drawer={
+          <MovesDrawer
+            planId={planId}
+            aisle={view.aisle}
+            round={view.round}
+            moves={view.moves}
+            selectedKey={selectedMoveKey}
+            onSelect={(key) => selectMove(key, "drawer")}
+            rows={recRows}
+            version={view.version}
+            savingReason={disabledReason}
+            onSend={sendWithEvents}
+            otherLocation={(props) => <OtherLocationAction key={props.row.id} planId={planId} {...props} />}
+            scrollTo={drawerScroll}
+          />
+        }
         grid={{
+          selectedMoveKey,
+          noteLines,
+          onSelectMove: (key) => selectMove(key, "wall"),
+          scrollTo: wallScroll,
           selectedCode,
           pinCode,
           onPinHandled,
