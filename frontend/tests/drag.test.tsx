@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
 
 import { type WallDrag, WallGrid, wallCells } from "@/components/common/wall";
 import type { AisleLayout, LayoutCell } from "@/lib/api/imports";
-import type { CommandEvent, MovePreview, WallLocation, WallPart, WallView } from "@/lib/api/plans";
+import type { CommandEvent, MovePreview, TargetPart, WallLocation, WallPart, WallView } from "@/lib/api/plans";
 import { SAVING_REASON } from "@/lib/commands";
-import { CHOOSE_PART_TO_MOVE } from "@/lib/copy";
+import { CHOOSE_PART_TO_MOVE, CHOOSE_PART_TO_MOVE_BACK, dropPartStats, keptSwapWarning } from "@/lib/copy";
 import {
   dragMoveToast,
   draggedPart,
@@ -18,8 +18,17 @@ import {
   dropHint,
   lastMoveEvent,
   pointerHalf,
+  swapToast,
 } from "@/modules/locations/drag/drag";
-import { checkedInOrder, DropDialogBody, dropMoveReason } from "@/modules/locations/drag/drop-dialog";
+import { DropDialogBody, dropMoveReason } from "@/modules/locations/drag/drop-dialog";
+import { checkedInOrder } from "@/modules/locations/drag/drop-popover";
+import {
+  chosenParts,
+  keptInSwap,
+  OccupiedDialogBody,
+  putTogetherReason,
+  swapReason,
+} from "@/modules/locations/drag/occupied-dialog";
 
 // Story 12.2 (FR-51, UX-DR50, NFR-10): drag a bin on the One aisle wall and drop it on an empty
 // location. Pure rules and static markup (Vitest has no DOM); the pointer journeys run in a browser
@@ -103,8 +112,10 @@ describe("uxdr50 drop targets from the server preview", () => {
     expect(dropAction(preview({ effect: { kind: "combines_with", move_number: 4 } }), 1)).toBe("send");
     expect(dropAction(preview(), 2)).toBe("dialog");
     expect(dropAction(preview(), 3)).toBe("dialog");
-    // Occupied: the hint only, nothing sent in this story.
-    expect(dropAction(preview({ target: "occupied" }), 1)).toBe("none");
+    // Occupied (Story 12.3): always the occupied dialog, whatever the from-location holds.
+    expect(dropAction(preview({ target: "occupied" }), 1)).toBe("occupied");
+    expect(dropAction(preview({ target: "occupied" }), 2)).toBe("occupied");
+    expect(dropAction(preview({ target: "occupied", allowed: false, effect: null }), 1)).toBe("none");
     expect(dropAction(preview({ target: "none" }), 1)).toBe("none");
     expect(dropAction(preview({ allowed: false, effect: null }), 1)).toBe("none");
     expect(dropAction(null, 1)).toBe("none");
@@ -210,6 +221,233 @@ describe("fr51 drop dialog", () => {
   it("fr51_move_sends_checked_parts_in_from_location_order", () => {
     expect(checkedInOrder(parts, new Set(["4410297", "4410281"]))).toEqual(["4410281", "4410297"]);
     expect(checkedInOrder(parts, new Set(["4410297"]))).toEqual(["4410297"]);
+  });
+});
+
+// Story 12.3 (FR-51, FR-32, FR-33, UX-DR50, UX-DR10): a drop on an occupied location.
+
+function moveMade(partNumber: string, number: number, from: string, to: string): CommandEvent {
+  return { type: "move_made", part: partNumber, from_location: from, to_location: to, move_number: number, round: 1, rule: "manual" };
+}
+
+function target(number: string, patch: Partial<TargetPart> = {}): TargetPart {
+  return {
+    part: number,
+    description: `Part ${number}`,
+    movement_class: "medium",
+    picks: 5,
+    stock: "6",
+    kept_in_place: false,
+    ...patch,
+  };
+}
+
+describe("fr51 swap toast", () => {
+  it("fr51_swap_toast_counts_the_swap_moves_and_undoes_the_last", () => {
+    const back = moveMade("4410297", 9, "G-14-01-03", "G-14-04-02");
+    // The server returns `swap_made` first, then the steps' move events.
+    const events: CommandEvent[] = [
+      {
+        type: "swap_made",
+        swap_id: "s",
+        from_location: "G-14-04-02",
+        to_location: "G-14-01-03",
+        move_numbers: [8, 9],
+        round: 1,
+      },
+      MOVE_MADE("4410281", 8),
+      back,
+    ];
+    expect(swapToast(events)).toBe("Swapped G-14-04-02 ↔ G-14-01-03 · 2 manual moves, round 1.");
+    // lastMoveEvent skips swap_made: the toast's Undo undoes the back-part's move first (FR-35).
+    expect(lastMoveEvent(events)).toEqual(back);
+    expect(swapToast([MOVE_MADE("4410281", 8)])).toBeNull();
+  });
+
+  it("fr33_put_together_toast_reuses_the_drop_wording", () => {
+    const drop = { from: "G-14-04-02", to: "G-14-01-03" };
+    const one = moveMade("4410281", 8, "G-14-04-02", "G-14-01-03");
+    expect(dragMoveToast([one], drop)).toBe("Moved 4410281: G-14-04-02 → G-14-01-03 (Manual, round 1).");
+    expect(dragMoveToast([one, moveMade("4410297", 9, "G-14-04-02", "G-14-01-03")], drop)).toBe(
+      "Moved 2 parts: G-14-04-02 → G-14-01-03 (Manual, round 1).",
+    );
+  });
+});
+
+describe("uxdr50 occupied drop dialog rules", () => {
+  const one = [part("A")];
+  const two = [part("A", 30), part("B", 20)];
+
+  it("uxdr50_a_side_with_one_part_moves_it_without_a_checkbox", () => {
+    expect(chosenParts(one, new Set())).toEqual(["A"]);
+    expect(chosenParts(two, new Set(["B"]))).toEqual(["B"]);
+    expect(chosenParts(two, new Set(["B", "A"]))).toEqual(["A", "B"]);
+    expect(chosenParts(two, new Set())).toEqual([]);
+  });
+
+  it("uxdr10_reasons_for_every_matrix_row_saving_first", () => {
+    // Saving: both buttons show the saving reason, before any other.
+    expect(swapReason(0, 0, SAVING_REASON)).toBe(SAVING_REASON);
+    expect(putTogetherReason(0, SAVING_REASON)).toBe(SAVING_REASON);
+    // No part to move: both.
+    expect(swapReason(0, 1, undefined)).toBe(CHOOSE_PART_TO_MOVE);
+    expect(swapReason(0, 0, undefined)).toBe(CHOOSE_PART_TO_MOVE);
+    expect(putTogetherReason(0, undefined)).toBe(CHOOSE_PART_TO_MOVE);
+    // No part to move back: Swap only.
+    expect(swapReason(1, 0, undefined)).toBe("Choose at least one part to move back.");
+    expect(putTogetherReason(1, undefined)).toBeUndefined();
+    // Both sides chosen.
+    expect(swapReason(1, 1, undefined)).toBeUndefined();
+  });
+
+  it("fr32_kept_parts_in_the_swap_one_several_unchecked", () => {
+    const from = [part("A"), { ...part("B"), kept_in_place: true }];
+    const back = [target("C", { kept_in_place: true }), target("D", { kept_in_place: true })];
+    expect(keptInSwap(from, ["A"], back, ["C"])).toEqual(["C"]);
+    expect(keptInSwap(from, ["A", "B"], back, ["C", "D"])).toEqual(["B", "C", "D"]);
+    // An unchecked kept part is not in the swap.
+    expect(keptInSwap(from, ["A"], back, [])).toEqual([]);
+    expect(keptSwapWarning(["4410297"])).toBe("4410297 is kept in place. Swap anyway?");
+    expect(keptSwapWarning(["4410297", "4410300"])).toBe("4410297 and 4410300 are kept in place. Swap anyway?");
+    expect(keptSwapWarning(["A", "B", "C"])).toBe("A, B and C are kept in place. Swap anyway?");
+  });
+
+  it("uxdr50_null_class_row_shows_the_stock_alone", () => {
+    expect(dropPartStats(null, "6")).toBe("6");
+    expect(dropPartStats("medium", "6")).toBe("Medium-moving · 6");
+  });
+});
+
+describe("fr51 occupied drop dialog", () => {
+  function body({
+    parts = [part("4410281")],
+    targetParts = [target("4410297")],
+    checked = ["4410281"],
+    checkedBack = targetParts.map((entry) => entry.part),
+    savingReason,
+  }: {
+    parts?: WallPart[];
+    targetParts?: TargetPart[];
+    checked?: string[];
+    checkedBack?: string[];
+    savingReason?: string;
+  } = {}) {
+    return renderToStaticMarkup(
+      <OccupiedDialogBody
+        titleId="t"
+        from="G-14-04-02"
+        to="G-14-01-03"
+        parts={parts}
+        targetParts={targetParts}
+        checked={new Set(checked)}
+        checkedBack={new Set(checkedBack)}
+        onToggle={() => {}}
+        onToggleBack={() => {}}
+        savingReason={savingReason}
+        onSwap={() => {}}
+        onPutTogether={() => {}}
+        onCancel={() => {}}
+      />,
+    );
+  }
+
+  function button(markup: string, label: string): string {
+    const tags = markup.match(/<button[^>]*>[^<]*<\/button>/g) ?? [];
+    return tags.find((tag) => tag.endsWith(`>${label}</button>`)) ?? "";
+  }
+
+  it("fr51_one_part_each_side_has_no_groups_and_three_buttons", () => {
+    const markup = body();
+    expect(markup).toContain('<h2 id="t"');
+    expect(text(markup)).toContain("G-14-01-03 is occupied");
+    expect(markup).not.toContain("<fieldset");
+    expect(markup).not.toContain('type="checkbox"');
+    expect(markup).not.toContain("data-kept-warning");
+    // Swap, Put together, Cancel in this order; no primary button, all enabled.
+    expect(text(markup)).toMatch(/Swap .*Put together .*Cancel/);
+    expect(markup).not.toContain("bg-ink text-surface");
+    expect(markup).not.toContain('aria-disabled="true"');
+  });
+
+  it("uxdr50_groups_only_when_several_with_all_back_parts_checked", () => {
+    const markup = body({
+      parts: [part("4410281", 30), part("4410290", 20)],
+      targetParts: [target("4410297"), target("4410300", { movement_class: null })],
+    });
+    expect(text(markup)).toContain("Parts to move from G-14-04-02");
+    expect(text(markup)).toContain("Parts to move back to G-14-04-02");
+    expect(markup.match(/type="checkbox"/g)).toHaveLength(4);
+    // The dragged from-part and both back-parts are checked.
+    expect(markup.match(/checked=""/g)).toHaveLength(3);
+    const back = markup.slice(markup.indexOf('data-drop-group="back"'));
+    expect(back.match(/checked=""/g)).toHaveLength(2);
+    // A back-part without a class: no glyph, the stock alone.
+    const nullRow = markup.slice(markup.indexOf('data-drop-part="4410300"'));
+    const row = nullRow.slice(0, nullRow.indexOf("</label>"));
+    expect(row).not.toContain("<svg");
+    expect(text(row)).toContain("4410300 Part 4410300 6");
+    expect(text(markup)).toContain("4410297 Part 4410297 Medium-moving · 6");
+
+    // Only the target holds several: the back group alone, every back-part checked.
+    const backOnly = body({ targetParts: [target("4410297"), target("4410300")] });
+    expect(backOnly).toContain('data-drop-group="back"');
+    expect(backOnly).not.toContain('data-drop-group="from"');
+    expect(backOnly.match(/type="checkbox"/g)).toHaveLength(2);
+    expect(backOnly.match(/checked=""/g)).toHaveLength(2);
+
+    // Only the from-side holds several: the back group is not shown.
+    const fromOnly = body({ parts: [part("4410281", 30), part("4410290", 20)] });
+    expect(fromOnly).toContain('data-drop-group="from"');
+    expect(fromOnly).not.toContain('data-drop-group="back"');
+  });
+
+  it("uxdr10_reasons_via_aria_describedby", () => {
+    const parts = [part("4410281", 30), part("4410290", 20)];
+    const targetParts = [target("4410297"), target("4410300")];
+    const none = body({ parts, targetParts, checked: [] });
+    for (const label of ["Swap", "Put together"]) {
+      expect(button(none, label)).toContain('aria-disabled="true"');
+      expect(button(none, label)).toContain("aria-describedby=");
+    }
+    expect(none.match(new RegExp(CHOOSE_PART_TO_MOVE.replace(".", "\\."), "g"))).toHaveLength(2);
+
+    const noBack = body({ parts, targetParts, checkedBack: [] });
+    expect(button(noBack, "Swap")).toContain('aria-disabled="true"');
+    expect(button(noBack, "Put together")).not.toContain("aria-disabled");
+    expect(noBack).toContain(CHOOSE_PART_TO_MOVE_BACK);
+
+    const saving = body({ savingReason: SAVING_REASON });
+    expect(button(saving, "Swap")).toContain('aria-disabled="true"');
+    expect(button(saving, "Put together")).toContain('aria-disabled="true"');
+    expect(saving.match(/Saving the last change…/g)).toHaveLength(2);
+  });
+
+  it("fr32_kept_warning_above_the_buttons_and_swap_enabled", () => {
+    const markup = body({ targetParts: [target("4410297", { kept_in_place: true })] });
+    expect(markup).toContain("data-kept-warning");
+    expect(text(markup)).toContain("4410297 is kept in place. Swap anyway?");
+    expect(markup.indexOf("data-kept-warning")).toBeLessThan(markup.indexOf("<button"));
+    expect(markup).toMatch(/data-kept-warning=""[^>]*>\s*<svg[^>]*aria-hidden="true"/);
+    expect(button(markup, "Swap")).not.toContain("aria-disabled");
+    // The warning describes Swap, so a keyboard or screen-reader user hears it there.
+    const warningId = /<p id="([^"]+)"[^>]*data-kept-warning/.exec(markup)![1];
+    const describedBy = /aria-describedby="([^"]+)"/.exec(button(markup, "Swap"))![1];
+    expect(describedBy.split(" ")).toContain(warningId);
+
+    // An unchecked kept back-part gives no warning.
+    const unchecked = body({
+      targetParts: [target("4410297"), target("4410300", { kept_in_place: true })],
+      checkedBack: ["4410297"],
+    });
+    expect(unchecked).not.toContain("data-kept-warning");
+
+    // No swap possible (no part to move, or no back-part): no warning, only the reason.
+    const kept = { kept_in_place: true };
+    const parts = [part("4410281", 30), part("4410290", 20)];
+    expect(body({ parts, targetParts: [target("4410297", kept)], checked: [] })).not.toContain("data-kept-warning");
+    const noBack = body({ targetParts: [target("4410297", kept), target("4410300", kept)], checkedBack: [] });
+    expect(noBack).not.toContain("data-kept-warning");
+    expect(noBack).toContain(CHOOSE_PART_TO_MOVE_BACK);
   });
 });
 

@@ -8,10 +8,11 @@ import { createSamplePlan } from "./support/sample-plan";
 // UJ-1 (Story 12.2; FR-51, UX-DR50, NFR-10): drag a bin on the One aisle wall with the mouse and
 // drop it on an empty location. A short press stays a click; the target hints come from the server
 // preview; `Esc` cancels; a one-part drop sends `move_parts` at once; several parts open the drop
-// dialog; a drop on an occupied location changes nothing in this story; the Best locations wall and
-// Whole warehouse never start a drag.
+// dialog; a drop on an occupied location opens the occupied dialog (Story 12.3: Swap, Put together
+// or Cancel, nothing sent until chosen); the Best locations wall and Whole warehouse never start a
+// drag.
 
-type WallPart = { part: string };
+type WallPart = { part: string; kept_in_place: boolean };
 type WallLocation = { location: { code: string; aisle: string }; occupied: boolean; parts: WallPart[] };
 type Wall = { version: number; locations: WallLocation[] };
 type Preview = { allowed: boolean; target: "empty" | "occupied" | "none" };
@@ -182,13 +183,17 @@ test("uj1 drags a bin on the One aisle wall to an empty location", async ({ page
   );
   expect(await planVersion(request, planId)).toBe(before);
 
-  // A drop on an occupied location changes nothing in this story.
+  // A drop on an occupied location opens the occupied dialog (Story 12.3); `Esc` closes it, nothing sent.
   await startDrag(page, fromCell);
   await dragOver(page, fullCell);
   await expect(fullCell).toHaveAttribute("data-drop-target", "swap");
   await page.mouse.up();
   await expect(page.locator("[data-drag-lifted]")).toHaveCount(0);
+  const occupiedDialog = page.getByRole("dialog", { name: `${full} is occupied` });
+  await expect(occupiedDialog).toBeVisible();
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(fullCell).toBeFocused();
   expect(await planVersion(request, planId)).toBe(before);
 
   // A one-part drop on an empty location sends one `move_parts`.
@@ -304,6 +309,203 @@ test("uj1 drags from a location with two parts and chooses the parts to move", a
   const after = await wallOf(page, planId);
   expect(after.locations.find((entry) => entry.location.code === to)!.parts.map((entry) => entry.part)).toEqual([dragged]);
   expect(after.locations.find((entry) => entry.location.code === from)!.parts.map((entry) => entry.part)).toEqual([stays]);
+});
+
+/** The part numbers at `code` on the wall, in wall order. */
+function partsAt(wall: Wall, code: string): string[] {
+  return wall.locations.find((entry) => entry.location.code === code)!.parts.map((entry) => entry.part);
+}
+
+/** Drags from `fromCell` (at `half`) onto `toCell`, waits for the occupied hint and drops. */
+async function dropOnOccupied(page: Page, fromCell: Locator, toCell: Locator, half: "left" | "right" = "left") {
+  await startDrag(page, fromCell, half);
+  await dragOver(page, toCell);
+  await expect(toCell).toHaveAttribute("data-drop-target", "swap");
+  await page.mouse.up();
+}
+
+/** A checkbox in the dialog for `part` (its accessible name starts with the part number). */
+function partBox(scope: Locator, part: string): Locator {
+  return scope.getByRole("checkbox", { name: new RegExp(`^${part}\\b`) });
+}
+
+/** Toggles a checkbox by keyboard. */
+async function toggle(page: Page, box: Locator) {
+  await box.focus();
+  await page.keyboard.press("Space");
+}
+
+test("uj1 drops a bin on an occupied location to swap or put it together", async ({ page, request }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Drag swap ${randomUUID().slice(0, 8)}`)).id;
+  const initial = await wallOf(page, planId);
+
+  await page.goto(`/plans/${planId}/locations?aisle=${AISLE}`);
+  await expect(grid(page)).toBeVisible();
+  const from = onePartLocations(initial)[0].location.code;
+  await cellOf(page, from).scrollIntoViewIfNeeded();
+  // One-part locations in view, nearest first: the pairs for Swap, Put together and the two-part swap.
+  const near = await nearestInView(
+    page,
+    from,
+    onePartLocations(initial).map((entry) => entry.location.code),
+  );
+  expect(near.length).toBeGreaterThanOrEqual(7);
+  const [to, from2, to2, host1, host2, donor1, donor2] = near;
+  const part = partsAt(initial, from)[0];
+  const back = partsAt(initial, to)[0];
+  const part2 = partsAt(initial, from2)[0];
+  const back2 = partsAt(initial, to2)[0];
+
+  // Set up by API: the target's part is kept in place (FR-32); two locations with two parts each.
+  await postCommand(request, planId, { type: "set_keep", part: back });
+  for (const [donor, host] of [
+    [donor1, host1],
+    [donor2, host2],
+  ]) {
+    await postCommand(request, planId, { type: "put_together", from: donor, to: host, parts: partsAt(initial, donor) });
+  }
+  await page.reload();
+  await expect(grid(page)).toBeVisible();
+  await cellOf(page, from).scrollIntoViewIfNeeded();
+  const before = await planVersion(request, planId);
+
+  // One part on each side: titled "<to> is occupied", no groups, Swap / Put together / Cancel, no
+  // button focused; the kept part in the swap shows the warning, Swap stays enabled.
+  const fromCell = cellOf(page, from);
+  const toCell = cellOf(page, to);
+  await dropOnOccupied(page, fromCell, toCell);
+  const dialog = page.getByRole("dialog", { name: `${to} is occupied` });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toBeFocused();
+  await expect(dialog.getByRole("group")).toHaveCount(0);
+  await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+  await expect(dialog.getByRole("button")).toHaveText(["Swap", "Put together", "Cancel"]);
+  await expect(dialog.locator("[data-kept-warning]")).toHaveText(`${back} is kept in place. Swap anyway?`);
+  await expect(dialog.locator("[data-kept-warning] svg")).toBeVisible();
+  const swap = dialog.getByRole("button", { name: "Swap", exact: true });
+  await expect(swap).not.toHaveAttribute("aria-disabled", /.*/);
+
+  // `Esc` closes it: nothing sent, focus on the dropped-on cell.
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(toCell).toBeFocused();
+  expect(await planVersion(request, planId)).toBe(before);
+
+  // Cancel closes it too.
+  await dropOnOccupied(page, fromCell, toCell);
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(toCell).toBeFocused();
+  expect(await planVersion(request, planId)).toBe(before);
+
+  // Put together: one Manual move into the occupied location; the wall shows the "M" marker.
+  const to2Cell = cellOf(page, to2);
+  await dropOnOccupied(page, cellOf(page, from2), to2Cell);
+  const dialog2 = page.getByRole("dialog", { name: `${to2} is occupied` });
+  await expect(dialog2).toBeVisible();
+  await dialog2.getByRole("button", { name: "Put together", exact: true }).click();
+  await expect(
+    toasts(page).getByText(`Moved ${part2}: ${from2} → ${to2} (Manual, round 0).`, { exact: true }),
+  ).toBeVisible();
+  await expect(dialog2).toHaveCount(0);
+  expect(await planVersion(request, planId)).toBe(before + 1);
+  const together = await wallOf(page, planId);
+  expect(partsAt(together, to2).sort()).toEqual([part2, back2].sort());
+  expect(partsAt(together, from2)).toEqual([]);
+  await expect(to2Cell).toHaveAttribute("aria-label", /manual move, arrived here/);
+  // The two set-up moves by API plus this one.
+  await expect(page.locator('[data-wall-markers] [data-move-marker="M"]')).toHaveCount(3);
+
+  // Swap by keyboard: the parts trade places, the kept mark stays set, the toast has Undo.
+  await dropOnOccupied(page, fromCell, toCell);
+  await expect(dialog).toBeVisible();
+  await swap.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    toasts(page).getByText(`Swapped ${from} ↔ ${to} · 2 manual moves, round 0.`, { exact: true }),
+  ).toBeVisible();
+  await expect(toasts(page).getByRole("button", { name: "Undo", exact: true }).last()).toBeVisible();
+  await expect(dialog).toHaveCount(0);
+  expect(await planVersion(request, planId)).toBe(before + 2);
+  const swapped = await wallOf(page, planId);
+  expect(partsAt(swapped, to)).toEqual([part]);
+  expect(partsAt(swapped, from)).toEqual([back]);
+  expect(swapped.locations.find((entry) => entry.location.code === from)!.parts[0].kept_in_place).toBe(true);
+
+  // Two parts on both sides: both groups, the dragged part and every back-part checked.
+  const [lifted, staying] = partsAt(swapped, host1);
+  const [backA, backB] = partsAt(swapped, host2);
+  const host1Cell = cellOf(page, host1);
+  const host2Cell = cellOf(page, host2);
+  await dropOnOccupied(page, host1Cell, host2Cell, "left");
+  const dialog3 = page.getByRole("dialog", { name: `${host2} is occupied` });
+  await expect(dialog3).toBeVisible();
+  const fromGroup = dialog3.getByRole("group", { name: `Parts to move from ${host1}` });
+  const backGroup = dialog3.getByRole("group", { name: `Parts to move back to ${host1}` });
+  await expect(fromGroup.getByRole("checkbox")).toHaveCount(2);
+  await expect(backGroup.getByRole("checkbox")).toHaveCount(2);
+  // Focus starts on the first checkbox, never on a button.
+  await expect(partBox(fromGroup, lifted)).toBeFocused();
+  await expect(partBox(fromGroup, lifted)).toBeChecked();
+  await expect(partBox(fromGroup, staying)).not.toBeChecked();
+  await expect(partBox(backGroup, backA)).toBeChecked();
+  await expect(partBox(backGroup, backB)).toBeChecked();
+  await expect(dialog3.locator("[data-kept-warning]")).toHaveCount(0);
+
+  // No part to move: both disabled with the reason; pressing sends nothing.
+  const swap3 = dialog3.getByRole("button", { name: "Swap", exact: true });
+  const together3 = dialog3.getByRole("button", { name: "Put together", exact: true });
+  await toggle(page, partBox(fromGroup, lifted));
+  for (const button of [swap3, together3]) {
+    await expect(button).toHaveAttribute("aria-disabled", "true");
+    await expect(button).toHaveAccessibleDescription("Choose at least one part to move.");
+  }
+  await swap3.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog3).toBeVisible();
+  expect(await planVersion(request, planId)).toBe(before + 2);
+  await toggle(page, partBox(fromGroup, lifted));
+
+  // No part to move back: only Swap is disabled.
+  await toggle(page, partBox(backGroup, backA));
+  await toggle(page, partBox(backGroup, backB));
+  await expect(swap3).toHaveAttribute("aria-disabled", "true");
+  await expect(swap3).toHaveAccessibleDescription("Choose at least one part to move back.");
+  await expect(together3).not.toHaveAttribute("aria-disabled", /.*/);
+
+  // Swap one chosen part with one back-part: only those move.
+  await toggle(page, partBox(backGroup, backB));
+  await expect(swap3).not.toHaveAttribute("aria-disabled", /.*/);
+  await swap3.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    toasts(page).getByText(`Swapped ${host1} ↔ ${host2} · 2 manual moves, round 0.`, { exact: true }),
+  ).toBeVisible();
+  await expect(dialog3).toHaveCount(0);
+  expect(await planVersion(request, planId)).toBe(before + 3);
+  const after = await wallOf(page, planId);
+  expect(partsAt(after, host1).sort()).toEqual([staying, backB].sort());
+  expect(partsAt(after, host2).sort()).toEqual([lifted, backA].sort());
+
+  // Put together from a location with several parts: only the checked (dragged) part moves.
+  const [lifted2, staying2] = partsAt(after, host1);
+  // Focus is back on host2, whose tooltip may cover host1: `Esc` hides it.
+  await page.keyboard.press("Escape");
+  await expect(page.locator("[data-wall-tooltip]")).toHaveCount(0);
+  await dropOnOccupied(page, host1Cell, host2Cell, "left");
+  await expect(dialog3).toBeVisible();
+  await expect(partBox(fromGroup, lifted2)).toBeChecked();
+  await expect(partBox(fromGroup, staying2)).not.toBeChecked();
+  await together3.click();
+  // The toast's wording depends on FR-34 (the part may return to where it came from): check by API.
+  await expect(dialog3).toHaveCount(0);
+  await expect.poll(() => planVersion(request, planId)).toBe(before + 4);
+  const final = await wallOf(page, planId);
+  expect(partsAt(final, host1)).toEqual([staying2]);
+  expect(partsAt(final, host2).sort()).toEqual([lifted, backA, lifted2].sort());
 });
 
 test("uj1 no drag starts on the Best locations wall or in Whole warehouse", async ({ page, request }) => {

@@ -1003,13 +1003,14 @@ export function undoFirstText(preview: UndoPreview): string {
   }
 }
 
-// Drag on the wall (Story 12.2, FR-51, UX-DR50): the drop target hints, the drop dialog and the
-// toast of a drop that moved several parts. One-part drops reuse the manual move toast.
+// Drag on the wall (Stories 12.2 and 12.3, FR-51, UX-DR50): the drop target hints, the drop
+// dialogs and the toasts of a drop that moved several parts or swapped. One-part drops reuse the
+// manual move toast.
 
 /** The hint on an empty location the dragged part may move to. */
 export const MOVE_HERE = "Move here";
 
-/** The hint on an occupied location (Story 12.3 adds what a drop there does). */
+/** The hint on an occupied location: a drop there opens the occupied drop dialog. */
 export const SWAP_OR_PUT_TOGETHER = "Swap or put together";
 
 /** Why the drop dialog's Move waits: no part is checked. */
@@ -1025,12 +1026,50 @@ export function partsToMoveFrom(from: string): string {
   return `Parts to move from ${from}`;
 }
 
-/** A drop row's facts: "Fast-moving · 4". */
-export function dropPartStats(movementClass: MovementClass, stock: string): string {
+/** A drop row's facts: "Fast-moving · 4"; the stock alone ("4") for a part without a class. */
+export function dropPartStats(movementClass: MovementClass | null, stock: string): string {
+  if (movementClass === null) return formatNumber(stock);
   return `${CLASS_LABELS[movementClass]} · ${formatNumber(stock)}`;
 }
 
 /** The toast of a drop that moved several parts: "Moved 2 parts: G-14-04-02 → G-14-01-04 (Manual, round 1)." */
 export function movedPartsToast(count: number, from: string, to: string, round: number): string {
   return `Moved ${formatNumber(count)} parts: ${from} → ${to} (Manual, round ${formatNumber(round)}).`;
+}
+
+/** Why the occupied drop dialog's Swap waits: no part to move back is checked. */
+export const CHOOSE_PART_TO_MOVE_BACK = "Choose at least one part to move back.";
+
+/** The occupied drop dialog's buttons. */
+export const SWAP = "Swap";
+export const PUT_TOGETHER = "Put together";
+
+/** The occupied drop dialog's title: "G-14-01-03 is occupied". */
+export function occupiedDialogTitle(to: string): string {
+  return `${to} is occupied`;
+}
+
+/** The occupied drop dialog's heading over the parts to move back: "Parts to move back to G-14-04-02". */
+export function partsToMoveBackTo(from: string): string {
+  return `Parts to move back to ${from}`;
+}
+
+/** "A", "A and B", "A, B and C" (no Oxford comma). */
+function andList(items: readonly string[]): string {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+}
+
+/**
+ * The warning over the occupied drop dialog's buttons when a swap moves a kept part (FR-32):
+ * "4410297 is kept in place. Swap anyway?" or "4410297 and 4410300 are kept in place. Swap anyway?".
+ */
+export function keptSwapWarning(parts: readonly string[]): string {
+  return `${andList(parts)} ${parts.length === 1 ? "is" : "are"} kept in place. Swap anyway?`;
+}
+
+/** The toast of a confirmed swap: "Swapped G-14-04-02 ↔ G-14-01-03 · 2 manual moves, round 1." */
+export function swappedToast(from: string, to: string, moves: number, round: number): string {
+  const noun = moves === 1 ? "manual move" : "manual moves";
+  return `Swapped ${from} ↔ ${to} · ${formatNumber(moves)} ${noun}, round ${formatNumber(round)}.`;
 }

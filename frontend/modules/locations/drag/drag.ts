@@ -6,7 +6,7 @@ import { moveToast } from "@/components/common/manual-move-dialog";
 import type { WallDropHint } from "@/components/common/wall";
 import { type CommandEvent, type MovePreview, planMovePreviewKey, type WallPart } from "@/lib/api/plans";
 import { moveEventStep } from "@/lib/commands/undo";
-import { movedPartsToast } from "@/lib/copy";
+import { movedPartsToast, swappedToast } from "@/lib/copy";
 
 /** The half of a bin's label the press landed on (a split label holds two parts). */
 export type PointerHalf = "left" | "right";
@@ -44,16 +44,21 @@ export function dropHint(preview: MovePreview | null | undefined, isOwnSlot: boo
   }
 }
 
-/** What a drop does: send `move_parts` at once, open the drop dialog, or nothing. */
-export type DropAction = "send" | "dialog" | "none";
+/**
+ * What a drop does: send `move_parts` at once, open the "Move to" drop dialog, open the occupied
+ * drop dialog (Swap / Put together / Cancel), or nothing.
+ */
+export type DropAction = "send" | "dialog" | "occupied" | "none";
 
 /**
  * A drop on another location with its preview: an empty target sends at once when the from-location
- * holds one part and opens the dialog when it holds several; anything else does nothing (Story 12.3
- * adds the occupied target's dialog).
+ * holds one part and opens the dialog when it holds several; an allowed occupied target always opens
+ * the occupied dialog (nothing changes until Swap or Put together); anything else does nothing.
  */
 export function dropAction(preview: MovePreview | null | undefined, fromPartCount: number): DropAction {
-  if (dropHint(preview, false) !== "move") return "none";
+  const hint = dropHint(preview, false);
+  if (hint === "swap") return "occupied";
+  if (hint !== "move") return "none";
   return fromPartCount > 1 ? "dialog" : "send";
 }
 
@@ -84,4 +89,14 @@ export function dragMoveToast(events: readonly CommandEvent[], drop: { from: str
   if (moves.length <= 1) return moveToast(events);
   const round = moveEventStep(moves[0])?.round ?? 0;
   return movedPartsToast(moves.length, drop.from, drop.to, round);
+}
+
+/**
+ * A confirmed swap's toast from its `swap_made` event: "Swapped <from> ↔ <to> · N manual moves,
+ * round R.", N being the swap's move numbers. Null without a `swap_made`.
+ */
+export function swapToast(events: readonly CommandEvent[]): string | null {
+  const swap = events.find((event) => event.type === "swap_made");
+  if (swap?.type !== "swap_made") return null;
+  return swappedToast(swap.from_location, swap.to_location, swap.move_numbers.length, swap.round);
 }

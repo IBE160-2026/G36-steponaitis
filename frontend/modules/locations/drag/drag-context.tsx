@@ -11,11 +11,14 @@
 //   server's move preview for (dragged part, from, target), fetched once per target and plan version
 //   (`dragPreviewKey`, `staleTime: Infinity`); no hint while it loads.
 // - Drop: on an empty target with one part at the from-location, `move_parts` is sent at once;
-//   with several parts the drop dialog asks which. A drop on the own slot, an occupied or refused
-//   target, or outside the grid, and `Esc`, send nothing. A drop before the target's preview has
-//   arrived waits for it (`fetchQuery` on the same key) and never guesses from occupancy.
-// - Every send goes through `usePlanCommands(planId).sendWithEvents`; a confirmed one shows the
-//   move toast with the Undo of its last move.
+//   with several parts the drop dialog asks which. On an occupied target (Story 12.3) the occupied
+//   drop dialog asks Swap / Put together / Cancel and which parts move on each side; nothing is
+//   sent until Swap or Put together. A drop on the own slot, a refused target, or outside the grid,
+//   and `Esc`, send nothing. A drop before the target's preview has arrived waits for it
+//   (`fetchQuery` on the same key) and never guesses from occupancy.
+// - Every send (`move_parts`, `swap`, `put_together`) goes through
+//   `usePlanCommands(planId).sendWithEvents`; a confirmed one shows its toast with the Undo of its
+//   last move. No drag starts while a dialog is open.
 
 import {
   type Announcements,
@@ -34,13 +37,31 @@ import { type ReactNode, useRef, useState } from "react";
 
 import { showToast } from "@/components/common/toast";
 import { BIN_WIDTH, LiftedBin, type WallDrag } from "@/components/common/wall";
-import { fetchMovePreview, type MovePreview, type WallPart, type WallView } from "@/lib/api/plans";
+import {
+  type CommandEvent,
+  fetchMovePreview,
+  type MovePreview,
+  type TargetPart,
+  type WallPart,
+  type WallView,
+} from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
+import type { CommandBody } from "@/lib/commands/client";
 import { moveUndoAction } from "@/lib/commands/undo";
 import type { MovementClass } from "@/lib/copy";
 
-import { dragMoveToast, draggedPart, dragPreviewKey, dropAction, dropHint, lastMoveEvent, pointerHalf } from "./drag";
+import {
+  dragMoveToast,
+  draggedPart,
+  dragPreviewKey,
+  dropAction,
+  dropHint,
+  lastMoveEvent,
+  pointerHalf,
+  swapToast,
+} from "./drag";
 import { DropDialog } from "./drop-dialog";
+import { OccupiedDialog } from "./occupied-dialog";
 
 /** The pointer must move this far (px) before a press becomes a drag. */
 export const DRAG_DISTANCE_PX = 4;
@@ -63,7 +84,10 @@ type Lifted = {
   scale: number;
 };
 
-type OpenDialog = { from: string; to: string; dragged: string; parts: WallPart[]; anchor: HTMLElement };
+type DropAt = { from: string; to: string; dragged: string; parts: WallPart[]; anchor: HTMLElement };
+
+/** The open drop dialog: "Move to" (empty target) or the occupied one with the preview's target parts. */
+type OpenDialog = (DropAt & { kind: "move" }) | (DropAt & { kind: "occupied"; targetParts: TargetPart[] });
 
 function previewQuery(planId: string, part: string, from: string, to: string, version: number) {
   return {
@@ -143,11 +167,11 @@ export function WallDragProvider({
     setOver(event.over ? String(event.over.id) : null);
   }
 
-  /** Sends `move_parts`; a confirmed drop shows its toast with the Undo of its last move. */
-  async function send(from: string, to: string, parts: string[]) {
-    const result = await sendWithEvents({ type: "move_parts", from, to, parts });
+  /** Sends a drop's command; a confirmed one shows its toast with the Undo of its last move. */
+  async function send(command: CommandBody, toast: (events: readonly CommandEvent[]) => string | null) {
+    const result = await sendWithEvents(command);
     if (result.outcome === "confirmed") {
-      const message = dragMoveToast(result.events, { from, to });
+      const message = toast(result.events);
       const last = lastMoveEvent(result.events);
       if (message) showToast(message, { action: last && moveUndoAction(last, sendWithEvents, showToast) });
     }
@@ -169,17 +193,25 @@ export function WallDragProvider({
     }
     const action = dropAction(answer, entry.parts.length);
     if (action === "send") {
-      await send(current.from, to, [current.part]);
-    } else if (action === "dialog") {
-      const anchor = cellElement(to);
-      if (anchor) setDialog({ from: current.from, to, dragged: current.part, parts: entry.parts, anchor });
+      await sendMove(current.from, to, [current.part]);
+      return;
     }
+    if (action === "none") return;
+    const anchor = cellElement(to);
+    if (!anchor) return;
+    const at = { from: current.from, to, dragged: current.part, parts: entry.parts, anchor };
+    if (action === "dialog") setDialog({ ...at, kind: "move" });
+    else setDialog({ ...at, kind: "occupied", targetParts: answer?.target_parts ?? [] });
   }
 
-  async function moveChecked(open: OpenDialog, parts: string[]) {
-    const outcome = await send(open.from, open.to, parts);
+  function sendMove(from: string, to: string, parts: string[]) {
+    return send({ type: "move_parts", from, to, parts }, (events) => dragMoveToast(events, { from, to }));
+  }
+
+  /** Sends from an open dialog; it closes on every outcome but `busy`. */
+  async function sendFromDialog(outcome: Promise<string>) {
     // A second press while the first send is pending leaves the dialog to the first.
-    if (outcome !== "busy") setDialog(null);
+    if ((await outcome) !== "busy") setDialog(null);
   }
 
   return (
@@ -198,7 +230,7 @@ export function WallDragProvider({
       <DragOverlay dropAnimation={null} className="pointer-events-none">
         {lifted && <LiftedBin parts={lifted.classes} scale={lifted.scale} />}
       </DragOverlay>
-      {dialog && (
+      {dialog?.kind === "move" && (
         <DropDialog
           key={`${dialog.from}>${dialog.to}`}
           anchor={dialog.anchor}
@@ -207,7 +239,32 @@ export function WallDragProvider({
           parts={dialog.parts}
           dragged={dialog.dragged}
           savingReason={disabledReason}
-          onMove={(parts) => void moveChecked(dialog, parts)}
+          onMove={(parts) => void sendFromDialog(sendMove(dialog.from, dialog.to, parts))}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.kind === "occupied" && (
+        <OccupiedDialog
+          key={`${dialog.from}>${dialog.to}`}
+          anchor={dialog.anchor}
+          from={dialog.from}
+          to={dialog.to}
+          parts={dialog.parts}
+          dragged={dialog.dragged}
+          targetParts={dialog.targetParts}
+          savingReason={disabledReason}
+          onSwap={(parts, backParts) =>
+            void sendFromDialog(
+              send({ type: "swap", from: dialog.from, to: dialog.to, parts, back_parts: backParts }, swapToast),
+            )
+          }
+          onPutTogether={(parts) =>
+            void sendFromDialog(
+              send({ type: "put_together", from: dialog.from, to: dialog.to, parts }, (events) =>
+                dragMoveToast(events, { from: dialog.from, to: dialog.to }),
+              ),
+            )
+          }
           onClose={() => setDialog(null)}
         />
       )}
