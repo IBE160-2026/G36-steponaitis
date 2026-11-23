@@ -202,3 +202,4 @@
 - [ ] 2026-11-23 [12-5-milestone-2-gate](896-2026-11-23-22-05-20-12-5-milestone-2-gate.md) — `epics.md:1418` nevner fortsatt `m1-flow.spec.ts`, som nå heter `sm2-flow.spec.ts` (Story 12.5)
 - [ ] 2026-11-23 [12-5-milestone-2-gate](896-2026-11-23-22-05-20-12-5-milestone-2-gate.md) — `locations-wall.spec.ts:512` feilet én gang i chromium uten forklaring; e2e i Firefox er fortsatt følsom for last, og porten med tre nettlesere kjøres bare lokalt (Story 12.5)
 - [ ] 2026-11-23 [12-5-milestone-2-gate](896-2026-11-23-22-05-20-12-5-milestone-2-gate.md) — oppfølgingsreview Story 12.5 anbefalt (to middels funn rettet)
+- [ ] 2026-11-23 [e2e-user-journeys](895-2026-11-23-23-53-07-e2e-user-journeys.md) — e2e-stegene for Epics 13–16 (kategorisjekk, QR-etiketter, FR-41-advarsel, offentlig deploy) er hoppet over i `user-journeys.spec.ts` og må dekkes når de epicene bygges
