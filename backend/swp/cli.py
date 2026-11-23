@@ -5,6 +5,7 @@ import json
 import sys
 
 from swp.app.bootstrap import bootstrap
+from swp.app.startup import StartupRefused, check_startup
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -17,11 +18,18 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     if args.command == "db" and args.db_command == "upgrade":
+        # AD-10/NFR-6: never migrate or seed on settings production would refuse.
+        try:
+            check_startup()
+        except StartupRefused as refused:
+            for problem in refused.problems:
+                print(f"swp: refusing to start: {problem}", file=sys.stderr)
+            return 2
         bootstrap(upgrade=True, seed=True)
     elif args.command == "openapi":
         from swp.api.app import create_app
 
-        json.dump(create_app().openapi(), sys.stdout, indent=2, sort_keys=True)
+        json.dump(create_app(check_settings=False).openapi(), sys.stdout, indent=2, sort_keys=True)
         sys.stdout.write("\n")
     return 0
 

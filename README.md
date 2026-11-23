@@ -35,7 +35,7 @@ npm run dev   # FastAPI on http://127.0.0.1:8000, Next.js on http://localhost:30
 
 Open http://localhost:3000. The browser calls `/api/*` on port 3000, which Next.js forwards to the backend. The local SQLite database is created at `backend/var/swp.db`.
 
-To try accounts, start with `FEATURE_AUTH=true npm run dev`: every page then needs a login. Log in as `demo` with the password `demo`; this account is created when the backend starts (set `DEMO_PASSWORD` before the first start to choose another password). A local install has no Demo version button.
+To try accounts, see *Accounts, secrets and the public demo* below.
 
 Checks:
 
@@ -49,10 +49,52 @@ Checks:
 | Tests (pytest and Vitest) | `npm test` |
 | End-to-end, all browsers (Playwright: Chromium, Firefox, Edge) | `npm run e2e` |
 | End-to-end, Chromium only (what CI runs) | `npm run e2e -- --project=chromium` |
+| End-to-end, production-like build with the demo on (Chromium, also in CI) | `npm run e2e:production` |
 
 Before the first end-to-end run, install the browsers once: `npx --workspace frontend playwright install chromium firefox`. The Edge project uses the installed Microsoft Edge; if it is missing, install it from https://www.microsoft.com/edge or with `npx --workspace frontend playwright install msedge`. Playwright builds and starts the app itself on port 3000 (stop `npm run dev` first) against `backend/var/e2e.db`, which is deleted each time Playwright starts the server itself (a server already running on port 3000 is reused as it is).
 
 CI (`.github/workflows/ci.yml`) runs these same checks on every push, plus `tests/app` against Postgres 17. To run that locally, start Postgres (for example `docker run -d --name swp-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=swp_test -p 55432:5432 postgres:17`) and run `uv run --directory backend --locked pytest tests/app --database-url postgresql://postgres:postgres@localhost:55432/swp_test`; without `--database-url`, `tests/app` uses a temporary SQLite file. `docker run -d` returns before Postgres is ready, so wait until `docker exec swp-pg pg_isready` succeeds before running pytest, and remove the container afterwards with `docker rm -f swp-pg`.
+
+## Accounts, secrets and the public demo
+
+Accounts are off by default. To try them locally, start with `FEATURE_AUTH=true npm run dev`: every page then needs a login. Or copy `backend/.env.example` to `backend/.env` (git ignores it; its only active line turns `FEATURE_AUTH` on, the rest are commented placeholders) and export it before starting:
+
+```sh
+cp backend/.env.example backend/.env
+set -a; . backend/.env; set +a; npm run dev
+```
+
+Log in as `demo` with the password `demo`. This demo account is created when the backend starts or `swp db upgrade` runs (set `DEMO_PASSWORD` before the first start to choose another password). A local install has no front page and no Demo version button.
+
+Every setting is a backend environment variable; `backend/.env.example` lists them all with placeholder values only. Never commit a real value. The frontend reads no environment variable: it gets the flags at runtime from `GET /api/session`, so there is no frontend example file.
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `APP_ENV` | `local` or `production`. Local migrates and seeds on startup; production does not and runs the checks below. | `local` |
+| `FEATURE_AUTH` | Accounts and login; every page needs a session. Off: everyone acts as `planner`. | `false` |
+| `FEATURE_DEMO` | Public demo: the front page, Demo version and the demo limits. | `false` |
+| `DEMO_PASSWORD` | Password of the seeded `demo` account, used only when the account is first created. | `demo` |
+| `DATABASE_URL` | App database. `postgresql://` URLs use psycopg 3. | SQLite at `backend/var/swp.db` |
+| `MIGRATION_DATABASE_URL` | Connection `swp db upgrade` migrates through, e.g. a direct Postgres connection when `DATABASE_URL` goes through a pooler. It must name the same database as `DATABASE_URL` (the seed uses `DATABASE_URL`). | `DATABASE_URL` |
+| `JWT_SECRET` | Key that signs the `swp_session` cookie. | a local development key |
+| `MAX_UPLOAD_BYTES` | Largest upload in bytes. | `4000000` |
+| `MAX_ROWS_PER_FILE` | Most rows read from one file. | `25000` |
+| `MAX_PLANS` | Most saved plans while `FEATURE_DEMO` is on. | `50` |
+| `MAX_ACCOUNTS` | Most accounts while `FEATURE_DEMO` is on. | `200` |
+
+The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to start: …` line per problem, when:
+
+1. `VERCEL` is set but `APP_ENV` is not (the platform sets `VERCEL`);
+2. `APP_ENV` is anything other than `local` or `production`;
+3. in production, `JWT_SECRET` is empty, the local default, the `.env.example` placeholder or shorter than 32 bytes;
+4. in production, `DEMO_PASSWORD` is not set;
+5. in production, `DATABASE_URL` is not set.
+
+Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
+
+`npm run e2e:production` runs the same checks locally: Playwright builds and starts the app with `APP_ENV=production`, `FEATURE_AUTH` and `FEATURE_DEMO` on and throwaway secrets it generates for that run, then walks the examiner journey (front page, Demo version as `demo`, Log out). It never reuses a running server, so stop `npm run dev` first.
+
+The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. Setting its Vercel environment variables is Story 16.2.
 
 ## Milestone 1 demo
 

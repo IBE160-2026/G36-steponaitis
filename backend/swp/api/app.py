@@ -26,6 +26,7 @@ from swp.api.routers import (
 from swp.api.session_guard import current_user
 from swp.api.upload_limit import UploadLimit
 from swp.app.bootstrap import bootstrap
+from swp.app.startup import check_startup
 from swp.config import get_settings
 
 
@@ -36,8 +37,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-def create_app() -> FastAPI:
+def create_app(*, check_settings: bool = True) -> FastAPI:
     configure_logging()
+    # AD-10/NFR-6: production refuses unsafe settings (StartupRefused) before anything is built,
+    # so `uvicorn swp.main:app` exits. Only `swp openapi` skips it (it serves nothing).
+    if check_settings:
+        check_startup()
     app = FastAPI(title="Smart Warehouse Planner", lifespan=lifespan)
     install_error_handlers(app)
     # Added last = outermost: the request log sees every response, then the origin guard

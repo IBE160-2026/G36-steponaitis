@@ -1,5 +1,6 @@
 """Shared fixtures: every test gets its own SQLite file and fresh caches."""
 
+import secrets
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -17,6 +18,19 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default="",
         help="Database URL for tests/app (default: a fresh temporary SQLite file).",
     )
+
+
+def production_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """APP_ENV=production with throwaway values that pass the startup check (AD-10, NFR-6).
+
+    DATABASE_URL is left as the fixtures set it (already in the environment, so it counts as
+    set); JWT_SECRET is random per call, so no secret is ever committed. Only the settings
+    cache is cleared: the database is unchanged, so a running test client keeps its engine.
+    """
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET", secrets.token_urlsafe(48))
+    monkeypatch.setenv("DEMO_PASSWORD", secrets.token_hex(8))
+    get_settings.cache_clear()
 
 
 def _clear_caches() -> None:

@@ -16,6 +16,7 @@ from swp.config import get_settings
 from swp.store import users as user_store
 from swp.store.db import get_engine
 from swp.store.models import UserRow
+from tests.conftest import production_env
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 TAKEN = "That username is taken. Try another."
@@ -126,8 +127,7 @@ def test_fr39_session_cookie_attributes(client: TestClient) -> None:
 def test_fr39_session_cookie_secure_in_production(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("APP_ENV", "production")
-    get_settings.cache_clear()
+    production_env(monkeypatch)
 
     response = _signup(client)
 

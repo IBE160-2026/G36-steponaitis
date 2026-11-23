@@ -6,6 +6,8 @@ const repoRoot = join(__dirname, "..");
 
 export default defineConfig({
   testDir: "./e2e",
+  // e2e/production runs only under playwright.production.config.ts (APP_ENV=production, demo on).
+  testIgnore: "production/**",
   // Runs after the web server is up. Only matters when a reused `next dev` server runs (it compiles
   // every route once); against the production build it is a quick no-op warm-up.
   globalSetup: "./e2e/support/warm-routes.ts",

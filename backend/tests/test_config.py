@@ -1,9 +1,11 @@
+import re
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from swp import config
+from swp.app.startup import DEMO_PASSWORD_UNSET, WEAK_JWT_SECRET, startup_problems
 
 
 @pytest.fixture
@@ -116,3 +118,58 @@ def test_fr50_demo_password_that_could_not_log_in_fails(
 
     with pytest.raises(ValidationError, match="DEMO_PASSWORD"):
         config.Settings()
+
+
+ENV_EXAMPLE = Path(__file__).resolve().parent.parent / ".env.example"
+_EXAMPLE_LINE = re.compile(r"^(?:#\s*)?([A-Z][A-Z0-9_]*)=(.*)$")
+
+
+def _example_values(*, active_only: bool = False) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for line in ENV_EXAMPLE.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        match = _EXAMPLE_LINE.match(line)
+        if match and not (active_only and line.startswith("#")):
+            assert match[1] not in values, f"{match[1]} listed twice"
+            values[match[1]] = match[2]
+    return values
+
+
+def test_nfr6_env_example_lists_every_setting() -> None:
+    names = {name.upper() for name in config.Settings.model_fields}
+
+    assert set(_example_values()) == names
+
+
+def test_nfr6_env_example_holds_no_secret(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert _example_values()["JWT_SECRET"] == config.JWT_SECRET_PLACEHOLDER
+
+    # Exporting the example (only its uncommented lines) in production is refused: it sets
+    # no secret and no demo password, so neither counts as chosen.
+    for name in ("JWT_SECRET", "DEMO_PASSWORD"):
+        monkeypatch.delenv(name, raising=False)
+    for name, value in _example_values(active_only=True).items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setenv("APP_ENV", "production")
+    problems = startup_problems(config.Settings(), {})
+
+    assert WEAK_JWT_SECRET in problems
+    assert DEMO_PASSWORD_UNSET in problems
+
+
+def test_nfr6_migration_database_url_uses_psycopg(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("MIGRATION_DATABASE_URL", "postgresql://u:p@h:5432/db")
+
+    assert config.Settings().migration_database_url == "postgresql+psycopg://u:p@h:5432/db"
+
+
+def test_nfr6_migration_database_url_defaults_to_none(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("MIGRATION_DATABASE_URL", raising=False)
+
+    assert config.Settings().migration_database_url is None

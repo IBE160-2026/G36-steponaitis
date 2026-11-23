@@ -16,6 +16,7 @@ from swp.domain.errors import DomainError
 from swp.store import users as user_store
 from swp.store.db import get_engine
 from swp.store.models import UserRow
+from tests.conftest import production_env
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 NOW = datetime(2026, 11, 23, 12, 0, tzinfo=UTC)
@@ -88,8 +89,7 @@ def test_fr40_login_cookie_attributes(client: TestClient, account: None) -> None
 def test_fr40_login_cookie_secure_in_production(
     client: TestClient, account: None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("APP_ENV", "production")
-    get_settings.cache_clear()
+    production_env(monkeypatch)
 
     _name, _token, attributes = _cookie_attributes(_login(client))
 
@@ -232,8 +232,7 @@ def test_fr40_logout_clears_cookie(client: TestClient, account: None, with_cooki
 def test_fr40_logout_cookie_secure_in_production(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("APP_ENV", "production")
-    get_settings.cache_clear()
+    production_env(monkeypatch)
 
     response = client.post("/api/auth/logout", headers=SAME_ORIGIN)
 

@@ -22,7 +22,7 @@ from swp.store.db import get_engine
 from swp.store.models import ImportRow, LoginAttemptRow, PlanRow, UserRow
 from tests.app.test_create_plan import _multipart, _small_files
 from tests.app.test_login import SAME_ORIGIN, _error, _login
-from tests.conftest import _clear_caches
+from tests.conftest import _clear_caches, production_env
 
 NOW = datetime(2026, 11, 23, 12, 0, tzinfo=UTC)
 NOT_FOUND = {"code": "not_found", "message": "Not found.", "details": []}
@@ -150,7 +150,7 @@ def test_fr50_lifespan_with_local_app_env_seeds_demo(
 def test_fr50_lifespan_outside_local_does_not_seed(
     empty_tables: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _env(monkeypatch, APP_ENV="production")
+    production_env(monkeypatch)
 
     with TestClient(create_app()):
         pass

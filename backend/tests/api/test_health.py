@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from swp.api.app import create_app
-from swp.config import get_settings
+from tests.conftest import production_env
 
 
 def test_nfr2_health_returns_ok_and_creates_sqlite_file(database_path: Path) -> None:
@@ -38,8 +38,7 @@ def test_nfr2_local_startup_runs_migrations(database_path: Path) -> None:
 def test_nfr2_production_startup_does_not_migrate(
     database_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("APP_ENV", "production")
-    get_settings.cache_clear()
+    production_env(monkeypatch)
     with TestClient(create_app()) as client:
         assert client.get("/api/health").status_code == 200
     assert "alembic_version" not in _tables(database_path)

@@ -78,6 +78,7 @@ def upgrade_to_head() -> None:
     ping()
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS_DIR))
+    # MIGRATION_DATABASE_URL (e.g. a direct connection beside a pooled DATABASE_URL) wins.
     # ConfigParser interpolation: escape % (URL-encoded passwords).
-    config.set_main_option("sqlalchemy.url", get_settings().database_url.replace("%", "%%"))
+    config.set_main_option("sqlalchemy.url", get_settings().migration_url.replace("%", "%%"))
     command.upgrade(config, "head")
