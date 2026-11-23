@@ -154,6 +154,28 @@ def test_fr22_wall_marks_rails_and_best(data: ImportData, analysis: Analysis) ->
     assert sum(c.empty_best for c in b.aisles) == expected.empty
 
 
+def test_fr42_wall_view_marks_in_mark_order(data: ImportData, analysis: Analysis) -> None:
+    marks = [
+        LocationMark(location="B-01-03-03"),
+        LevelMark(level="2", aisle="C"),
+        AisleMark(aisle="B"),
+        LevelMark(level="1"),
+        AisleMark(aisle="A"),
+    ]
+    state = PlanState(best_marks=marks)
+    wall = build_wall_view(data, analysis, state, 1, "D")
+    table = build_locations_view(data, state, 1)
+    assert wall.marks == table.marks
+    assert wall.marks == [
+        AisleMark(aisle="A"),
+        AisleMark(aisle="B"),
+        LevelMark(level="1"),
+        LevelMark(level="2", aisle="C"),
+        LocationMark(location="B-01-03-03"),
+    ]
+    assert build_wall_view(data, analysis, PlanState.new(), 1, "A").marks == []
+
+
 def test_fr22_wall_level_mark_in_one_aisle(data: ImportData, analysis: Analysis) -> None:
     state = PlanState(best_marks=[LevelMark(level="2", aisle="C")])
     assert build_wall_view(data, analysis, state, 1, "C").rail_levels == ["2"]

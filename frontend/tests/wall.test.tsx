@@ -120,6 +120,7 @@ const WALL: WallView = {
   version: 3,
   aisle: "A",
   round: 1,
+  marks: [],
   moves: [],
   rail_levels: ["1"],
   locations: [

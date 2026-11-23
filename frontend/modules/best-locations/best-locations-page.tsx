@@ -1,24 +1,29 @@
 "use client";
 
-// Best locations step (FR-21, FR-22, UX-DR, Story 3.4): the Locations table in marking mode. A
-// segmented control picks Whole aisle | Level | Single location (remembered per plan in this
-// browser); beside the table, the plan's marks with remove buttons and the "N best · M empty"
-// counts. Every change goes through lib/commands; best status, counts and marks come only from the
-// refetched server views, rendered as one version-consistent set.
+// Best locations step (FR-21, FR-22, UX-DR, Story 3.4). By default it is the marking wall (Story
+// 10.7, `marking-wall.tsx`); **Open as list** (`?mode=list`) shows the milestone 1 table: the
+// Locations table in marking mode. A segmented control picks Whole aisle | Level | Single location
+// (remembered per plan in this browser); beside the table, the plan's marks with remove buttons and
+// the "N best · M empty" counts. Every change goes through lib/commands; best status, counts and
+// marks come only from the refetched server views, rendered as one version-consistent set.
 
-import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type ReactNode, useId, useState } from "react";
 
 import { Button } from "@/components/common/button";
 import type { DataTableColumn } from "@/components/common/data-table";
-import { Icon } from "@/components/common/icons";
-import { ALL_AISLES, type LocationFilters, LocationsTable, NO_FILTERS } from "@/components/common/locations-table";
+import {
+  aisleFromParams,
+  ALL_AISLES,
+  type LocationFilters,
+  LocationsTable,
+  NO_FILTERS,
+} from "@/components/common/locations-table";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SegmentedControl } from "@/components/common/segmented-control";
-import { showToast, type ToastOptions } from "@/components/common/toast";
+import { showToast } from "@/components/common/toast";
 import {
   type BestMark,
-  type CommandEvent,
   type LocationRow,
   type LocationsView as LocationsData,
   type PlanSummary,
@@ -26,33 +31,18 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
-import { markLabel, marksChangedText, VIEW_LABEL } from "@/lib/copy";
-import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
-import { recommendationsTabHref } from "@/lib/view-state/urls";
-import { bestCountsLine, hasLocationMark, levelsInAisle, sameMark } from "./marks";
+import { markLabel, OPEN_AS_WALL } from "@/lib/copy";
+import { bestLocationsModeKey, writeStored } from "@/lib/view-state/storage";
+import { type LocationParams, parseLocationParams, planStepHref, recommendationsTabHref } from "@/lib/view-state/urls";
+import { hasLocationMark, type LevelScope, levelsInAisle, type MarkingMode, sameMark } from "./marks";
+import { MarksPanel } from "./marks-panel";
+import { MODES, SCOPES, readMode, sendMarkChange } from "./marking";
+import { BestLocationsWall } from "./marking-wall";
 
-export type MarkingMode = "aisle" | "level" | "single";
-export type LevelScope = "aisle" | "all";
-
-export const NO_MARKS = "No best locations yet. The tool never guesses: mark a whole aisle, a level or single locations.";
+export type { LevelScope, MarkingMode } from "./marks";
+export { NO_MARKS } from "./marks-panel";
+export { MODES, outdatedCount, readMode, SCOPES, sendMarkChange } from "./marking";
 export const CHOOSE_AISLE = "Choose an aisle in the aisle filter.";
-
-const MODES: readonly { value: MarkingMode; label: string }[] = [
-  { value: "aisle", label: "Whole aisle" },
-  { value: "level", label: "Level" },
-  { value: "single", label: "Single location" },
-];
-
-const SCOPES: readonly { value: LevelScope; label: string }[] = [
-  { value: "aisle", label: "in this aisle" },
-  { value: "all", label: "in all aisles" },
-];
-
-/** The plan's remembered marking mode; Whole aisle when none is stored or storage fails. */
-export function readMode(planId: string): MarkingMode {
-  const stored = readStored(bestLocationsModeKey(planId));
-  return MODES.find((mode) => mode.value === stored)?.value ?? "aisle";
-}
 
 /** The mark the mode's Mark button sets, its button text, and why it cannot (if so). */
 export type MarkAction = { mark: BestMark | null; text: string; reason?: string };
@@ -76,31 +66,6 @@ export function levelAction(level: string, scope: LevelScope, aisle: string, mar
   return { mark, text: `Mark level ${level} ${where}`, reason: alreadyMarked(marks, mark) };
 }
 
-/** How many recommendations a command outdated: the sum of its `recommendations_outdated` counts. */
-export function outdatedCount(events: readonly CommandEvent[]): number {
-  return events.reduce((sum, event) => (event.type === "recommendations_outdated" ? sum + event.count : sum), 0);
-}
-
-/**
- * Sends one mark change; the toast shows only for a confirmed change that produced events
- * ("dropped"/"busy" and a confirmed no-op show none). When the change outdated recommendations,
- * the toast counts them and offers **View** (`onView`, the Outdated tab); there is no Undo.
- */
-export async function sendMarkChange(
-  send: (body: CommandBody) => Promise<SendResult>,
-  body: CommandBody,
-  notify: (message: string, options?: ToastOptions) => void = showToast,
-  onView?: () => void,
-): Promise<SendResult> {
-  const result = await send(body);
-  if (result.outcome === "confirmed" && result.events.length > 0) {
-    const count = outdatedCount(result.events);
-    const options = count > 0 && onView ? { action: { label: VIEW_LABEL, onClick: onView } } : undefined;
-    notify(marksChangedText(count), options);
-  }
-  return result;
-}
-
 export function BestLocationsView({
   planId,
   summary,
@@ -108,10 +73,16 @@ export function BestLocationsView({
   disabledReason,
   onSend,
   onViewOutdated,
+  initialAisle,
+  onOpenWall,
 }: {
   planId: string;
   summary: PlanSummary;
   view: LocationsData;
+  /** The aisle filter's first value (`?aisle=` when it is a known aisle). */
+  initialAisle?: string;
+  /** **Open as wall** with the filter's aisle (undefined for all aisles). */
+  onOpenWall?: (aisle: string | undefined) => void;
   /** "Saving the last change…" while a command is unconfirmed (lib/commands). */
   disabledReason?: string;
   onSend: (body: CommandBody) => Promise<SendResult>;
@@ -120,11 +91,13 @@ export function BestLocationsView({
 }) {
   // Mounted only once the views have loaded (client side), so reading storage here is safe.
   const [mode, setMode] = useState<MarkingMode>(() => readMode(planId));
-  const [filters, setFilters] = useState<LocationFilters>(NO_FILTERS);
+  const [filters, setFilters] = useState<LocationFilters>(() => ({
+    ...NO_FILTERS,
+    aisle: aisleFromParams({ aisle: initialAisle }, view.aisles),
+  }));
   const [scope, setScope] = useState<LevelScope>("aisle");
   const [level, setLevel] = useState("");
   const levelSelect = useId();
-  const marksHeading = useId();
 
   const levelOptions = scope === "aisle" ? levelsInAisle(view.levels, view.locations, filters.aisle) : view.levels;
   const chosenLevel = levelOptions.includes(level) ? level : (levelOptions[0] ?? "");
@@ -172,7 +145,18 @@ export function BestLocationsView({
 
   return (
     <div className="flex flex-col gap-4 px-page-gutter py-5">
-      <h1 className="type-page-title">Best locations</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h1 className="type-page-title">Best locations</h1>
+        {onOpenWall && (
+          <Button
+            variant="tertiary"
+            size="md"
+            onClick={() => onOpenWall(filters.aisle === ALL_AISLES ? undefined : filters.aisle)}
+          >
+            {OPEN_AS_WALL}
+          </Button>
+        )}
+      </div>
       <SegmentedControl label="Marking mode" options={MODES} value={mode} onChange={changeMode} />
       {mode === "level" && (
         <div className="flex flex-wrap items-center gap-4">
@@ -208,41 +192,13 @@ export function BestLocationsView({
         </Button>
       )}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section
-          aria-labelledby={marksHeading}
-          className="flex flex-col gap-2 lg:col-start-2 lg:row-start-1 lg:self-start"
-        >
-          <h2 id={marksHeading} className="type-section-title">
-            Marks
-          </h2>
-          <p className="type-body text-ink" aria-live="polite" data-testid="best-counts">
-            {bestCountsLine(summary.best_locations, summary.empty_best_locations)}
-          </p>
-          {view.marks.length === 0 ? (
-            <p className="type-body text-ink-secondary">{NO_MARKS}</p>
-          ) : (
-            <ul className="flex flex-col gap-1" aria-label="Best-location marks">
-              {view.marks.map((mark) => {
-                const label = markLabel(mark);
-                return (
-                  <li key={label} className="flex items-center justify-between gap-2 type-body text-ink">
-                    <span>{label}</span>
-                    <Button
-                      variant="tertiary"
-                      size="sm"
-                      className="w-control-sm min-w-control-sm px-0"
-                      aria-label={`Remove mark ${label}`}
-                      disabledReason={disabledReason}
-                      onClick={() => void change({ type: "remove_best_mark", mark })}
-                    >
-                      <Icon name="close" />
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+        <MarksPanel
+          marks={view.marks}
+          best={summary.best_locations}
+          emptyBest={summary.empty_best_locations}
+          disabledReason={disabledReason}
+          onRemove={(mark) => void change({ type: "remove_best_mark", mark })}
+        />
         <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1">
           <LocationsTable
             view={view}
@@ -256,7 +212,8 @@ export function BestLocationsView({
   );
 }
 
-export function BestLocationsPage({ planId }: { planId: string }) {
+/** The milestone 1 table (`?mode=list`): its own summary + locations consistency, unchanged. */
+function BestLocationsList({ planId, params }: { planId: string; params: LocationParams }) {
   const summary = usePlanSummary(planId);
   const locations = usePlanLocations(planId);
   const data = useConsistentPlanQueries([summary, locations]);
@@ -272,13 +229,32 @@ export function BestLocationsPage({ planId }: { planId: string }) {
         disabledReason={disabledReason}
         onSend={sendWithEvents}
         onViewOutdated={() => router.push(recommendationsTabHref(planId, "outdated"))}
+        initialAisle={params.aisle}
+        onOpenWall={(aisle) =>
+          window.history.replaceState(null, "", planStepHref(planId, "best-locations", { aisle }))
+        }
       />
     );
   }
   const error = summary.error ?? locations.error;
-  return (
-    <div className="flex flex-col gap-4 px-page-gutter py-5">
-      {showsLoadError(error) ? <PlanLoadError message={error.message} /> : <PlanOpening planId={planId} />}
-    </div>
-  );
+  return <StepStatus>{showsLoadError(error) ? <PlanLoadError message={error.message} /> : <PlanOpening planId={planId} />}</StepStatus>;
+}
+
+function StepStatus({ children }: { children: ReactNode }) {
+  return <div className="flex flex-col gap-4 px-page-gutter py-5">{children}</div>;
+}
+
+export function BestLocationsPage({ planId }: { planId: string }) {
+  // The URL is the one source of the view state: `?aisle=` and `?mode=list` (lib/view-state).
+  const params = parseLocationParams(useSearchParams());
+  const summary = usePlanSummary(planId);
+  if (params.mode === "list") return <BestLocationsList planId={planId} params={params} />;
+  if (!summary.data) {
+    return (
+      <StepStatus>
+        {showsLoadError(summary.error) ? <PlanLoadError message={summary.error.message} /> : <PlanOpening planId={planId} />}
+      </StepStatus>
+    );
+  }
+  return <BestLocationsWall planId={planId} params={params} importId={summary.data.import_id} />;
 }

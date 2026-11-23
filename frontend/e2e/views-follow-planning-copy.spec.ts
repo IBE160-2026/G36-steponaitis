@@ -172,7 +172,7 @@ test("ad12 best locations repairs a first load with mismatched versions", async 
     await route.fallback();
   });
 
-  await page.goto(`/plans/${planId}/best-locations`);
+  await page.goto(`/plans/${planId}/best-locations?mode=list`);
   const main = page.getByRole("main");
   // The stale locations view is refetched; until the versions agree, the step shows no counts.
   await expect.poll(() => hits).toBe(2);
@@ -196,7 +196,7 @@ test("ad12 best locations stops refetching a view that stays behind", async ({ p
     await route.fulfill({ response, json: { ...body, version: body.version - 1 } });
   });
 
-  await page.goto(`/plans/${planId}/best-locations`);
+  await page.goto(`/plans/${planId}/best-locations?mode=list`);
   // One load plus MAX_STALE_REFETCHES (2) refetches, then no more.
   await expect.poll(() => hits).toBe(3);
   await page.waitForTimeout(1_500);

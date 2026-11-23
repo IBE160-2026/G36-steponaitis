@@ -1,9 +1,49 @@
 // Pure helpers for the Best locations step (FR-21, FR-22, Story 3.4). They only name and compare
-// server marks; best status and counts always come from the server.
+// server marks; best status and counts always come from the server. Story 10.7 adds the marking
+// wall's mode-to-mark logic: which mark a click on a location sets or removes, and its preview.
 
 import { ALL_AISLES } from "@/components/common/locations-table";
-import type { BestMark, LocationRow } from "@/lib/api/plans";
+import type { BestMark, LocationRef, LocationRow } from "@/lib/api/plans";
+import type { CommandBody } from "@/lib/commands";
+import { markPreviewText } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
+
+export type MarkingMode = "aisle" | "level" | "single";
+export type LevelScope = "aisle" | "all";
+
+/** A level mark: in one aisle (`scope` "aisle") or in all aisles. */
+export function levelMark(level: string, scope: LevelScope, aisle: string): BestMark {
+  return { kind: "level", level, aisle: scope === "all" ? null : aisle };
+}
+
+/** The mark a click on `location` stands for in `mode` (Level mode uses `scope`). */
+export function markFor(
+  mode: MarkingMode,
+  scope: LevelScope,
+  location: Pick<LocationRef, "code" | "aisle" | "level">,
+): BestMark {
+  switch (mode) {
+    case "aisle":
+      return { kind: "aisle", aisle: location.aisle };
+    case "level":
+      return levelMark(location.level, scope, location.aisle);
+    case "single":
+      return { kind: "location", location: location.code };
+  }
+}
+
+/** What a click does with `mark`: remove it when an exact equal mark exists, else set it. */
+export type MarkPreview = { mark: BestMark; remove: boolean; text: string };
+
+export function markPreview(mark: BestMark, marks: readonly BestMark[]): MarkPreview {
+  const remove = marks.some((existing) => sameMark(existing, mark));
+  return { mark, remove, text: markPreviewText(mark, remove) };
+}
+
+/** The command a click with `preview` sends: `remove_best_mark` for an exact mark, else `set_best_mark`. */
+export function markCommand(preview: Pick<MarkPreview, "mark" | "remove">): CommandBody {
+  return { type: preview.remove ? "remove_best_mark" : "set_best_mark", mark: preview.mark };
+}
 
 /** Whether two marks are the same value (exact text; a level's missing aisle equals `null`). */
 export function sameMark(a: BestMark, b: BestMark): boolean {

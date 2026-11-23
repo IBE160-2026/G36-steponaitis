@@ -93,6 +93,8 @@ export type WallTooltipProps = {
   onOpenPart?: (part: string) => void;
   /** The pinned dialog's Manual move… action. */
   manualMove?: ReactNode;
+  /** Marking (Story 10.7): the mark a click sets or removes, shown as the first line. */
+  preview?: string;
   tipRef?: Ref<HTMLDivElement>;
   style?: CSSProperties;
   onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
@@ -109,6 +111,7 @@ export function WallTooltip({
   links = [],
   onOpenPart,
   manualMove,
+  preview,
   tipRef,
   style,
   onKeyDown,
@@ -130,6 +133,11 @@ export function WallTooltip({
       style={style}
       className="fixed z-40 flex w-max max-w-80 flex-col gap-1.5 rounded-lg border border-border bg-surface p-3 text-ink shadow-overlay"
     >
+      {preview !== undefined && (
+        <p className="type-body-strong text-ink" data-tip-mark-preview="">
+          {preview}
+        </p>
+      )}
       <p id={labelId} className="type-code text-ink">
         {code}
       </p>

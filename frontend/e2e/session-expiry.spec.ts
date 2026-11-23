@@ -85,7 +85,7 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await logIn(page, username);
     await expect(page).toHaveURL(/\/plans$/);
 
-    await page.goto(`/plans/${plan.id}/best-locations`);
+    await page.goto(`/plans/${plan.id}/best-locations?mode=list`);
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
     await main.getByRole("combobox", { name: "Aisle" }).selectOption("A");
@@ -122,7 +122,7 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await logIn(page, username);
     await expect(page).toHaveURL(/\/plans$/);
 
-    await page.goto(`/plans/${plan.id}/best-locations`);
+    await page.goto(`/plans/${plan.id}/best-locations?mode=list`);
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
     await main.getByRole("combobox", { name: "Aisle" }).selectOption("A");

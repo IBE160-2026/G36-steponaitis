@@ -1,8 +1,12 @@
 // Wall primitives (Story 10.2, FR-42): shared by the Locations wall, the front page and, later,
 // wall crops (Story 10.5), the whole-warehouse view (Story 10.6, its mini-walls and route) and
 // marking (Story 10.7). The keyboard grid, its navigation and the tooltip are Story 10.3's; the
-// moves layer is Story 10.4's (Story 10.5 reuses it for the wall crops).
+// moves layer is Story 10.4's (Story 10.5 reuses it for the wall crops). The aisle tabs and the
+// open aisle's wall moved here from the Locations module in Story 10.7, whose Best locations
+// marking wall reuses them.
 
+export { aisleTabId, AisleTabs } from "./aisle-tabs";
+export { AisleWall, type AisleWallProps } from "./aisle-wall";
 export { BIN_HEIGHT, BIN_WIDTH, Bin, CODE_MIN_WIDTH } from "./bin";
 export { CLASS_FILL } from "./class-fill";
 export { cropLayout } from "./crop";
@@ -12,8 +16,14 @@ export {
   cellRect,
   framedCounts,
   isFramed,
+  LABEL_WIDTH,
   MAX_SCALE,
+  PAD,
+  ROW_HEIGHT,
+  runHeight,
   runTops,
+  runWidth,
+  SECTION_HEADER,
   type WallCellModel,
   wallCells,
   wallNaturalSize,
@@ -56,6 +66,7 @@ export {
   WallGrid,
   type WallGridProps,
   type WallManualMoveProps,
+  type WallMarking,
 } from "./wall-grid";
 export {
   cellRecommendations,

@@ -17,6 +17,11 @@
 // hides it without moving focus. `Enter` or a click pins it as a non-modal dialog and focuses its
 // first action; `Esc` there closes it back to the cell, and focus leaving both closes it. Only one
 // tooltip or dialog exists at a time.
+//
+// Marking (Story 10.7, FR-21/FR-29): with `marking`, a click or `Enter` on a cell marks or unmarks
+// (`onMark`) instead of pinning the dialog or selecting a move, and sends nothing while
+// `disabledReason` is set. The tooltip and the cell's description start with the mark preview
+// ("Mark aisle A"); `onPreview` reports the hovered (else focused) location for a visible preview.
 
 import {
   type KeyboardEvent,
@@ -155,6 +160,20 @@ export type WallGridProps = {
   onSelectMove?: (key: string) => void;
   /** Scroll this cell into view (once per `seq`): a move selected in the drawer. */
   scrollTo?: { code: string; seq: number };
+  /** Marking replaces pinning (Story 10.7): a click or `Enter` marks; no dialog, no move selection. */
+  marking?: WallMarking;
+};
+
+/** Marking on the wall (Story 10.7): what a click or `Enter` on a location does, and its preview. */
+export type WallMarking = {
+  /** The preview line of the mark a click on `location` sets or removes ("Mark aisle A"). */
+  preview: (location: WallLocation) => string;
+  /** A click or `Enter` on `location` (never while `disabledReason` is set). */
+  onMark: (location: WallLocation) => void;
+  /** "Saving the last change…" while a command is unconfirmed: a click or `Enter` sends nothing. */
+  disabledReason?: string;
+  /** The hovered location, else the focused one, else null (whenever that changes). */
+  onPreview?: (location: WallLocation | null) => void;
 };
 
 /** A target's lines about a move from another aisle: the tooltip's and the description's. */
@@ -192,6 +211,7 @@ export function WallGrid({
   marks = [],
   onSelectMove,
   scrollTo,
+  marking,
 }: WallGridProps) {
   const id = useId();
   const tops = useMemo(() => runTops(layout), [layout]);
@@ -235,6 +255,15 @@ export function WallGrid({
   /** The next cell focus is a return from the dialog: it does not show the tooltip again. */
   const quietFocus = useRef(false);
   const focusFirstAction = useRef(false);
+  /** The hovered and the focused cell for the marking preview (`marking.onPreview`). */
+  const previewHover = useRef<string | null>(null);
+  const previewFocus = useRef<string | null>(null);
+  const onPreview = marking?.onPreview;
+  const reportPreview = useCallback(() => {
+    if (!onPreview) return;
+    const code = previewHover.current ?? previewFocus.current;
+    onPreview(code === null ? null : (locations.find((entry) => entry.location.code === code) ?? null));
+  }, [onPreview, locations]);
 
   useEffect(
     () => () => {
@@ -262,6 +291,15 @@ export function WallGrid({
   function selectCellMove(code: string) {
     const key = cellMoveSelection(marksAt.get(code), selectedMoveKey);
     if (key !== undefined) onSelectMove?.(key);
+  }
+
+  /** A click or `Enter` on a located cell while marking: mark it unless a change is saving. */
+  function mark(code: string, active: WallMarking) {
+    const entry = byCode.get(code);
+    if (!entry) return;
+    setChosen(code);
+    if (active.disabledReason !== undefined) return;
+    active.onMark(entry);
   }
 
   function pin(code: string) {
@@ -361,6 +399,8 @@ export function WallGrid({
 
   function onCellFocus(code: string) {
     setChosen(code);
+    previewFocus.current = code;
+    reportPreview();
     if (quietFocus.current) {
       quietFocus.current = false;
       return;
@@ -372,6 +412,10 @@ export function WallGrid({
     if (event.key === "Enter") {
       if (!byCode.has(cell.code)) return;
       event.preventDefault();
+      if (marking) {
+        mark(cell.code, marking);
+        return;
+      }
       pin(cell.code);
       selectCellMove(cell.code);
       return;
@@ -395,6 +439,8 @@ export function WallGrid({
 
   function onCellPointerEnter(code: string) {
     pointer.current = code;
+    previewHover.current = code;
+    reportPreview();
     clearTimeout(graceTimer.current);
     clearTimeout(hoverTimer.current);
     if (tipState.current.pinned || tipState.current.code === code) return;
@@ -404,6 +450,10 @@ export function WallGrid({
   function onPointerLeave() {
     clearTimeout(hoverTimer.current);
     pointer.current = null;
+    if (previewHover.current !== null) {
+      previewHover.current = null;
+      reportPreview();
+    }
     scheduleHide();
   }
 
@@ -431,6 +481,10 @@ export function WallGrid({
     // Focus moving within the wall (or into the move dialog, through React) sets it back at once.
     setTimeout(() => {
       if (focusInside.current) return;
+      if (previewFocus.current !== null) {
+        previewFocus.current = null;
+        reportPreview();
+      }
       const shown = tipState.current;
       if (shown.pinned) dispatch({ type: "close" });
       else if (pointer.current === null) dispatch({ type: "hide" });
@@ -505,6 +559,7 @@ export function WallGrid({
                       const selected = code === selectedCode;
                       const active = code === activeCode;
                       const descriptionId = entry ? `${id}-desc-${runIndex}-${row}-${cell.column}` : undefined;
+                      const preview = entry && marking ? marking.preview(entry) : undefined;
                       return (
                         <div
                           key={cell.column}
@@ -525,8 +580,8 @@ export function WallGrid({
                             moves: (marksAt.get(code) ?? []).map(cellMoveText),
                           })}
                           aria-describedby={descriptionId}
-                          aria-haspopup={entry ? "dialog" : undefined}
-                          aria-expanded={entry ? tip.pinned && tip.code === code : undefined}
+                          aria-haspopup={entry && !marking ? "dialog" : undefined}
+                          aria-expanded={entry && !marking ? tip.pinned && tip.code === code : undefined}
                           tabIndex={active ? 0 : -1}
                           data-grid-cell={code}
                           data-active={active ? "" : undefined}
@@ -537,6 +592,10 @@ export function WallGrid({
                           onKeyDown={(event) => onCellKeyDown(event, { ...cell, code })}
                           onClick={() => {
                             if (!entry) return;
+                            if (marking) {
+                              mark(code, marking);
+                              return;
+                            }
                             pin(code);
                             selectCellMove(code);
                           }}
@@ -545,6 +604,7 @@ export function WallGrid({
                         >
                           {descriptionId && entry && (
                             <div id={descriptionId} hidden>
+                              {preview !== undefined && <p data-mark-preview-line="">{descriptionLine(preview)}</p>}
                               {entry.parts.map((part) => (
                                 <p key={part.part}>{descriptionLine(cellPartLine(part))}</p>
                               ))}
@@ -578,6 +638,7 @@ export function WallGrid({
             tipRef={tipElement}
             location={shownLocation}
             pinned={tip.pinned}
+            preview={marking ? marking.preview(shownLocation) : undefined}
             labelId={labelId}
             partners={partnerStrips(touching)}
             fromLines={shownCross.map((line) => line.tip)}

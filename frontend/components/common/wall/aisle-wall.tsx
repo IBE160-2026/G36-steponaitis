@@ -6,30 +6,22 @@
 // keyboard grid over it is the wall's one tab stop and carries the names, tooltips and dialogs.
 // The moves touching the aisle (the server's entries) are drawn in the SVG, their markers in an
 // SVG over the grid, and the selected move's hover note beside its target.
+//
+// Story 10.7 moved it to components/common/wall for the Best locations marking wall, which passes
+// `showMoves={false}` (no lifted bins, markers or arrows) and an `overlay` drawn under the grid
+// in the scaled box (the Level mode buttons).
 
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import {
-  cellGeometry,
-  liftedRect,
-  moveKey,
-  moveMarks,
-  NOTE_HEIGHT,
-  NOTE_WIDTH,
-  placeNote,
-  type Rect,
-  WallGrid,
-  type WallGridProps,
-  WallHoverNote,
-  WallMoveMarkers,
-  WallPanel,
-  wallCells,
-  wallNaturalSize,
-  wallScale,
-} from "@/components/common/wall";
 import type { AisleLayout } from "@/lib/api/imports";
 import type { WallView } from "@/lib/api/plans";
 import { wallScrollLabel } from "@/lib/copy";
+
+import { wallCells, wallNaturalSize, wallScale } from "./model";
+import { liftedRect, moveKey, moveMarks, placeNote, type Rect } from "./moves";
+import { cellGeometry, NOTE_HEIGHT, NOTE_WIDTH, WallHoverNote, WallMoveMarkers } from "./moves-layer";
+import { WallGrid, type WallGridProps } from "./wall-grid";
+import { WallPanel } from "./wall-panel";
 
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -52,16 +44,29 @@ export type AisleWallProps = Omit<WallGridProps, "layout" | "cells" | "locations
   selectedMoveKey?: string;
   /** The selected move's hover note lines (`hoverNoteLines`). */
   noteLines?: readonly [string, string];
+  /** Whether the aisle's moves are drawn (default true; the marking wall draws none). */
+  showMoves?: boolean;
+  /** Drawn inside the scaled box under the grid, from the drawn scale (the Level mode buttons). */
+  overlay?: (scale: number) => ReactNode;
 };
 
-export function AisleWall({ layout, wall, selectedMoveKey, noteLines, ...grid }: AisleWallProps) {
+export function AisleWall({
+  layout,
+  wall,
+  selectedMoveKey,
+  noteLines,
+  showMoves = true,
+  overlay,
+  ...grid
+}: AisleWallProps) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const cells = wallCells(layout, wall);
   const natural = wallNaturalSize(layout);
   const scale = wallScale(width, natural.width);
   const geometry = cellGeometry(layout, cells);
-  const marks = moveMarks(wall.moves, (code) => geometry.has(code), selectedMoveKey);
-  const selected = wall.moves.find((move) => moveKey(move) === selectedMoveKey);
+  const moves = showMoves ? wall.moves : [];
+  const marks = moveMarks(moves, (code) => geometry.has(code), selectedMoveKey);
+  const selected = moves.find((move) => moveKey(move) === selectedMoveKey);
   const selectedEnds = selected && { from: selected.from_location.code, to: selected.to_location.code };
 
   // The note beside the target (else the from-cell), never over either end.
@@ -98,12 +103,13 @@ export function AisleWall({ layout, wall, selectedMoveKey, noteLines, ...grid }:
           marks={marks}
           selectedEnds={selectedEnds}
         />
+        {overlay?.(scale)}
         <WallGrid
           layout={layout}
           cells={cells}
           locations={wall.locations}
           scale={scale}
-          moves={wall.moves}
+          moves={moves}
           marks={marks}
           {...grid}
         />

@@ -47,10 +47,12 @@ def test_fr42_wall_endpoint_on_sample(empty_tables: str) -> None:
         "locations",
         "rail_levels",
         "moves",
+        "marks",
         "aisles",
         "warehouse",
     }
     assert (body["version"], body["aisle"], body["rail_levels"]) == (1, "A", [])
+    assert body["marks"] == []
     assert (body["round"], body["moves"]) == (0, [])
     rows = body["locations"]
     in_a = [row for row in table["locations"] if row["location"]["aisle"] == "A"]
@@ -109,7 +111,14 @@ def test_fr22_wall_endpoint_marks(empty_tables: str) -> None:
         a = client.get(f"/api/plans/{plan_id}/wall", params={"aisle": "A"}).json()
         b = client.get(f"/api/plans/{plan_id}/wall", params={"aisle": "B"}).json()
         summary = client.get(f"/api/plans/{plan_id}").json()
+        table = client.get(f"/api/plans/{plan_id}/locations").json()
 
+    assert a["marks"] == b["marks"] == table["marks"]
+    assert a["marks"] == [
+        {"kind": "aisle", "aisle": "A"},
+        {"kind": "level", "level": "1", "aisle": None},
+        {"kind": "location", "location": b_code},
+    ]
     a_levels = {row["location"]["level"] for row in a["locations"]}
     assert set(a["rail_levels"]) == a_levels
     assert a["rail_levels"] == sorted(a_levels, key=int)

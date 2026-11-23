@@ -560,6 +560,26 @@ export function markLabel(mark: BestMark): string {
   }
 }
 
+/** The mark's target in a preview: "aisle A", "level 1 in aisle A", "level 1 in all aisles", "A-07-01-02". */
+function markTarget(mark: BestMark): string {
+  switch (mark.kind) {
+    case "aisle":
+      return `aisle ${mark.aisle}`;
+    case "level":
+      return mark.aisle == null ? `level ${mark.level} in all aisles` : `level ${mark.level} in aisle ${mark.aisle}`;
+    case "location":
+      return mark.location;
+  }
+}
+
+/** Why the marking wall sends nothing while the chosen aisle's wall view still loads (Story 10.7). */
+export const OPENING_AISLE_REASON = "Opening the aisle…";
+
+/** The marking wall's preview (Story 10.7): "Mark aisle A" or, for an existing mark, "Unmark aisle A". */
+export function markPreviewText(mark: BestMark, remove: boolean): string {
+  return `${remove ? "Unmark" : "Mark"} ${markTarget(mark)}`;
+}
+
 /** The wall grid's accessible name: "Aisle A bin wall". */
 export function wallGridLabel(aisle: string): string {
   return `Aisle ${aisle} bin wall`;

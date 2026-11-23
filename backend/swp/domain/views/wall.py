@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from swp.domain.analysis import Analysis, MovementClass, PartAnalysis
 from swp.domain.errors import DomainError
 from swp.domain.import_data import ImportData
-from swp.domain.ordering import aisle_order, level_key, location_order, part_order
+from swp.domain.ordering import aisle_order, level_key, location_order, mark_order, part_order
 from swp.domain.planning import (
     EffectiveMove,
     LocationRef,
@@ -109,6 +109,8 @@ class WallView(BaseModel):
     locations: list[WallLocation]
     rail_levels: list[str]
     moves: list[WallMove]
+    marks: list[BestMark]
+    """The plan's marks in `mark_order` (the same order as the locations view's marks)."""
     aisles: list[AisleCounts]
     warehouse: WarehouseCounts
 
@@ -374,6 +376,7 @@ def build_wall_view(
             for entry in entries
             if aisle in entry.aisles
         ],
+        marks=mark_order(marks, copy.locations),
         aisles=aisles,
         warehouse=warehouse,
     )

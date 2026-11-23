@@ -1954,6 +1954,8 @@ export interface components {
             aisles: components["schemas"]["AisleCounts"][];
             /** Locations */
             locations: components["schemas"]["WallLocation"][];
+            /** Marks */
+            marks: (components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"])[];
             /** Moves */
             moves: components["schemas"]["WallMove"][];
             /** Rail Levels */

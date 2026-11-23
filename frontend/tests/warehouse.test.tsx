@@ -267,6 +267,7 @@ describe("fr42 warehouse view (UX-DR45/58)", () => {
       aisle: "A",
       round: 1,
       moves: [],
+      marks: [],
       rail_levels: [],
       locations: [],
       aisles: VIEW.aisles,

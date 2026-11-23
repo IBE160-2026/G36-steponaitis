@@ -69,6 +69,10 @@ test("uj1 marks aisle A and level 1 in all aisles, removes a mark and keeps the 
 
   const main = page.getByRole("main");
   await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
+  // The step opens as the marking wall (Story 10.7); this journey drives the milestone 1 table.
+  await expect(main.getByRole("grid", { name: "Aisle A bin wall" })).toBeVisible();
+  await page.goto(`/plans/${planId}/best-locations?mode=list`);
+  await expect(main.getByRole("table", { name: "Locations" })).toBeVisible();
   await expect(
     main.getByText("No best locations yet. The tool never guesses: mark a whole aisle, a level or single locations."),
   ).toBeVisible();

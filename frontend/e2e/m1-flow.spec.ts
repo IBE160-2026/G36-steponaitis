@@ -49,6 +49,9 @@ test("uj1 milestone 1 flow on the sample data", async ({ page, request }) => {
   // Best locations: aisle A, then level 1 in all aisles.
   await nav.getByRole("link", { name: /^\d*Best locations/ }).click();
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/best-locations$`));
+  // The step opens as the marking wall (Story 10.7); Open as list shows the milestone 1 table.
+  await main.getByRole("button", { name: "Open as list", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/best-locations\\?aisle=A&mode=list$`));
   const marks = main.getByRole("list", { name: "Best-location marks" });
   await main.getByRole("combobox", { name: "Aisle" }).selectOption("A");
   await main.getByRole("button", { name: "Mark aisle A", exact: true }).click();

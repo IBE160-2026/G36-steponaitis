@@ -228,6 +228,7 @@ function wall(name: string, moves: WallMove[], version = 5, occupied: readonly s
     aisle: name,
     round: 1,
     moves,
+    marks: [],
     rail_levels: [],
     locations: aisle(name, 5).cells.map((cell) =>
       located(cell.location!.code, cell.location!.level, name, occupied.includes(cell.location!.code)),

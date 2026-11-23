@@ -49,7 +49,15 @@ import { ManualMoveAction } from "@/components/common/manual-move-dialog";
 import { OtherLocationAction } from "@/components/common/other-location";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
-import { Key, moveKey, recommendationsAtVersion } from "@/components/common/wall";
+import {
+  aisleTabId,
+  AisleTabs,
+  AisleWall,
+  type AisleWallProps,
+  Key,
+  moveKey,
+  recommendationsAtVersion,
+} from "@/components/common/wall";
 import { type LayoutView, useImportLayout } from "@/lib/api/imports";
 import {
   type LocationsView as LocationsData,
@@ -81,8 +89,6 @@ import {
 } from "@/lib/view-state/urls";
 
 import { chooseAisle, chooseScope, readStoredWall, storeAisle, storeWall, type WallScope } from "./aisle-choice";
-import { aisleTabId, AisleTabs } from "./aisle-tabs";
-import { AisleWall, type AisleWallProps } from "./aisle-wall";
 import { joinedRow, MovesDrawer } from "./moves-drawer";
 import { ScopeControl, WholeWarehouse } from "./warehouse-view";
 
