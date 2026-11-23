@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 06:50
+last_updated: 11-23-2026 06:58
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -113,7 +113,7 @@ development_status:
   9-5-seeded-demo-account-and-demo-version: done
   9-6-demo-front-page: done
   9-7-production-like-auth-configuration-readme-and-secrets: done
-  epic-9-retrospective: optional
+  epic-9-retrospective: done
 
   epic-10: backlog
   10-1-wall-layout-as-an-import-scoped-domain-view: backlog
@@ -718,3 +718,70 @@ action_items:
     owner: "dev"
     status: open
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-76-make-the-login-throttle-hold-under-concu"
+    epic: 9
+    action: "Make the login throttle hold under concurrency: atomic check-and-increment
+      before bcrypt, a parallel-login test, and purge stale login_attempts rows (R1,
+      R7); before Story 16.2"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-77-bind-a-held-command-to-the-user-whose-se"
+    epic: 9
+    action: "Bind a held command to the user whose session expired; drop it when another
+      user or demo logs in, and keep the Log out destination on a 401 during Log out
+      (R2, R9)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-78-close-the-production-startup-holes-verce"
+    epic: 9
+    action: "Close the production startup holes: VERCEL with APP_ENV other than production,
+      FEATURE_AUTH off or FEATURE_DEMO without auth, DEMO_PASSWORD=demo, and a Refusing-to-start
+      line without the value for invalid settings (R3, R4, R14); before Story 16.2"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-79-decide-and-record-in-ad-18-and-epics-md"
+    epic: 9
+    action: "Decide and record in AD-18 and epics.md Epic 9: seed demo when FEATURE_DEMO
+      is off, server-side Log out revocation, NFKC or ASCII usernames, hard caps under
+      concurrency, and the as-built additions (R4, R5, R6, R13, R17)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-80-close-the-client-auth-flow-gaps-keep-the"
+    epic: 9
+    action: "Close the client auth-flow gaps: keep the deep link through the guard,
+      open Log in on a 401 from New Plan, reuse and Delete plan, handle a failed session
+      refetch after Log in, and replace the module-level Log out hold (R8, R10, R11,
+      R12)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-81-clean-up-epic-9-duplication-shared-passw"
+    epic: 9
+    action: "Clean up epic-9 duplication: shared password-bytes check, one session-cookie
+      lookup, one Demo version button, a request helper in modules/auth/api.ts, e2e
+      auth helpers in e2e/support, split auth.test.tsx, guard test from the route
+      table (A1-A3)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-82-add-the-low-severity-tests-and-fixes-dem"
+    epic: 9
+    action: "Add the low-severity tests and fixes: demo seed with MAX_ACCOUNTS full,
+      seed target with MIGRATION_DATABASE_URL, the plan-limit comment and the at most
+      1 plans copy (R15, R16, R18, R19)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
+  - id: "epic-9-retro-item-83-give-the-nine-open-9-x-issues-md-deferra"
+    epic: 9
+    action: "Give the nine open 9.x issues.md deferrals an owner in action_items,
+      tick the stale issues.md:165, update AGENTS.md for e2e:production, run the auth
+      e2e in firefox and msedge before the milestone 2 gate, and add a real-flag e2e
+      config in any story that adds a flag (P1, P2, P4)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
