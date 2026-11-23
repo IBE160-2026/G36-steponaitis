@@ -104,7 +104,9 @@ test.describe("fr40 uj3 log in and log out", () => {
     await expect(page).toHaveURL(/\/plans$/);
     await expect(page.getByRole("heading", { name: "Saved plans", level: 1 })).toBeVisible();
 
-    await page.getByRole("banner").getByRole("button", { name: "Log out" }).click();
+    // Log out is in the avatar user menu (Story 9.3).
+    await page.getByRole("banner").getByRole("button", { name: "User menu" }).click();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Log out" }).click();
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(card(page)).toBeVisible();
@@ -115,7 +117,7 @@ test.describe("fr40 uj3 log in and log out", () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/login$/);
     await expect(card(page)).toBeVisible();
-    await expect(page.getByRole("banner").getByRole("button", { name: "Log out" })).toHaveCount(0);
+    await expect(page.getByRole("banner").getByRole("button", { name: "User menu" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Saved plans" })).toHaveCount(0);
 
     await page.goto("/plans");

@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api/errors";
 import { type Session, SESSION_KEY } from "@/lib/api/session";
 import { isAuthPath, LOGIN_HREF, SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
 import {
+  afterLoginHref,
   fieldErrorsOf,
   firstFailingField,
   LOGIN_LEAD,
@@ -24,11 +25,13 @@ import {
 } from "@/modules/auth/api";
 import { AuthGuard, followGuard, guardDecision } from "@/modules/auth/auth-guard";
 import { afterFailedLogin, focusAfterFailedLogin, LoginCard, type LoginFormState } from "@/modules/auth/login-page";
-import { LogoutButton } from "@/modules/auth/logout-button";
 import { PasswordInput } from "@/modules/auth/password-input";
 import { focusField, SignupCard, type SignupFieldRefs } from "@/modules/auth/signup-page";
+import { avatarInitials, UserMenu } from "@/modules/auth/user-menu";
+import { SessionExpiry } from "@/lib/api/session-expiry";
 
 // Story 9.1: Create account (FR-39, UX-DR53). Story 9.2: Log in, Log out and the page guard (FR-40).
+// Story 9.3: the avatar user menu (UX-DR4) and the return to the open page after Log in (FR-40).
 
 // The guard, Log out and the toolbar read the path and the session through hooks; these stand in.
 const nav = vi.hoisted(() => ({
@@ -446,13 +449,27 @@ describe("fr40 log out", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it("fr40_logout_button_shows_only_with_auth_and_a_user", () => {
+  it("fr40_avatar_initials_are_the_first_two_letters_upper_cased", () => {
+    expect(avatarInitials("demo")).toBe("DE");
+    expect(avatarInitials("a")).toBe("A");
+    expect(avatarInitials("Kari7")).toBe("KA");
+    // A capital that expands ("ß" to "SS") still leaves two letters.
+    expect(avatarInitials("ßa")).toBe("SS");
+    // By code point: a letter outside the BMP is one character, not two halves.
+    expect(avatarInitials("\u{1D49C}bc")).toBe("\u{1D49C}B");
+  });
+
+  it("fr40_user_menu_shows_the_ink_avatar_only_with_auth_and_a_user", () => {
     nav.session = { isPending: false, data: { ...AUTH_ON, user: "Kari7" } };
-    expect(withQueryClient(<LogoutButton />)).toContain(">Log out</button>");
+    const markup = withQueryClient(<UserMenu />);
+    expect(markup).toContain('aria-label="User menu"');
+    expect(markup).toContain('aria-haspopup="menu"');
+    expect(markup).toMatch(/class="[^"]*size-\[34px\][^"]*rounded-full[^"]*bg-ink[^"]*text-white[^"]*"[^>]*>KA<\/button>/);
+    expect(markup).not.toContain("Log out");
     nav.session = { isPending: false, data: AUTH_ON };
-    expect(withQueryClient(<LogoutButton />)).toBe("");
+    expect(withQueryClient(<UserMenu />)).toBe("");
     nav.session = { isPending: false, data: { ...AUTH_ON, user: "Kari7", feature_auth: false } };
-    expect(withQueryClient(<LogoutButton />)).toBe("");
+    expect(withQueryClient(<UserMenu />)).toBe("");
   });
 
   it("fr40_toolbar_puts_the_account_slot_at_the_right_end_off_auth_pages", () => {
@@ -461,5 +478,15 @@ describe("fr40 log out", () => {
     expect(withQueryClient(<Toolbar account={account} />)).toMatch(/ml-auto[^>]*><button type="button">Account/);
     nav.pathname = LOGIN_HREF;
     expect(withQueryClient(<Toolbar account={account} />)).not.toContain("Account");
+  });
+});
+
+describe("fr40 return after Log in", () => {
+  it("fr40_login_success_opens_the_restored_page_else_saved_plans", () => {
+    const expiry = new SessionExpiry();
+    expect(afterLoginHref(expiry)).toBe(SAVED_PLANS_HREF);
+    void expiry.expire("/plans/p1/locations?aisle=A");
+    expect(afterLoginHref(expiry)).toBe("/plans/p1/locations?aisle=A");
+    expect(afterLoginHref(expiry)).toBe(SAVED_PLANS_HREF);
   });
 });

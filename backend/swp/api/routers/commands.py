@@ -4,10 +4,12 @@ JSON body only; cross-site POSTs are rejected by the origin guard (AD-19).
 """
 
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from swp.api.errors import error_responses
+from swp.api.session_guard import current_user
 from swp.app.commands import run_command
 from swp.domain.commands import Command, CommandResult
 
@@ -15,5 +17,8 @@ router = APIRouter()
 
 
 @router.post("/plans/{plan_id}/commands", responses=error_responses(403, 404, 409, 422, 500, 503))
-def post_command(plan_id: uuid.UUID, command: Command) -> CommandResult:
-    return run_command(plan_id, command)
+def post_command(
+    plan_id: uuid.UUID, command: Command, user: Annotated[str, Depends(current_user)]
+) -> CommandResult:
+    # The router guard's dependency again: cached per request, so the user loads once (FR-11).
+    return run_command(plan_id, command, user=user)

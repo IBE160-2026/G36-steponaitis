@@ -228,7 +228,7 @@ describe("fr35 undo last move in the part panel", () => {
     return text(
       renderToStaticMarkup(
         <QueryClientProvider client={queryClient}>
-          <CommandsProvider effects={{ notify: vi.fn(), navigate: vi.fn() }}>
+          <CommandsProvider effects={{ notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) }}>
             <PartPanel planId="p1" part="2400" detail={DETAIL} detailError={null} onClose={() => {}} />
           </CommandsProvider>
         </QueryClientProvider>,

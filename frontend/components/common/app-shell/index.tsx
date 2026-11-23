@@ -9,8 +9,8 @@ import { PlanSaveStatus } from "@/components/common/app-shell/save-status";
 import { Toolbar } from "@/components/common/app-shell/toolbar";
 
 /**
- * `launcher` is the toolbar's launcher slot (Story 6.5) and `account` its account slot (Log out,
- * Story 9.2), both passed in by app/layout.tsx.
+ * `launcher` is the toolbar's launcher slot (Story 6.5) and `account` its account slot (the avatar
+ * user menu, Story 9.3), both passed in by app/layout.tsx.
  */
 export function AppShell({
   children,

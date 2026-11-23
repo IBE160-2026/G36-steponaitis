@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/common/app-shell";
 import { AuthGuard } from "@/modules/auth/auth-guard";
-import { LogoutButton } from "@/modules/auth/logout-button";
+import { UserMenu } from "@/modules/auth/user-menu";
 import { Launcher } from "@/modules/launcher/launcher";
 
 import "./globals.css";
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <Providers>
           {/* With FEATURE_AUTH on, pages other than Log in and Create account need a session (Story 9.2). */}
           <AuthGuard>
-            <AppShell launcher={<Launcher />} account={<LogoutButton />}>
+            <AppShell launcher={<Launcher />} account={<UserMenu />}>
               {children}
             </AppShell>
           </AuthGuard>

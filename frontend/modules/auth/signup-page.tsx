@@ -13,9 +13,10 @@ import { type FormEvent, type RefObject, useId, useRef, useState } from "react";
 import { Button } from "@/components/common/button";
 import { Input, InputError } from "@/components/common/input";
 import { SESSION_KEY, useSession } from "@/lib/api/session";
-import { LOGIN_HREF, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
+import { LOGIN_HREF } from "@/lib/view-state/urls";
 
 import {
+  afterLoginHref,
   runSignup,
   SIGNUP_TITLE,
   type SignupField,
@@ -177,9 +178,9 @@ export function SignupPage() {
     setFormError(null);
     const outcome = await runSignup(values, {
       invalidateSession: () => queryClient.invalidateQueries({ queryKey: SESSION_KEY }),
-      navigate: () => router.push(SAVED_PLANS_HREF),
+      navigate: () => router.push(afterLoginHref()),
     });
-    if (outcome.kind === "signed-up") return; // Stays busy while the saved-plans list opens.
+    if (outcome.kind === "signed-up") return; // Stays busy while the next page opens.
     inFlight.current = false;
     setBusy(false);
     if (outcome.kind === "field-errors") {

@@ -109,7 +109,7 @@ function setup(serve: { summary?: number[]; locations?: number[] } = {}) {
     const observer = new QueryObserver(queryClient, { queryKey, queryFn, staleTime: Infinity });
     cleanups.push(observer.subscribe(() => {}));
   }
-  const effects = { notify: vi.fn(), navigate: vi.fn() };
+  const effects = { notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) };
   const delays: number[] = [];
   let ids = 0;
   const client = new CommandClient(queryClient, effects, {
@@ -152,7 +152,7 @@ describe("fr10 confirmed command", () => {
   it("ad12_default_command_id_is_a_random_uuid", async () => {
     const queryClient = new QueryClient();
     const fetchMock = mockFetch(json(200, { version: 1, events: [] }), json(200, { version: 2, events: [] }));
-    const client = new CommandClient(queryClient, { notify: vi.fn(), navigate: vi.fn() });
+    const client = new CommandClient(queryClient, { notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) });
     await client.send(PLAN, MARK_A);
     await client.send(PLAN, MARK_A);
     const first = bodyOf(fetchMock, 0).command_id;
@@ -374,7 +374,7 @@ describe("ad12 retries and failures", () => {
     // Retro 21: the command is built inside the `try`, so a throwing id generator drops the send.
     const queryClient = new QueryClient();
     const fetchMock = mockFetch();
-    const client = new CommandClient(queryClient, { notify: vi.fn(), navigate: vi.fn() }, {
+    const client = new CommandClient(queryClient, { notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) }, {
       randomId: () => {
         throw new Error("no crypto");
       },
@@ -595,7 +595,7 @@ describe("fr10 save status and plan plate", () => {
     const queryClient = new QueryClient();
     const wrap = (children: ReactNode) => (
       <QueryClientProvider client={queryClient}>
-        <CommandsProvider effects={{ notify: vi.fn(), navigate: vi.fn() }}>{children}</CommandsProvider>
+        <CommandsProvider effects={{ notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) }}>{children}</CommandsProvider>
       </QueryClientProvider>
     );
     const shell = html(wrap(<AppShell>page</AppShell>));
@@ -637,7 +637,7 @@ describe("fr10 save status and plan plate", () => {
       undo_preview: null,
       steps: [],
     };
-    const effects = { notify: vi.fn(), navigate: vi.fn() };
+    const effects = { notify: vi.fn(), navigate: vi.fn(), sessionExpired: vi.fn(async () => {}) };
     const shellFor = (client: CommandClient, queryClient: QueryClient) =>
       html(
         <QueryClientProvider client={queryClient}>

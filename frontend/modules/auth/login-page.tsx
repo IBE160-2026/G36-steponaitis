@@ -13,9 +13,17 @@ import { type FormEvent, type RefObject, useId, useRef, useState } from "react";
 import { Button } from "@/components/common/button";
 import { Input } from "@/components/common/input";
 import { SESSION_KEY, useSession } from "@/lib/api/session";
-import { SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
+import { SIGNUP_HREF } from "@/lib/view-state/urls";
 
-import { LOGIN_LEAD, LOGIN_TITLE, type LoginForm, type LoginOutcome, runLogin, SIGNUP_TITLE } from "./api";
+import {
+  afterLoginHref,
+  LOGIN_LEAD,
+  LOGIN_TITLE,
+  type LoginForm,
+  type LoginOutcome,
+  runLogin,
+  SIGNUP_TITLE,
+} from "./api";
 import { AuthAlert, AuthCard } from "./auth-card";
 import { PasswordInput } from "./password-input";
 
@@ -153,9 +161,9 @@ export function LoginPage() {
     setForm((current) => ({ ...current, formError: null }));
     const outcome = await runLogin(form.values, {
       invalidateSession: () => queryClient.invalidateQueries({ queryKey: SESSION_KEY }),
-      navigate: () => router.push(SAVED_PLANS_HREF),
+      navigate: () => router.push(afterLoginHref()),
     });
-    if (outcome.kind === "logged-in") return; // Stays busy while the saved-plans list opens.
+    if (outcome.kind === "logged-in") return; // Stays busy while the next page opens.
     inFlight.current = false;
     setBusy(false);
     setForm((current) => afterFailedLogin(current, outcome));

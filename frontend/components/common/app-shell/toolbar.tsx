@@ -6,7 +6,7 @@
 // (AD-20) and reads only the plan summary and saved-plans queries (AD-3). Off plan paths the steps are plain text.
 // On Log in and Create account (Story 9.1) it holds only the product mark and name.
 // On plan paths the launcher slot (Story 6.5) follows the flow bar; the toolbar never imports a module.
-// On every page but Log in and Create account the account slot (Log out, Story 9.2) sits at the right end.
+// On every page but Log in and Create account the account slot (the avatar user menu, Story 9.3) sits at the right end.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -50,7 +50,7 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
 export type ToolbarProps = {
   /** The launcher's grid button (app/layout.tsx passes it in); rendered after the flow bar on plan paths only. */
   launcher?: ReactNode;
-  /** The account control (Log out; app/layout.tsx passes it in); at the right end on non-auth paths. */
+  /** The account control (the avatar user menu; app/layout.tsx passes it in); at the right end on non-auth paths. */
   account?: ReactNode;
 };
 

@@ -7,10 +7,11 @@ The GETs only read: they never change `version` or `last_edited_*` (FR-9).
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Response, UploadFile, status
 
 from swp.api.errors import INVALID_REQUEST, error_responses
 from swp.api.schemas.plans import SavedPlanRow
+from swp.api.session_guard import current_user
 from swp.app import plans
 from swp.app.imports import UploadedFile, read_import
 from swp.domain.errors import DomainError
@@ -41,6 +42,8 @@ def _validation_failed(details: list[dict[str, object]]) -> DomainError:
     responses=error_responses(403, 404, 413, 422, 503),
 )
 def create_plan(
+    # The router guard's dependency again: cached per request, so the user loads once (FR-11).
+    user: Annotated[str, Depends(current_user)],
     # Optional so a reuse (`import_id`, FR-2) needs no files; a missing file is still
     # `validation_failed` with the same details FastAPI gave before.
     locations: Annotated[UploadFile | None, File()] = None,
@@ -56,7 +59,9 @@ def create_plan(
         plan_name = plans.plan_name(name)
         if any(upload is not None for upload in uploads.values()):
             raise _validation_failed([{"field": "import_id", "message": FILES_WITH_IMPORT}])
-        reused = plans.create_from_import(plan_name, plans.parse_import_id(import_id), now=now)
+        reused = plans.create_from_import(
+            plan_name, plans.parse_import_id(import_id), now=now, user=user
+        )
         return plans.created(reused)
     missing = [role for role in FILE_ROLES if uploads[role] is None]
     if missing:
@@ -69,7 +74,7 @@ def create_plan(
         assert upload is not None
         files[role] = _uploaded(upload)
     imported = read_import(files)
-    return plans.created(plans.create(plan_name, imported, now=now))
+    return plans.created(plans.create(plan_name, imported, now=now, user=user))
 
 
 @router.get("/plans")

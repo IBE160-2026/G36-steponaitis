@@ -1,6 +1,7 @@
 // Client command flow (AD-12, Story 3.3): the one way the client changes a plan. One command at a
 // time per plan, each with a new `command_id` and the current `base_version`; transient failures
-// retry with the same body; nothing changes on screen until the server confirms and the plan
+// retry with the same body; a command that meets an ended session waits for Log in and is then
+// sent again unchanged (Story 9.3); nothing changes on screen until the server confirms and the plan
 // queries are refetched. Framework-free: React bindings live in `./react.tsx`, effects (toast,
 // navigation) are injected so `lib/` never imports `components/`.
 
@@ -150,12 +151,20 @@ export class CommandClient {
         return { outcome: await this.fail(planId), events: [] };
       }
       let outcome: PostOutcome;
-      for (let attempt = 0; ; attempt++) {
+      for (let attempt = 0; ; ) {
         outcome = await this.post(planId, command);
+        if (outcome instanceof ApiError && outcome.code === "unauthenticated") {
+          // The session ended (Story 9.3, FR-40): hold the command, still pending, until Log in
+          // succeeds, then post the identical body again. Not a transient attempt.
+          this.update(planId, { notice: null });
+          await this.effects.sessionExpired();
+          continue;
+        }
         if (outcome !== "transient") break;
         if (attempt === RETRY_DELAYS_MS.length) return { outcome: await this.fail(planId), events: [] };
         this.update(planId, { notice: "retrying" });
         await this.sleep(RETRY_DELAYS_MS[attempt]);
+        attempt++;
       }
       if (outcome instanceof ApiError) return { outcome: await this.reject(planId, outcome), events: [] };
       await this.refetchConsistent(planId, outcome.ok.version);

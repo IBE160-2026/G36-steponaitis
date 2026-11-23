@@ -2,10 +2,13 @@
 // /api/auth/* POSTs and what the pages do with their answers. The server checks every field and
 // writes the copy; the pages only show it. Create account focuses the first failing field; a wrong
 // login clears and focuses the password. Success refreshes the session and opens the saved-plans
-// list; Log out clears the cached data and opens Log in.
+// list, or the page that was open when the session ended (Story 9.3); Log out clears the cached
+// data and opens Log in.
 
 import { ApiError, internalError, parseErrorBody } from "@/lib/api/errors";
 import type { components } from "@/lib/api/schema";
+import { sessionExpiry } from "@/lib/api/session-expiry";
+import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 export type SignupForm = components["schemas"]["SignupRequest"];
 export type SignupResponse = components["schemas"]["SignupResponse"];
@@ -87,6 +90,14 @@ export function fieldErrorsOf(error: ApiError): SignupFieldErrors {
 /** The first field in form order that has an error, or null. */
 export function firstFailingField(errors: SignupFieldErrors): SignupField | null {
   return SIGNUP_FIELDS.find((field) => errors[field] !== undefined) ?? null;
+}
+
+/**
+ * Where a successful Log in or Create account goes: the page that was open when the session ended,
+ * else the saved-plans list. Restoring also lets every command held for the login go (Story 9.3).
+ */
+export function afterLoginHref(expiry: { restore: () => string | null } = sessionExpiry): string {
+  return expiry.restore() ?? SAVED_PLANS_HREF;
 }
 
 export type SignupOutcome =

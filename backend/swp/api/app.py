@@ -23,7 +23,7 @@ from swp.api.routers import (
     search,
     session,
 )
-from swp.api.session_guard import require_session
+from swp.api.session_guard import current_user
 from swp.api.upload_limit import UploadLimit
 from swp.app.bootstrap import bootstrap
 from swp.config import get_settings
@@ -50,7 +50,7 @@ def create_app() -> FastAPI:
     app.include_router(session.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")
     # Every other router answers `unauthenticated` when auth is on and there is no session.
-    guarded = [Depends(require_session)]
+    guarded = [Depends(current_user)]
     for router in (
         plans.router,
         commands.router,
