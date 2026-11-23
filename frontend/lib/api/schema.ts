@@ -783,6 +783,7 @@ export interface components {
              * @enum {string}
              */
             rule: "rule_1" | "rule_2" | "rule_3" | "manual";
+            swap: components["schemas"]["MoveListSwap"] | null;
             /** To Location */
             to_location: string;
         };
@@ -794,6 +795,22 @@ export interface components {
             lines: components["schemas"]["MoveListLine"][];
             /** Round */
             round: number;
+        };
+        /**
+         * MoveListSwap
+         * @description A line's place in an intact swap: line `index` of `size`; `locations` is the
+         *     (from-location, to-location) of the group's first printed line, the same on every line.
+         */
+        MoveListSwap: {
+            /** Index */
+            index: number;
+            /** Locations */
+            locations: [
+                string,
+                string
+            ];
+            /** Size */
+            size: number;
         };
         /** MoveListView */
         MoveListView: {

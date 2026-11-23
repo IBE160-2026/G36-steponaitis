@@ -486,7 +486,7 @@ def test_fr23_answer_key_settled_check(
 
 
 def test_fr38_answer_key_move_list(key: dict[str, Any], data: ImportData, final: PlanState) -> None:
-    rounds = build_move_list_rounds(data, replay(data, final.steps).moves)
+    rounds = build_move_list_rounds(data, replay(data, final.steps).moves, steps=final.steps)
     want = key["move_list"]
 
     assert len(rounds) == want["rounds"] == 3
@@ -504,3 +504,4 @@ def test_fr38_answer_key_move_list(key: dict[str, Any], data: ImportData, final:
     for line in (line for r in rounds for line in r.lines):
         assert line.move_number == moves[(line.round, line.part)].move_number, line
         assert line.description == data.parts[line.part], line
+        assert line.swap is None, line  # 9100 <-> 9200 is a cycle of manual moves, not a swap
