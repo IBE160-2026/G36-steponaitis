@@ -11,6 +11,7 @@
 import type { CSSProperties } from "react";
 
 import type { AisleLayout } from "@/lib/api/imports";
+import type { MovementClass } from "@/lib/copy";
 
 import { BIN_HEIGHT, BIN_WIDTH, Bin } from "./bin";
 import { cellRect, runTops, type WallCellModel } from "./model";
@@ -195,6 +196,36 @@ export function WallMovesLayer({ marks, geometry, selectedEnds, scale = 1 }: Wal
         </g>
       )}
     </g>
+  );
+}
+
+/**
+ * A bin lifted by a drag (Story 12.2): the lifted bin with its shadow, in an SVG the size of its
+ * slot (the lift overflows it up and left as on the wall), drawn at `scale`.
+ */
+export function LiftedBin({ parts, scale = 1 }: { parts: readonly MovementClass[]; scale?: number }) {
+  const lift = liftedRect({ x: 0, y: 0 });
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width={BIN_WIDTH * scale}
+      height={BIN_HEIGHT * scale}
+      viewBox={`0 0 ${BIN_WIDTH} ${BIN_HEIGHT}`}
+      overflow="visible"
+      data-drag-lifted=""
+    >
+      <g style={{ filter: LIFT_SHADOW } as CSSProperties}>
+        <Bin
+          parts={parts}
+          x={lift.x}
+          y={lift.y}
+          width={lift.width}
+          height={lift.height}
+          drawnWidth={BIN_WIDTH * scale}
+        />
+      </g>
+    </svg>
   );
 }
 

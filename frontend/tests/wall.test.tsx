@@ -28,7 +28,8 @@ import {
 import { planWallStorageKey } from "@/lib/view-state/storage";
 import { parseLocationParams, planStepHref, VIEW_QUERY_KEYS } from "@/lib/view-state/urls";
 import { chooseAisle, readStoredAisle, storeAisle } from "@/modules/locations/aisle-choice";
-import { isListMode, LocationsWall } from "@/modules/locations/locations-page";
+import { isListMode } from "@/modules/locations/locations-page";
+import { LocationsWall } from "@/modules/locations/locations-wall";
 
 // Story 10.2 (FR-42, FR-14, FR-22): the bin wall of one aisle with its Key. Rendered to static
 // markup (Vitest has no DOM); the join, scale and aisle choice are tested as pure helpers.

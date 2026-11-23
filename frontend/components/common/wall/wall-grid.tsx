@@ -22,6 +22,10 @@
 // (`onMark`) instead of pinning the dialog or selecting a move, and sends nothing while
 // `disabledReason` is set. The tooltip and the cell's description start with the mark preview
 // ("Mark aisle A"); `onPreview` reports the hovered (else focused) location for a visible preview.
+//
+// Drag (Story 12.2, FR-51): with `drag` (only the Locations wall in One aisle), each located cell is
+// a dnd-kit droppable and an occupied one a draggable (`WallCell`, which holds each cell's markup);
+// a drag hides the tooltip and no tooltip shows while it is on.
 
 import {
   type KeyboardEvent,
@@ -44,7 +48,6 @@ import {
   cellName,
   cellPartLine,
   descriptionLine,
-  GAP_CELL_LABEL,
   levelName,
   markSourceText,
   moveArrivesFromText,
@@ -57,6 +60,7 @@ import {
 import { cellRect, runHeight, runTops, type WallCellModel } from "./model";
 import { cellMoveSelection, marksByCode, moveKey, type MoveMark, scrollBehavior } from "./moves";
 import { firstCell, nextCell } from "./navigation";
+import { WallCell, type WallDrag, WallGapCell } from "./wall-cell";
 import { cellRecommendations, partnerStrips, recommendationLinks, WallTooltip } from "./wall-tooltip";
 
 /** The pointer must rest this long on a cell before its tooltip shows. */
@@ -162,6 +166,11 @@ export type WallGridProps = {
   scrollTo?: { code: string; seq: number };
   /** Marking replaces pinning (Story 10.7): a click or `Enter` marks; no dialog, no move selection. */
   marking?: WallMarking;
+  /**
+   * Drag (Story 12.2, FR-51): only the Locations wall in One aisle passes it. Each located cell
+   * becomes a dnd-kit droppable (and a draggable when `canDrag`); the tooltip hides while a drag is on.
+   */
+  drag?: WallDrag;
 };
 
 /** Marking on the wall (Story 10.7): what a click or `Enter` on a location does, and its preview. */
@@ -212,6 +221,7 @@ export function WallGrid({
   onSelectMove,
   scrollTo,
   marking,
+  drag,
 }: WallGridProps) {
   const id = useId();
   const tops = useMemo(() => runTops(layout), [layout]);
@@ -272,6 +282,21 @@ export function WallGrid({
     },
     [],
   );
+
+  /** Keeps `cellElements` current (stable, so a drag binding's node refs are not reset on every render). */
+  const registerCell = useCallback((code: string, element: HTMLElement | null) => {
+    if (element) cellElements.current.set(code, element);
+    else cellElements.current.delete(code);
+  }, []);
+
+  // A drag hides the tooltip (and a pinned dialog); no tooltip shows while it is on.
+  const dragging = drag?.activeCode != null;
+  useEffect(() => {
+    if (!dragging) return;
+    clearTimeout(hoverTimer.current);
+    clearTimeout(graceTimer.current);
+    dispatch({ type: "escape" });
+  }, [dragging]);
 
   // A newly selected part's cell scrolls into view inside the scroll box, without taking focus.
   useEffect(() => {
@@ -443,7 +468,7 @@ export function WallGrid({
     reportPreview();
     clearTimeout(graceTimer.current);
     clearTimeout(hoverTimer.current);
-    if (tipState.current.pinned || tipState.current.code === code) return;
+    if (dragging || tipState.current.pinned || tipState.current.code === code) return;
     hoverTimer.current = setTimeout(() => dispatch({ type: "hover", code }), HOVER_DELAY_MS);
   }
 
@@ -542,35 +567,28 @@ export function WallGrid({
                       };
                       if (cell.code === null) {
                         return (
-                          <div
+                          <WallGapCell
                             key={cell.column}
-                            role="gridcell"
-                            aria-rowindex={header + 1 + row}
-                            aria-colindex={2 + cell.column}
-                            aria-label={GAP_CELL_LABEL}
-                            className="absolute"
+                            rowIndex={header + 1 + row}
+                            colIndex={2 + cell.column}
                             style={style ?? undefined}
-                            data-grid-gap=""
+                            dragging={dragging}
                           />
                         );
                       }
                       const code = cell.code;
                       const entry = byCode.get(code);
                       const selected = code === selectedCode;
-                      const active = code === activeCode;
                       const descriptionId = entry ? `${id}-desc-${runIndex}-${row}-${cell.column}` : undefined;
                       const preview = entry && marking ? marking.preview(entry) : undefined;
                       return (
-                        <div
+                        <WallCell
                           key={cell.column}
-                          ref={(element) => {
-                            if (element) cellElements.current.set(code, element);
-                            else cellElements.current.delete(code);
-                          }}
-                          role="gridcell"
-                          aria-rowindex={header + 1 + row}
-                          aria-colindex={2 + cell.column}
-                          aria-label={cellName({
+                          code={code}
+                          rowIndex={header + 1 + row}
+                          colIndex={2 + cell.column}
+                          style={style ?? undefined}
+                          name={cellName({
                             code,
                             level: entry?.location.level ?? cell.level,
                             best: entry?.location.is_best ?? cell.best !== "none",
@@ -579,15 +597,12 @@ export function WallGrid({
                             selected,
                             moves: (marksAt.get(code) ?? []).map(cellMoveText),
                           })}
-                          aria-describedby={descriptionId}
-                          aria-haspopup={entry && !marking ? "dialog" : undefined}
-                          aria-expanded={entry && !marking ? tip.pinned && tip.code === code : undefined}
-                          tabIndex={active ? 0 : -1}
-                          data-grid-cell={code}
-                          data-active={active ? "" : undefined}
-                          data-selected={selected ? "" : undefined}
-                          className="pointer-events-auto absolute cursor-pointer rounded-[3px] outline-none"
-                          style={style ?? undefined}
+                          descriptionId={descriptionId}
+                          hasPopup={entry !== undefined && !marking}
+                          expanded={entry && !marking ? tip.pinned && tip.code === code : undefined}
+                          active={code === activeCode}
+                          selected={selected}
+                          cellRef={registerCell}
                           onFocus={() => onCellFocus(code)}
                           onKeyDown={(event) => onCellKeyDown(event, { ...cell, code })}
                           onClick={() => {
@@ -601,28 +616,40 @@ export function WallGrid({
                           }}
                           onPointerEnter={() => onCellPointerEnter(code)}
                           onPointerLeave={onPointerLeave}
-                        >
-                          {descriptionId && entry && (
-                            <div id={descriptionId} hidden>
-                              {preview !== undefined && <p data-mark-preview-line="">{descriptionLine(preview)}</p>}
-                              {entry.parts.map((part) => (
-                                <p key={part.part}>{descriptionLine(cellPartLine(part))}</p>
-                              ))}
-                              {entry.covering_marks.map((mark, index) => (
-                                <p key={`mark-${index}`}>{descriptionLine(markSourceText(mark))}</p>
-                              ))}
-                              <p>{descriptionLine(walkPathText(entry.walk_path))}</p>
-                              {crossAisleLines(marksAt.get(code) ?? [], moves, layout.aisle).map((line, index) => (
-                                <p key={`from-${index}`}>{descriptionLine(line.description)}</p>
-                              ))}
-                              {partnerStrips(touchingByCode.get(code) ?? []).map((partner) => (
-                                <p key={`partner-${partner.id}`}>
-                                  {descriptionLine(partnerStripText(partner.partner, partner.sharedJobs, partner.number))}
-                                </p>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                          drag={
+                            drag && {
+                              draggable: entry !== undefined && drag.canDrag(entry),
+                              drop: {
+                                dragging,
+                                vacated: drag.activeCode === code,
+                                hint: drag.over?.code === code ? drag.over.hint : undefined,
+                              },
+                            }
+                          }
+                          description={
+                            descriptionId &&
+                            entry && (
+                              <div id={descriptionId} hidden>
+                                {preview !== undefined && <p data-mark-preview-line="">{descriptionLine(preview)}</p>}
+                                {entry.parts.map((part) => (
+                                  <p key={part.part}>{descriptionLine(cellPartLine(part))}</p>
+                                ))}
+                                {entry.covering_marks.map((mark, index) => (
+                                  <p key={`mark-${index}`}>{descriptionLine(markSourceText(mark))}</p>
+                                ))}
+                                <p>{descriptionLine(walkPathText(entry.walk_path))}</p>
+                                {crossAisleLines(marksAt.get(code) ?? [], moves, layout.aisle).map((line, index) => (
+                                  <p key={`from-${index}`}>{descriptionLine(line.description)}</p>
+                                ))}
+                                {partnerStrips(touchingByCode.get(code) ?? []).map((partner) => (
+                                  <p key={`partner-${partner.id}`}>
+                                    {descriptionLine(partnerStripText(partner.partner, partner.sharedJobs, partner.number))}
+                                  </p>
+                                ))}
+                              </div>
+                            )
+                          }
+                        />
                       );
                     })}
                 </div>

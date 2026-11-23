@@ -14,7 +14,7 @@ import {
 } from "@/lib/copy";
 import { planWallStorageKey } from "@/lib/view-state/storage";
 import { chooseScope, readStoredWall, storeAisle, storeWall } from "@/modules/locations/aisle-choice";
-import { LocationsWall } from "@/modules/locations/locations-page";
+import { LocationsWall } from "@/modules/locations/locations-wall";
 import { MiniWall } from "@/modules/locations/mini-wall";
 import { type MiniWallBox, warehouseRoute, WholeWarehouse } from "@/modules/locations/warehouse-view";
 

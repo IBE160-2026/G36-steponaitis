@@ -50,6 +50,7 @@ export {
   MOVE_ARROW,
   NOTE_HEIGHT,
   NOTE_WIDTH,
+  LiftedBin,
   WallHoverNote,
   WallMoveMarkers,
   WallMovesLayer,
@@ -79,4 +80,12 @@ export {
   WallTooltip,
 } from "./wall-tooltip";
 export { Slot, SlotNone } from "./slot";
+export {
+  WallCell,
+  type WallCellDrop,
+  type WallCellProps,
+  type WallDrag,
+  type WallDropHint,
+  WallGapCell,
+} from "./wall-cell";
 export { WallPanel } from "./wall-panel";

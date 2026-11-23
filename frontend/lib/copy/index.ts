@@ -1002,3 +1002,35 @@ export function undoFirstText(preview: UndoPreview): string {
       return `Undo restores move ${number} first`;
   }
 }
+
+// Drag on the wall (Story 12.2, FR-51, UX-DR50): the drop target hints, the drop dialog and the
+// toast of a drop that moved several parts. One-part drops reuse the manual move toast.
+
+/** The hint on an empty location the dragged part may move to. */
+export const MOVE_HERE = "Move here";
+
+/** The hint on an occupied location (Story 12.3 adds what a drop there does). */
+export const SWAP_OR_PUT_TOGETHER = "Swap or put together";
+
+/** Why the drop dialog's Move waits: no part is checked. */
+export const CHOOSE_PART_TO_MOVE = "Choose at least one part to move.";
+
+/** The drop dialog's title: "Move to G-14-01-04". */
+export function dropDialogTitle(to: string): string {
+  return `Move to ${to}`;
+}
+
+/** The drop dialog's heading over its checkboxes: "Parts to move from G-14-04-02". */
+export function partsToMoveFrom(from: string): string {
+  return `Parts to move from ${from}`;
+}
+
+/** A drop row's facts: "Fast-moving · 4". */
+export function dropPartStats(movementClass: MovementClass, stock: string): string {
+  return `${CLASS_LABELS[movementClass]} · ${formatNumber(stock)}`;
+}
+
+/** The toast of a drop that moved several parts: "Moved 2 parts: G-14-04-02 → G-14-01-04 (Manual, round 1)." */
+export function movedPartsToast(count: number, from: string, to: string, round: number): string {
+  return `Moved ${formatNumber(count)} parts: ${from} → ${to} (Manual, round ${formatNumber(round)}).`;
+}
