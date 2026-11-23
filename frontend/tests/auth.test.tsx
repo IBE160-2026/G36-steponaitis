@@ -1,23 +1,60 @@
-import { createRef } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createRef, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { Toolbar } from "@/components/common/app-shell/toolbar";
 import { ApiError } from "@/lib/api/errors";
-import { SESSION_KEY } from "@/lib/api/session";
+import { type Session, SESSION_KEY } from "@/lib/api/session";
 import { isAuthPath, LOGIN_HREF, SAVED_PLANS_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
 import {
   fieldErrorsOf,
   firstFailingField,
+  LOGIN_LEAD,
+  LOGIN_TITLE,
+  postLogin,
+  postLogout,
   postSignup,
+  runLogin,
+  runLogout,
   runSignup,
   SIGNUP_TITLE,
   type SignupForm,
   USERNAME_HINT,
 } from "@/modules/auth/api";
+import { AuthGuard, followGuard, guardDecision } from "@/modules/auth/auth-guard";
+import { afterFailedLogin, focusAfterFailedLogin, LoginCard, type LoginFormState } from "@/modules/auth/login-page";
+import { LogoutButton } from "@/modules/auth/logout-button";
 import { PasswordInput } from "@/modules/auth/password-input";
 import { focusField, SignupCard, type SignupFieldRefs } from "@/modules/auth/signup-page";
 
-// Story 9.1: Create account (FR-39, UX-DR53).
+// Story 9.1: Create account (FR-39, UX-DR53). Story 9.2: Log in, Log out and the page guard (FR-40).
+
+// The guard, Log out and the toolbar read the path and the session through hooks; these stand in.
+const nav = vi.hoisted(() => ({
+  pathname: "/plans",
+  session: { isPending: false, data: undefined as unknown },
+  replace: vi.fn(),
+  push: vi.fn(),
+}));
+vi.mock("next/navigation", () => ({
+  usePathname: () => nav.pathname,
+  useRouter: () => ({ replace: nav.replace, push: nav.push }),
+  notFound: () => {
+    throw new Error("not found");
+  },
+}));
+vi.mock("@/lib/api/session", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api/session")>()),
+  useSession: () => nav.session,
+}));
+
+afterEach(() => {
+  nav.pathname = "/plans";
+  nav.session = { isPending: false, data: undefined };
+  nav.replace.mockReset();
+  nav.push.mockReset();
+});
 
 const html = renderToStaticMarkup;
 const FORM: SignupForm = { username: "Kari7", password: "secret", password_repeat: "secret" };
@@ -89,7 +126,8 @@ describe("fr39 create account card", () => {
     const markup = html(
       <SignupCard values={FORM} errors={{}} formError="Something went wrong. Try again." passwordShown={false} />,
     );
-    expect(markup).toContain('role="alert"');
+    expect(markup.match(/role="alert"/g)).toHaveLength(1);
+    expect(markup).toMatch(/role="alert"[^>]*border-error bg-error-tint/);
     expect(markup).toContain("Something went wrong. Try again.");
   });
 });
@@ -211,5 +249,217 @@ describe("fr39 signup success", () => {
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).code).toBe("validation_failed");
     expect(fieldErrorsOf(error as ApiError)).toEqual({ username: TAKEN });
+  });
+});
+
+// ---- Story 9.2 (FR-40) ----
+
+const WRONG_LOGIN = "Wrong username or password. Check both and try again.";
+const AUTH_ON: Session = { user: null, feature_auth: true, feature_demo: false, max_upload_bytes: 1 };
+
+function withQueryClient(node: ReactNode): string {
+  return html(<QueryClientProvider client={new QueryClient()}>{node}</QueryClientProvider>);
+}
+
+describe("fr40 log in card", () => {
+  it("fr40_card_shows_title_lead_fields_show_submit_and_create_account_link", () => {
+    const markup = html(<LoginCard values={{ username: "", password: "" }} passwordShown={false} />);
+    expect(markup).toContain("max-w-[380px]");
+    expect(markup.match(new RegExp(`>${LOGIN_TITLE}<`, "g"))).toHaveLength(2); // title and submit
+    expect(LOGIN_LEAD).toBe("Plans are shared by everyone who logs in.");
+    expect(markup).toContain(LOGIN_LEAD);
+    expect(markup).toContain(">Username</label>");
+    expect(markup).toContain(">Password</label>");
+    expect(markup).toContain(">Show</button>");
+    expect(markup).toMatch(/<button[^>]*type="submit"[^>]*w-full/);
+    expect(markup).toContain("No account?");
+    expect(markup).toContain(`href="${SIGNUP_HREF}"`);
+    expect(markup).toContain(">Create account</a>");
+    expect(markup).not.toContain('role="alert"');
+  });
+
+  it("fr40_wrong_login_shows_one_alert_keeps_username_and_hides_the_cleared_password", () => {
+    const before: LoginFormState = {
+      values: { username: "Kari7", password: "nope" },
+      formError: null,
+      passwordShown: true,
+    };
+    const after = afterFailedLogin(before, { kind: "wrong-login", message: WRONG_LOGIN });
+    expect(after).toEqual({ values: { username: "Kari7", password: "" }, formError: WRONG_LOGIN, passwordShown: false });
+
+    const markup = html(
+      <LoginCard values={after.values} formError={after.formError} passwordShown={after.passwordShown} />,
+    );
+    expect(markup.match(/role="alert"/g)).toHaveLength(1);
+    expect(markup).toMatch(/role="alert"[^>]*border-error bg-error-tint/);
+    expect(markup).toContain(WRONG_LOGIN);
+    // The alert sits above the fields.
+    expect(markup.indexOf('role="alert"')).toBeLessThan(markup.indexOf('name="username"'));
+    expect(inputTag(markup, "username")).toContain('value="Kari7"');
+    expect(inputTag(markup, "password")).toContain('value=""');
+    expect(inputTag(markup, "password")).toContain('type="password"');
+  });
+
+  it("fr40_wrong_login_focuses_the_password", () => {
+    const focus = vi.fn();
+    const ref = createRef<HTMLInputElement>();
+    (ref as { current: unknown }).current = { focus };
+    focusAfterFailedLogin({ kind: "wrong-login", message: WRONG_LOGIN }, ref);
+    expect(focus).toHaveBeenCalledOnce();
+    focusAfterFailedLogin({ kind: "failed", message: "x" }, ref);
+    expect(focus).toHaveBeenCalledOnce();
+  });
+
+  it("fr40_other_errors_keep_both_fields", () => {
+    const before: LoginFormState = { values: { username: "Kari7", password: "secret" }, formError: null, passwordShown: true };
+    expect(afterFailedLogin(before, { kind: "failed", message: "Something went wrong. Try again." })).toEqual({
+      ...before,
+      formError: "Something went wrong. Try again.",
+    });
+  });
+});
+
+describe("fr40 log in requests", () => {
+  it("fr40_unauthenticated_is_a_wrong_login_and_never_navigates", async () => {
+    const navigate = vi.fn();
+    const invalidateSession = vi.fn();
+    const outcome = await runLogin(
+      { username: "Kari7", password: "nope" },
+      {
+        post: async () => Promise.reject(new ApiError(401, "unauthenticated", WRONG_LOGIN)),
+        invalidateSession,
+        navigate,
+      },
+    );
+    expect(outcome).toEqual({ kind: "wrong-login", message: WRONG_LOGIN });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(invalidateSession).not.toHaveBeenCalled();
+
+    const other = await runLogin(
+      { username: "Kari7", password: "nope" },
+      { post: async () => Promise.reject(new TypeError("network")), invalidateSession, navigate },
+    );
+    expect(other).toEqual({ kind: "failed", message: "Something went wrong. Try again." });
+  });
+
+  it("fr40_success_awaits_the_session_refetch_then_opens_saved_plans", async () => {
+    const calls: string[] = [];
+    const outcome = await runLogin(
+      { username: "kari7", password: "secret" },
+      {
+        post: async () => ({ user: "Kari7" }),
+        invalidateSession: async () => {
+          await Promise.resolve();
+          calls.push("invalidate");
+        },
+        navigate: () => calls.push("navigate"),
+      },
+    );
+    expect(outcome).toEqual({ kind: "logged-in", user: "Kari7" });
+    expect(calls).toEqual(["invalidate", "navigate"]);
+  });
+
+  it("fr40_post_login_and_logout_send_json_once", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ user: "Kari7" }), { status: 200 }));
+    await expect(postLogin({ username: "kari7", password: "secret" }, fetchImpl)).resolves.toEqual({ user: "Kari7" });
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect([url, init.method]).toEqual(["/api/auth/login", "POST"]);
+
+    const logoutFetch = vi.fn(async () => new Response(null, { status: 204 }));
+    await expect(postLogout(logoutFetch)).resolves.toBeUndefined();
+    expect(logoutFetch).toHaveBeenCalledOnce();
+    expect((logoutFetch.mock.calls[0] as unknown as [string, RequestInit])[0]).toBe("/api/auth/logout");
+  });
+});
+
+describe("fr40 page guard", () => {
+  const user: Session = { ...AUTH_ON, user: "Kari7" };
+
+  it("fr40_guard_decides_per_path_and_session", () => {
+    expect(guardDecision("/plans", { isPending: true })).toBe("wait");
+    expect(guardDecision("/plans", { isPending: false, data: AUTH_ON })).toBe("redirect");
+    expect(guardDecision("/", { isPending: false, data: AUTH_ON })).toBe("redirect");
+    expect(guardDecision("/plans", { isPending: false, data: user })).toBe("render");
+    expect(guardDecision("/plans", { isPending: false, data: { ...AUTH_ON, feature_auth: false } })).toBe("render");
+    expect(guardDecision("/plans", { isPending: false, data: undefined })).toBe("render"); // session failed
+    for (const path of [LOGIN_HREF, SIGNUP_HREF]) {
+      expect(guardDecision(path, { isPending: true })).toBe("render");
+      expect(guardDecision(path, { isPending: false, data: AUTH_ON })).toBe("render");
+    }
+  });
+
+  it("fr40_guard_replaces_to_login_only_on_redirect", () => {
+    const router = { replace: vi.fn() };
+    followGuard("render", router);
+    followGuard("wait", router);
+    expect(router.replace).not.toHaveBeenCalled();
+    followGuard("redirect", router);
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+  });
+
+  it("fr40_guard_renders_nothing_without_a_session_and_children_otherwise", () => {
+    const app = (
+      <AuthGuard>
+        <p>app</p>
+      </AuthGuard>
+    );
+    nav.session = { isPending: true, data: undefined };
+    expect(html(app)).toBe("");
+    nav.session = { isPending: false, data: AUTH_ON };
+    expect(html(app)).toBe("");
+    nav.session = { isPending: false, data: user };
+    expect(html(app)).toBe("<p>app</p>");
+    nav.session = { isPending: false, data: { ...AUTH_ON, feature_auth: false } };
+    expect(html(app)).toBe("<p>app</p>");
+    nav.session = { isPending: false, data: AUTH_ON };
+    nav.pathname = LOGIN_HREF;
+    expect(html(app)).toBe("<p>app</p>");
+  });
+});
+
+describe("fr40 log out", () => {
+  it("fr40_logout_clears_the_cache_marks_logged_out_then_opens_login", async () => {
+    const calls: string[] = [];
+    const outcome = await runLogout({
+      post: async () => {
+        calls.push("post");
+      },
+      clearCache: () => calls.push("clear"),
+      setLoggedOut: () => calls.push("logged-out"),
+      navigate: () => calls.push("navigate"),
+    });
+    expect(outcome).toEqual({ kind: "logged-out" });
+    expect(calls).toEqual(["post", "clear", "logged-out", "navigate"]);
+  });
+
+  it("fr40_failed_logout_keeps_the_session", async () => {
+    const navigate = vi.fn();
+    const clearCache = vi.fn();
+    const outcome = await runLogout({
+      post: async () => Promise.reject(new TypeError("network")),
+      clearCache,
+      setLoggedOut: vi.fn(),
+      navigate,
+    });
+    expect(outcome).toEqual({ kind: "failed", message: "Something went wrong. Try again." });
+    expect(clearCache).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("fr40_logout_button_shows_only_with_auth_and_a_user", () => {
+    nav.session = { isPending: false, data: { ...AUTH_ON, user: "Kari7" } };
+    expect(withQueryClient(<LogoutButton />)).toContain(">Log out</button>");
+    nav.session = { isPending: false, data: AUTH_ON };
+    expect(withQueryClient(<LogoutButton />)).toBe("");
+    nav.session = { isPending: false, data: { ...AUTH_ON, user: "Kari7", feature_auth: false } };
+    expect(withQueryClient(<LogoutButton />)).toBe("");
+  });
+
+  it("fr40_toolbar_puts_the_account_slot_at_the_right_end_off_auth_pages", () => {
+    const account = <button type="button">Account</button>;
+    nav.pathname = SAVED_PLANS_HREF;
+    expect(withQueryClient(<Toolbar account={account} />)).toMatch(/ml-auto[^>]*><button type="button">Account/);
+    nav.pathname = LOGIN_HREF;
+    expect(withQueryClient(<Toolbar account={account} />)).not.toContain("Account");
   });
 });

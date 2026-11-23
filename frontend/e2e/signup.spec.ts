@@ -2,7 +2,7 @@ import { expect, type Page, test } from "./support/test";
 
 // UJ-5 "other ways in": Create account (Story 9.1, FR-39, UX-DR53). The e2e server runs with
 // FEATURE_AUTH=true and reuses backend/var/e2e.db within a run, so every test signs up a
-// fresh username.
+// fresh username. These tests start logged out (the shared fixture logs every other spec in).
 
 const TAKEN = "That username is taken. Try another.";
 const MISMATCH = "The passwords don’t match.";
@@ -23,6 +23,8 @@ async function fill(page: Page, username: string, password: string, repeat: stri
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByLabel("Repeat password").fill(repeat);
 }
+
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe("fr39 create account", () => {
   test.beforeEach(async ({ page }) => {

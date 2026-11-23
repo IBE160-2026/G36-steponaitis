@@ -44,7 +44,8 @@ export default defineConfig({
     env: {
       DATABASE_URL: `sqlite:///${join(repoRoot, "backend", "var", "e2e.db")}`,
       NEXT_TELEMETRY_DISABLED: "1",
-      // Story 9.1: Create account needs auth on; no page guard exists until Story 9.2.
+      // Auth on (Stories 9.1, 9.2): every page needs a session, so the shared `test` in
+      // e2e/support/test.ts logs each worker in as a fixed e2e account.
       FEATURE_AUTH: "true",
     },
   },

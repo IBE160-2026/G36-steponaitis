@@ -1,4 +1,4 @@
-"""Auth service (FR-39, AD-10): Create account and the `swp_session` cookie.
+"""Auth service (FR-39, FR-40, AD-10): Create account, Log in and the `swp_session` cookie.
 
 The only module that uses bcrypt and PyJWT. The caller passes `now`; ids come from uuid4 here.
 """
@@ -6,12 +6,20 @@ The only module that uses bcrypt and PyJWT. The caller passes `now`; ids come fr
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from functools import cache
 
 import bcrypt
 import jwt
 
 from swp.config import get_settings
-from swp.domain.accounts import TAKEN, FieldError, signup_errors, username_key
+from swp.domain.accounts import (
+    PASSWORD_MAX_BYTES,
+    TAKEN,
+    FieldError,
+    signup_errors,
+    username_error,
+    username_key,
+)
 from swp.domain.errors import DomainError
 from swp.store import users as store
 
@@ -19,6 +27,8 @@ SESSION_COOKIE = "swp_session"
 SESSION_DAYS = 30
 SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60  # seconds, the cookie's Max-Age
 JWT_ALGORITHM = "HS256"
+
+WRONG_LOGIN = "Wrong username or password. Check both and try again."
 
 
 @dataclass(frozen=True)
@@ -81,6 +91,40 @@ def signup(username: str, password: str, password_repeat: str, *, now: datetime)
     )
     if not store.insert_user(user):
         raise _taken()
+    return SignedUp(username=user.username, token=session_token(user.id, now=now))
+
+
+@cache
+def _dummy_hash() -> bytes:
+    """A fixed hash checked for unknown usernames, so timing does not reveal accounts."""
+    return bcrypt.hashpw(b"swp-dummy-password", bcrypt.gensalt())
+
+
+def _password_bytes(password: str) -> bytes | None:
+    """`password` as UTF-8, or None when it has no UTF-8 form or is too long for bcrypt."""
+    try:
+        encoded = password.encode("utf-8")
+    except UnicodeEncodeError:
+        return None
+    return encoded if len(encoded) <= PASSWORD_MAX_BYTES else None
+
+
+def login(username: str, password: str, *, now: datetime) -> SignedUp:
+    """The stored username and a session token; `unauthenticated` for any failed login.
+
+    The message never says which part was wrong. An unknown username still runs one bcrypt
+    check against a dummy hash.
+    """
+    encoded = _password_bytes(password)
+    # A malformed username (lone surrogate, NUL, ...) never reaches the database.
+    if username_error(username) is not None or encoded is None or not encoded:
+        raise DomainError("unauthenticated", WRONG_LOGIN)
+    user = store.get_user_by_key(username_key(username))
+    if user is None:
+        bcrypt.checkpw(encoded, _dummy_hash())
+        raise DomainError("unauthenticated", WRONG_LOGIN)
+    if not bcrypt.checkpw(encoded, user.password_hash.encode("ascii")):
+        raise DomainError("unauthenticated", WRONG_LOGIN)
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 

@@ -1,6 +1,6 @@
 import { expect as baseExpect, test as base } from "@playwright/test";
 
-import type { Locator, Page } from "@playwright/test";
+import type { BrowserContextOptions, Locator, Page, PlaywrightWorkerArgs } from "@playwright/test";
 
 export { type APIRequestContext, type Locator, type Page } from "@playwright/test";
 
@@ -116,11 +116,58 @@ export function toasts(page: Page): Locator {
   return page.locator("[data-sonner-toaster]");
 }
 
-// Shared `test` for every e2e spec. After the test body, unroute all page.route handlers with
-// ignoreErrors before the page closes, so a handler still inside route.fetch/continue cannot report
-// "route.fetch: Test ended" outside any test (CI run 45017052318). Not "wait": a handler awaiting a
-// held promise would hang teardown.
-export const test = base.extend({
+type StorageState = Exclude<BrowserContextOptions["storageState"], string | undefined>;
+
+/** The fixed e2e account every spec runs as (Story 9.2): the server runs with FEATURE_AUTH on. */
+export const E2E_USER = { username: "e2eplanner", password: "e2e-secret" } as const;
+
+const SAME_SITE = { "Sec-Fetch-Site": "same-origin" };
+
+/**
+ * Log the e2e account in through the API and return its cookie as a storage state. Signs up when
+ * the login is 401 (a fresh database) and logs in again when the sign-up says taken (another
+ * worker won the race). Undefined when /api/auth/login is 404: a reused server with auth off.
+ */
+async function logInE2eUser(playwright: PlaywrightWorkerArgs["playwright"], baseURL: string | undefined) {
+  const api = await playwright.request.newContext({ baseURL, extraHTTPHeaders: SAME_SITE });
+  try {
+    const logIn = () => api.post("/api/auth/login", { data: E2E_USER });
+    let response = await logIn();
+    if (response.status() === 404) return undefined;
+    if (response.status() === 401) {
+      const signup = await api.post("/api/auth/signup", {
+        data: { ...E2E_USER, password_repeat: E2E_USER.password },
+      });
+      response = signup.status() === 201 ? signup : await logIn();
+    }
+    if (!response.ok()) throw new Error(`e2e login failed: ${response.status()} ${await response.text()}`);
+    return (await api.storageState()) as StorageState;
+  } finally {
+    await api.dispose();
+  }
+}
+
+// Shared `test` for every e2e spec.
+// - Every browser context and the `request` fixture carry the e2e account's session cookie (one
+//   login per worker). A spec that needs a logged-out visitor opts out with
+//   `test.use({ storageState: { cookies: [], origins: [] } })`.
+// - After the test body, unroute all page.route handlers with ignoreErrors before the page closes,
+//   so a handler still inside route.fetch/continue cannot report "route.fetch: Test ended" outside
+//   any test (CI run 45017052318). Not "wait": a handler awaiting a held promise would hang teardown.
+export const test = base.extend<object, { e2eSession: StorageState | undefined }>({
+  e2eSession: [
+    async ({ playwright }, provide, workerInfo) => {
+      await provide(await logInE2eUser(playwright, workerInfo.project.use.baseURL));
+    },
+    { scope: "worker" },
+  ],
+  storageState: async ({ e2eSession }, provide) => provide(e2eSession),
+  // Playwright's own `request` ignores `storageState`; this one carries the same cookie.
+  request: async ({ playwright, baseURL, storageState }, provide) => {
+    const request = await playwright.request.newContext({ baseURL, storageState });
+    await provide(request);
+    await request.dispose();
+  },
   page: async ({ page }, runTest) => {
     await runTest(page);
     await page.unrouteAll({ behavior: "ignoreErrors" });

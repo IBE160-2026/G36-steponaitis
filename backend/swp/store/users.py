@@ -38,18 +38,27 @@ def insert_user(user: StoredUser) -> bool:
     return True
 
 
+def _stored(row: UserRow) -> StoredUser:
+    return StoredUser(
+        id=row.id,
+        username=row.username,
+        username_key=row.username_key,
+        password_hash=row.password_hash,
+        created_at=row.created_at,
+    )
+
+
 def get_user(user_id: uuid.UUID) -> StoredUser | None:
     with transaction() as session:
         row = session.get(UserRow, user_id)
-        if row is None:
-            return None
-        return StoredUser(
-            id=row.id,
-            username=row.username,
-            username_key=row.username_key,
-            password_hash=row.password_hash,
-            created_at=row.created_at,
-        )
+        return _stored(row) if row is not None else None
+
+
+def get_user_by_key(key: str) -> StoredUser | None:
+    """The account whose casefolded `username_key` is `key`, or None."""
+    with transaction() as session:
+        row = session.scalars(select(UserRow).where(UserRow.username_key == key).limit(1)).first()
+        return _stored(row) if row is not None else None
 
 
 def username_key_taken(key: str) -> bool:

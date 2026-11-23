@@ -1,4 +1,4 @@
-"""POST /api/auth/signup: Create account and start a session (FR-39, AD-10).
+"""POST /api/auth/signup, /login and /logout: accounts and the session (FR-39, FR-40, AD-10).
 
 With `FEATURE_AUTH` off, every /api/auth/* path is `not_found`.
 """
@@ -8,7 +8,12 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, Response, status
 
 from swp.api.errors import NOT_FOUND, error_responses
-from swp.api.schemas.auth import SignupRequest, SignupResponse
+from swp.api.schemas.auth import (
+    LoginRequest,
+    LoginResponse,
+    SignupRequest,
+    SignupResponse,
+)
 from swp.app import auth
 from swp.domain.errors import DomainError
 
@@ -35,6 +40,16 @@ def set_session_cookie(response: Response, token: str) -> None:
     )
 
 
+def clear_session_cookie(response: Response) -> None:
+    response.delete_cookie(
+        auth.SESSION_COOKIE,
+        path="/",
+        secure=auth.cookie_secure(),
+        httponly=True,
+        samesite="lax",
+    )
+
+
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
@@ -46,6 +61,22 @@ def signup(body: SignupRequest, response: Response) -> SignupResponse:
     )
     set_session_cookie(response, signed_up.token)
     return SignupResponse(user=signed_up.username)
+
+
+@router.post("/login", responses=error_responses(401, 403, 404, 422))
+def login(body: LoginRequest, response: Response) -> LoginResponse:
+    logged_in = auth.login(body.username, body.password, now=datetime.now(UTC))
+    set_session_cookie(response, logged_in.token)
+    return LoginResponse(user=logged_in.username)
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=error_responses(403, 404),
+)
+def logout(response: Response) -> None:
+    clear_session_cookie(response)
 
 
 @router.api_route("/{path:path}", methods=ALL_METHODS, include_in_schema=False)

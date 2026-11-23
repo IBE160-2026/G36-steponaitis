@@ -7,12 +7,10 @@
 // does not exist.
 
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { type FormEvent, type RefObject, useId, useRef, useState } from "react";
 
 import { Button } from "@/components/common/button";
-import { Icon } from "@/components/common/icons";
 import { Input, InputError } from "@/components/common/input";
 import { SESSION_KEY, useSession } from "@/lib/api/session";
 import { LOGIN_HREF, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
@@ -25,6 +23,7 @@ import {
   type SignupForm,
   USERNAME_HINT,
 } from "./api";
+import { AuthAlert, AuthCard } from "./auth-card";
 import { PasswordInput } from "./password-input";
 
 const SUBMITTING_REASON = "Creating the account.";
@@ -73,99 +72,79 @@ export function SignupCard({
   } satisfies Record<SignupField, string>;
   const errorId = (field: SignupField) => (errors[field] ? `${ids[field]}-error` : undefined);
   const hintId = `${id}-username-hint`;
-  const titleId = `${id}-title`;
 
   return (
-    <div className="flex justify-center px-page-gutter py-10">
-      <section
-        aria-labelledby={titleId}
-        className="flex w-full max-w-[380px] flex-col gap-5 rounded-lg border border-border bg-surface p-6"
-      >
-        <h1 id={titleId} className="type-page-title text-ink">
-          {SIGNUP_TITLE}
-        </h1>
-        <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor={ids.username} className="type-body-strong text-ink">
-              Username
-            </label>
-            <Input
-              ref={usernameRef}
-              id={ids.username}
-              name="username"
-              autoComplete="username"
-              autoCapitalize="none"
-              spellCheck={false}
-              className="h-[40px]!"
-              value={values.username}
-              aria-describedby={hintId}
-              errorId={errorId("username")}
-              onChange={(event) => onChange("username", event.currentTarget.value)}
-            />
-            <p id={hintId} className="text-ink-secondary type-caption">
-              {USERNAME_HINT}
-            </p>
-            {errors.username && <InputError id={`${ids.username}-error`}>{errors.username}</InputError>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor={ids.password} className="type-body-strong text-ink">
-              Password
-            </label>
-            <PasswordInput
-              ref={passwordRef}
-              id={ids.password}
-              name="password"
-              autoComplete="new-password"
-              value={values.password}
-              shown={passwordShown}
-              onShownChange={onPasswordShownChange}
-              errorId={errorId("password")}
-              onChange={(event) => onChange("password", event.currentTarget.value)}
-            />
-            {errors.password && <InputError id={`${ids.password}-error`}>{errors.password}</InputError>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor={ids.password_repeat} className="type-body-strong text-ink">
-              Repeat password
-            </label>
-            <Input
-              ref={passwordRepeatRef}
-              id={ids.password_repeat}
-              name="password_repeat"
-              type="password"
-              autoComplete="new-password"
-              className="h-[40px]!"
-              value={values.password_repeat}
-              errorId={errorId("password_repeat")}
-              onChange={(event) => onChange("password_repeat", event.currentTarget.value)}
-            />
-            {errors.password_repeat && (
-              <InputError id={`${ids.password_repeat}-error`}>{errors.password_repeat}</InputError>
-            )}
-          </div>
-          {formError && (
-            <p role="alert" className="flex items-start gap-2 text-ink type-body">
-              <Icon name="warning" size={16} className="mt-px text-error" />
-              <span>{formError}</span>
-            </p>
+    <AuthCard title={SIGNUP_TITLE} linkPrompt="Have an account?" linkHref={LOGIN_HREF} linkLabel="Log in">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <label htmlFor={ids.username} className="type-body-strong text-ink">
+            Username
+          </label>
+          <Input
+            ref={usernameRef}
+            id={ids.username}
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            className="h-[40px]!"
+            value={values.username}
+            aria-describedby={hintId}
+            errorId={errorId("username")}
+            onChange={(event) => onChange("username", event.currentTarget.value)}
+          />
+          <p id={hintId} className="text-ink-secondary type-caption">
+            {USERNAME_HINT}
+          </p>
+          {errors.username && <InputError id={`${ids.username}-error`}>{errors.username}</InputError>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor={ids.password} className="type-body-strong text-ink">
+            Password
+          </label>
+          <PasswordInput
+            ref={passwordRef}
+            id={ids.password}
+            name="password"
+            autoComplete="new-password"
+            value={values.password}
+            shown={passwordShown}
+            onShownChange={onPasswordShownChange}
+            errorId={errorId("password")}
+            onChange={(event) => onChange("password", event.currentTarget.value)}
+          />
+          {errors.password && <InputError id={`${ids.password}-error`}>{errors.password}</InputError>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor={ids.password_repeat} className="type-body-strong text-ink">
+            Repeat password
+          </label>
+          <Input
+            ref={passwordRepeatRef}
+            id={ids.password_repeat}
+            name="password_repeat"
+            type="password"
+            autoComplete="new-password"
+            className="h-[40px]!"
+            value={values.password_repeat}
+            errorId={errorId("password_repeat")}
+            onChange={(event) => onChange("password_repeat", event.currentTarget.value)}
+          />
+          {errors.password_repeat && (
+            <InputError id={`${ids.password_repeat}-error`}>{errors.password_repeat}</InputError>
           )}
-          <Button
-            type="submit"
-            variant="primary"
-            className="w-full"
-            disabledReason={busy ? SUBMITTING_REASON : undefined}
-          >
-            {SIGNUP_TITLE}
-          </Button>
-        </form>
-        <p className="text-ink-secondary type-body">
-          Have an account?{" "}
-          <Link href={LOGIN_HREF} className="text-ink underline underline-offset-2">
-            Log in
-          </Link>
-        </p>
-      </section>
-    </div>
+        </div>
+        {formError && <AuthAlert message={formError} />}
+        <Button
+          type="submit"
+          variant="primary"
+          className="w-full"
+          disabledReason={busy ? SUBMITTING_REASON : undefined}
+        >
+          {SIGNUP_TITLE}
+        </Button>
+      </form>
+    </AuthCard>
   );
 }
 

@@ -398,6 +398,29 @@ def test_nfr6_cross_site_signup_rejected(auth_client: TestClient) -> None:
     assert _user_count() == 0
 
 
+@pytest.mark.parametrize(
+    ("path", "body"),
+    [
+        ("/api/auth/login", {"username": "Kari7", "password": "secret"}),
+        ("/api/auth/logout", None),
+    ],
+    ids=["login", "logout"],
+)
+def test_nfr6_cross_site_login_and_logout_rejected(
+    auth_client: TestClient, path: str, body: dict[str, str] | None
+) -> None:
+    assert auth_client.post("/api/auth/signup", json=SIGNUP, headers=SAME_ORIGIN).status_code == 201
+    auth_client.cookies.clear()
+
+    response = auth_client.post(
+        path, json=body, headers={"Sec-Fetch-Site": "cross-site", **SAME_ORIGIN}
+    )
+
+    assert response.status_code == 403
+    assert _error(response)["code"] == "forbidden_origin"
+    assert "set-cookie" not in response.headers
+
+
 def test_fr39_signup_missing_field_rejected(auth_client: TestClient) -> None:
     response = auth_client.post(
         "/api/auth/signup", json={"username": "Kari7", "password": "secret"}, headers=SAME_ORIGIN

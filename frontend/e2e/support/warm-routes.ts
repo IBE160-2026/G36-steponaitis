@@ -27,7 +27,7 @@ export default async function warmRoutes(config: FullConfig): Promise<void> {
   if (!baseURL) return;
   const context = await request.newContext({ baseURL });
   try {
-    const paths = ["/", "/plans", "/plans/new", "/signup", ...PLAN_STEPS.map((step) => `/plans/${PLAN}/${step}`)];
+    const paths = ["/", "/plans", "/plans/new", "/signup", "/login", ...PLAN_STEPS.map((step) => `/plans/${PLAN}/${step}`)];
     for (const path of paths) {
       // A route only needs to compile; any status (e.g. 404 for an unbuilt step) will do.
       await context.get(path, { timeout: 120_000, failOnStatusCode: false });
