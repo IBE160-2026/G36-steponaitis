@@ -50,6 +50,54 @@ class ManualMove(BaseModel):
     to_location: str = Field(alias="to", max_length=CODE_MAX_LENGTH)
 
 
+MAX_DRAG_PARTS = 100
+"""A defensive bound on the parts of one drag command, far above any location's count."""
+
+DragPart = Annotated[str, Field(max_length=CODE_MAX_LENGTH)]
+
+
+class MoveParts(BaseModel):
+    """Drop on an empty location: move each of `parts` from `from` to `to` (FR-51, AD-16)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["move_parts"] = "move_parts"
+    command_id: uuid.UUID
+    base_version: int
+    from_location: str = Field(alias="from", max_length=CODE_MAX_LENGTH)
+    to_location: str = Field(alias="to", max_length=CODE_MAX_LENGTH)
+    parts: list[DragPart] = Field(max_length=MAX_DRAG_PARTS)
+
+
+class PutTogether(BaseModel):
+    """Drop on an occupied location: move each of `parts` into it beside what it holds
+    (FR-51, AD-16)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["put_together"] = "put_together"
+    command_id: uuid.UUID
+    base_version: int
+    from_location: str = Field(alias="from", max_length=CODE_MAX_LENGTH)
+    to_location: str = Field(alias="to", max_length=CODE_MAX_LENGTH)
+    parts: list[DragPart] = Field(max_length=MAX_DRAG_PARTS)
+
+
+class Swap(BaseModel):
+    """Drop on an occupied location: move `parts` from `from` to `to`, then `back_parts`
+    from `to` to `from` (FR-51, AD-16)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["swap"] = "swap"
+    command_id: uuid.UUID
+    base_version: int
+    from_location: str = Field(alias="from", max_length=CODE_MAX_LENGTH)
+    to_location: str = Field(alias="to", max_length=CODE_MAX_LENGTH)
+    parts: list[DragPart] = Field(max_length=MAX_DRAG_PARTS)
+    back_parts: list[DragPart] = Field(max_length=MAX_DRAG_PARTS)
+
+
 class RunRecommendations(BaseModel):
     """Run the recommendation rules on the planning copy as a new round (FR-23)."""
 
@@ -125,6 +173,9 @@ Command = Annotated[
     SetBestMark
     | RemoveBestMark
     | ManualMove
+    | MoveParts
+    | PutTogether
+    | Swap
     | RunRecommendations
     | ApplyRecommendation
     | ApplyOtherLocation
@@ -193,6 +244,19 @@ class MoveRemoved(BaseModel):
     step_move_number: int
 
 
+class SwapMade(BaseModel):
+    """A swap was saved as manual steps sharing `swap_id` (FR-51). `move_numbers` are the
+    move numbers of the swap's steps; an FR-34 combine or removal can fold a step into
+    another move, so a number need not be an effective move of its own."""
+
+    type: Literal["swap_made"] = "swap_made"
+    swap_id: str
+    from_location: str
+    to_location: str
+    move_numbers: list[int]
+    round: int
+
+
 class StepUndone(BaseModel):
     """The last step was undone; `undone` is the undo preview it had (FR-35, AD-5)."""
 
@@ -245,6 +309,7 @@ Event = Annotated[
     | MoveMade
     | MovesCombined
     | MoveRemoved
+    | SwapMade
     | RunDone
     | RecommendationsOutdated
     | ApplyAllDone

@@ -171,6 +171,8 @@ KERNEL_MODULES = {
     "swp.domain.commands",
     "swp.domain.errors",
     "swp.domain.import_data",
+    # The shared "append a checked manual step and its event" of moves and drag (Story 12.1).
+    "swp.domain.manual_steps",
     "swp.domain.ordering",
     "swp.domain.planning",
     "swp.domain.state",

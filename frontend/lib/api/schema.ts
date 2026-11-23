@@ -686,7 +686,7 @@ export interface components {
          */
         CommandResult: {
             /** Events */
-            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"] | components["schemas"]["StepUndone"] | components["schemas"]["PlanReset"])[];
+            events: (components["schemas"]["MarkSet"] | components["schemas"]["MarkRemoved"] | components["schemas"]["MoveMade"] | components["schemas"]["MovesCombined"] | components["schemas"]["MoveRemoved"] | components["schemas"]["SwapMade"] | components["schemas"]["RunDone"] | components["schemas"]["RecommendationsOutdated"] | components["schemas"]["ApplyAllDone"] | components["schemas"]["KeepSet"] | components["schemas"]["KeepRemoved"] | components["schemas"]["StepUndone"] | components["schemas"]["PlanReset"])[];
             /** Version */
             version: number;
         };
@@ -1050,6 +1050,30 @@ export interface components {
              * @enum {string}
              */
             type: "move_made";
+        };
+        /**
+         * MoveParts
+         * @description Drop on an empty location: move each of `parts` from `from` to `to` (FR-51, AD-16).
+         */
+        MoveParts: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** From */
+            from: string;
+            /** Parts */
+            parts: string[];
+            /** To */
+            to: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "move_parts";
         };
         /** MovePreview */
         MovePreview: {
@@ -1430,6 +1454,31 @@ export interface components {
             version: number;
         };
         /**
+         * PutTogether
+         * @description Drop on an occupied location: move each of `parts` into it beside what it holds
+         *     (FR-51, AD-16).
+         */
+        PutTogether: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** From */
+            from: string;
+            /** Parts */
+            parts: string[];
+            /** To */
+            to: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "put_together";
+        };
+        /**
          * RecentMove
          * @description One effective move of the planning copy (FR-34), as the detail's "Moves in the
          *     planning copy" lists it (Story 10.5).
@@ -1805,6 +1854,56 @@ export interface components {
             location: components["schemas"]["LocationRef"];
             /** Stock */
             stock: string;
+        };
+        /**
+         * Swap
+         * @description Drop on an occupied location: move `parts` from `from` to `to`, then `back_parts`
+         *     from `to` to `from` (FR-51, AD-16).
+         */
+        Swap: {
+            /** Back Parts */
+            back_parts: string[];
+            /** Base Version */
+            base_version: number;
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** From */
+            from: string;
+            /** Parts */
+            parts: string[];
+            /** To */
+            to: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "swap";
+        };
+        /**
+         * SwapMade
+         * @description A swap was saved as manual steps sharing `swap_id` (FR-51). `move_numbers` are the
+         *     move numbers of the swap's steps; an FR-34 combine or removal can fold a step into
+         *     another move, so a number need not be an effective move of its own.
+         */
+        SwapMade: {
+            /** From Location */
+            from_location: string;
+            /** Move Numbers */
+            move_numbers: number[];
+            /** Round */
+            round: number;
+            /** Swap Id */
+            swap_id: string;
+            /** To Location */
+            to_location: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "swap_made";
         };
         /** TargetPart */
         TargetPart: {
@@ -2544,7 +2643,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"] | components["schemas"]["Undo"] | components["schemas"]["Reset"];
+                "application/json": components["schemas"]["SetBestMark"] | components["schemas"]["RemoveBestMark"] | components["schemas"]["ManualMove"] | components["schemas"]["MoveParts"] | components["schemas"]["PutTogether"] | components["schemas"]["Swap"] | components["schemas"]["RunRecommendations"] | components["schemas"]["ApplyRecommendation"] | components["schemas"]["ApplyOtherLocation"] | components["schemas"]["ApplyAll"] | components["schemas"]["SetKeep"] | components["schemas"]["RemoveKeep"] | components["schemas"]["Undo"] | components["schemas"]["Reset"];
             };
         };
         responses: {

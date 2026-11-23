@@ -111,6 +111,7 @@ modules =
     swp.domain.keep
     swp.domain.history
     swp.domain.moves
+    swp.domain.drag
     swp.domain.views.summary
     swp.domain.views.parts
     swp.domain.views.locations
