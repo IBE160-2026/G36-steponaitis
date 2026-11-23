@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 02:14
+last_updated: 11-23-2026 02:20
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -103,7 +103,7 @@ development_status:
   8-2-mark-the-lines-of-a-swap: done
   8-3-move-list-print-view: done
   8-4-paper-layout-and-print-check-in-every-browser: done
-  epic-8-retrospective: optional
+  epic-8-retrospective: done
 
   epic-9: backlog
   9-1-create-an-account: backlog
@@ -655,3 +655,66 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-68-decide-the-same-part-move-list-order-fr"
+    epic: 8
+    action: "Decide the same-part move-list order (FR-38 same-part exception or FR-34
+      combine when target held the part), record it in FR-38/AD-14, then implement
+      with test_fr38 chain and in-cycle cases"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-69-make-print-immune-to-a-cancelled-refetch"
+    epic: 8
+    action: "Make Print immune to a cancelled refetch: print only data newer than
+      when Print was pressed (or fetch with cancelRefetch false), with a createPrintFlow
+      Vitest"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-70-close-print-verification-gaps-print-medi"
+    epic: 8
+    action: "Close print verification gaps: print-media e2e with a mocked swap line
+      checking A4 width, MoveListPage first-load-error Vitest, one manual multi-page
+      Firefox PDF check of band breaks, header and page numbers"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-71-reconcile-ad-17-ux-dr52-and-epics-md-epi"
+    epic: 8
+    action: "Reconcile AD-17, UX-DR52 and epics.md Epic 8 with the as-built print
+      view: same-minute printouts (seconds or version in header), menu print uses
+      last fetch, band rule hard vs best effort, /print route for the move-list step"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-72-in-story-12-4-store-swap-size-or-members"
+    epic: 8
+    action: "In Story 12.4 store swap size or membership so a partly undone multi-part
+      swap loses its swap mark, and add that case to test_fr38_swap_mark_only_when_intact"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-73-decide-how-the-milestone-2-gate-proves-t"
+    epic: 8
+    action: "Decide how the milestone 2 gate proves the three-browser print check
+      (CI firefox/msedge for move-list specs or a recorded local gate step) and update
+      AGENTS.md for the three browsers"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-74-copy-story-deferred-entries-that-need-a"
+    epic: 8
+    action: "Copy story deferred entries that need a product decision into sprint-status
+      action_items with an owner; run the outstanding follow-up reviews and confirm
+      the nine landed items"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
+  - id: "epic-8-retro-item-75-share-the-e2e-sample-plan-setup-create-m"
+    epic: 8
+    action: "Share the e2e sample-plan setup (create, mark aisle A, run, apply all)
+      in e2e/support and use it from both move-list specs, as part of the epic-7 item
+      64 cleanup"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
