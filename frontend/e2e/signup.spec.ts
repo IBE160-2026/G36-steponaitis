@@ -1,3 +1,4 @@
+import { uniqueUsername } from "./support/auth";
 import { expect, type Page, test } from "./support/test";
 
 // UJ-5 "other ways in": Create account (Story 9.1, FR-39, UX-DR53). The e2e server runs with
@@ -7,13 +8,6 @@ import { expect, type Page, test } from "./support/test";
 const TAKEN = "That username is taken. Try another.";
 const MISMATCH = "The passwords don’t match.";
 const ACCOUNT_LIMIT = "The demo has reached its account limit. Use Demo version instead.";
-
-function uniqueUsername(): string {
-  const digits = Math.floor(Math.random() * 1_000_000)
-    .toString()
-    .padStart(6, "0");
-  return `uj5${Date.now()}${digits}`; // 3 + 13 + 6 = 22 letters and numbers
-}
 
 function card(page: Page) {
   return page.getByRole("region", { name: "Create account" });
@@ -82,7 +76,7 @@ test.describe("fr39 create account", () => {
     await expect(page.getByLabel("Password", { exact: true })).not.toHaveAttribute("aria-invalid", "true");
     await expect(username).toBeFocused();
 
-    const name = uniqueUsername();
+    const name = uniqueUsername("uj5");
     await fill(page, name, "secret", "secret");
     await section.getByRole("button", { name: "Create account" }).click();
 
@@ -92,7 +86,7 @@ test.describe("fr39 create account", () => {
   });
 
   test("fr39 a taken username is reported with focus on the username", async ({ page, request }) => {
-    const name = uniqueUsername();
+    const name = uniqueUsername("uj5");
     // The `request` fixture has its own cookie jar, so the page stays signed out.
     const response = await request.post("/api/auth/signup", {
       data: { username: name, password: "secret", password_repeat: "secret" },
@@ -122,7 +116,7 @@ test.describe("fr39 create account", () => {
       }),
     );
     await page.goto("/signup");
-    const name = uniqueUsername();
+    const name = uniqueUsername("uj5");
     await fill(page, name, "secret", "secret");
     await card(page).getByRole("button", { name: "Create account" }).click();
 

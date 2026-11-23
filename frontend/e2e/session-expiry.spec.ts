@@ -1,43 +1,15 @@
 import { randomUUID } from "node:crypto";
 
+import { logIn, signUp, uniqueUsername } from "./support/auth";
 import { createSamplePlan } from "./support/sample-plan";
-import { type APIRequestContext, expect, type Page, test, toasts } from "./support/test";
+import { expect, test, toasts } from "./support/test";
 
 // UJ-3 "continues a saved plan" as a logged-in user (Story 9.3; FR-11, FR-40, UX-DR4, AD-12):
 // the avatar user menu names who is logged in, and when the session ends while the app is open,
 // Log in opens and the page (and a change made meanwhile) comes back after logging in. The e2e
 // server runs with FEATURE_AUTH=true. Each test starts logged out with its own account.
 
-const SAME_SITE = { "Sec-Fetch-Site": "same-origin" };
-
 test.use({ storageState: { cookies: [], origins: [] } });
-
-function uniqueUsername(): string {
-  const digits = Math.floor(Math.random() * 1_000_000)
-    .toString()
-    .padStart(6, "0");
-  return `uj3${Date.now()}${digits}`;
-}
-
-/** Signs up a new account; `request` then carries its session. */
-async function signUp(request: APIRequestContext): Promise<string> {
-  const username = uniqueUsername();
-  const response = await request.post("/api/auth/signup", {
-    data: { username, password: "secret", password_repeat: "secret" },
-    headers: SAME_SITE,
-  });
-  expect(response.status(), await response.text()).toBe(201);
-  return username;
-}
-
-/** Logs in through the Log in page, which must already be open. */
-async function logIn(page: Page, username: string) {
-  const card = page.getByRole("region", { name: "Log in" });
-  await expect(card).toBeVisible();
-  await page.getByLabel("Username").fill(username);
-  await page.getByLabel("Password", { exact: true }).fill("secret");
-  await card.getByRole("button", { name: "Log in" }).click();
-}
 
 test.describe("uj3 fr40 the logged-in user and session expiry", () => {
   test.beforeEach(async ({ page }) => {

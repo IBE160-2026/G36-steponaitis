@@ -1,4 +1,5 @@
-import { type APIRequestContext, expect, type Page, test } from "./support/test";
+import { signUp, uniqueUsername } from "./support/auth";
+import { expect, type Page, test } from "./support/test";
 
 // UJ-3 "continues a saved plan", entered through Log in (Story 9.2, FR-40, UX-DR53). The e2e
 // server runs with FEATURE_AUTH=true. These tests start logged out and sign up their own account
@@ -8,23 +9,6 @@ const WRONG_LOGIN = "Wrong username or password. Check both and try again.";
 const LOGIN_LOCKED = "Too many failed logins for this username. Wait a minute and try again.";
 
 test.use({ storageState: { cookies: [], origins: [] } });
-
-function uniqueUsername(): string {
-  const digits = Math.floor(Math.random() * 1_000_000)
-    .toString()
-    .padStart(6, "0");
-  return `uj3${Date.now()}${digits}`;
-}
-
-async function signUp(request: APIRequestContext): Promise<string> {
-  const username = uniqueUsername();
-  const response = await request.post("/api/auth/signup", {
-    data: { username, password: "secret", password_repeat: "secret" },
-    headers: { "Sec-Fetch-Site": "same-origin" },
-  });
-  expect(response.status(), await response.text()).toBe(201);
-  return username;
-}
 
 function card(page: Page) {
   return page.getByRole("region", { name: "Log in" });

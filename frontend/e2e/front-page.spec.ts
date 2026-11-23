@@ -1,3 +1,4 @@
+import { HEADLINE, PANELS, turnDemoOn } from "./support/auth";
 import { expect, type Page, test } from "./support/test";
 
 // UJ-5 "an examiner tries the app" (Story 9.6, FR-40, FR-50, NFR-5, UX-DR54): the demo front page.
@@ -7,27 +8,6 @@ import { expect, type Page, test } from "./support/test";
 // a real `demo`/`demo` login.
 
 test.use({ storageState: { cookies: [], origins: [] } });
-
-const HEADLINE = "Every move comes with a reason.";
-const PANELS = ["In your export", "Classified fast", "You decide", "On the move list"];
-
-async function turnDemoOn(page: Page) {
-  await page.route("**/api/session", async (route) => {
-    const response = await route.fetch();
-    const body = (await response.json()) as Record<string, unknown>;
-    await route.fulfill({ response, json: { ...body, feature_demo: true } });
-  });
-  await page.route("**/api/auth/demo", async (route) => {
-    const request = route.request();
-    const response = await route.fetch({
-      url: new URL("/api/auth/login", request.url()).toString(),
-      method: "POST",
-      headers: { ...request.headers(), "content-type": "application/json" },
-      postData: JSON.stringify({ username: "demo", password: "demo" }),
-    });
-    await route.fulfill({ response });
-  });
-}
 
 function hero(page: Page) {
   return page.getByRole("main");

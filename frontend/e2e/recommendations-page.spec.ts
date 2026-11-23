@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { type APIRequestContext, expect, test, toasts } from "./support/test";
 
 import { getJson, planVersion } from "./support/plan-api";
+import { plural, type RecRow, type RecView, RULES, visibleOpen } from "./support/recommendations";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1 (Story 5.7; FR-23–FR-30, UX-DR31–35): the planner runs the rules on the Recommendations
@@ -10,18 +11,8 @@ import { createSamplePlan } from "./support/sample-plan";
 // applies the rest. Retro item 26: the Apply button, its toast, the 409 path and the views
 // refreshing after apply (handed over by Story 5.2) are all checked here.
 
-type Row = {
-  id: string;
-  number: number;
-  rule: "rule_1" | "rule_2" | "rule_3";
-  part: string;
-  from_location: string;
-  to_location: string;
-  status: "open" | "applied" | "outdated";
-};
-type View = { run: { round: number } | null; recommendations: Row[]; no_space: unknown[] };
-
-const RULES = ["rule_1", "rule_2", "rule_3"] as const;
+type Row = RecRow;
+type View = RecView;
 
 async function command(request: APIRequestContext, planId: string, body: Record<string, unknown>) {
   const response = await request.post(`/api/plans/${planId}/commands`, {
@@ -30,14 +21,6 @@ async function command(request: APIRequestContext, planId: string, body: Record<
   });
   expect(response.status(), await response.text()).toBe(200);
 }
-
-/** The open rows the page shows first: rule order, server order within a rule, 5 per rule. */
-function visibleOpen(view: View): Row[] {
-  const open = view.recommendations.filter((row) => row.status === "open");
-  return RULES.flatMap((rule) => open.filter((row) => row.rule === rule).slice(0, 5));
-}
-
-const plural = (n: number, one: string, many: string) => `${n.toLocaleString("en-US")} ${n === 1 ? one : many}`;
 
 test("uj1 runs, reads and applies recommendations", async ({ page, request }) => {
   test.setTimeout(180_000);

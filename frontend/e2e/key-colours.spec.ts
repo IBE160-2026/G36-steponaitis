@@ -2,6 +2,16 @@ import { randomUUID } from "node:crypto";
 
 import { expect, type Locator, type Page, test } from "./support/test";
 
+import {
+  DEFAULT_FAST_RGB,
+  DEFAULT_SLOW,
+  DEFAULT_SLOW_RGB,
+  expectSlowBin,
+  printOffenders,
+  rootSlow,
+  SHADE_6,
+  SHADE_6_RGB,
+} from "./support/colours";
 import { getJson, planVersion, postCommand } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
@@ -13,27 +23,7 @@ import { createSamplePlan } from "./support/sample-plan";
 // invalid stored value falls back to the default. Story 11.3 (second test) changes the colour from
 // the Key's colour popover.
 
-const SHADE_6 = "#378CBE";
-const SHADE_6_RGB = "rgb(55, 140, 190)";
-const DEFAULT_SLOW_RGB = "rgb(65, 125, 220)";
-const DEFAULT_FAST_RGB = "rgb(216, 81, 68)";
-const GLYPH_RGB = "rgb(27, 30, 34)";
-const SLOW_GLYPH_PATH = "M5 9.2 L9.6 0.8 H0.4 Z";
-
 type WallMove = { recommendation_id: string | null; status: string };
-
-/** The fill of the first slow bin body under `scope`, and its ▼ glyph. */
-async function expectSlowBin(scope: Locator, fill: string) {
-  const bin = scope.locator('[data-bin="slow"]').first();
-  await expect(bin.locator("> rect").first()).toHaveCSS("fill", fill);
-  const glyph = bin.locator('svg[data-class="slow"]').first();
-  await expect(glyph).toHaveCSS("color", GLYPH_RGB);
-  await expect(glyph.locator("path")).toHaveAttribute("d", SLOW_GLYPH_PATH);
-}
-
-async function rootSlow(page: Page): Promise<string> {
-  return page.evaluate(() => document.documentElement.style.getPropertyValue("--colour-slow"));
-}
 
 /** The slow bins of the recommendation detail's crops: every one in `fill`, fast ones unchanged. */
 async function expectCropSlowBins(main: Locator, fill: string, hex: string) {
@@ -50,23 +40,6 @@ async function expectCropSlowBins(main: Locator, fill: string, hex: string) {
   expect(drawn.bins.length).toBeGreaterThan(0);
   for (const bin of drawn.bins.filter((entry) => entry.movementClass === "slow")) expect(bin.fill).toBe(fill);
   for (const bin of drawn.bins.filter((entry) => entry.movementClass === "fast")) expect(bin.fill).toBe(DEFAULT_FAST_RGB);
-}
-
-/** In print media, every visible element of the page that is drawn in `rgb` (none expected). */
-async function printOffenders(page: Page, rgb: string): Promise<string[]> {
-  await page.emulateMedia({ media: "print" });
-  const found = await page.evaluate((colour) => {
-    const offenders: string[] = [];
-    for (const element of document.querySelectorAll("*")) {
-      if (!element.checkVisibility()) continue;
-      const style = getComputedStyle(element);
-      const values = [style.color, style.backgroundColor, style.fill, style.stroke, style.borderTopColor, style.borderBottomColor];
-      if (values.includes(colour)) offenders.push(`${element.tagName.toLowerCase()}.${element.getAttribute("class") ?? ""}`);
-    }
-    return offenders;
-  }, rgb);
-  await page.emulateMedia({ media: "screen" });
-  return found;
 }
 
 test("uj4 fr42 a stored Slow-moving colour paints every wall from first load, survives a reload and stays in the browser", async ({
@@ -163,7 +136,6 @@ test("uj4 fr42 a stored Slow-moving colour paints every wall from first load, su
 const SHADE_1 = "#98C6E1";
 const SHADE_1_RGB = "rgb(152, 198, 225)";
 const SHADE_2 = "#5EB5E9";
-const DEFAULT_SLOW = "#417DDC";
 
 async function storedColours(page: Page): Promise<string | null> {
   return page.evaluate(() => window.localStorage.getItem("swp:colours"));

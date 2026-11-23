@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import { type APIRequestContext, expect, type Locator, test, toasts } from "./support/test";
+import { type APIRequestContext, expect, test, toasts } from "./support/test";
 
+import { aisleRow } from "./support/before-after";
 import { getJson, planVersion } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
@@ -28,10 +29,6 @@ async function command(request: APIRequestContext, planId: string, body: Record<
     headers: { "Sec-Fetch-Site": "same-origin" },
   });
   expect(response.status(), await response.text()).toBe(200);
-}
-
-function aisleRow(table: Locator, aisle: string): Locator {
-  return table.locator("tbody tr").filter({ has: table.page().getByRole("cell", { name: aisle, exact: true }) });
 }
 
 test("uj1 applies a recommendation with another location", async ({ page, request }) => {

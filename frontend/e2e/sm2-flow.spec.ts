@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { join } from "node:path";
 
-import { expect, type Locator, test, toasts } from "./support/test";
+import { expect, test, toasts } from "./support/test";
 
+import { aisleRow } from "./support/before-after";
 import { type Detail, getJson, locationRows, moveFromPanel, partDetail } from "./support/plan-api";
-import { SAMPLE, SAMPLE_FILES } from "./support/sample-plan";
+import { newPlanThroughUi } from "./support/sample-plan";
 
 // Milestone 2 gate, SM-2 (Story 12.5, extending the milestone 1 flow of Story 5.8; UJ-1, UJ-2,
 // FR-1, FR-13, FR-16, FR-19, FR-21, FR-23, FR-28, FR-33, FR-37, FR-38, NFR-9): README demo steps
@@ -17,10 +17,6 @@ import { SAMPLE, SAMPLE_FILES } from "./support/sample-plan";
 type Row = { id: string; rule: string; part: string; from_location: string; to_location: string; status: string };
 type View = { recommendations: Row[] };
 
-function aisleRow(table: Locator, aisle: string): Locator {
-  return table.locator("tbody tr").filter({ has: table.page().getByRole("cell", { name: aisle, exact: true }) });
-}
-
 test("uj1 uj2 sm2 fr38 nfr9 milestone 2 flow on the sample data", async ({ page, request }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -28,15 +24,7 @@ test("uj1 uj2 sm2 fr38 nfr9 milestone 2 flow on the sample data", async ({ page,
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   // New Plan with the three sample files.
-  await page.goto("/plans/new");
-  await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
-  await page.getByLabel("Plan name").fill(`Milestone 2 demo ${randomUUID().slice(0, 8)}`);
-  await page.getByLabel("Locations", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.locations));
-  await page.getByLabel("Inventory", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.inventory));
-  await page.getByLabel("Transactions", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.transactions));
-  await page.getByRole("button", { name: "New Plan", exact: true }).click();
-  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]{36}\/overview$/, { timeout: 30_000 });
-  const planId = new URL(page.url()).pathname.split("/")[2];
+  const planId = await newPlanThroughUi(page, `Milestone 2 demo ${randomUUID().slice(0, 8)}`);
 
   // Overview → Parts → Pick groups.
   const main = page.getByRole("main");

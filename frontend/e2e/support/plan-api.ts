@@ -61,7 +61,11 @@ export async function moveFromPanel(page: Page, panel: Locator, part: string, fr
   const dialog = page.getByRole("dialog", { name: `Manual move · ${part}` });
   await expect(dialog.getByRole("combobox", { name: "To-location" })).toBeFocused();
   await enterTarget(page, dialog, to, "to an empty location");
+  // The option list shows once the plan's locations have loaded (the preview can answer before
+  // that). Esc must close that list: with no list shown, Esc clears the field instead.
+  await expect(dialog.locator(`[data-location-option="${to}"]`)).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(dialog.locator(`[data-location-option="${to}"]`)).toHaveCount(0);
   await page.keyboard.press("Enter");
   await expect(toasts(page).getByText(`Moved ${part}: ${from} → ${to} (Manual, round ${round}).`, { exact: true })).toBeVisible();
   await expect(dialog).toHaveCount(0);

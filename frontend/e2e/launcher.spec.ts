@@ -1,39 +1,12 @@
 import { randomUUID } from "node:crypto";
 
+import { gridButton, launcher, planReady, searchField, STEPS } from "./support/launcher";
 import { getJson, planVersion, type RosterRow } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
-import { type APIRequestContext, expect, type Page, test, toasts } from "./support/test";
+import { type APIRequestContext, expect, test, toasts } from "./support/test";
 
 // UJ-8 (Story 6.5; UX-DR7, UX-DR8): the planner opens the launcher from the keyboard or the grid
 // button, reads the flow map, and jumps to a step, runs an action or opens another saved plan.
-
-const STEPS = [
-  "Overview",
-  "Parts",
-  "Locations",
-  "Pick groups",
-  "Best locations",
-  "Recommendations",
-  "Before/after",
-  "Move list",
-];
-
-function launcher(page: Page) {
-  return page.getByRole("dialog", { name: "Launcher" });
-}
-
-function searchField(page: Page) {
-  return launcher(page).getByPlaceholder("Search features, actions and plans");
-}
-
-function gridButton(page: Page) {
-  return page.getByRole("button", { name: "Open the launcher" });
-}
-
-/** The plan plate shows once the summary has loaded on the client, so the shortcut listener is live. */
-async function planReady(page: Page) {
-  await expect(page.getByRole("banner").getByText(/^Data as of /)).toBeVisible();
-}
 
 async function command(request: APIRequestContext, planId: string, body: Record<string, unknown>) {
   const response = await request.post(`/api/plans/${planId}/commands`, {

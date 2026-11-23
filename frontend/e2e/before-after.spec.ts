@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, type Locator, test } from "./support/test";
+import { expect, test } from "./support/test";
 
+import { aisleRow } from "./support/before-after";
 import { type Detail, getJson, locationRows, moveFromPanel, partDetail } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
@@ -13,10 +14,6 @@ type BeforeAfter = { aisles: { aisle: string; occupied: Count }[] };
 
 const NO_MOVES = "No moves yet: before and after are the same.";
 const n = (value: number) => value.toLocaleString("en-US");
-
-function aisleRow(table: Locator, aisle: string): Locator {
-  return table.locator("tbody tr").filter({ has: table.page().getByRole("cell", { name: aisle, exact: true }) });
-}
 
 test("uj1 before/after shows a manual move", async ({ page, request }) => {
   test.setTimeout(120_000);

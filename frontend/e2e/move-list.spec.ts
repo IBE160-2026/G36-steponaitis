@@ -1,40 +1,14 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, type Page, test } from "./support/test";
+import { expect, test } from "./support/test";
 
+import { isMoveListGet, printCount, printedGenerated, stubPrint } from "./support/move-list";
 import { getJson, postCommand } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-2 (Story 8.3; FR-38, AD-17, UX-DR52): the planner opens Move list from the flow bar, checks
 // the server's lines on the print view and prints. Print fetches the view again and only then
 // calls `window.print()` (stubbed here; the paper and the cross-browser print check are 8.4).
-
-/**
- * Replaces `window.print` with a counter, so the test never opens a print dialog. Each call also
- * records the header's generated line as it is on screen at that moment.
- */
-async function stubPrint(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const target = window as unknown as { __prints: number; __printedGenerated: string[] };
-    target.__prints = 0;
-    target.__printedGenerated = [];
-    window.print = () => {
-      target.__prints += 1;
-      target.__printedGenerated.push(document.querySelector("[data-move-list-generated]")?.textContent ?? "");
-    };
-  });
-}
-
-async function printCount(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { __prints: number }).__prints);
-}
-
-async function printedGenerated(page: Page): Promise<string[]> {
-  return page.evaluate(() => (window as unknown as { __printedGenerated: string[] }).__printedGenerated);
-}
-
-const isMoveListGet = (planId: string) => (response: { url(): string; request(): { method(): string } }) =>
-  response.url().endsWith(`/api/plans/${planId}/move-list`) && response.request().method() === "GET";
 
 test("uj2 prints the move list", async ({ page, request }) => {
   test.setTimeout(120_000);

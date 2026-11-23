@@ -1,3 +1,4 @@
+import { turnDemoOn } from "./support/auth";
 import { expect, type Page, test } from "./support/test";
 
 // UJ-5 "an examiner tries the app" (Story 9.5, FR-50, UX-DR53): the seeded `demo` account and
@@ -46,23 +47,8 @@ test.describe("fr50 uj5 the demo account", () => {
   });
 
   test("fr50 uj5 Demo version opens the saved-plans list as demo", async ({ page }) => {
-    await page.route("**/api/session", async (route) => {
-      const response = await route.fetch();
-      const body = (await response.json()) as Record<string, unknown>;
-      await route.fulfill({ response, json: { ...body, feature_demo: true } });
-    });
     const demoPosts: string[] = [];
-    await page.route("**/api/auth/demo", async (route) => {
-      const request = route.request();
-      demoPosts.push(request.method());
-      const response = await route.fetch({
-        url: new URL("/api/auth/login", request.url()).toString(),
-        method: "POST",
-        headers: { ...request.headers(), "content-type": "application/json" },
-        postData: JSON.stringify({ username: "demo", password: "demo" }),
-      });
-      await route.fulfill({ response });
-    });
+    await turnDemoOn(page, (method) => demoPosts.push(method));
 
     await page.goto("/login");
     const section = card(page);
