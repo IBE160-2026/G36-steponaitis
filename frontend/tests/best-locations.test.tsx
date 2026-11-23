@@ -17,7 +17,8 @@ import {
   readMode,
   sendMarkChange,
 } from "@/modules/best-locations/best-locations-page";
-import { bestCountsLine, hasLocationMark, levelsInAisle, markLabel, sameMark } from "@/modules/best-locations/marks";
+import { markLabel } from "@/lib/copy";
+import { bestCountsLine, hasLocationMark, levelsInAisle, sameMark } from "@/modules/best-locations/marks";
 
 // Story 3.4: the Best locations step (FR-21, FR-22, UX-DR: segmented control, marks list, counts,
 // remembered mode). Rendered to static markup; Vitest has no DOM, so keyboard logic is a pure helper.

@@ -7,6 +7,8 @@ import type { AisleLayout, LayoutRun } from "@/lib/api/imports";
 import type { WallLocation, WallView } from "@/lib/api/plans";
 import type { MovementClass } from "@/lib/copy";
 
+import { BIN_HEIGHT, BIN_WIDTH } from "./bin";
+
 /** How a cell shows best: under its level's rail, framed on its own, or not at all. */
 export type CellBest = "rail" | "frame" | "none";
 
@@ -74,6 +76,8 @@ export const BEAM_TOP = 33;
 export const BEAM_HEIGHT = 4;
 export const RUN_GAP = 14;
 export const END_CAP = 22;
+/** A bin's left inset inside its column pitch. */
+export const BIN_INSET = (PITCH - BIN_WIDTH) / 2;
 /** The largest bin scale: 27px bins grow to 35px at most (UX-DR41). */
 export const MAX_SCALE = 35 / 27;
 
@@ -98,6 +102,34 @@ export function runWidth(run: Pick<LayoutRun, "sections" | "columns">): number {
 
 export function runHeight(run: Pick<LayoutRun, "levels">): number {
   return SECTION_HEADER + run.levels.length * ROW_HEIGHT;
+}
+
+/** Each run's top edge in natural pixels: the SVG and the keyboard grid over it use the same numbers. */
+export function runTops(layout: Pick<AisleLayout, "runs">): number[] {
+  const tops: number[] = [];
+  let top = PAD;
+  for (const run of layout.runs) {
+    tops.push(top);
+    top += runHeight(run) + RUN_GAP;
+  }
+  return tops;
+}
+
+/** A cell's bin rectangle in natural pixels (multiply by the scale for drawn pixels). */
+export function cellRect(
+  layout: Pick<AisleLayout, "runs">,
+  tops: readonly number[],
+  cell: Pick<WallCellModel, "run" | "row" | "column">,
+): { x: number; y: number; width: number; height: number } | null {
+  const run = layout.runs[cell.run];
+  const top = tops[cell.run];
+  if (run === undefined || top === undefined) return null;
+  return {
+    x: PAD + LABEL_WIDTH + columnX(run, cell.column) + BIN_INSET,
+    y: top + SECTION_HEADER + cell.row * ROW_HEIGHT + BIN_TOP,
+    width: BIN_WIDTH,
+    height: BIN_HEIGHT,
+  };
 }
 
 /** The wall's natural size before scaling. */

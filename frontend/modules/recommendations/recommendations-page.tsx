@@ -4,7 +4,8 @@
 // rules, read the rows per state tab under their rule bands, apply one or all, and keep a part in
 // place (Story 7.1, FR-32: the shared Keep in place link and `Alt+K`), and apply one to another
 // allowed location (Story 7.2, FR-31: Other location ▾ and `Alt+O`), and reset the planning copy
-// (Story 7.4, FR-35: the "⋯" menu's Reset…, in reset-plan.tsx). Everything shown
+// (Story 7.4, FR-35: the "⋯" menu's Reset…, in reset-plan.tsx). A `?rec=` link (the wall's Show
+// recommendation #n, Story 10.3) starts with that row selected and focused. Everything shown
 // comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
 // version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
 // command goes through lib/commands; a 409 is the command client's (server message + refetch).
@@ -24,10 +25,9 @@ import {
 
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { Button } from "@/components/common/button";
-import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
+import { ManualMoveAction } from "@/components/common/manual-move-dialog";
 import { Icon } from "@/components/common/icons";
 import { KeepInPlaceButton, KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
-import { MANUAL_MOVE_LABEL, manualMoveReason } from "@/components/common/part-panel";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { showToast, type ToastOptions } from "@/components/common/toast";
 import { UndoLastMove } from "@/components/common/undo-last-move";
@@ -36,7 +36,6 @@ import {
   type PlanSummary,
   type RecommendationRow,
   type RecommendationsView as RecommendationsData,
-  usePlanPart,
   usePlanRecommendations,
   usePlanSummary,
 } from "@/lib/api/plans";
@@ -59,11 +58,17 @@ import {
 } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { parseRecommendationsTab, type RecommendationsTab, recommendationsTabHref } from "@/lib/view-state/urls";
+import {
+  parseRecommendationId,
+  parseRecommendationsTab,
+  type RecommendationsTab,
+  recommendationsTabHref,
+} from "@/lib/view-state/urls";
 import {
   type BandView,
   bandViews,
   collapseNoSpace,
+  expandedForRow,
   effectiveTo,
   EMPTY_TAB,
   groupByRule,
@@ -93,7 +98,6 @@ import { ResetPlanMenu } from "./reset-plan";
 
 export const RUN_LABEL = "Run recommendations";
 export const RUNNING_LABEL = "Running…";
-export const LOADING_PART = "Loading the part…";
 export const NO_BEST_NOTE = "Rule 1 and rule 2 need best locations. Rule 3 runs without them.";
 export const NO_RUN = "No run yet. Run recommendations to start round 1 on the planning copy as it is now.";
 
@@ -522,6 +526,8 @@ export type RecommendationsViewProps = {
   /** The Other location ▾ action (the page wires `OtherLocationAction` with the server's set). */
   otherLocation?: (props: OtherLocationActionProps) => ReactNode;
   notify?: (message: string, options?: ToastOptions) => void;
+  /** `?rec=`: the recommendation the page starts with selected (its band expanded when needed). */
+  initialRecId?: string;
 };
 
 export function RecommendationsView({
@@ -534,18 +540,25 @@ export function RecommendationsView({
   manualMove = () => null,
   otherLocation = () => null,
   notify = showToast,
+  initialRecId,
 }: RecommendationsViewProps) {
   const [running, setRunning] = useState(false);
   const [failedRound, setFailedRound] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState("");
-  const [chosenId, setChosenId] = useState<string | undefined>(undefined);
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  // A `?rec=` link starts on that row (an unknown id falls back to the first row) and focuses it.
+  const [initialRec] = useState(() =>
+    tabItems(view, tab).some((item) => itemId(item) === initialRecId) ? initialRecId : undefined,
+  );
+  const [chosenId, setChosenId] = useState<string | undefined>(initialRec);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => expandedForRow(tabItems(view, tab), tab, initialRec));
   const [focusRequest, setFocusRequest] = useState(0);
   // The recommendation whose Other location ▾ listbox is open (Alt+O or the trigger).
   const [otherOpenId, setOtherOpenId] = useState<string | undefined>(undefined);
   // A focus request waits for its row: it is kept until its tab shows a view of at least
   // `minVersion`, then focuses the selected row there, or is dropped when that view has none.
-  const pendingFocus = useRef<{ minVersion: number; tab: RecommendationsTab } | null>(null);
+  const pendingFocus = useRef<{ minVersion: number; tab: RecommendationsTab } | null>(
+    initialRec === undefined ? null : { minVersion: view.version, tab },
+  );
   const region = useRef<HTMLDivElement>(null);
   const runButton = useRef<HTMLButtonElement>(null);
   // Set when a run failed: the Run button is focused once it renders enabled again (the disabled
@@ -836,29 +849,14 @@ export function RecommendationsView({
   );
 }
 
-function ManualMoveAction({ planId, part, savingReason }: { planId: string; part: string; savingReason?: string }) {
-  const detail = usePlanPart(planId, part);
-  const [open, setOpen] = useState(false);
-  const button = useRef<HTMLButtonElement>(null);
-  const reason = detail.data && detail.data.part === part ? manualMoveReason(detail.data, savingReason) : LOADING_PART;
-  return (
-    <>
-      <Button ref={button} variant="tertiary" size="md" disabledReason={reason} onClick={() => setOpen(true)}>
-        {MANUAL_MOVE_LABEL}
-      </Button>
-      {detail.data && (
-        <ManualMoveDialog planId={planId} detail={detail.data} open={open} onOpenChange={setOpen} returnFocusRef={button} />
-      )}
-    </>
-  );
-}
-
 export function RecommendationsPage({ planId }: { planId: string }) {
   const summary = usePlanSummary(planId);
   const recommendations = usePlanRecommendations(planId);
   const data = useConsistentPlanQueries([summary, recommendations]);
   const { sendWithEvents, disabledReason } = usePlanCommands(planId);
-  const tab = parseRecommendationsTab(useSearchParams());
+  const searchParams = useSearchParams();
+  const tab = parseRecommendationsTab(searchParams);
+  const recId = parseRecommendationId(searchParams);
   const changeTab = useCallback(
     (next: RecommendationsTab) => window.history.replaceState(null, "", recommendationsTabHref(planId, next)),
     [planId],
@@ -875,6 +873,7 @@ export function RecommendationsPage({ planId }: { planId: string }) {
         onSend={sendWithEvents}
         manualMove={(part) => <ManualMoveAction key={part} planId={planId} part={part} savingReason={disabledReason} />}
         otherLocation={(props) => <OtherLocationAction key={props.row.id} planId={planId} {...props} />}
+        initialRecId={recId}
       />
     );
   }

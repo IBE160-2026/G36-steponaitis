@@ -188,6 +188,18 @@ export function bandViews(
   });
 }
 
+/**
+ * The expanded rule bands a page opened on `?rec=<id>` starts with: the row's band on `tab` when
+ * the row would sit past the first rows of its rule, so the selected row is shown; none otherwise.
+ */
+export function expandedForRow(items: readonly ListItem[], tab: RecommendationsTab, id: string | undefined): Set<string> {
+  const item = id === undefined ? undefined : items.find((candidate) => candidate.kind === "rec" && itemId(candidate) === id);
+  if (item === undefined || item.kind !== "rec" || tab === "no-space") return new Set();
+  const rule = item.row.rule;
+  const index = items.filter((candidate) => candidate.kind !== "kept-part" && candidate.row.rule === rule).indexOf(item);
+  return index >= ROWS_PER_RULE ? new Set([`${tab}:${rule}`]) : new Set();
+}
+
 export function showMoreText(count: number, rule: Rule): string {
   return `Show ${formatNumber(count)} more under rule ${ruleNumber(rule)}`;
 }

@@ -5,18 +5,6 @@ import { ALL_AISLES } from "@/components/common/locations-table";
 import type { BestMark, LocationRow } from "@/lib/api/plans";
 import { formatNumber } from "@/lib/format";
 
-/** "Aisle A", "Level 1 in aisle A", "Level 1 in all aisles", "Location A-01-01-01". */
-export function markLabel(mark: BestMark): string {
-  switch (mark.kind) {
-    case "aisle":
-      return `Aisle ${mark.aisle}`;
-    case "level":
-      return mark.aisle == null ? `Level ${mark.level} in all aisles` : `Level ${mark.level} in aisle ${mark.aisle}`;
-    case "location":
-      return `Location ${mark.location}`;
-  }
-}
-
 /** Whether two marks are the same value (exact text; a level's missing aisle equals `null`). */
 export function sameMark(a: BestMark, b: BestMark): boolean {
   if (a.kind === "aisle" && b.kind === "aisle") return a.aisle === b.aisle;

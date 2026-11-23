@@ -314,6 +314,12 @@ tr[data-row-index]:focus-visible {
     0 0 0 4px var(--color-focus-on-dark);
 }
 
+/* Wall grid cells (Story 10.3): a cell moved to by keyboard scrolls clear of the sticky toolbar
+   and of the toasts and notices at the bottom (WCAG 2.4.11). */
+[data-grid-cell] {
+  scroll-margin: calc(var(--spacing-toolbar-height) + 8px) 8px 96px;
+}
+
 /* Toasts: no transition longer than 200 ms (UX-DR57). */
 [data-sonner-toast],
 [data-sonner-toast] > * {

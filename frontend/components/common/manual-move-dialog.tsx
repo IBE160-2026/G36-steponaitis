@@ -6,7 +6,9 @@
 // refusal sentence and the effect; the client never computes occupancy or the move's effect
 // (AD-3). The to-location field is an ARIA combobox over the Locations file codes in server order
 // (AD-14). Confirm sends `manual_move` through lib/commands; a confirmed move closes the dialog and
-// a toast names it. Shared: the recommendation detail and the wall reuse it later.
+// a toast names it. Shared: the part panel, the recommendation detail and the wall's pinned
+// tooltip (Story 10.3) open it; `ManualMoveAction` is the button plus dialog for a part by number,
+// with the from-location optionally preselected.
 
 import { Dialog } from "radix-ui";
 import {
@@ -30,9 +32,10 @@ import {
   type PartDetail,
   useMovePreview,
   usePlanLocations,
+  usePlanPart,
 } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
-import { RULE_LABELS } from "@/lib/copy";
+import { LOADING_PART, RULE_LABELS } from "@/lib/copy";
 import { moveEventStep, moveUndoAction } from "@/lib/commands/undo";
 import { cn } from "@/lib/utils";
 
@@ -42,11 +45,23 @@ export const ENTER_TO = "Enter a to-location.";
 export const CHECKING = "Checking the move…";
 export const PREVIEW_DEBOUNCE_MS = 200;
 export const MATCH_LIMIT = 8;
+export const NO_CURRENT_LOCATION = "No current location (no stock above zero)";
+export const MANUAL_MOVE_LABEL = "Manual move…";
+
+/** Why Manual move… cannot open: no current location first, else the command flow's reason. */
+export function manualMoveReason(detail: Pick<PartDetail, "current_location">, savingReason?: string): string | undefined {
+  return detail.current_location === null ? NO_CURRENT_LOCATION : savingReason;
+}
 
 /** The part's locations to move from: the current location first, then the other locations. */
 export function fromChoices(detail: Pick<PartDetail, "current_location" | "other_locations">): string[] {
   const current = detail.current_location ? [detail.current_location.code] : [];
   return [...current, ...detail.other_locations.map((other) => other.location.code)];
+}
+
+/** The from-location a dialog starts on: `initialFrom` when it is one of `choices`, else the first. */
+export function initialFromChoice(choices: readonly string[], initialFrom?: string): string {
+  return initialFrom !== undefined && choices.includes(initialFrom) ? initialFrom : (choices[0] ?? "");
 }
 
 /** Codes starting with the typed text (case-insensitive, trimmed), in the given order; none for blank. */
@@ -233,12 +248,21 @@ export type ManualMoveDialogProps = {
   onOpenChange: (open: boolean) => void;
   /** Gets the focus back on close (the opener may have re-rendered while the move was saving). */
   returnFocusRef?: RefObject<HTMLElement | null>;
+  /** The from-location to start on, when it is one of the part's locations (else the first). */
+  initialFrom?: string;
 };
 
 const FADE =
   "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 duration-150";
 
-export function ManualMoveDialog({ planId, detail, open, onOpenChange, returnFocusRef }: ManualMoveDialogProps) {
+export function ManualMoveDialog({
+  planId,
+  detail,
+  open,
+  onOpenChange,
+  returnFocusRef,
+  initialFrom,
+}: ManualMoveDialogProps) {
   const input = useRef<HTMLInputElement>(null);
 
   return (
@@ -274,6 +298,7 @@ export function ManualMoveDialog({ planId, detail, open, onOpenChange, returnFoc
             planId={planId}
             detail={detail}
             inputRef={input}
+            initialFrom={initialFrom}
             onDone={() => onOpenChange(false)}
           />
         </Dialog.Content>
@@ -287,16 +312,21 @@ function ManualMoveForm({
   planId,
   detail,
   inputRef,
+  initialFrom,
   onDone,
 }: {
   planId: string;
   detail: PartDetail;
   inputRef: RefObject<HTMLInputElement | null>;
+  initialFrom?: string;
   onDone: () => void;
 }) {
   const part = detail.part;
-  const [choices] = useState(() => fromChoices(detail));
-  const [from, setFrom] = useState(choices[0] ?? "");
+  // The choices follow the current detail (a refetch after a command may change them); the chosen
+  // from-location stays while it is still a choice, else the first one is used.
+  const choices = fromChoices(detail);
+  const [chosen, setFrom] = useState(() => initialFromChoice(choices, initialFrom));
+  const from = choices.includes(chosen) ? chosen : (choices[0] ?? "");
   const [to, setTo] = useState("");
   const [debounced, setDebounced] = useState("");
   const [listOpen, setListOpen] = useState(false);
@@ -438,5 +468,59 @@ function ManualMoveForm({
         </Button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Manual move… for a part by number (the recommendation detail, the wall's pinned tooltip): loads
+ * the part, is disabled with the reason while it loads, has no current location, has no part
+ * (`emptyReason`, an empty location) or a command is unconfirmed, and opens the shared dialog,
+ * optionally on `initialFrom`. The last loaded part stays behind the dialog, so a move that empties
+ * the location lets the dialog close normally and return focus.
+ */
+export function ManualMoveAction({
+  planId,
+  part,
+  savingReason,
+  initialFrom,
+  returnFocusRef,
+  label = MANUAL_MOVE_LABEL,
+  emptyReason,
+}: {
+  planId: string;
+  /** The part to move; undefined when there is none (then disabled with `emptyReason`). */
+  part: string | undefined;
+  savingReason?: string;
+  initialFrom?: string;
+  /** Where focus goes when the dialog closes (default: this button). */
+  returnFocusRef?: RefObject<HTMLElement | null>;
+  label?: string;
+  emptyReason?: string;
+}) {
+  const detail = usePlanPart(planId, part);
+  const [open, setOpen] = useState(false);
+  const [kept, setKept] = useState<PartDetail | undefined>(undefined);
+  const button = useRef<HTMLButtonElement>(null);
+  const current = part !== undefined && detail.data && detail.data.part === part ? detail.data : undefined;
+  if (current !== undefined && current !== kept) setKept(current);
+  const dialogDetail = current ?? kept;
+  const reason =
+    part === undefined ? (emptyReason ?? LOADING_PART) : current ? manualMoveReason(current, savingReason) : LOADING_PART;
+  return (
+    <>
+      <Button ref={button} variant="tertiary" size="md" disabledReason={reason} onClick={() => setOpen(true)}>
+        {label}
+      </Button>
+      {dialogDetail && (
+        <ManualMoveDialog
+          planId={planId}
+          detail={dialogDetail}
+          open={open}
+          onOpenChange={setOpen}
+          returnFocusRef={returnFocusRef ?? button}
+          initialFrom={initialFrom}
+        />
+      )}
+    </>
   );
 }

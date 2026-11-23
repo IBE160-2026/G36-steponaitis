@@ -1,18 +1,43 @@
 // Wall primitives (Story 10.2, FR-42): shared by the Locations wall, the front page and, later,
-// wall crops (Story 10.5), the whole-warehouse view (Story 10.6) and marking (Story 10.7).
+// wall crops (Story 10.5), the whole-warehouse view (Story 10.6) and marking (Story 10.7). The
+// keyboard grid, its navigation and the tooltip are Story 10.3's.
 
 export { BIN_HEIGHT, BIN_WIDTH, Bin, CODE_MIN_WIDTH } from "./bin";
 export { CLASS_FILL } from "./class-fill";
-export { Key, KeySwatch } from "./key";
+export { Frame, Key, KeySwatch, SELECTED_FRAME } from "./key";
 export {
   type CellBest,
+  cellRect,
   framedCounts,
   isFramed,
   MAX_SCALE,
+  runTops,
   type WallCellModel,
   wallCells,
   wallNaturalSize,
   wallScale,
 } from "./model";
+export { firstCell, nextCell, WALL_KEYS, type WallKeyEvent } from "./navigation";
+export {
+  gridCounts,
+  HOVER_DELAY_MS,
+  HOVER_GRACE_MS,
+  NO_TIP,
+  type TipEvent,
+  type TipState,
+  tipReducer,
+  WallGrid,
+  type WallGridProps,
+  type WallManualMoveProps,
+} from "./wall-grid";
+export {
+  cellRecommendations,
+  partnerStrips,
+  recommendationLinks,
+  recommendationsAtVersion,
+  type WallPartner,
+  type WallRecommendationLink,
+  WallTooltip,
+} from "./wall-tooltip";
 export { Slot, SlotNone } from "./slot";
 export { WallPanel } from "./wall-panel";

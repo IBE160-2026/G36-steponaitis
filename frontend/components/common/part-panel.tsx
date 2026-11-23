@@ -21,7 +21,12 @@ import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
 import { KeepInPlaceButton, KeptInPlaceMark, useKeepInPlace } from "@/components/common/keep-in-place";
 import { LocationChip } from "@/components/common/location-chip";
-import { ManualMoveDialog } from "@/components/common/manual-move-dialog";
+import {
+  MANUAL_MOVE_LABEL,
+  ManualMoveDialog,
+  manualMoveReason,
+  NO_CURRENT_LOCATION,
+} from "@/components/common/manual-move-dialog";
 import { PlanLoadError, showsLoadError } from "@/components/common/plan-status";
 import { UndoLastMoveButton } from "@/components/common/undo-last-move";
 import { type PartDetail, usePlanPart } from "@/lib/api/plans";
@@ -31,15 +36,9 @@ import { formatNumber } from "@/lib/format";
 import type { StepKey } from "@/lib/view-state/steps";
 import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
 
-export const NO_CURRENT_LOCATION = "No current location (no stock above zero)";
+export { MANUAL_MOVE_LABEL, manualMoveReason, NO_CURRENT_LOCATION };
 export const NO_PICK_GROUPS = "No pick groups";
 export const CLOSE_LABEL = "Close part panel";
-export const MANUAL_MOVE_LABEL = "Manual move…";
-
-/** Why Manual move… cannot open: no current location first, else the command flow's reason. */
-export function manualMoveReason(detail: Pick<PartDetail, "current_location">, savingReason?: string): string | undefined {
-  return detail.current_location === null ? NO_CURRENT_LOCATION : savingReason;
-}
 
 /** The panel's Manual move… button (FR-33, UX-DR24): disabled with its reason, never hidden. */
 export function ManualMoveButton({

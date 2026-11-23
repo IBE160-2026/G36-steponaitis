@@ -6,7 +6,7 @@ import { type Occupancy, occupancyLine } from "./support/plan-api";
 import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-1: the planner opens the Locations step, reads the occupancy lines, filters by aisle and
-// occupancy, and opens a location from a `?aisle=&loc=` URL (Story 2.4; FR-14, UX-DR9, UX-DR27,
+// occupancy, and opens a location from a `?mode=list&aisle=&loc=` URL (Story 2.4; FR-14, UX-DR9, UX-DR27,
 // UX-DR57).
 
 type Row = {
@@ -71,10 +71,11 @@ test("uj1 reads the locations table with occupancy, filters it and opens a locat
   await expect(emptyRowLine.locator("[data-occupancy]")).toHaveText("Empty");
   await expect(emptyRowLine).toContainText("None");
 
-  // A `?aisle=B&loc=` link: aisle filter B, that row focused and in view.
+  // A `?mode=list&aisle=B&loc=` link: aisle filter B, that row focused and in view (without
+  // `mode=list` a location link opens the wall, Story 10.3).
   const aisleB = view.locations.filter((row) => row.location.aisle === "B");
   const target = aisleB[Math.floor(aisleB.length / 2)].location.code;
-  await page.goto(`/plans/${planId}/locations?aisle=B&loc=${encodeURIComponent(target)}`);
+  await page.goto(`/plans/${planId}/locations?aisle=B&mode=list&loc=${encodeURIComponent(target)}`);
   await expect(aisleSelect).toHaveValue("B");
   await expect(body).toHaveCount(aisleB.length);
   const targetRow = body.filter({ has: page.getByRole("cell", { name: target, exact: true }) });
@@ -88,7 +89,7 @@ test("uj1 reads the locations table with occupancy, filters it and opens a locat
   await expect(allOccupancy).toBeFocused();
 
   // Unknown aisle and location: all aisles, nothing focused.
-  await page.goto(`/plans/${planId}/locations?aisle=Z&loc=nope`);
+  await page.goto(`/plans/${planId}/locations?aisle=Z&mode=list&loc=nope`);
   await expect(aisleSelect).toHaveValue("");
   await expect(body).toHaveCount(2_000);
   const focusedInTable = await table.evaluate((element) => element.contains(document.activeElement));
@@ -124,7 +125,8 @@ test("uj1 changing the aisle keeps the occupancy filter", async ({ page, request
   await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
   await expect(body).toHaveCount(aisleB.empty);
 
-  // A different `?aisle=&loc=` link (a part panel's location chip) still resets them.
+  // A part panel's location chip opens the wall at that location (Story 10.3); Open as list from
+  // there shows the table on the chip's aisle with the filters reset.
   const target = view.locations.find((row) => row.location.aisle === "A" && row.contents.length > 0)!;
   const part = target.contents[0].part;
   await main.getByRole("heading", { name: "Locations", level: 1 }).click();
@@ -138,6 +140,9 @@ test("uj1 changing the aisle keeps the occupancy filter", async ({ page, request
   const chipAisle = view.locations.find((row) => row.location.code === chipCode)!.location.aisle;
   await chip.click();
   await expect(page).toHaveURL(new RegExp(`\\?aisle=${chipAisle}&loc=${encodeURIComponent(chipCode)}$`));
+  await expect(page.getByRole("dialog", { name: chipCode })).toBeVisible();
+  await main.getByRole("button", { name: "Open as list" }).click();
+  await expect(page).toHaveURL(new RegExp(`\\?aisle=${chipAisle}&mode=list$`));
   await expect(aisleSelect).toHaveValue(chipAisle);
   await expect(emptyButton).toHaveAttribute("aria-pressed", "false");
   await expect(notBest).toHaveAttribute("aria-pressed", "false");

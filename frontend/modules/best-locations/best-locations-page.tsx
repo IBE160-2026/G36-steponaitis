@@ -26,10 +26,10 @@ import {
   usePlanSummary,
 } from "@/lib/api/plans";
 import { type CommandBody, type SendResult, useConsistentPlanQueries, usePlanCommands } from "@/lib/commands";
-import { marksChangedText, VIEW_LABEL } from "@/lib/copy";
+import { markLabel, marksChangedText, VIEW_LABEL } from "@/lib/copy";
 import { bestLocationsModeKey, readStored, writeStored } from "@/lib/view-state/storage";
 import { recommendationsTabHref } from "@/lib/view-state/urls";
-import { bestCountsLine, hasLocationMark, levelsInAisle, markLabel, sameMark } from "./marks";
+import { bestCountsLine, hasLocationMark, levelsInAisle, sameMark } from "./marks";
 
 export type MarkingMode = "aisle" | "level" | "single";
 export type LevelScope = "aisle" | "all";

@@ -2,6 +2,9 @@
 // A louvre background, an upright at each section start, a beam under each level (a 4px best rail
 // on a level in `rail_levels`), a section header row and level labels per run, the two runs, and an
 // end cap with the aisle's last Walk Path. Cells come from `wallCells`; this file owns only pixels.
+// Without a `label` the picture is `aria-hidden`: the keyboard grid over it (`WallGrid`, Story
+// 10.3) carries the names, focus, hover and clicks. The selected part's cell gets the Key's
+// Selected frame.
 
 import { useId } from "react";
 
@@ -9,18 +12,18 @@ import type { AisleLayout } from "@/lib/api/imports";
 import { BEST_TAG, bestCountTag, endCapLabel, levelLabel } from "@/lib/copy";
 
 import { BIN_HEIGHT, BIN_WIDTH, Bin } from "./bin";
+import { Frame, SELECTED_FRAME } from "./key";
 import {
   BEAM_HEIGHT,
   BEAM_TOP,
-  BIN_TOP,
+  cellRect,
   columnX,
   framedCounts,
   LABEL_WIDTH,
   PAD,
   PITCH,
   ROW_HEIGHT,
-  RUN_GAP,
-  runHeight,
+  runTops as runTopsOf,
   runWidth,
   SECTION_GAP,
   SECTION_HEADER,
@@ -30,7 +33,6 @@ import {
 } from "./model";
 import { Slot, SlotNone, SlotNoneHatch } from "./slot";
 
-const BIN_INSET = (PITCH - BIN_WIDTH) / 2;
 const TAG_HEIGHT = 15;
 
 function BestTag({ x, y, text }: { x: number; y: number; text: string }) {
@@ -52,7 +54,21 @@ function BestTag({ x, y, text }: { x: number; y: number; text: string }) {
   );
 }
 
-function Cell({ cell, x, y, scale, hatchId }: { cell: WallCellModel; x: number; y: number; scale: number; hatchId: string }) {
+function Cell({
+  cell,
+  x,
+  y,
+  scale,
+  hatchId,
+  selected,
+}: {
+  cell: WallCellModel;
+  x: number;
+  y: number;
+  scale: number;
+  hatchId: string;
+  selected: boolean;
+}) {
   if (cell.code === null) {
     return (
       <g data-gap="">
@@ -68,6 +84,7 @@ function Cell({ cell, x, y, scale, hatchId }: { cell: WallCellModel; x: number; 
       data-best={cell.best}
       data-class={top}
       data-parts={cell.parts.length}
+      data-selected={selected ? "" : undefined}
     >
       {cell.occupied && top !== undefined ? (
         <Bin parts={cell.parts} x={x} y={y} drawnWidth={BIN_WIDTH * scale} />
@@ -87,6 +104,11 @@ function Cell({ cell, x, y, scale, hatchId }: { cell: WallCellModel; x: number; 
           data-best-frame=""
         />
       )}
+      {selected && (
+        <g data-selected-frame="">
+          <Frame {...SELECTED_FRAME} x={x} y={y} />
+        </g>
+      )}
     </g>
   );
 }
@@ -97,6 +119,7 @@ export function WallPanel({
   railLevels,
   scale = 1,
   label,
+  selectedCode,
 }: {
   layout: AisleLayout;
   cells: readonly WallCellModel[];
@@ -104,8 +127,10 @@ export function WallPanel({
   railLevels: readonly string[];
   /** The drawn size over the natural size (`wallScale`). */
   scale?: number;
-  /** The picture's accessible name. */
-  label: string;
+  /** The picture's accessible name; without one the picture is `aria-hidden` (a grid names the cells). */
+  label?: string;
+  /** The location drawn with the Selected frame (the open part's current location). */
+  selectedCode?: string;
 }) {
   const id = useId();
   const louvre = `${id}-louvre`;
@@ -114,20 +139,14 @@ export function WallPanel({
   const rails = new Set(railLevels);
   const framed = framedCounts(layout, cells);
   const left = PAD + LABEL_WIDTH;
-  const runTops: number[] = [];
-  let top = PAD;
-  for (const run of layout.runs) {
-    runTops.push(top);
-    top += runHeight(run) + RUN_GAP;
-  }
+  const runTops = runTopsOf(layout);
   const endCapY = size.height - PAD - 6;
   return (
     <svg
       width={size.width * scale}
       height={size.height * scale}
       viewBox={`0 0 ${size.width} ${size.height}`}
-      role="img"
-      aria-label={label}
+      {...(label === undefined ? { "aria-hidden": true } : { role: "img", "aria-label": label })}
       focusable="false"
       data-wall-panel={layout.aisle}
       style={{ display: "block", flexShrink: 0 }}
@@ -211,18 +230,17 @@ export function WallPanel({
         );
       })}
       {cells.map((cell) => {
-        const run = layout.runs[cell.run];
-        if (run === undefined) return null;
-        const x = left + columnX(run, cell.column) + BIN_INSET;
-        const y = runTops[cell.run] + SECTION_HEADER + cell.row * ROW_HEIGHT + BIN_TOP;
+        const rect = cellRect(layout, runTops, cell);
+        if (rect === null) return null;
         return (
           <Cell
             key={`${cell.run}:${cell.row}:${cell.column}`}
             cell={cell}
-            x={x}
-            y={y}
+            x={rect.x}
+            y={rect.y}
             scale={scale}
             hatchId={hatch}
+            selected={cell.code !== null && cell.code === selectedCode}
           />
         );
       })}

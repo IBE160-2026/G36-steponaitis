@@ -8,6 +8,7 @@ import type {
   AisleCounts,
   AppliedInfo,
   ApplyAllDoneEvent,
+  BestMark,
   ClassThreshold,
   CommandEvent,
   LocationRef,
@@ -451,12 +452,7 @@ export function aisleHeading(aisle: string): string {
   return `Aisle ${aisle}`;
 }
 
-/** The wall picture's accessible name. */
-export function wallImageLabel(aisle: string): string {
-  return `Bin wall of aisle ${aisle}. Open as list reads every location as text.`;
-}
-
-/** The wall's scroll box: a keyboard user tabs to it to scroll a wall wider than the page. */
+/** The wall's scroll box: it scrolls a wall wider than the page; the grid inside is its tab stop. */
 export function wallScrollLabel(aisle: string): string {
   return `Aisle ${aisle} wall, scrollable`;
 }
@@ -509,3 +505,117 @@ export function wallAisleLine(counts: AisleCounts, walkPathFirst: string, walkPa
 export function endCapLabel(aisle: string, walkPathLast: string): string {
   return `End of aisle ${aisle} · Walk Path ${formatNumber(walkPathLast)} →`;
 }
+
+// The wall's keyboard grid and tooltips (Story 10.3, FR-42, UX-DR42/43). Every fact comes from the
+// server's wall view and recommendations; only the words are made here.
+
+/** "Aisle A", "Level 1 in aisle A", "Level 1 in all aisles", "Location A-01-01-01". */
+export function markLabel(mark: BestMark): string {
+  switch (mark.kind) {
+    case "aisle":
+      return `Aisle ${mark.aisle}`;
+    case "level":
+      return mark.aisle == null ? `Level ${mark.level} in all aisles` : `Level ${mark.level} in aisle ${mark.aisle}`;
+    case "location":
+      return `Location ${mark.location}`;
+  }
+}
+
+/** The wall grid's accessible name: "Aisle A bin wall". */
+export function wallGridLabel(aisle: string): string {
+  return `Aisle ${aisle} bin wall`;
+}
+
+/** "Level 1": a level row's header and the tooltip's level line. */
+export function levelName(level: string): string {
+  return `Level ${level}`;
+}
+
+/** A class name inside a sentence: "fast-moving", "dead stock". */
+function classInSentence(movementClass: MovementClass): string {
+  return CLASS_LABELS[movementClass].toLowerCase();
+}
+
+/** "N picks" (singular "1 pick"). */
+function picksText(picks: number): string {
+  return plural(picks, "pick", "picks");
+}
+
+/**
+ * A wall cell's accessible name: "A-07-01-02, level 1, best location, occupied, fast-moving"
+ * (the top part's class), ", selected" while its part's panel is open.
+ */
+export function cellName(cell: {
+  code: string;
+  level: string;
+  best: boolean;
+  occupied: boolean;
+  topClass?: MovementClass;
+  selected?: boolean;
+}): string {
+  const words = [cell.code, `level ${cell.level}`];
+  if (cell.best) words.push("best location");
+  words.push(cell.occupied ? "occupied" : "empty");
+  if (cell.occupied && cell.topClass !== undefined) words.push(classInSentence(cell.topClass));
+  if (cell.selected) words.push("selected");
+  return words.join(", ");
+}
+
+type WallPartLike = {
+  part: string;
+  description: string;
+  movement_class: MovementClass;
+  picks: number;
+  stock: string;
+  kept_in_place: boolean;
+};
+
+/** One line of a cell's description: "4410281 Oil filter, fast-moving, 33 picks, stock 4[, kept in place]". */
+export function cellPartLine(part: WallPartLike): string {
+  const line = `${part.part} ${part.description}, ${classInSentence(part.movement_class)}, ${picksText(part.picks)}, stock ${formatNumber(part.stock)}`;
+  return part.kept_in_place ? `${line}, ${KEPT_IN_PLACE_STATE}` : line;
+}
+
+/** "Occupied · 3 parts", "Occupied · 1 part" or "Empty" (never a colour). */
+export function occupancyText(occupied: boolean, parts: number): string {
+  return occupied ? `Occupied · ${plural(parts, "part", "parts")}` : "Empty";
+}
+
+/** A covering mark in the tooltip: "Level 1 in aisle A (best-location mark)". */
+export function markSourceText(mark: BestMark): string {
+  return `${markLabel(mark)} (best-location mark)`;
+}
+
+/** "Walk Path 2,270". */
+export function walkPathText(walkPath: string): string {
+  return `Walk Path ${formatNumber(walkPath)}`;
+}
+
+/** A part line's facts in the tooltip: "Fast-moving · 33 picks · stock 4". */
+export function partStatsText(part: Pick<WallPartLike, "movement_class" | "picks" | "stock">): string {
+  return `${CLASS_LABELS[part.movement_class]} · ${picksText(part.picks)} · stock ${formatNumber(part.stock)}`;
+}
+
+/** A rule 3 recommendation touching a cell: "Partner 4410281 · 14 shared jobs · recommendation #2". */
+export function partnerStripText(partner: string, sharedJobs: number, number: number): string {
+  return `Partner ${partner} · ${sharedJobsText(sharedJobs)} · recommendation #${formatNumber(number)}`;
+}
+
+/** The pinned tooltip's link to a recommendation: "Show recommendation #2". */
+export function showRecommendationLabel(number: number): string {
+  return `Show recommendation #${formatNumber(number)}`;
+}
+
+/** A line of a wall cell's description, ended with a period so screen readers pause between lines. */
+export function descriptionLine(line: string): string {
+  return `${line}.`;
+}
+
+/** A wall gap cell's name: a section position with no location. */
+export const GAP_CELL_LABEL = "No location";
+
+/** Why the pinned tooltip's Manual move… is disabled on an empty location. */
+export const EMPTY_LOCATION_REASON = "This location is empty.";
+
+/** Why a Manual move… waits: its part is still loading. */
+export const LOADING_PART = "Loading the part…";

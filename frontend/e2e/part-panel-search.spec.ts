@@ -6,7 +6,7 @@ import { createSamplePlan } from "./support/sample-plan";
 
 // UJ-7 and UJ-6: the planner finds a part or a location with the search field, opens a part's
 // panel from a search result, a roster row or the pick groups table, and follows a location chip
-// to the Locations table (Story 2.6; FR-13, FR-15, FR-20, UX-DR8, UX-DR11, UX-DR24, UX-DR25).
+// to the Locations wall (Story 2.6, Story 10.3; FR-13, FR-15, FR-20, UX-DR8, UX-DR11, UX-DR24, UX-DR25).
 
 type Ref = { code: string; aisle: string };
 type Threshold = { min_picks: number; max_picks: number | null };
@@ -95,7 +95,8 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await expect(main.getByText("No part or location matches “zzzz”.", { exact: true })).toBeVisible();
   await field.fill("");
 
-  // A roster row click opens a panel; its chip opens the Locations table with that row focused.
+  // A roster row click opens a panel; its chip opens the Locations wall at that location with its
+  // dialog pinned and focus on its first action (Story 10.3).
   const rows = main.getByRole("table", { name: "Parts" }).locator("tbody tr");
   const roster = (await (await request.get(`/api/plans/${planId}/parts`)).json()) as {
     parts: { part: string; current_location: Ref | null }[];
@@ -111,10 +112,11 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await expect(page).toHaveURL(
     new RegExp(`/plans/${planId}/locations\\?aisle=${location.aisle}&loc=${encodeURIComponent(location.code)}$`),
   );
-  const locationRows = page.getByRole("main").getByRole("table", { name: "Locations" }).locator("tbody tr");
-  await expect(locationRows.filter({ hasText: location.code }).first()).toBeFocused();
+  const chipDialog = page.getByRole("dialog", { name: location.code });
+  await expect(chipDialog).toBeVisible();
+  await expect(chipDialog.locator("button, a[href]").first()).toBeFocused();
 
-  // A location search on the Locations page opens the table at that aisle with the row focused.
+  // A location search on the Locations page opens the wall at that aisle with the dialog pinned.
   const locationsSearch = (await (await request.get(`/api/plans/${planId}/search?q=a-01-01`)).json()) as Search;
   const target = locationsSearch.locations[0].location;
   const locField = page.getByRole("main").getByRole("searchbox", { name: "Search parts and locations" });
@@ -125,25 +127,25 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   await expect(page).toHaveURL(
     new RegExp(`/plans/${planId}/locations\\?aisle=${target.aisle}&loc=${encodeURIComponent(target.code)}$`),
   );
-  const targetRow = locationRows.filter({ has: page.getByText(target.code, { exact: true }) }).first();
-  await expect(targetRow).toBeFocused();
+  await expect(page.getByRole("dialog", { name: target.code })).toBeVisible();
 
-  // The part panel on the Locations page: opened from a part result, kept across an aisle change,
-  // closed with Esc back to the search field.
+  // The part panel on the table: opened from a part result, kept across an aisle change, closed
+  // with Esc back to the search field.
+  await page.getByRole("main").getByRole("button", { name: "Open as list" }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=${target.aisle}&mode=list$`));
   await locField.fill("oil filter");
   await page.locator(`[data-search-part="${firstPart}"]`).click();
   // Opening keeps the view state already in the URL.
   await expect(page).toHaveURL(
-    new RegExp(
-      `/plans/${planId}/locations\\?aisle=${target.aisle}&loc=${encodeURIComponent(target.code)}&part=${encodeURIComponent(firstPart)}$`,
-    ),
+    new RegExp(`/plans/${planId}/locations\\?aisle=${target.aisle}&mode=list&part=${encodeURIComponent(firstPart)}$`),
   );
+  const listAisle = target.aisle;
   const locPanel = page.getByRole("complementary", { name: firstPart });
   await expect(locPanel).toBeVisible();
   const otherAisle = (await (await request.get(`/api/plans/${planId}/locations`)).json()) as {
     aisles: { aisle: string }[];
   };
-  const nextAisle = otherAisle.aisles.find((entry) => entry.aisle !== target.aisle)!.aisle;
+  const nextAisle = otherAisle.aisles.find((entry) => entry.aisle !== listAisle)!.aisle;
   await page.getByRole("main").getByLabel("Aisle", { exact: true }).selectOption(nextAisle);
   await expect(page).toHaveURL(new RegExp(`aisle=${nextAisle}&mode=list&part=${encodeURIComponent(firstPart)}$`));
   await expect(locPanel).toBeVisible();

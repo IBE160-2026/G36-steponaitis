@@ -1,8 +1,8 @@
 // Plan URLs (AD-20): `/plans/{id}/{view}` and its view-state query (`?aisle=&loc=`, UX-DR9, and
 // the open part panel `?part=`, UX-DR24) are built and read here and nowhere else. The
-// recommendations tab (`?tab=`, Story 5.7) is built and parsed here too, as are the saved-plans
-// list (`/plans`, FR-8) and New Plan (`/plans/new`, with `?from=<planId>` to reuse that plan's
-// import, FR-2). So is the plan's last view, kept per browser (`swp:plan:<id>:view`, Story 6.2),
+// recommendations tab (`?tab=`, Story 5.7) and selected recommendation (`?rec=`, Story 10.3) are
+// built and parsed here too, as are the saved-plans list (`/plans`, FR-8) and New Plan
+// (`/plans/new`, with `?from=<planId>` to reuse that plan's import, FR-2). So is the plan's last view, kept per browser (`swp:plan:<id>:view`, Story 6.2),
 // which the bare `/plans/<id>` opens.
 
 import { type StepKey, stepFromKey, stepFromSegment, stepSegment } from "@/lib/view-state/steps";
@@ -10,8 +10,8 @@ import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
 
 /**
  * The view state carried in the URL: the Locations aisle (the wall's open aisle, or the table's
- * aisle filter), a location to focus, `mode=list` for the table (Story 10.2), and the part whose
- * panel is open.
+ * aisle filter), a location to open (the wall pins its tooltip, the table focuses its row),
+ * `mode=list` for the table (Story 10.2), and the part whose panel is open.
  */
 export type LocationParams = { aisle?: string; loc?: string; mode?: string; part?: string };
 
@@ -123,6 +123,22 @@ export type RecommendationsTab = "open" | "applied" | "kept" | "outdated" | "no-
 /** `/plans/<id>/recommendations?tab=<tab>`: the Recommendations step on one tab. */
 export function recommendationsTabHref(planId: string, tab: RecommendationsTab): string {
   return `${planStepHref(planId, "recommendations")}?${new URLSearchParams({ tab })}`;
+}
+
+/**
+ * `/plans/<id>/recommendations?tab=<tab>&rec=<id>`: one recommendation, selected on the tab of its
+ * server status (Story 10.3, the wall's Show recommendation #n).
+ */
+export function recommendationHref(
+  planId: string,
+  row: { id: string; status: "open" | "applied" | "kept" | "outdated" },
+): string {
+  return planStepHref(planId, "recommendations", { tab: row.status, rec: row.id });
+}
+
+/** `?rec=` → the recommendation to select; undefined when missing or empty. */
+export function parseRecommendationId(searchParams: SearchParamsInput): string | undefined {
+  return firstValue(searchParams, "rec");
 }
 
 const RECOMMENDATIONS_TABS: readonly RecommendationsTab[] = ["open", "applied", "kept", "outdated", "no-space"];

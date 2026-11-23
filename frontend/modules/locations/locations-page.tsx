@@ -1,21 +1,28 @@
 "use client";
 
-// Locations step (FR-14, FR-42, UX-DR27, UX-DR40/41/45/48, UX-DR57). By default the open aisle is
+// Locations step (FR-14, FR-42, UX-DR27, UX-DR40–43/45/48, UX-DR57). By default the open aisle is
 // a bin wall (Story 10.2): aisle tabs in server order with the whole-warehouse figure, the aisle's
 // header line, the wall and its Key. Every count, occupancy and best flag comes from the plan's wall
 // view; the cells come from the import layout. The aisle opens from `?aisle=`, else the plan's
 // stored last aisle, else the first.
 //
-// **Open as list** (`?mode=list`, or any `?loc=` link) shows the milestone 1 table: every location
-// in server order with its aisle, level, Walk Path, occupied or empty, best or not, and the parts
-// stored there, with the whole-warehouse and per-aisle occupancy lines. Filters only read server
-// flags; occupancy is always words and counts, never colour alone. `?aisle=&loc=` sets the aisle
-// filter and focuses the row (UX-DR9, through lib/view-state). The header's search field opens a
-// part's panel (`?part=`, UX-DR24) or another location; so does a part number in a row's Parts cell.
+// The wall is a keyboard grid with tooltips (Story 10.3): `?aisle=&loc=` (a LocationChip, a search
+// location result) opens the wall on that aisle with the location's dialog pinned, once per `loc`.
+// While a part's panel is open, its current location is drawn Selected and is the grid's tab stop;
+// a part opened from the search field switches the wall to its aisle. The pinned dialog links the
+// latest run's recommendations touching the location, only while their version agrees with the
+// wall's (AD-12).
+//
+// **Open as list** (`?mode=list`) shows the milestone 1 table: every location in server order with
+// its aisle, level, Walk Path, occupied or empty, best or not, and the parts stored there, with the
+// whole-warehouse and per-aisle occupancy lines. Filters only read server flags; occupancy is always
+// words and counts, never colour alone. `?mode=list&aisle=&loc=` sets the aisle filter and focuses
+// the row (UX-DR9, through lib/view-state). The header's search field opens a part's panel
+// (`?part=`, UX-DR24) or another location; so does a part number in a row's Parts cell.
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type ReactNode, useEffect, useId, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { Button, buttonClassName } from "@/components/common/button";
 import {
@@ -27,34 +34,43 @@ import {
   type OpenPart,
 } from "@/components/common/locations-table";
 import { usePanelPlanData, usePartPanel, WithPartPanel } from "@/components/common/part-panel";
+import { ManualMoveAction } from "@/components/common/manual-move-dialog";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
 import { SearchField } from "@/components/common/search-field";
-import { Key } from "@/components/common/wall";
+import { Key, recommendationsAtVersion } from "@/components/common/wall";
 import { type LayoutView, useImportLayout } from "@/lib/api/imports";
 import {
   type LocationsView as LocationsData,
   usePlanLocations,
+  usePlanRecommendations,
   usePlanSummary,
   usePlanWall,
   type WallView,
 } from "@/lib/api/plans";
+import { usePlanCommands } from "@/lib/commands";
 import {
   aisleHeading,
   EDIT_BEST_MARKS,
+  EMPTY_LOCATION_REASON,
   OPEN_AS_LIST,
   OPEN_AS_WALL,
   wallAisleLine,
   wholeWarehouseFigure,
 } from "@/lib/copy";
-import { type LocationParams, parseLocationParams, planStepHref } from "@/lib/view-state/urls";
+import {
+  type LocationParams,
+  parseLocationParams,
+  planStepHref,
+  recommendationHref,
+} from "@/lib/view-state/urls";
 
 import { chooseAisle, readStoredAisle, storeAisle } from "./aisle-choice";
 import { aisleTabId, AisleTabs } from "./aisle-tabs";
-import { AisleWall } from "./aisle-wall";
+import { AisleWall, type AisleWallProps } from "./aisle-wall";
 
-/** List mode: `?mode=list`, or a `?loc=` link (a location link focuses its table row). */
+/** List mode: only `?mode=list` (a `?loc=` link without it opens the wall at that location). */
 export function isListMode(params: LocationParams): boolean {
-  return params.mode === "list" || params.loc !== undefined;
+  return params.mode === "list";
 }
 
 /** The part of the URL that resets the filters: `?aisle=` and `?loc=` (empty values dropped). */
@@ -143,6 +159,7 @@ export function LocationsWall({
   onOpenList,
   part,
   search,
+  grid = {},
 }: {
   planId: string;
   view: WallView;
@@ -154,6 +171,8 @@ export function LocationsWall({
   onOpenList: () => void;
   part?: string;
   search?: ReactNode;
+  /** The wall grid's selection, `?loc=` pin, recommendations and actions. */
+  grid?: Omit<AisleWallProps, "layout" | "wall">;
 }) {
   const idPrefix = useId();
   const panelId = `${idPrefix}-panel`;
@@ -200,7 +219,7 @@ export function LocationsWall({
             </Link>
           </div>
         </div>
-        {aisleLayout && <AisleWall layout={aisleLayout} wall={view} />}
+        {aisleLayout && <AisleWall key={view.aisle} layout={aisleLayout} wall={view} {...grid} />}
         <Key />
       </section>
     </div>
@@ -215,6 +234,27 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
   const wall = usePlanWall(planId, aisle ?? "", aisle !== undefined);
   const panel = usePartPanel(planId, "locations");
   const data = usePanelPlanData(planId, wall, panel.part);
+  const recommendations = usePlanRecommendations(planId);
+  const { disabledReason } = usePlanCommands(planId);
+
+  // `?loc=` pins that location's dialog once per distinct value (a new link pins again).
+  const [handledLoc, setHandledLoc] = useState<string | undefined>(undefined);
+  if (params.loc === undefined && handledLoc !== undefined) setHandledLoc(undefined);
+  const loc = params.loc;
+  const onPinHandled = useCallback(() => setHandledLoc(loc), [loc]);
+  const pinCode = loc !== undefined && loc !== handledLoc && data?.view.aisle === aisle ? loc : undefined;
+
+  // A part opened from the search field: once its detail is here, the wall shows its aisle.
+  const followPart = useRef<string | undefined>(undefined);
+  const detail = data?.detail;
+  useEffect(() => {
+    if (detail === undefined || followPart.current !== detail.part) return;
+    followPart.current = undefined;
+    const target = detail.current_location?.aisle;
+    if (target !== undefined && target !== aisle) {
+      window.history.replaceState(null, "", planStepHref(planId, "locations", { aisle: target, part: detail.part }));
+    }
+  }, [detail, aisle, planId]);
 
   useEffect(() => {
     if (aisle !== undefined) storeAisle(planId, aisle);
@@ -225,7 +265,7 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
   }
 
   function openList() {
-    // The chosen aisle, not the previous aisle's wall still shown while the next one loads.
+    // The chosen aisle, not the previous aisle's wall still shown while the next one loads; no `loc`.
     const current = aisle ?? data?.view.aisle;
     window.history.replaceState(
       null,
@@ -247,6 +287,10 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
       </div>
     );
   }
+  // The selected part's current location; the recommendations only at the wall's version (AD-12).
+  const selectedCode =
+    panel.part !== undefined && data.detail?.part === panel.part ? data.detail.current_location?.code : undefined;
+  const recRows = recommendationsAtVersion(recommendations.data, data.view.version);
   return (
     <WithPartPanel
       planId={planId}
@@ -263,7 +307,37 @@ function WallMode({ planId, params, importId }: { planId: string; params: Locati
         onSelect={select}
         onOpenList={openList}
         part={panel.part}
-        search={<SearchField planId={planId} onOpenPart={panel.open} />}
+        search={
+          <SearchField
+            planId={planId}
+            onOpenPart={(part, opener) => {
+              // The part already open does not move the wall on a later refetch.
+              if (part !== panel.part) followPart.current = part;
+              panel.open(part, opener);
+            }}
+          />
+        }
+        grid={{
+          selectedCode,
+          pinCode,
+          onPinHandled,
+          recommendations: recRows,
+          recommendationHref: (row) => recommendationHref(planId, row),
+          onOpenPart: panel.open,
+          // One Manual move… per pinned location: its part and reason follow the data, so a move
+          // that empties the location closes its dialog normally and focus returns to the cell.
+          manualMove: ({ location, returnFocusRef }) => (
+            <ManualMoveAction
+              key={location.location.code}
+              planId={planId}
+              part={location.top_part?.part}
+              emptyReason={EMPTY_LOCATION_REASON}
+              savingReason={disabledReason}
+              initialFrom={location.location.code}
+              returnFocusRef={returnFocusRef}
+            />
+          ),
+        }}
       />
     </WithPartPanel>
   );

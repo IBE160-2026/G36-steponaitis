@@ -321,7 +321,11 @@ describe("fr42 wall copy", () => {
     expect(markup).toMatch(/<button[^>]*>Open as list<\/button>/);
     expect(markup).toContain(`href="${planStepHref("p1", "best-locations", { aisle: "A" })}"`);
     expect(plain).toContain("Edit best-location marks");
-    expect(markup).toContain('aria-label="Bin wall of aisle A. Open as list reads every location as text."');
+    // Story 10.3: the picture is aria-hidden; the grid over it is the wall's one tab stop.
+    expect(markup).toMatch(/<svg[^>]*aria-hidden="true"[^>]*data-wall-panel="A"/);
+    expect(markup).toContain('role="grid" aria-label="Aisle A bin wall"');
+    expect(markup).toMatch(/<div role="region" aria-label="Aisle A wall, scrollable"/);
+    expect(markup).not.toMatch(/role="region"[^>]*tabindex/);
     expect(markup.indexOf("data-wall-panel")).toBeLessThan(markup.indexOf("data-wall-key"));
     expect(markup).toMatch(/role="tabpanel" id="([^"]+)" aria-labelledby="[^"]+-tab-A"/);
   });
@@ -382,7 +386,9 @@ describe("fr42 wall aisle choice", () => {
     expect(VIEW_QUERY_KEYS).toContain("mode");
     expect(parseLocationParams(new URLSearchParams("aisle=A&mode=list"))).toEqual({ aisle: "A", mode: "list" });
     expect(isListMode({ mode: "list" })).toBe(true);
-    expect(isListMode({ loc: "A-01" })).toBe(true);
+    // Story 10.3: a location link opens the wall; only `?mode=list` is the table.
+    expect(isListMode({ loc: "A-01" })).toBe(false);
+    expect(isListMode({ mode: "list", loc: "A-01" })).toBe(true);
     expect(isListMode({ aisle: "A" })).toBe(false);
     expect(planStepHref("p1", "locations", { aisle: "A", mode: "list" })).toBe("/plans/p1/locations?aisle=A&mode=list");
   });
