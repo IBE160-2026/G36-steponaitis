@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 05:30
+last_updated: 11-23-2026 05:34
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -111,7 +111,7 @@ development_status:
   9-3-plans-record-the-logged-in-user-the-user-menu-and-session-ex: done
   9-4-login-throttle-and-account-limits: done
   9-5-seeded-demo-account-and-demo-version: done
-  9-6-demo-front-page: backlog
+  9-6-demo-front-page: in-progress
   9-7-production-like-auth-configuration-readme-and-secrets: backlog
   epic-9-retrospective: optional
 
