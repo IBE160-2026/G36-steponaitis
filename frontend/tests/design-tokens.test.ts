@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { DEFAULT_COLOUR_VARIABLES } from "@/lib/colours";
+
 // UX-DR1 under NFR-10 (accessibility floor) and NFR-2 (runs locally, no runtime network calls).
 const frontend = join(__dirname, "..");
 const designPath = join(frontend, "..", ".docs", "planning-artifacts", "ux-designs", "ux-Project-2026-11-11", "DESIGN.md");
@@ -53,7 +55,15 @@ function escape(text: string): string {
 }
 
 function declares(variable: string, value: string): boolean {
-  return new RegExp(`${escape(variable)}:\\s*${escape(value)};`).test(css);
+  if (new RegExp(`${escape(variable)}:\\s*${escape(value)};`).test(css)) return true;
+  // An editable Key colour (FR-42) aliases a `--colour-*` variable whose `:root` default is the hex.
+  const alias = aliasOf(variable);
+  return alias !== null && declares(alias, value);
+}
+
+/** The `--colour-*` variable a token aliases (`--color-x: var(--colour-y);`), else null. */
+function aliasOf(variable: string): string | null {
+  return new RegExp(`${escape(variable)}:\\s*var\\((--colour-[\\w-]+)\\);`).exec(css)?.[1] ?? null;
 }
 
 function sourceFiles(dir: string): string[] {
@@ -76,6 +86,51 @@ describe("nfr10 theme defines every DESIGN.md token", () => {
 
   it("keeps the product mark in the fixed brand yellow", () => {
     expect(declares("--color-brand-mark", "#F0B323")).toBe(true);
+  });
+
+  it("fr42 (SM-7) the eight editable Key colours alias --colour-* variables and the fixed tokens do not", () => {
+    expect({
+      "--color-class-fast": aliasOf("--color-class-fast"),
+      "--color-class-medium": aliasOf("--color-class-medium"),
+      "--color-class-slow": aliasOf("--color-class-slow"),
+      "--color-class-dead": aliasOf("--color-class-dead"),
+      "--color-best": aliasOf("--color-best"),
+      "--color-best-on-light": aliasOf("--color-best-on-light"),
+      "--color-accent": aliasOf("--color-accent"),
+      "--color-selected-tint": aliasOf("--color-selected-tint"),
+    }).toEqual({
+      "--color-class-fast": "--colour-fast",
+      "--color-class-medium": "--colour-medium",
+      "--color-class-slow": "--colour-slow",
+      "--color-class-dead": "--colour-dead",
+      "--color-best": "--colour-best",
+      "--color-best-on-light": "--colour-best-on-light",
+      "--color-accent": "--colour-selection",
+      "--color-selected-tint": "--colour-selected-tint",
+    });
+    const defaults = Object.fromEntries(
+      Object.entries(DEFAULT_COLOUR_VARIABLES).map(([name, hex]) => [`--colour-${name}`, hex]),
+    );
+    expect(Object.keys(defaults)).toHaveLength(8);
+    for (const [variable, hex] of Object.entries(defaults)) expect(declares(variable, hex), variable).toBe(true);
+    const fixed = [
+      ["--color-focus-on-dark", "#FFFFFF"],
+      ["--color-focus-on-dark-inner", "#141719"],
+      ["--color-focus-on-light", "#1B1E22"],
+      ["--color-focus-gap", "#FFFFFF"],
+      ["--color-input-border", "#8A9097"],
+      ["--color-brand-mark", "#F0B323"],
+      ["--color-print-ink", "#000000"],
+      ["--color-print-paper", "#FFFFFF"],
+    ];
+    for (const [variable, hex] of fixed) {
+      expect(new RegExp(`${escape(variable)}:\\s*${escape(hex)};`).test(css), `${variable} stays ${hex}`).toBe(true);
+      expect(aliasOf(variable), variable).toBeNull();
+    }
+    // Nothing outside the :root block and the eight aliases reads a --colour-* variable.
+    expect(css.match(/var\(--colour-/g)).toHaveLength(8);
+    const print = css.slice(css.indexOf("@media print"));
+    expect(print).not.toMatch(/--colour-|--color-(class|best|accent|selected)/);
   });
 
   it("defines every typography entry with size, line height, weight and family", () => {

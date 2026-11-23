@@ -14,6 +14,24 @@
 /* Toolbar is sticky only when the viewport is tall enough (UX-DR58). */
 @custom-variant tall (@media (min-height: 500px));
 
+/*
+ * Key colours (FR-42, Story 11.2): the eight editable colours as plain variables on `:root`, with
+ * the DESIGN.md defaults. The theme tokens for the movement classes, best, best-on-light, accent
+ * and selected tint alias them, so the inline script in the root layout (stored colours, before
+ * first paint) and the colour store change every wall, swatch, best mark and selection at once.
+ * Fixed tokens (focus, inputs, brand mark, print) stay hex and never read these variables.
+ */
+:root {
+  --colour-fast: #D85144;
+  --colour-medium: #F0B323;
+  --colour-slow: #417DDC;
+  --colour-dead: #8C939A;
+  --colour-best: #3DAE6B;
+  --colour-best-on-light: #267A4B;
+  --colour-selection: #9466F0;
+  --colour-selected-tint: #F3EFFD;
+}
+
 @theme {
   /* Colours: paper side */
   --color-ground: #EEEDE8;
@@ -21,7 +39,7 @@
   --color-surface-disabled: #F3F2EE;
   --color-band: #E4E2DB;
   --color-row-quiet: #FAFAF7;
-  --color-selected-tint: #F3EFFD;
+  --color-selected-tint: var(--colour-selected-tint);
   --color-ink: #1B1E22;
   --color-ink-secondary: #4A5058;
   --color-ink-muted: #6B717A;
@@ -55,16 +73,16 @@
   --color-launcher-rail: #454B52;
   --color-launcher-rail-edge: #5A6168;
   /* Colours: movement class */
-  --color-class-fast: #D85144;
-  --color-class-medium: #F0B323;
-  --color-class-slow: #417DDC;
-  --color-class-dead: #8C939A;
+  --color-class-fast: var(--colour-fast);
+  --color-class-medium: var(--colour-medium);
+  --color-class-slow: var(--colour-slow);
+  --color-class-dead: var(--colour-dead);
   --color-label-window: #FFFFFF;
   --color-glyph: #1B1E22;
   /* Colours: meaning */
-  --color-accent: #9466F0;
-  --color-best: #3DAE6B;
-  --color-best-on-light: #267A4B;
+  --color-accent: var(--colour-selection);
+  --color-best: var(--colour-best);
+  --color-best-on-light: var(--colour-best-on-light);
   /* Colours: focus (fixed) */
   --color-focus-on-dark: #FFFFFF;
   --color-focus-on-dark-inner: #141719;

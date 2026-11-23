@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/common/app-shell";
+import { COLOURS_BOOT_SCRIPT } from "@/lib/colours";
 import { AuthGuard } from "@/modules/auth/auth-guard";
 import { UserMenu } from "@/modules/auth/user-menu";
 import { Launcher } from "@/modules/launcher/launcher";
@@ -25,7 +26,12 @@ export const metadata: Metadata = {
 // Fonts are self-hosted from the @fontsource packages above; no font is fetched from a CDN (NFR-2).
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    // The boot script sets the stored Key colours (FR-42) as a `style` on <html> before first paint,
+    // so React must keep that attribute when it hydrates.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: COLOURS_BOOT_SCRIPT }} />
+      </head>
       <body>
         <Providers>
           {/* With FEATURE_AUTH on, pages other than Log in and Create account need a session (Story 9.2). */}

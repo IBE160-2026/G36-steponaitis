@@ -432,6 +432,8 @@ export const OPEN_AS_WALL = "Open as wall";
 export const EDIT_BEST_MARKS = "Edit best-location marks";
 export const AISLE_TABS_LABEL = "Aisles";
 export const KEY_TITLE = "Key";
+/** Shown in the Key colour popover when this browser cannot keep the colours (FR-42, Story 11.3). */
+export const COLOURS_NOT_KEPT = "Colours can't be kept in this browser; changes last until you reload or close this page.";
 
 /** The Key's entries, in their fixed order: glossary names, never colour words (UX-DR45). */
 export const KEY_LABELS = {

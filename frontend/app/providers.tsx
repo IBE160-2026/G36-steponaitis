@@ -2,17 +2,22 @@
 
 import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useLayoutEffect, useState } from "react";
 
 import { showToast, Toaster } from "@/components/common/toast";
 import { handleQueryError, type QueryErrorEffects } from "@/lib/api/query-errors";
 import { type Session, SESSION_KEY } from "@/lib/api/session";
 import { sessionExpiry } from "@/lib/api/session-expiry";
+import { applyKeyColours } from "@/lib/colours";
 import { CommandsProvider } from "@/lib/commands";
 import { LOGIN_HREF } from "@/lib/view-state/urls";
 
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
+  // The boot script in the root layout set the stored Key colours before first paint; React's
+  // development remount of <html> can drop them, so set the same values again (harmless in
+  // production).
+  useLayoutEffect(applyKeyColours, []);
   // Built once: the QueryCache hook closes over these effects, and the effects reach the
   // QueryClient through the variable they are built beside.
   const [{ queryClient, effects }] = useState(() => {
