@@ -333,3 +333,28 @@ tr[data-row-index]:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Print (Story 8.4, UX-DR52, AD-17, NFR-9): the move list prints on A4 portrait, black on white.
+ * The components hide their own chrome with `print:` utilities; here is only what has no
+ * component handle: the page box, its page numbers (best effort; Firefox may not render margin
+ * boxes), the page ground and the sonner toast portal.
+ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 16mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font: 13.5px Figtree, sans-serif;
+      color: #000;
+    }
+  }
+  html,
+  body {
+    background: var(--color-print-paper);
+  }
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}

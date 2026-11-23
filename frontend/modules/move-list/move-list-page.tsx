@@ -5,7 +5,9 @@
 // exactly in response order; the client never sorts, filters, counts or marks swaps (AD-3). The
 // view is fetched on mount and the paper shows only once that response has arrived. Print fetches
 // the view again and calls `window.print()` only after the new response has been rendered, so
-// every printout carries a fresh generated time. The paper stylesheet is Story 8.4.
+// every printout carries a fresh generated time. In print media (Story 8.4, NFR-9) only the paper
+// prints: the actions and any error are `print:hidden`, the paper drops its gutter and shadow, and
+// bands keep at least two lines with them; `@page` (A4 portrait, page numbers) is in globals.css.
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -109,7 +111,7 @@ function RuleCell({ line }: { line: MoveListLine }) {
 function RoundBody({ round }: { round: MoveListRound }) {
   return (
     <tbody data-round={round.round}>
-      <tr data-round-band className="border-y-2 border-print-ink">
+      <tr data-round-band className="break-inside-avoid break-after-avoid border-y-2 border-print-ink">
         <th scope="rowgroup" colSpan={COLUMN_COUNT} className="px-2 py-2 text-left font-normal">
           <span className="mr-3 inline-block border-[1.5px] border-print-ink px-1.5 py-0.5 type-print-round">
             {roundBandTag(round.round)}
@@ -117,10 +119,15 @@ function RoundBody({ round }: { round: MoveListRound }) {
           <span className="type-print-body">{roundBandNote(round)}</span>
         </th>
       </tr>
-      {round.lines.map((line) => (
-        <tr key={line.move_number} data-move-line={line.move_number} className="border-b border-print-ink">
+      {round.lines.map((line, index) => (
+        <tr
+          key={line.move_number}
+          data-move-line={line.move_number}
+          // The band keeps at least two lines with it: the first line of a longer round stays with the second.
+          className={`break-inside-avoid border-b border-print-ink${index === 0 && round.lines.length >= 2 ? " break-after-avoid" : ""}`}
+        >
           <td className="px-2 py-2 align-top">
-            <span aria-hidden="true" className="inline-block size-[14px] border border-print-ink" />
+            <span aria-hidden="true" className="inline-block size-[14px] border-[1.5px] border-print-ink" />
           </td>
           <td className="px-2 py-2 align-top tabular-nums">{formatNumber(line.round)}</td>
           <td className="px-2 py-2 align-top type-print-code">{line.part}</td>
@@ -141,7 +148,7 @@ function Paper({ view }: { view: MoveListData }) {
   const { header } = view;
   const hasSwap = view.rounds.some((round) => round.lines.some((line) => line.swap !== null));
   return (
-    <div data-paper className="mx-auto w-full max-w-[210mm] bg-print-paper px-8 py-8 text-print-ink shadow-overlay">
+    <div data-paper className="mx-auto w-full max-w-[210mm] bg-print-paper px-8 py-8 text-print-ink shadow-overlay print:max-w-none print:p-0 print:shadow-none">
       <table aria-label={moveListTitle(header.name)} className="w-full border-collapse type-print-body text-print-ink">
         <thead>
           <tr>
@@ -194,8 +201,8 @@ export function MoveListView({ planId, view, onPrint, printing = false, error = 
   const empty = view.rounds.length === 0;
   const disabledReason = empty ? NO_MOVES_TO_PRINT : printing ? PRINT_BUSY : undefined;
   return (
-    <div className="flex flex-col gap-4 px-page-gutter py-5">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-4 px-page-gutter py-5 print:p-0">
+      <div data-move-list-actions className="flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="primary" disabledReason={disabledReason} aria-busy={printing || undefined} onClick={onPrint}>
           {PRINT_LABEL}
         </Button>
@@ -203,11 +210,15 @@ export function MoveListView({ planId, view, onPrint, printing = false, error = 
           {BACK_TO_RECOMMENDATIONS}
         </Link>
       </div>
-      {showsLoadError(error) ? <PlanLoadError message={error.message} /> : null}
+      {showsLoadError(error) ? (
+        <div data-move-list-error className="print:hidden">
+          <PlanLoadError message={error.message} />
+        </div>
+      ) : null}
       {empty ? (
         <section className="flex flex-col gap-2">
           <h1 className="type-page-title">{MOVE_LIST_TITLE}</h1>
-          <p data-move-list-empty className="type-body text-ink-secondary">
+          <p data-move-list-empty className="type-body text-ink-secondary print:text-print-ink">
             {NO_MOVES_TO_PRINT}
           </p>
         </section>

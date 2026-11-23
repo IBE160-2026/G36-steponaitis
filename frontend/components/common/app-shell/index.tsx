@@ -14,7 +14,7 @@ export function AppShell({ children, launcher }: { children: ReactNode; launcher
     <>
       <a
         href="#content"
-        className="sr-only rounded-lg bg-surface px-3 py-2 text-ink type-button focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
+        className="sr-only rounded-lg print:hidden bg-surface px-3 py-2 text-ink type-button focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
       >
         Skip to content
       </a>

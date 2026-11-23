@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -273,5 +276,70 @@ describe("ad17 print fetches again and prints after the render", () => {
     flow.committed(Date.now() + 1_000);
     expect(print).not.toHaveBeenCalled();
     unsubscribe();
+  });
+});
+
+// Story 8.4: the paper in print media (NFR-9, UX-DR52). Only the class names and the stylesheet
+// text are checked here; the computed print styles are checked in e2e/move-list-print.spec.ts.
+const classOf = (tag: string) => /class="([^"]*)"/.exec(tag)?.[1].split(" ") ?? [];
+
+describe("uxdr52 move list paper in print", () => {
+  it("uxdr52_actions_and_error_are_hidden_in_print", () => {
+    const markup = html(VIEW, { error: new Error("The server is not available.") });
+    expect(classOf(/<div data-move-list-actions[^>]*>/.exec(markup)?.[0] ?? "")).toContain("print:hidden");
+    expect(classOf(/<div data-move-list-error[^>]*>/.exec(markup)?.[0] ?? "")).toContain("print:hidden");
+    expect(markup).toMatch(/<div data-move-list-error[^>]*><p role="alert"/);
+  });
+
+  it("uxdr52_paper_drops_gutter_and_shadow_in_print", () => {
+    const markup = html(VIEW);
+    const paper = classOf(/<div data-paper[^>]*>/.exec(markup)?.[0] ?? "");
+    expect(paper).toEqual(expect.arrayContaining(["print:shadow-none", "print:p-0", "print:max-w-none"]));
+    expect(classOf(/^<div[^>]*>/.exec(markup)?.[0] ?? "")).toEqual(expect.arrayContaining(["px-page-gutter", "print:p-0"]));
+  });
+
+  it("uxdr52_band_keeps_at_least_two_lines", () => {
+    const markup = html(VIEW);
+    const bands = [...markup.matchAll(/<tr data-round-band[^>]*>/g)].map((m) => classOf(m[0]));
+    expect(bands).toHaveLength(2);
+    for (const band of bands) expect(band).toEqual(expect.arrayContaining(["break-inside-avoid", "break-after-avoid"]));
+    const rows = Object.fromEntries(
+      [...markup.matchAll(/<tr data-move-line="(\d+)"[^>]*>/g)].map((m) => [m[1], classOf(m[0])]),
+    );
+    for (const row of Object.values(rows)) expect(row).toContain("break-inside-avoid");
+    // Round 0 has one line: no extra break-after. Round 2 has three: only its first line keeps the second.
+    expect(rows["5"]).not.toContain("break-after-avoid");
+    expect(rows["9"]).toContain("break-after-avoid");
+    expect(rows["3"]).not.toContain("break-after-avoid");
+    expect(rows["4"]).not.toContain("break-after-avoid");
+  });
+
+  it("uxdr52_band_keeps_both_lines_of_a_two_line_round", () => {
+    const two: MoveListData = { ...VIEW, rounds: [{ round: 2, label: null, lines: [line(9, 2), line(3, 2)] }] };
+    const rows = [...html(two).matchAll(/<tr data-move-line="(\d+)"[^>]*>/g)].map((m) => [m[1], classOf(m[0])] as const);
+    expect(rows.map(([move]) => move)).toEqual(["9", "3"]);
+    expect(rows[0][1]).toContain("break-after-avoid");
+    expect(rows[1][1]).not.toContain("break-after-avoid");
+  });
+
+  it("uxdr52_empty_message_prints_black", () => {
+    const empty = classOf(/<p data-move-list-empty[^>]*>/.exec(html(EMPTY))?.[0] ?? "");
+    expect(empty).toContain("print:text-print-ink");
+  });
+
+  it("uxdr52_tick_box_is_14px_with_a_1_5px_border", () => {
+    const tick = /<tr data-move-line[^>]*><td[^>]*><span aria-hidden="true" class="([^"]*)"/.exec(html(VIEW))?.[1];
+    expect(tick?.split(" ")).toEqual(expect.arrayContaining(["size-[14px]", "border-[1.5px]", "border-print-ink"]));
+  });
+});
+
+describe("nfr9 print stylesheet", () => {
+  it("nfr9_globals_css_sets_a4_page_numbers_and_hides_toasts", () => {
+    const css = readFileSync(join(__dirname, "..", "app", "globals.css"), "utf8");
+    const print = css.slice(css.indexOf("@media print"));
+    expect(css).toContain("@media print");
+    expect(print).toContain("size: A4 portrait");
+    expect(print).toContain("counter(pages)");
+    expect(print).toMatch(/\[data-sonner-toaster\]\s*\{\s*display: none !important;/);
   });
 });

@@ -55,7 +55,7 @@ export function Toolbar({ launcher }: ToolbarProps) {
   return (
     <header
       data-surface="graphite"
-      className="static z-40 flex min-h-toolbar-height flex-wrap items-center gap-x-6 gap-y-2 border-b border-shell-edge bg-louvre-shell px-page-gutter py-3 tall:sticky tall:top-0"
+      className="static z-40 flex print:hidden min-h-toolbar-height flex-wrap items-center gap-x-6 gap-y-2 border-b border-shell-edge bg-louvre-shell px-page-gutter py-3 tall:sticky tall:top-0"
     >
       <Link href={SAVED_PLANS_HREF} className="flex shrink-0 items-center gap-2 rounded-sm">
         <ProductMark />

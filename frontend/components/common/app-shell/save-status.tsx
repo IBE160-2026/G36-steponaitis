@@ -13,7 +13,7 @@ import { parsePlanPath } from "@/lib/view-state/urls";
 export function SaveStatusView({ notice = null, saved = false }: { notice?: SaveNotice; saved?: boolean }) {
   const text = noticeText(notice);
   return (
-    <div aria-live="polite" data-testid="save-status">
+    <div aria-live="polite" data-testid="save-status" className="print:hidden">
       {text ? (
         <GlobalNotice live={false}>{text}</GlobalNotice>
       ) : (
