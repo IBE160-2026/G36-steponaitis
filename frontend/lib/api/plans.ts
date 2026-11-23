@@ -55,6 +55,8 @@ export type BeforeAfterCount = components["schemas"]["Count"];
 /** The latest run's recommendations and "no space" entries (FR-28, FR-29), in server order. */
 export type RecommendationsView = components["schemas"]["RecommendationsView"];
 export type RunMeta = components["schemas"]["RunMeta"];
+/** One of the last effective moves of the planning copy (FR-34), newest first (Story 10.5). */
+export type RecentMove = components["schemas"]["RecentMove"];
 export type RecommendationRow = components["schemas"]["RecommendationRow"];
 export type NoSpaceRow = components["schemas"]["NoSpaceRow"];
 /** A kept part with no kept row in the latest run (FR-32), in part-number order. */

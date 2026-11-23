@@ -1413,6 +1413,28 @@ export interface components {
             version: number;
         };
         /**
+         * RecentMove
+         * @description One effective move of the planning copy (FR-34), as the detail's "Moves in the
+         *     planning copy" lists it (Story 10.5).
+         */
+        RecentMove: {
+            /** From Location */
+            from_location: string;
+            /** Move Number */
+            move_number: number;
+            /** Part */
+            part: string;
+            /** Round */
+            round: number;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "rule_1" | "rule_2" | "rule_3" | "manual";
+            /** To Location */
+            to_location: string;
+        };
+        /**
          * RecommendationRow
          * @description One recommendation with its status, reason data and the display facts the page
          *     shows (description, class, picks, BEST of from/to in the replayed copy), so the client
@@ -1476,12 +1498,15 @@ export interface components {
          * RecommendationsView
          * @description The latest run's rows and the kept parts without a kept row. Kept recommendation rows,
          *     kept "no space" rows and `kept_parts` together hold exactly one entry per keep mark.
+         *     `recent_moves` is the last effective moves of the replay, newest first.
          */
         RecommendationsView: {
             /** Kept Parts */
             kept_parts: components["schemas"]["KeptPartRow"][];
             /** No Space */
             no_space: components["schemas"]["NoSpaceRow"][];
+            /** Recent Moves */
+            recent_moves: components["schemas"]["RecentMove"][];
             /** Recommendations */
             recommendations: components["schemas"]["RecommendationRow"][];
             run: components["schemas"]["RunMeta"] | null;

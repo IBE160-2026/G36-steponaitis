@@ -62,6 +62,7 @@ from swp.domain.state import (
     PlanState,
     Recommendation,
     RecommendationRule,
+    Rule,
     Run,
 )
 
@@ -507,15 +508,49 @@ class KeptPartRow(BaseModel):
     from_best: bool
 
 
+class RecentMove(BaseModel):
+    """One effective move of the planning copy (FR-34), as the detail's "Moves in the
+    planning copy" lists it (Story 10.5)."""
+
+    move_number: int
+    part: str
+    rule: Rule
+    round: int
+    from_location: str
+    to_location: str
+
+
+RECENT_MOVES = 3
+"""How many effective moves `recent_moves` holds."""
+
+
 class RecommendationsView(BaseModel):
     """The latest run's rows and the kept parts without a kept row. Kept recommendation rows,
-    kept "no space" rows and `kept_parts` together hold exactly one entry per keep mark."""
+    kept "no space" rows and `kept_parts` together hold exactly one entry per keep mark.
+    `recent_moves` is the last effective moves of the replay, newest first."""
 
     version: int
     run: RunMeta | None
     recommendations: list[RecommendationRow]
     no_space: list[NoSpaceRow]
     kept_parts: list[KeptPartRow]
+    recent_moves: list[RecentMove]
+
+
+def _recent_moves(replayed: Replay) -> list[RecentMove]:
+    """The last `RECENT_MOVES` effective moves (FR-34), highest move number first."""
+    newest = sorted(replayed.moves, key=lambda move: move.move_number, reverse=True)
+    return [
+        RecentMove(
+            move_number=move.move_number,
+            part=move.part,
+            rule=move.rule,
+            round=move.round,
+            from_location=move.from_location,
+            to_location=move.to_location,
+        )
+        for move in newest[:RECENT_MOVES]
+    ]
 
 
 def _class_reason(analysis: Analysis, part: str) -> ClassReason | None:
@@ -671,6 +706,7 @@ def build_recommendations_view(
             recommendations=[],
             no_space=[],
             kept_parts=_kept_parts(data, analysis, state, replayed, set()),
+            recent_moves=_recent_moves(replayed),
         )
     rows = []
     for rec in latest.recommendations:
@@ -707,6 +743,7 @@ def build_recommendations_view(
         recommendations=rows,
         no_space=no_space,
         kept_parts=_kept_parts(data, analysis, state, replayed, shown),
+        recent_moves=_recent_moves(replayed),
     )
 
 

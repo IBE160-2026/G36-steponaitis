@@ -9,6 +9,8 @@
 // comes from GET /api/plans/{id}/recommendations and the plan summary, rendered as one
 // version-consistent set (AD-12); status, BEST, class and order are the server's (AD-3, AD-14). Every
 // command goes through lib/commands; a 409 is the command client's (server message + refetch).
+// The selected row's detail is detail.tsx; its wall crops and Show on the Locations wall
+// (Story 10.5) are crops.tsx, wired here as render props that read the layout and walls.
 
 import { useSearchParams } from "next/navigation";
 import { Popover, Tabs } from "radix-ui";
@@ -26,7 +28,7 @@ import {
 import { BinSwatch } from "@/components/common/bin-swatch";
 import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
-import { KeepInPlaceButton, KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
+import { KeptInPlaceMark, sendKeep } from "@/components/common/keep-in-place";
 import { ManualMoveAction } from "@/components/common/manual-move-dialog";
 import { OtherLocationAction, type OtherLocationActionProps } from "@/components/common/other-location";
 import { PlanLoadError, PlanOpening, showsLoadError } from "@/components/common/plan-status";
@@ -51,7 +53,6 @@ import {
   NO_OPEN_TO_APPLY,
   noSpaceText,
   outdatedText,
-  reasonSegments,
   runAnnouncement,
   runLine,
 } from "@/lib/copy";
@@ -84,7 +85,6 @@ import {
   type Rule,
   RULE_BANDS,
   ROWS_PER_RULE,
-  ruleNumber,
   showMoreText,
   showsKeepLink,
   TABS,
@@ -92,7 +92,11 @@ import {
   tabItems,
   tabName,
 } from "./list";
+import { RecommendationCrops, ShowOnWallLink } from "./crops";
+import { BestTag, Detail, NoSpaceChip } from "./detail";
 import { ResetPlanMenu } from "./reset-plan";
+
+export { eyebrowText } from "./detail";
 
 export const RUN_LABEL = "Run recommendations";
 export const RUNNING_LABEL = "Running…";
@@ -111,25 +115,8 @@ export function emptyRunText(round: number): string {
   return `Round ${formatNumber(round)} found no recommendations and no “no space” parts. The rules have nothing more to suggest for these best-location marks.`;
 }
 
-/** The detail eyebrow: "SELECTED · #1 · RULE 1", "SELECTED · NO SPACE · RULE 3" or "SELECTED · KEPT IN PLACE". */
-export function eyebrowText(item: ListItem): string {
-  if (item.kind === "kept-part") return `SELECTED · ${KEPT_IN_PLACE.toUpperCase()}`;
-  const rule = `RULE ${ruleNumber(item.row.rule)}`;
-  return item.kind === "rec" ? `SELECTED · #${formatNumber(item.row.number)} · ${rule}` : `SELECTED · NO SPACE · ${rule}`;
-}
-
 function findEvent<T extends CommandEvent["type"]>(events: readonly CommandEvent[], type: T) {
   return events.find((event): event is Extract<CommandEvent, { type: T }> => event.type === type);
-}
-
-function BestTag() {
-  return (
-    <span className="rounded-xs border border-best-on-light px-1 py-0.5 text-best-on-light type-tag">BEST</span>
-  );
-}
-
-function NoSpaceChip() {
-  return <span className="rounded-xs bg-ink px-1 py-0.5 text-surface type-tag">NO SPACE</span>;
 }
 
 const HATCH = {
@@ -207,129 +194,6 @@ function OptionRow({ item }: { item: ListItem }) {
         <RowLine item={item} />
       </span>
     </div>
-  );
-}
-
-function Detail({
-  id,
-  item,
-  savingReason,
-  onApply,
-  onKeep,
-  manualMove,
-  otherLocation,
-}: {
-  id: string;
-  item: ListItem | undefined;
-  savingReason: string | undefined;
-  onApply: (row: RecommendationRow) => void;
-  onKeep: (item: ListItem) => void;
-  manualMove: (part: string) => ReactNode;
-  /** The Other location ▾ action of an open recommendation (between Apply and Keep in place). */
-  otherLocation: (row: RecommendationRow) => ReactNode;
-}) {
-  if (!item) {
-    return <section id={id} aria-label="Selected recommendation" className="min-w-0" />;
-  }
-  const row = item.row;
-  const keepLink = showsKeepLink(item) ? (
-    <KeepInPlaceButton
-      kept={isKept(item)}
-      savingReason={savingReason}
-      keyShortcut="Alt+K"
-      onClick={() => onKeep(item)}
-    />
-  ) : null;
-  const keptLine = isKept(item) ? <KeptInPlaceMark label={KEPT_IN_PLACE} size={16} className="type-body text-ink" /> : null;
-  return (
-    <section
-      id={id}
-      aria-label="Selected recommendation"
-      className="flex min-w-0 flex-col gap-3 self-start rounded-lg border border-border bg-surface p-panel-padding"
-    >
-      <p className="type-marker tracking-wide text-ink-secondary" data-testid="detail-eyebrow">
-        {eyebrowText(item)}
-      </p>
-      <div className="flex items-center gap-2">
-        {row.movement_class && <BinSwatch movementClass={row.movement_class} />}
-        <h2 className="type-section-title text-ink">{row.part}</h2>
-      </div>
-      {row.description && <p className="-mt-2 type-body text-ink-secondary">{row.description}</p>}
-      {item.kind !== "kept-part" && item.row.reason && (
-        <p className="type-body text-ink" data-testid="detail-reason">
-          {reasonSegments(item.row.reason).map((segment, index) =>
-            segment.strong ? <strong key={index}>{segment.text}</strong> : <span key={index}>{segment.text}</span>,
-          )}
-        </p>
-      )}
-      <p className="inline-flex flex-wrap items-center gap-2 type-code text-ink">
-        <span>{row.from_location ?? "No current location"}</span>
-        {row.from_best && <BestTag />}
-        {item.kind !== "kept-part" && (
-          <>
-            <span aria-hidden="true">→</span>
-            <span className="sr-only">to</span>
-          </>
-        )}
-        {item.kind === "rec" ? (
-          <>
-            <span className={cn(item.row.status === "outdated" && "line-through")}>
-              {effectiveTo(item.row).location}
-            </span>
-            {effectiveTo(item.row).best && <BestTag />}
-          </>
-        ) : item.kind === "no-space" ? (
-          <NoSpaceChip />
-        ) : null}
-      </p>
-      {item.kind === "kept-part" ? (
-        <>
-          {keptLine}
-          <div className="flex flex-wrap items-center gap-2">
-            {keepLink}
-            {manualMove(row.part)}
-          </div>
-        </>
-      ) : item.kind === "no-space" ? (
-        <>
-          {keptLine}
-          <p className="type-body text-ink">{noSpaceText(item.row.cause)}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            {keepLink}
-            {manualMove(row.part)}
-          </div>
-        </>
-      ) : item.row.status === "applied" && item.row.applied ? (
-        <p className="inline-flex items-center gap-1 type-body text-ink">
-          <Icon name="check" />
-          {appliedText(item.row.applied)}
-        </p>
-      ) : (
-        <>
-          {item.row.status === "outdated" && item.row.outdated && (
-            <p className="inline-flex items-center gap-1 type-body text-ink">
-              <Icon name="clock" />
-              Outdated · {outdatedText(item.row.part, item.row.outdated)}
-            </p>
-          )}
-          {keptLine}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="primary"
-              size="md"
-              aria-keyshortcuts="Alt+A"
-              disabledReason={applyReason(item.row, savingReason)}
-              onClick={() => onApply(item.row)}
-            >
-              Apply
-            </Button>
-            {otherLocation(item.row)}
-            {keepLink}
-            {manualMove(row.part)}
-          </div>
-        </>
-      )}
-    </section>
   );
 }
 
@@ -518,6 +382,10 @@ export type RecommendationsViewProps = {
   notify?: (message: string, options?: ToastOptions) => void;
   /** `?rec=`: the recommendation the page starts with selected (its band expanded when needed). */
   initialRecId?: string;
+  /** The detail's wall crops of a recommendation (Story 10.5; the page wires the layout and wall reads). */
+  crops?: (row: RecommendationRow) => ReactNode;
+  /** The detail's Show on the Locations wall link of a recommendation (Story 10.5). */
+  showOnWall?: (row: RecommendationRow) => ReactNode;
 };
 
 export function RecommendationsView({
@@ -531,6 +399,8 @@ export function RecommendationsView({
   otherLocation = () => null,
   notify = showToast,
   initialRecId,
+  crops,
+  showOnWall,
 }: RecommendationsViewProps) {
   const [running, setRunning] = useState(false);
   const [failedRound, setFailedRound] = useState<number | null>(null);
@@ -815,6 +685,10 @@ export function RecommendationsView({
                       onApply={(row) => void apply(row)}
                       onKeep={(item) => void keep(item)}
                       manualMove={manualMove}
+                      crops={crops}
+                      showOnWall={showOnWall}
+                      recentMoves={view.recent_moves}
+                      undoPreview={summary.undo_preview}
                       otherLocation={(row) =>
                         otherLocation({
                           row,
@@ -862,6 +736,16 @@ export function RecommendationsPage({ planId }: { planId: string }) {
         manualMove={(part) => <ManualMoveAction key={part} planId={planId} part={part} savingReason={disabledReason} />}
         otherLocation={(props) => <OtherLocationAction key={props.row.id} planId={planId} {...props} />}
         initialRecId={recId}
+        crops={(row) => (
+          <RecommendationCrops
+            planId={planId}
+            importId={summaryData.import_id}
+            row={row}
+            version={view.version}
+            round={view.run?.round ?? 0}
+          />
+        )}
+        showOnWall={(row) => <ShowOnWallLink planId={planId} importId={summaryData.import_id} row={row} />}
       />
     );
   }

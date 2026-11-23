@@ -5,6 +5,7 @@
 
 export { BIN_HEIGHT, BIN_WIDTH, Bin, CODE_MIN_WIDTH } from "./bin";
 export { CLASS_FILL } from "./class-fill";
+export { cropLayout } from "./crop";
 export { Frame, Key, KeySwatch, SELECTED_FRAME } from "./key";
 export {
   type CellBest,

@@ -222,7 +222,19 @@ function markerKind(mark: MoveMark): MarkerKind {
   return mark.kind === "outdated" ? "outdated" : "recommended";
 }
 
-function Marker({ mark, cx, cy, onSelect }: { mark: MoveMark; cx: number; cy: number; onSelect?: (key: string) => void }) {
+function Marker({
+  mark,
+  cx,
+  cy,
+  onSelect,
+  interactive,
+}: {
+  mark: MoveMark;
+  cx: number;
+  cy: number;
+  onSelect?: (key: string) => void;
+  interactive: boolean;
+}) {
   const kind = markerKind(mark);
   const ink = kind === "applied" || kind === "manual";
   const ring =
@@ -236,11 +248,15 @@ function Marker({ mark, cx, cy, onSelect }: { mark: MoveMark; cx: number; cy: nu
       data-move-marker={text}
       data-marker-kind={kind}
       data-selected={mark.selected ? "" : undefined}
-      style={{ pointerEvents: "auto", cursor: "pointer" }}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect?.(mark.key);
-      }}
+      style={interactive ? { pointerEvents: "auto", cursor: "pointer" } : undefined}
+      onClick={
+        interactive
+          ? (event) => {
+              event.stopPropagation();
+              onSelect?.(mark.key);
+            }
+          : undefined
+      }
     >
       {mark.selected && (
         <>
@@ -289,12 +305,15 @@ export function WallMoveMarkers({
   size,
   scale,
   onSelect,
+  interactive = true,
 }: {
   marks: readonly MoveMark[];
   geometry: CellGeometry;
   size: { width: number; height: number };
   scale: number;
   onSelect?: (key: string) => void;
+  /** False for a picture only (a wall crop, Story 10.5): no marker takes a pointer event. */
+  interactive?: boolean;
 }) {
   const lifted = liftedCodes(marks, geometry);
   const perCell = new Map<string, number>();
@@ -316,7 +335,7 @@ export function WallMoveMarkers({
         const at = perCell.get(mark.code) ?? 0;
         perCell.set(mark.code, at + 1);
         const { x, y } = markerCenter(onLift ? liftedRect(rect) : rect, at);
-        return <Marker key={markId(mark)} mark={mark} cx={x} cy={y} onSelect={onSelect} />;
+        return <Marker key={markId(mark)} mark={mark} cx={x} cy={y} onSelect={onSelect} interactive={interactive} />;
       })}
     </svg>
   );

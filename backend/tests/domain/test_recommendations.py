@@ -186,7 +186,106 @@ def test_fr28_no_run_view(data: ImportData, analysis: Analysis) -> None:
         "recommendations": [],
         "no_space": [],
         "kept_parts": [],
+        "recent_moves": [],
     }
+
+
+# --- FR-42 (Story 10.5, UX-DR57): the detail's "Moves in the planning copy" ---
+
+_MOVES = [
+    ("0100", "A-01-01-01", "C-01-03-02"),
+    ("10240", "B-01-01-03", "B-01-04-01"),
+    ("1100", "C-01-01-01", "B-01-04-02"),
+    ("2300", "C-01-01-03", "B-01-04-03"),
+]
+
+
+def _moved(
+    state: PlanState, moves: list[tuple[str, str, str]], data: ImportData, analysis: Analysis
+) -> PlanState:
+    for part, from_location, to_location in moves:
+        state, _ = _do(state, _manual(part, from_location, to_location), data, analysis)
+    return state
+
+
+def _recent(view: RecommendationsView) -> list[tuple[int, str, str, int, str, str]]:
+    return [
+        (m.move_number, m.part, m.rule, m.round, m.from_location, m.to_location)
+        for m in view.recent_moves
+    ]
+
+
+def test_fr42_recommendations_recent_moves_empty(
+    run_1: PlanState, data: ImportData, analysis: Analysis
+) -> None:
+    assert _view(run_1, data, analysis).recent_moves == []
+
+
+def test_fr42_recommendations_recent_moves_fewer_than_three_before_first_run(
+    data: ImportData, analysis: Analysis
+) -> None:
+    state = _moved(PlanState.new(), _MOVES[:2], data, analysis)
+
+    view = _view(state, data, analysis)
+
+    assert view.run is None
+    assert _recent(view) == [
+        (2, "10240", "manual", 0, "B-01-01-03", "B-01-04-01"),
+        (1, "0100", "manual", 0, "A-01-01-01", "C-01-03-02"),
+    ]
+
+
+def test_fr42_recommendations_recent_moves_newest_three(
+    data: ImportData, analysis: Analysis
+) -> None:
+    state = _moved(PlanState.new(), _MOVES, data, analysis)
+
+    assert [m[0:2] for m in _recent(_view(state, data, analysis))] == [
+        (4, "2300"),
+        (3, "1100"),
+        (2, "10240"),
+    ]
+
+
+def test_fr42_recommendations_recent_moves_combined_once(
+    data: ImportData, analysis: Analysis
+) -> None:
+    # 0100 moves on from C-01-03-02: the step combines into move 1 (FR-34).
+    state = _moved(
+        PlanState.new(), [_MOVES[0], ("0100", "C-01-03-02", "B-01-03-03")], data, analysis
+    )
+
+    assert _recent(_view(state, data, analysis)) == [
+        (1, "0100", "manual", 0, "A-01-01-01", "B-01-03-03")
+    ]
+
+
+def test_fr42_recommendations_recent_moves_moved_back_is_not_listed(
+    data: ImportData, analysis: Analysis
+) -> None:
+    # 0100 moves back to where it started: move 1 is removed (FR-34), move 2 stays.
+    state = _moved(
+        PlanState.new(),
+        [_MOVES[0], _MOVES[1], ("0100", "C-01-03-02", "A-01-01-01")],
+        data,
+        analysis,
+    )
+
+    assert _recent(_view(state, data, analysis)) == [
+        (2, "10240", "manual", 0, "B-01-01-03", "B-01-04-01")
+    ]
+
+
+def test_fr42_recommendations_recent_moves_after_apply(
+    run_1: PlanState, data: ImportData, analysis: Analysis
+) -> None:
+    rec = _rec(run_1, 1)
+    state, _ = _do(run_1, _apply(rec.id), data, analysis)
+
+    recent = _view(state, data, analysis).recent_moves
+    assert len(recent) == 1
+    assert (recent[0].part, recent[0].rule, recent[0].round) == (rec.part, rec.rule, 1)
+    assert (recent[0].from_location, recent[0].to_location) == (rec.from_location, rec.to_location)
 
 
 # --- FR-29: revalidate and each cause ---

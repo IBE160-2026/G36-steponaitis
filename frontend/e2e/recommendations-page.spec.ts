@@ -209,3 +209,108 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
     /Recommendations\s*, step 6, done$/,
   );
 });
+
+// UJ-1 with wall crops in the detail (Story 10.5; FR-42, UX-DR34/57/58): the selected move drawn
+// in its shelf context, Show on the Locations wall, and the planning copy's last moves.
+
+type CropRef = { code: string; aisle: string; level: string; is_best: boolean };
+type CropMove = {
+  recommendation_id: string | null;
+  number: number | null;
+  status: string;
+  rule: string;
+  from_location: CropRef;
+  to_location: CropRef;
+};
+type CropWall = { aisles: { aisle: string }[]; moves: CropMove[] };
+
+function cropEnd(end: CropRef): string {
+  return [end.code, `aisle ${end.aisle}`, `level ${end.level}`, ...(end.is_best ? ["best location"] : [])].join(", ");
+}
+
+test("uj1 wall crops in the recommendation detail, show on the wall and the planning copy's moves", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Crops ${randomUUID().slice(0, 8)}`)).id;
+  await command(request, planId, { type: "set_best_mark", mark: { kind: "level", level: "1", aisle: null } });
+  await command(request, planId, { type: "run" });
+
+  // The open recommendations by aisle, from the walls (the server's LocationRefs).
+  const first = await getJson<CropWall>(request, `/api/plans/${planId}/wall?aisle=A`);
+  const moves = new Map<string, CropMove>();
+  for (const { aisle } of first.aisles) {
+    const wall = aisle === "A" ? first : await getJson<CropWall>(request, `/api/plans/${planId}/wall?aisle=${aisle}`);
+    for (const move of wall.moves) {
+      if (move.status === "open" && move.recommendation_id) moves.set(move.recommendation_id, move);
+    }
+  }
+  const all = [...moves.values()];
+  const inner = all.find((move) => move.from_location.aisle === move.to_location.aisle);
+  const cross = all.find((move) => move.from_location.aisle !== move.to_location.aisle);
+  expect(inner, "an open move inside one aisle").toBeDefined();
+  const rec = inner!;
+  const recId = rec.recommendation_id!;
+  const ruleNumber = rec.rule.slice("rule_".length);
+
+  await page.goto(`/plans/${planId}/recommendations?tab=open&rec=${encodeURIComponent(recId)}`);
+  const main = page.getByRole("main");
+  const detail = main.getByRole("region", { name: "Selected recommendation" });
+  const name = `From ${cropEnd(rec.from_location)} → to ${cropEnd(rec.to_location)}`;
+  const crop = detail.getByRole("img", { name });
+  await expect(crop).toBeVisible();
+  await expect(crop).toHaveCount(1);
+  await expect(crop.locator(`[data-lifted="${rec.number}"]`)).toHaveCount(1);
+  await expect(crop.locator(`[data-move-target="${rec.number}"]`)).toHaveCount(1);
+  await expect(crop.locator("[data-move-arrow]")).toHaveCount(1);
+  await expect(detail.getByText(`Rule ${ruleNumber} · round 1`, { exact: true })).toBeVisible();
+  await expect(detail.locator("[data-wall-key]")).toHaveCount(1);
+  // The crops add no tab stops; the eyebrow's link is followed straight by Apply.
+  await expect(
+    detail.locator('[data-crops] a, [data-crops] button, [data-crops] [tabindex]:not([tabindex="-1"])'),
+  ).toHaveCount(0);
+  const link = detail.getByRole("link", { name: "Show on the Locations wall" });
+  await link.focus();
+  await page.keyboard.press("Tab");
+  await expect(detail.getByRole("button", { name: "Apply", exact: true })).toBeFocused();
+  await expect(detail.getByText("No moves in the planning copy yet.")).toBeVisible();
+
+  // Show on the Locations wall opens the from-aisle with the move selected and its arrow drawn.
+  await link.click();
+  await expect(page).toHaveURL(
+    new RegExp(`/plans/${planId}/locations\\?aisle=${rec.from_location.aisle}&rec=${encodeURIComponent(recId)}$`),
+  );
+  await expect(main.locator(`[data-wall-panel="${rec.from_location.aisle}"] [data-move-arrow]`)).toHaveCount(1);
+
+  // Applied: the detail lists that move first and names it in the undo line.
+  await page.goto(`/plans/${planId}/recommendations?tab=open&rec=${encodeURIComponent(recId)}`);
+  await detail.getByRole("button", { name: "Apply", exact: true }).click();
+  await expect(toasts(page).getByText(/^Applied · move/)).toBeVisible();
+  type Recent = { recent_moves: { move_number: number }[] };
+  const recentOf = () => getJson<Recent>(request, `/api/plans/${planId}/recommendations`);
+  await expect.poll(async () => (await recentOf()).recent_moves.length).toBe(1);
+  const moveNumber = (await recentOf()).recent_moves[0].move_number;
+  await page.goto(`/plans/${planId}/recommendations?tab=applied&rec=${encodeURIComponent(recId)}`);
+  const recent = detail.locator("[data-recent-moves] li");
+  await expect(recent.first()).toContainText(
+    `Move ${moveNumber} · Rule ${ruleNumber} · `,
+  );
+  await expect(recent.first()).toContainText(`${rec.from_location.code} → ${rec.to_location.code}`);
+  await expect(detail.getByText(`Undo reverses move ${moveNumber} first`)).toBeVisible();
+  await expect(detail.getByRole("img", { name })).toBeVisible();
+  await expect(detail.getByRole("img", { name }).locator('[data-move-marker="applied"]')).toHaveCount(0);
+  await expect(detail.locator('[data-move-marker="applied"]')).toHaveCount(1);
+
+  // At 1300px a crop shows 2 sections per run.
+  expect(cross, "an open move between two aisles").toBeDefined();
+  await page.setViewportSize({ width: 1300, height: 900 });
+  await page.goto(`/plans/${planId}/recommendations?tab=open&rec=${encodeURIComponent(cross!.recommendation_id!)}`);
+  const panels = detail.locator('[data-crops] [data-wall-panel][role="img"]');
+  await expect(panels.first()).toBeVisible();
+  const runs = detail.locator("[data-crops] [data-wall-panel] [data-run]");
+  const counts = await runs.evaluateAll((groups) => groups.map((group) => group.querySelectorAll("[data-section]").length));
+  expect(counts.length).toBeGreaterThan(0);
+  expect(Math.max(...counts)).toBe(2);
+});

@@ -1,7 +1,8 @@
 // WallPanel (DESIGN.md "wall-panel", UX-DR40/41/48): one aisle drawn as a graphite shelf wall.
 // A louvre background, an upright at each section start, a beam under each level (a 4px best rail
 // on a level in `rail_levels`), a section header row and level labels per run, the two runs, and an
-// end cap with the aisle's last Walk Path. Cells come from `wallCells`; this file owns only pixels.
+// end cap with the aisle's last Walk Path (left out with `endCap={false}` for a wall crop). Cells
+// come from `wallCells`; this file owns only pixels.
 // Without a `label` the picture is `aria-hidden`: the keyboard grid over it (`WallGrid`, Story
 // 10.3) carries the names, focus, hover and clicks. The selected part's cell gets the Key's
 // Selected frame. With move marks (Story 10.4) a lifted bin's cell shows its vacated slot, and the
@@ -133,6 +134,7 @@ export function WallPanel({
   selectedCode,
   marks = [],
   selectedEnds,
+  endCap = true,
 }: {
   layout: AisleLayout;
   cells: readonly WallCellModel[];
@@ -148,6 +150,8 @@ export function WallPanel({
   marks?: readonly MoveMark[];
   /** The selected move's from- and to-location codes: its arrow is drawn when both are on this wall. */
   selectedEnds?: { from: string; to: string };
+  /** Whether the end cap text is drawn; a wall crop (Story 10.5) leaves it out. */
+  endCap?: boolean;
 }) {
   const id = useId();
   const louvre = `${id}-louvre`;
@@ -273,16 +277,18 @@ export function WallPanel({
       {marks.length > 0 && (
         <WallMovesLayer marks={marks} geometry={geometry} selectedEnds={selectedEnds} scale={scale} />
       )}
-      <text
-        x={size.width - PAD - 4}
-        y={endCapY}
-        textAnchor="end"
-        className="type-wall-section"
-        fill="var(--color-on-dark-secondary)"
-        data-end-cap=""
-      >
-        {endCapLabel(layout.aisle, layout.walk_path_last)}
-      </text>
+      {endCap && (
+        <text
+          x={size.width - PAD - 4}
+          y={endCapY}
+          textAnchor="end"
+          className="type-wall-section"
+          fill="var(--color-on-dark-secondary)"
+          data-end-cap=""
+        >
+          {endCapLabel(layout.aisle, layout.walk_path_last)}
+        </text>
+      )}
     </svg>
   );
 }

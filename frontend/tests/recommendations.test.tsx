@@ -97,7 +97,7 @@ function view(
   run: RunMeta | null = RUN,
   kept_parts: KeptPartRow[] = [],
 ): RecommendationsView {
-  return { version: 5, run, recommendations, no_space, kept_parts };
+  return { version: 5, run, recommendations, no_space, kept_parts, recent_moves: [] };
 }
 
 function summary(fields: Partial<PlanSummary> = {}): PlanSummary {

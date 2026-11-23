@@ -89,7 +89,14 @@ def test_fr28_reasons_over_http_and_read_only(empty_tables: str) -> None:
     assert first.json() == second.json()
     assert _row(uuid.UUID(plan_id)) == before
     body = first.json()
-    assert set(body) == {"version", "run", "recommendations", "no_space", "kept_parts"}
+    assert set(body) == {
+        "version",
+        "run",
+        "recommendations",
+        "no_space",
+        "kept_parts",
+        "recent_moves",
+    }
     assert body["recommendations"][0]["reason"]["kind"] == "class"
     assert body["recommendations"][5]["reason"]["kind"] == "pick_group"
     assert [n["part"] for n in body["no_space"]] == ["1200", "10240", "2400", "6600"]
@@ -121,3 +128,25 @@ def test_fr28_view_rows_carry_display_facts(empty_tables: str) -> None:
     assert spark["part"] == "1200" and spark["description"] == "Spark plug - Ford Focus"
     assert (spark["from_location"], spark["from_best"]) == ("B-01-01-02", False)
     assert spark["movement_class"] == "fast" and isinstance(spark["picks"], int)
+
+
+def test_fr42_recommendations_recent_moves_over_http(empty_tables: str) -> None:
+    with TestClient(create_app()) as client:
+        plan_id, rec_id = _answer_key_after_run(client)
+        before = client.get(f"/api/plans/{plan_id}/recommendations").json()
+        applied = _command(client, plan_id, _apply_body(rec_id, 3))
+        after = client.get(f"/api/plans/{plan_id}/recommendations").json()
+
+    assert before["recent_moves"] == []
+    assert applied.status_code == 200, applied.text
+    row = next(r for r in after["recommendations"] if r["id"] == rec_id)
+    assert after["recent_moves"] == [
+        {
+            "move_number": row["applied"]["move_number"],
+            "part": row["part"],
+            "rule": row["rule"],
+            "round": 1,
+            "from_location": row["from_location"],
+            "to_location": row["to_location"],
+        }
+    ]

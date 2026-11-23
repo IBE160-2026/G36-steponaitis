@@ -17,6 +17,7 @@ import type {
   MoveListRound,
   NoSpaceCause,
   OutdatedInfo,
+  RecentMove,
   RecommendationReason,
   RecommendationRow,
   RunMeta,
@@ -789,3 +790,68 @@ export const ROUTE_TO_TEXT = "to";
 
 /** The drawer's Apply. */
 export const APPLY_LABEL = "Apply";
+
+// Wall crops in the recommendation detail (Story 10.5, FR-42, UX-DR34/57): the crops' names and
+// headings, the rule caption, the link to the Locations wall and "Moves in the planning copy".
+// Every location's aisle and level come from the import layout, every move from the server.
+
+/** One end of a move in a crop's name: its code, and its aisle and level when the layout has it. */
+export type CropEnd = { code: string; aisle?: string; level?: string; best: boolean };
+
+function cropEndText(end: CropEnd): string {
+  const words = [end.code];
+  if (end.aisle !== undefined) words.push(`aisle ${end.aisle}`);
+  if (end.level !== undefined) words.push(`level ${end.level}`);
+  if (end.best) words.push("best location");
+  return words.join(", ");
+}
+
+/** A crop's accessible name: "From G-14-04-02, aisle G, level 4 → to A-02-01-01, aisle A, level 1, best location". */
+export function cropName(from: CropEnd, to: CropEnd): string {
+  return `From ${cropEndText(from)} → to ${cropEndText(to)}`;
+}
+
+/** The heading over a cross-aisle move's first crop: "From aisle G". */
+export function cropFromHeading(aisle: string): string {
+  return `From aisle ${aisle}`;
+}
+
+/** The heading over a cross-aisle move's second crop: "To aisle A". */
+export function cropToHeading(aisle: string): string {
+  return `To aisle ${aisle}`;
+}
+
+/** The caption between (or under) the crops: "Rule 1 · round 1". */
+export function cropCaption(rule: RecommendationRow["rule"], round: number): string {
+  return `${RULE_LABELS[rule]} · round ${formatNumber(round)}`;
+}
+
+/** The detail's link that opens the Locations wall with the move selected. */
+export const SHOW_ON_LOCATIONS_WALL = "Show on the Locations wall";
+
+/** The heading of the planning copy's last moves under the crops. */
+export const RECENT_MOVES_TITLE = "Moves in the planning copy";
+
+/** "Moves in the planning copy" with no moves. */
+export const NO_RECENT_MOVES = "No moves in the planning copy yet.";
+
+/** One recent move: "Move 3 · Rule 1 · 9723950 · A-03-04-02 → A-05-01-03" ("Manual" for a manual move). */
+export function recentMoveText(move: RecentMove): string {
+  return `Move ${formatNumber(move.move_number)} · ${RULE_LABELS[move.rule]} · ${move.part} · ${move.from_location} → ${move.to_location}`;
+}
+
+/**
+ * Under the recent moves, from the undo preview's `effect`: "Undo reverses move 3 first",
+ * "Undo splits move 3 first" or "Undo restores move 4 first".
+ */
+export function undoFirstText(preview: UndoPreview): string {
+  const number = formatNumber(preview.effect.move_number);
+  switch (preview.effect.kind) {
+    case "reverts_move":
+      return `Undo reverses move ${number} first`;
+    case "splits_combined_move":
+      return `Undo splits move ${number} first`;
+    case "restores_removed_move":
+      return `Undo restores move ${number} first`;
+  }
+}
