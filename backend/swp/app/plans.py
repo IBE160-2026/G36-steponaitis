@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pydantic import AwareDatetime, BaseModel
 
+from swp.app.limits import ensure_plan_room as ensure_plan_room  # the demo plan limit (AD-18)
 from swp.config import BACKEND_DIR
 from swp.domain.analysis import Analysis, AnalysisSettings, build_analysis
 from swp.domain.classify import classify_parts

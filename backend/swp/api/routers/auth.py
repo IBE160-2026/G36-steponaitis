@@ -53,7 +53,7 @@ def clear_session_cookie(response: Response) -> None:
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
-    responses=error_responses(403, 404, 422),
+    responses=error_responses(403, 404, 409, 422),
 )
 def signup(body: SignupRequest, response: Response) -> SignupResponse:
     signed_up = auth.signup(
@@ -63,7 +63,7 @@ def signup(body: SignupRequest, response: Response) -> SignupResponse:
     return SignupResponse(user=signed_up.username)
 
 
-@router.post("/login", responses=error_responses(401, 403, 404, 422))
+@router.post("/login", responses=error_responses(401, 403, 404, 422, 429))
 def login(body: LoginRequest, response: Response) -> LoginResponse:
     logged_in = auth.login(body.username, body.password, now=datetime.now(UTC))
     set_session_cookie(response, logged_in.token)

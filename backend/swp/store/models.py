@@ -1,4 +1,4 @@
-"""Declarative rows for the tables created by migrations 0001 and 0002 (AD-4, AD-9, AD-10).
+"""Declarative rows for the tables created by migrations 0001 to 0003 (AD-4, AD-9, AD-10, AD-18).
 
 JSON columns hold `model_dump(mode="json")` of the domain models; they are upcast
 through `swp.domain.state_migrations` on read (see `swp.store.plans`).
@@ -55,3 +55,11 @@ class UserRow(Base):
     username_key: Mapped[str] = mapped_column(String, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+
+
+class LoginAttemptRow(Base):
+    __tablename__ = "login_attempts"
+
+    username_key: Mapped[str] = mapped_column(String, primary_key=True)
+    failures: Mapped[int] = mapped_column(Integer, nullable=False)
+    locked_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)

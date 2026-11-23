@@ -55,11 +55,20 @@ def test_fr18_analysis_toml_matches_answer_key() -> None:
     assert plans.load_analysis_settings().model_dump() == _answer_key_settings()
 
 
-def test_nfr12_migration_creates_exactly_imports_plans_and_users(empty_tables: str) -> None:
+def test_nfr12_migration_creates_exactly_imports_plans_users_and_login_attempts(
+    empty_tables: str,
+) -> None:
     inspector = inspect(get_engine())
 
-    # FR-39: migration 0002 only adds `users` (checked in tests/app/test_signup.py).
-    assert set(inspector.get_table_names()) == {"alembic_version", "imports", "plans", "users"}
+    # FR-39: migration 0002 only adds `users` (checked in tests/app/test_signup.py); FR-40:
+    # migration 0003 only adds `login_attempts` (checked in tests/app/test_fr40_login_throttle.py).
+    assert set(inspector.get_table_names()) == {
+        "alembic_version",
+        "imports",
+        "plans",
+        "users",
+        "login_attempts",
+    }
     assert [c["name"] for c in inspector.get_columns("imports")] == [
         "id",
         "uploaded_at",

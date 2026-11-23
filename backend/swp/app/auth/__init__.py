@@ -11,16 +11,20 @@ from functools import cache
 import bcrypt
 import jwt
 
+from swp.app.limits import ensure_account_room
 from swp.config import get_settings
 from swp.domain.accounts import (
+    LOGIN_LOCKED,
     PASSWORD_MAX_BYTES,
     TAKEN,
     FieldError,
+    is_locked,
     signup_errors,
     username_error,
     username_key,
 )
 from swp.domain.errors import DomainError
+from swp.store import login_attempts
 from swp.store import users as store
 
 SESSION_COOKIE = "swp_session"
@@ -73,8 +77,10 @@ def signup(username: str, password: str, password_repeat: str, *, now: datetime)
     """Create an account and its session token; raise `validation_failed` per failing field.
 
     Whether the username is taken is checked only when its format is valid; a concurrent
-    sign-up that wins the unique constraint gives the same taken message.
+    sign-up that wins the unique constraint gives the same taken message. With the demo flag
+    on, a full demo is refused with `limit_reached` before any field check (AD-18).
     """
+    ensure_account_room()
     errors = signup_errors(username, password, password_repeat)
     if not any(error["field"] == "username" for error in errors) and store.username_key_taken(
         username_key(username)
@@ -113,18 +119,25 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
     """The stored username and a session token; `unauthenticated` for any failed login.
 
     The message never says which part was wrong. An unknown username still runs one bcrypt
-    check against a dummy hash.
+    check against a dummy hash. Failures count per casefolded username whether or not the
+    account exists; a locked username gets `login_locked` without a password check (AD-18).
     """
     encoded = _password_bytes(password)
     # A malformed username (lone surrogate, NUL, ...) never reaches the database.
     if username_error(username) is not None or encoded is None or not encoded:
         raise DomainError("unauthenticated", WRONG_LOGIN)
-    user = store.get_user_by_key(username_key(username))
+    key = username_key(username)
+    if is_locked(login_attempts.get(key), now):
+        raise DomainError("login_locked", LOGIN_LOCKED)
+    user = store.get_user_by_key(key)
     if user is None:
         bcrypt.checkpw(encoded, _dummy_hash())
+        login_attempts.record_failure(key, now)
         raise DomainError("unauthenticated", WRONG_LOGIN)
     if not bcrypt.checkpw(encoded, user.password_hash.encode("ascii")):
+        login_attempts.record_failure(key, now)
         raise DomainError("unauthenticated", WRONG_LOGIN)
+    login_attempts.clear(key)
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 

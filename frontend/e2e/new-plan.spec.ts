@@ -236,6 +236,17 @@ test.describe("uj1 new plan", () => {
     await expect(page).toHaveURL(/\/plans\/new$/);
   });
 
+  test("fr39 uj1 a full demo refuses a new plan", async ({ page }) => {
+    // The e2e server runs with FEATURE_DEMO off, so the real 409 envelope is answered here.
+    const message = "The demo holds at most 50 plans. Delete a plan to make room.";
+    await submitWithResponse(page, 409, "application/json", envelope("limit_reached", message, [{ limit: "max_plans" }]));
+
+    const alert = page.getByRole("alert").filter({ hasText: message });
+    await expect(alert).toBeVisible();
+    await expect(alert).toHaveText(message);
+    await expect(page).toHaveURL(/\/plans\/new$/);
+  });
+
   test("uj1 shows a name rejected by the server under the name field", async ({ page }) => {
     const body = envelope("validation_failed", "Give the plan a name.", [
       { field: "name", message: "Give the plan a name." },

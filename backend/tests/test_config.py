@@ -73,3 +73,22 @@ def test_nfr_max_rows_per_file_must_be_positive(
 
     with pytest.raises(ValidationError):
         config.Settings()
+
+
+def test_fr39_demo_limit_defaults(fresh_settings: None, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MAX_PLANS", raising=False)
+    monkeypatch.delenv("MAX_ACCOUNTS", raising=False)
+
+    settings = config.Settings()
+
+    assert settings.max_plans == 50
+    assert settings.max_accounts == 200
+
+
+def test_fr39_max_plans_must_be_positive(
+    fresh_settings: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("MAX_PLANS", "0")
+
+    with pytest.raises(ValidationError):
+        config.Settings()

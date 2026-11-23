@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     # AD-12 limits (env MAX_UPLOAD_BYTES, MAX_ROWS_PER_FILE); read through swp.app.limits.
     max_upload_bytes: PositiveInt = 4_000_000
     max_rows_per_file: PositiveInt = 25_000
+    # AD-18 demo limits (env MAX_PLANS, MAX_ACCOUNTS); applied only with FEATURE_DEMO on.
+    max_plans: PositiveInt = 50
+    max_accounts: PositiveInt = 200
     # Feature flags (env FEATURE_AUTH, FEATURE_DEMO); both off in M1, shown by GET /api/session.
     feature_auth: bool = False
     feature_demo: bool = False

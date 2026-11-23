@@ -26,7 +26,7 @@ STATUS_BY_CODE: Mapping[str, int] = {
     "unauthenticated": 401,
     "forbidden_origin": 403,
     "login_locked": 429,
-    "limit_reached": 413,
+    "limit_reached": 413,  # upload size and rows; the demo plan/account limits are 409
     "internal": 500,
     "unavailable": 503,
 }
@@ -46,8 +46,20 @@ class ErrorEnvelope(BaseModel):
     error: ErrorBody
 
 
+# `limit_reached` for a demo count limit (AD-18) is a conflict, not a too-large request.
+COUNT_LIMITS = frozenset({"max_plans", "max_accounts"})
+
+
+def status_for(error: DomainError) -> int:
+    if error.code == "limit_reached" and any(
+        detail.get("limit") in COUNT_LIMITS for detail in error.details
+    ):
+        return 409
+    return STATUS_BY_CODE.get(error.code, 500)
+
+
 def error_response(error: DomainError) -> JSONResponse:
-    status = STATUS_BY_CODE.get(error.code, 500)
+    status = status_for(error)
     body = ErrorEnvelope(
         error=ErrorBody(code=error.code, message=error.message, details=error.details)
     )

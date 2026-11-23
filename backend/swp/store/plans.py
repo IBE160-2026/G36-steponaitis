@@ -310,6 +310,12 @@ def plan_for_update(plan_id: uuid.UUID) -> Iterator[PlanWriter | None]:
         yield PlanWriter(session, plan)
 
 
+def count_plans() -> int:
+    """The number of saved plans (AD-18)."""
+    with transaction() as session:
+        return session.execute(select(func.count()).select_from(PlanRow)).scalar_one()
+
+
 def list_plans() -> list[PlanListItem]:
     """Every saved plan, most recently edited first (then newest created, then id)."""
     query = (

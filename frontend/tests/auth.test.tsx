@@ -61,6 +61,9 @@ afterEach(() => {
 
 const html = renderToStaticMarkup;
 const FORM: SignupForm = { username: "Kari7", password: "secret", password_repeat: "secret" };
+// Server copy (AD-18); the frontend adds none, it shows the message it is sent.
+const ACCOUNT_LIMIT = "The demo has reached its account limit. Use Demo version instead.";
+const LOGIN_LOCKED = "Too many failed logins for this username. Wait a minute and try again.";
 const TAKEN = "That username is taken. Try another.";
 const MISMATCH = "The passwords don’t match.";
 
@@ -216,6 +219,20 @@ describe("fr39 signup errors", () => {
     expect(outcome).toEqual({ kind: "failed", message: "Something went wrong. Try again." });
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it("fr39_full_demo_limit_reached_is_one_form_message", async () => {
+    const navigate = vi.fn();
+    const invalidateSession = vi.fn();
+    const outcome = await runSignup(FORM, {
+      post: async () =>
+        Promise.reject(new ApiError(409, "limit_reached", ACCOUNT_LIMIT, [{ limit: "max_accounts" }])),
+      invalidateSession,
+      navigate,
+    });
+    expect(outcome).toEqual({ kind: "failed", message: ACCOUNT_LIMIT });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(invalidateSession).not.toHaveBeenCalled();
+  });
 });
 
 describe("fr39 signup success", () => {
@@ -343,6 +360,33 @@ describe("fr40 log in requests", () => {
       { post: async () => Promise.reject(new TypeError("network")), invalidateSession, navigate },
     );
     expect(other).toEqual({ kind: "failed", message: "Something went wrong. Try again." });
+  });
+
+  it("fr40_login_locked_is_one_alert_and_keeps_both_fields", async () => {
+    const navigate = vi.fn();
+    const invalidateSession = vi.fn();
+    const outcome = await runLogin(
+      { username: "Kari7", password: "secret" },
+      {
+        post: async () => Promise.reject(new ApiError(429, "login_locked", LOGIN_LOCKED)),
+        invalidateSession,
+        navigate,
+      },
+    );
+    expect(outcome).toEqual({ kind: "failed", message: LOGIN_LOCKED });
+    expect(navigate).not.toHaveBeenCalled();
+    expect(invalidateSession).not.toHaveBeenCalled();
+
+    const before: LoginFormState = { values: { username: "Kari7", password: "secret" }, formError: null, passwordShown: false };
+    const after = afterFailedLogin(before, { kind: "failed", message: LOGIN_LOCKED });
+    expect(after).toEqual({ ...before, formError: LOGIN_LOCKED });
+    const markup = html(
+      <LoginCard values={after.values} formError={after.formError} passwordShown={after.passwordShown} />,
+    );
+    expect(markup.match(/role="alert"/g)).toHaveLength(1);
+    expect(markup).toContain(LOGIN_LOCKED);
+    expect(inputTag(markup, "username")).toContain('value="Kari7"');
+    expect(inputTag(markup, "password")).toContain('value="secret"');
   });
 
   it("fr40_success_awaits_the_session_refetch_then_opens_saved_plans", async () => {

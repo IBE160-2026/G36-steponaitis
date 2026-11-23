@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from swp.store.db import transaction
@@ -67,3 +67,11 @@ def username_key_taken(key: str) -> bool:
             select(UserRow.id).where(UserRow.username_key == key).limit(1)
         ).first()
         return found is not None
+
+
+def count_accounts() -> int:
+    """The number of accounts, not counting the seeded `demo` account (AD-18)."""
+    with transaction() as session:
+        return session.execute(
+            select(func.count()).select_from(UserRow).where(UserRow.username_key != "demo")
+        ).scalar_one()

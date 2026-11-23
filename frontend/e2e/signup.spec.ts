@@ -6,6 +6,7 @@ import { expect, type Page, test } from "./support/test";
 
 const TAKEN = "That username is taken. Try another.";
 const MISMATCH = "The passwords don’t match.";
+const ACCOUNT_LIMIT = "The demo has reached its account limit. Use Demo version instead.";
 
 function uniqueUsername(): string {
   const digits = Math.floor(Math.random() * 1_000_000)
@@ -106,6 +107,29 @@ test.describe("fr39 create account", () => {
 
     await expect(card(page).getByText(TAKEN)).toBeVisible();
     await expect(page.getByLabel("Username")).toBeFocused();
+    await expect(page).toHaveURL(/\/signup$/);
+  });
+
+  test("fr39 uj5 a full demo refuses a new account", async ({ page }) => {
+    // The e2e server runs with FEATURE_DEMO off, so the real 409 envelope is answered here.
+    await page.route("**/api/auth/signup", (route) =>
+      route.fulfill({
+        status: 409,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "limit_reached", message: ACCOUNT_LIMIT, details: [{ limit: "max_accounts" }] },
+        }),
+      }),
+    );
+    await page.goto("/signup");
+    const name = uniqueUsername();
+    await fill(page, name, "secret", "secret");
+    await card(page).getByRole("button", { name: "Create account" }).click();
+
+    const alert = card(page).getByRole("alert");
+    await expect(alert).toHaveText(ACCOUNT_LIMIT);
+    await expect(alert).toHaveCount(1);
+    await expect(page.getByLabel("Username")).toHaveValue(name);
     await expect(page).toHaveURL(/\/signup$/);
   });
 

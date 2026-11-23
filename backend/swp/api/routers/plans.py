@@ -39,7 +39,7 @@ def _validation_failed(details: list[dict[str, object]]) -> DomainError:
 @router.post(
     "/plans",
     status_code=status.HTTP_201_CREATED,
-    responses=error_responses(403, 404, 413, 422, 503),
+    responses=error_responses(403, 404, 409, 413, 422, 503),
 )
 def create_plan(
     # The router guard's dependency again: cached per request, so the user loads once (FR-11).
@@ -53,6 +53,8 @@ def create_plan(
     name: Annotated[str, Form()] = "",
     import_id: Annotated[str | None, Form()] = None,
 ) -> plans.CreatedPlan:
+    # The demo plan limit first, before any name, file or import check reads anything (AD-18).
+    plans.ensure_plan_room()
     uploads = {"locations": locations, "inventory": inventory, "transactions": transactions}
     now = datetime.now(UTC)
     if import_id is not None:

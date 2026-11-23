@@ -5,6 +5,7 @@ import { type APIRequestContext, expect, type Page, test } from "./support/test"
 // through the API, so they never log the shared e2e account out.
 
 const WRONG_LOGIN = "Wrong username or password. Check both and try again.";
+const LOGIN_LOCKED = "Too many failed logins for this username. Wait a minute and try again.";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -122,6 +123,42 @@ test.describe("fr40 uj3 log in and log out", () => {
 
     await page.goto("/plans");
     await expect(page).toHaveURL(/\/login$/);
+  });
+
+  test("fr40 uj3 five wrong logins lock the username for a minute", async ({ page }) => {
+    // A fresh name with no account: failures count per username whether or not it exists.
+    const username = uniqueUsername();
+    await page.goto("/login");
+    const section = card(page);
+    const alert = section.getByRole("alert");
+    const password = page.getByLabel("Password", { exact: true });
+    const submit = section.getByRole("button", { name: "Log in" });
+
+    await page.getByLabel("Username").fill(username);
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      await password.fill(`wrong${attempt}`);
+      const answered = page.waitForResponse((r) => r.url().endsWith("/api/auth/login"));
+      await submit.click();
+      expect((await answered).status()).toBe(401);
+      await expect(alert).toHaveText(WRONG_LOGIN);
+      await expect(password).toHaveValue("");
+    }
+
+    await password.fill("wrong6");
+    const locked = page.waitForResponse((r) => r.url().endsWith("/api/auth/login"));
+    await submit.click();
+    expect((await locked).status()).toBe(429);
+    await expect(alert).toHaveText(LOGIN_LOCKED);
+    await expect(alert).toHaveCount(1);
+    await expect(page.getByLabel("Username")).toHaveValue(username);
+    await expect(password).toHaveValue("wrong6");
+    await expect(page).toHaveURL(/\/login$/);
+
+    // Another username is not locked.
+    await page.getByLabel("Username").fill(uniqueUsername());
+    await password.fill("wrong7");
+    await submit.click();
+    await expect(alert).toHaveText(WRONG_LOGIN);
   });
 
   test("fr40 the page is a 404 when the session reports auth off", async ({ page }) => {

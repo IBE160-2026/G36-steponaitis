@@ -1,8 +1,12 @@
 """Account rules (FR-39, AD-10): username and password checks for Create account.
 
+Also the login throttle rules (FR-40, AD-18): failures per casefolded username lock it.
+
 Pure: no clock, ids or hashing here. `swp.app.auth` hashes, stores and signs the session.
 """
 
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import TypedDict
 
 
@@ -85,3 +89,40 @@ def signup_errors(username: str, password: str, password_repeat: str) -> list[Fi
     if password_repeat != password:
         errors.append({"field": "password_repeat", "message": PASSWORDS_DIFFER})
     return errors
+
+
+LOGIN_MAX_FAILURES = 5
+LOGIN_LOCK = timedelta(seconds=60)
+LOGIN_LOCKED = "Too many failed logins for this username. Wait a minute and try again."
+
+
+@dataclass(frozen=True)
+class LoginAttempts:
+    """Failed logins counted for one casefolded username, and when its lock ends."""
+
+    failures: int
+    locked_until: datetime | None
+
+
+def is_locked(attempts: LoginAttempts | None, now: datetime) -> bool:
+    """True while `attempts` holds a lock that has not passed at `now`."""
+    return (
+        attempts is not None and attempts.locked_until is not None and now < attempts.locked_until
+    )
+
+
+def after_failure(attempts: LoginAttempts | None, now: datetime) -> LoginAttempts:
+    """The attempts after one more failed login at `now`.
+
+    No time window: failures add up until a success clears them or a lock passes. A missing
+    record or one whose lock has passed starts from 0; the `LOGIN_MAX_FAILURES`th failure locks
+    the username for `LOGIN_LOCK`.
+    """
+    previous = 0
+    if attempts is not None and not (
+        attempts.locked_until is not None and now >= attempts.locked_until
+    ):
+        previous = attempts.failures
+    failures = previous + 1
+    locked_until = now + LOGIN_LOCK if failures >= LOGIN_MAX_FAILURES else None
+    return LoginAttempts(failures=failures, locked_until=locked_until)

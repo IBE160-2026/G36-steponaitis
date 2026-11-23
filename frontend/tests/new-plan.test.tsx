@@ -361,6 +361,12 @@ describe("fr1 error view branches on the code", () => {
     expect(errorView(parseErrorBody(502, "<html></html>"))).toEqual({ kind: "message", message: INTERNAL_MESSAGE });
   });
 
+  it("fr39 shows the full demo plan limit (409 limit_reached) as one message panel", () => {
+    const full = "The demo holds at most 50 plans. Delete a plan to make room.";
+    const body = JSON.stringify({ error: { code: "limit_reached", message: full, details: [{ limit: "max_plans" }] } });
+    expect(errorView(parseErrorBody(409, body))).toEqual({ kind: "message", message: full });
+  });
+
   it("fr3_fr4 turns import_invalid into tile states and error groups", () => {
     const details = [fileCheck("locations", "failed", ["bad"]), fileCheck("inventory", "not_checked")];
     expect(errorView(new ApiError(422, "import_invalid", "Import stopped: nothing was saved.", details))).toEqual({
