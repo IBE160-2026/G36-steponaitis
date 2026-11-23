@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 14:14
+last_updated: 11-23-2026 15:05
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -125,10 +125,10 @@ development_status:
   10-7-mark-best-locations-on-the-wall: done
   epic-10-retrospective: done
 
-  epic-11: in-progress
+  epic-11: done
   11-1-colour-maths-and-presets: done
   11-2-key-colours-as-live-css-variables-kept-in-the-browser: done
-  11-3-change-a-colour-from-the-key: in-progress
+  11-3-change-a-colour-from-the-key: done
   epic-11-retrospective: optional
 
   epic-12: backlog
