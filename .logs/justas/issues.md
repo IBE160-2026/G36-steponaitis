@@ -155,3 +155,4 @@
 - [ ] 2026-11-23 [epic-8-retrospective](921-2026-11-23-02-21-12-epic-8-retrospective.md) — avgjør hvordan milestone 2-porten skal bevise utskriftssjekken i alle tre nettlesere (i CI eller lokalt i portsteget), og oppdater AGENTS.md (epic 8 retro, punkt 6)
 - [ ] 2026-11-23 [epic-8-retrospective](921-2026-11-23-02-21-12-epic-8-retrospective.md) — kopier utsatte punkter som trenger en produktbeslutning, inn i tiltakspunktene i sprint-status med eier (epic 8 retro, punkt 7)
 - [ ] 2026-11-23 [9-1-create-an-account](920-2026-11-23-03-01-24-9-1-create-an-account.md) — backend starter i produksjon med standardverdien for `JWT_SECRET` som ligger i repoet; utsatt til Story 9.7 (Story 9.1)
+- [ ] 2026-11-23 [9-2-log-in-log-out-and-the-page-guard](919-2026-11-23-03-42-18-9-2-log-in-log-out-and-the-page-guard.md) — når en økt utløper mens appen er åpen, sendes brukeren ikke til Log in; utsatt til Story 9.3 (Story 9.2)
