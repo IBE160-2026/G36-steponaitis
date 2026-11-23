@@ -164,23 +164,52 @@ export function getKeyColours(): Readonly<KeyColours> {
   return entries;
 }
 
+function requireEntry(entry: KeyColourEntry): void {
+  if (!KEY_COLOUR_ENTRIES.includes(entry)) throw new RangeError(`Not a Key colour entry: ${String(entry)}`);
+}
+
+/** The variables one entry's colour sets: the entry and, for best and selection, its derived partner. */
+function changeFor(entry: KeyColourEntry, hex: string): Partial<ColourValues> {
+  const colour = normaliseHex(hex);
+  const change: Partial<ColourValues> = { [entry]: colour };
+  if (entry === "best") change["best-on-light"] = deriveBestOnLight(colour);
+  if (entry === "selection") change["selected-tint"] = deriveSelectedTint(colour);
+  return change;
+}
+
 /**
  * Sets one Key colour: the variable (and its derived partner for best and selection) changes on
  * `<html>` at once, all eight values are stored, and subscribers are told. A value that is not a
  * colour as `#RRGGBB` throws `RangeError` and changes nothing.
  */
 export function setKeyColour(entry: KeyColourEntry, hex: string): void {
-  if (!KEY_COLOUR_ENTRIES.includes(entry)) throw new RangeError(`Not a Key colour entry: ${String(entry)}`);
-  const colour = normaliseHex(hex);
-  const change: Partial<ColourValues> = { [entry]: colour };
-  if (entry === "best") change["best-on-light"] = deriveBestOnLight(colour);
-  if (entry === "selection") change["selected-tint"] = deriveSelectedTint(colour);
+  requireEntry(entry);
+  const change = changeFor(entry, hex);
   const next: ColourValues = { ...latest(), ...change };
   values = next;
   entries = null;
   apply(change);
   store(next);
   for (const listener of [...listeners]) listener();
+}
+
+/**
+ * Previews one Key colour (Story 11.3): `hex` sets the entry's variable and its derived partner on
+ * `<html>` without storing or notifying; `null` sets the kept values of that entry and partner
+ * again. A value that is not a colour as `#RRGGBB` throws `RangeError` and changes nothing.
+ */
+export function previewKeyColour(entry: KeyColourEntry, hex: string | null): void {
+  requireEntry(entry);
+  if (hex !== null) {
+    apply(changeFor(entry, hex));
+    return;
+  }
+  if (!inBrowser()) return;
+  const kept = load();
+  const restore: Partial<ColourValues> = { [entry]: kept[entry] };
+  if (entry === "best") restore["best-on-light"] = kept["best-on-light"];
+  if (entry === "selection") restore["selected-tint"] = kept["selected-tint"];
+  apply(restore);
 }
 
 /** Restores one entry's DESIGN.md default (best also restores best-on-light `#267A4B`). */

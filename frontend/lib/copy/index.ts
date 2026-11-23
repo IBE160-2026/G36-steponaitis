@@ -26,6 +26,7 @@ import type {
   WallMove,
   WarehouseCounts,
 } from "@/lib/api/plans";
+import type { ColourWarning, ContrastBackground, KeyColourEntry } from "@/lib/colours";
 import { formatDate, formatDateTime, formatNumber, formatTime } from "@/lib/format";
 
 /** The saved-plans list's title, also the label of New Plan's list of saved plans (FR-2, FR-8). */
@@ -450,6 +451,93 @@ export const KEY_LABELS = {
 export type KeyEntry = keyof typeof KEY_LABELS;
 
 export const KEY_ORDER: readonly KeyEntry[] = ["fast", "medium", "slow", "dead", "empty", "best", "selected", "twoParts"];
+
+// The Key colour popover (Story 11.3, FR-42, UX-DR49). `label` is the entry's Key label.
+
+/** A Key colour entry's button: "Slow-moving, change colour". */
+export function keyEntryButtonName(label: string): string {
+  return `${label}, change colour`;
+}
+
+/** The popover title's last word, after the label and its miniature (an SVG, never a glyph character). */
+export const COLOUR_TITLE_WORD = "colour";
+
+/** The popover's accessible name: "Slow-moving colour". */
+export function colourPopoverTitle(label: string): string {
+  return `${label} ${COLOUR_TITLE_WORD}`;
+}
+
+export const COLOUR_PRESET_COUNT = 8;
+
+/** The preset radiogroup: "Slow-moving shades". */
+export function colourPresetsName(label: string): string {
+  return `${label} shades`;
+}
+
+/** The preset that is the entry's default is named this instead of its shade number. */
+export const DEFAULT_PRESET_NAME = "Default";
+
+/** A preset radio: "Slow-moving shade 6 of 8" (`n` counts from 1, lightest first). */
+export function presetName(label: string, n: number): string {
+  return `${label} shade ${n} of ${COLOUR_PRESET_COUNT}`;
+}
+
+export const DEFAULT_CHIP_LABEL = "Default";
+export const COLOUR_CODE_LABEL = "Colour code";
+export const HEX_INVALID = "Enter a colour as #RRGGBB";
+export const RESET_THIS_COLOUR = "Reset this colour";
+export const DONE = "Done";
+
+/** The native colour picker's swatch: "Slow-moving, pick a colour". */
+export function colourPickerName(label: string): string {
+  return `${label}, pick a colour`;
+}
+
+/** Announced after Done or a click outside changed the colour: "Slow-moving colour changed". */
+export function colourChanged(label: string): string {
+  return `${label} colour changed`;
+}
+
+/** An entry as the warnings name it: the class names, "Best location" and "Selection". */
+export function colourEntryName(entry: KeyColourEntry): string {
+  switch (entry) {
+    case "best":
+      return "Best location";
+    case "selection":
+      return "Selection";
+    default:
+      return CLASS_LABELS[entry];
+  }
+}
+
+const CONTRAST_WHERE: Record<ContrastBackground, string> = {
+  wall: "on the wall",
+  "open-slot": "on an open slot",
+  "ink-text": "under BEST text",
+  casing: "on its casing",
+  white: "on white",
+};
+
+function alikeObjects(a: KeyColourEntry, b: KeyColourEntry): string {
+  const isClass = (entry: KeyColourEntry) => entry !== "best" && entry !== "selection";
+  if (isClass(a) && isClass(b)) return "Bins of the two classes";
+  if (a === "best" && b === "selection") return "The best-location frame and the selection frame";
+  return b === "best" ? "Bins and the best-location frame" : "Bins and the selection frame";
+}
+
+/**
+ * One popover warning: "Slow-moving on the wall: 1.2:1 (3:1 or more recommended)" (the ratio
+ * floored to one decimal) or "Slow-moving and Selection look alike (ΔE 0). Bins and the
+ * selection frame may be hard to tell apart." (ΔE floored; names in Key order).
+ */
+export function colourWarningText(warning: ColourWarning): string {
+  if (warning.kind === "contrast") {
+    const ratio = (Math.floor(warning.ratio * 10) / 10).toFixed(1);
+    return `${colourEntryName(warning.entry)} ${CONTRAST_WHERE[warning.against]}: ${ratio}:1 (${warning.threshold}:1 or more recommended)`;
+  }
+  const names = `${colourEntryName(warning.a)} and ${colourEntryName(warning.b)}`;
+  return `${names} look alike (ΔE ${Math.floor(warning.deltaE)}). ${alikeObjects(warning.a, warning.b)} may be hard to tell apart.`;
+}
 
 /** "Aisle A": the open aisle's heading. */
 export function aisleHeading(aisle: string): string {

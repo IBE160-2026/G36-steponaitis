@@ -211,7 +211,19 @@ describe("fr42 wall key", () => {
     for (const label of Object.values(KEY_LABELS)) expect(plain).toContain(label);
     expect(plain.toLowerCase()).not.toMatch(/\b(red|yellow|blue|grey|gray|green|purple|violet|black|white)\b/);
     expect(markup).toMatch(/<p id="([^"]+)"[^>]*>Key<\/p><ul aria-labelledby="\1"/);
-    expect(markup).not.toMatch(/<(button|a)\b/);
+    // Story 11.3: the six colour entries are buttons; Empty and 2 parts stay plain text.
+    const buttons = [...markup.matchAll(/<button\b[^>]*aria-label="([^"]+)"/g)].map((match) => match[1]);
+    expect(buttons).toEqual([
+      "Fast-moving, change colour",
+      "Medium-moving, change colour",
+      "Slow-moving, change colour",
+      "Dead stock, change colour",
+      "Best location, change colour",
+      "Selected, change colour",
+    ]);
+    expect(markup).not.toMatch(/<a\b/);
+    expect(markup).toMatch(/<li[^>]*data-key-entry="empty"><svg/);
+    expect(markup).toMatch(/<li[^>]*data-key-entry="twoParts"><svg/);
     expect(markup.match(/width="16" height="18"/g)).toHaveLength(8);
   });
 });

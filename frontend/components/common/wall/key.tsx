@@ -1,12 +1,16 @@
 // Key (UX-DR45): always visible under the wall. Each entry is a 16 × 18 miniature of the real
-// graphic with its glossary name, in a fixed order, never a colour word. Plain text in this
-// story; Epic 11 turns the class entries into buttons.
+// graphic with its glossary name, in a fixed order, never a colour word. The six colour entries
+// (Story 11.3, FR-42) are buttons that open the colour popover ("Slow-moving, change colour");
+// Empty and 2 parts stay plain text. A kept change is announced in the Key's polite live region.
+// This file stays server-safe (no "use client"): the buttons live in colour-popover.tsx.
 
 import { useId } from "react";
 
+import type { KeyColourEntry } from "@/lib/colours";
 import { KEY_LABELS, KEY_ORDER, KEY_TITLE, type KeyEntry } from "@/lib/copy";
 
 import { BIN_HEIGHT, BIN_WIDTH, Bin } from "./bin";
+import { KeyColourAnnouncer, KeyColourButton } from "./colour-popover";
 import { Slot } from "./slot";
 
 /** A frame around a bin at (`x`, `y`): the best frame, or the Selected frame (accent over a casing). */
@@ -69,6 +73,16 @@ export function KeySwatch({ entry }: { entry: KeyEntry }) {
   );
 }
 
+/** The Key entries whose colour the planner can change, and the colour each one sets. */
+export const KEY_COLOUR_OF: Readonly<Partial<Record<KeyEntry, KeyColourEntry>>> = {
+  fast: "fast",
+  medium: "medium",
+  slow: "slow",
+  dead: "dead",
+  best: "best",
+  selected: "selection",
+};
+
 export function Key() {
   const titleId = useId();
   return (
@@ -76,14 +90,25 @@ export function Key() {
       <p id={titleId} className="type-caption font-medium text-ink">
         {KEY_TITLE}
       </p>
-      <ul aria-labelledby={titleId} className="flex flex-wrap gap-x-5 gap-y-2">
-        {KEY_ORDER.map((entry) => (
-          <li key={entry} className="flex items-center gap-1.5 type-caption font-medium text-ink" data-key-entry={entry}>
-            <KeySwatch entry={entry} />
-            {KEY_LABELS[entry]}
-          </li>
-        ))}
-      </ul>
+      <KeyColourAnnouncer>
+        <ul aria-labelledby={titleId} className="flex flex-wrap gap-x-5 gap-y-2">
+          {KEY_ORDER.map((entry) => {
+            const colour = KEY_COLOUR_OF[entry];
+            return (
+              <li key={entry} className="flex items-center gap-1.5 type-caption font-medium text-ink" data-key-entry={entry}>
+                {colour ? (
+                  <KeyColourButton entry={colour} label={KEY_LABELS[entry]} swatch={<KeySwatch entry={entry} />} />
+                ) : (
+                  <>
+                    <KeySwatch entry={entry} />
+                    {KEY_LABELS[entry]}
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </KeyColourAnnouncer>
     </div>
   );
 }

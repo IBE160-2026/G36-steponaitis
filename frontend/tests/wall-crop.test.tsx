@@ -259,7 +259,11 @@ describe("fr42 crops in the detail (UX-DR34/57)", () => {
     // A crop names the move and draws no end cap, grid, tooltip or tab stop.
     expect(markup).not.toContain("data-end-cap");
     expect(markup).not.toContain('role="grid"');
-    expect(markup).not.toMatch(/tabindex="0"|<a |<button/);
+    // The Key under the crops has its colour buttons (Story 11.3); the crops themselves have none.
+    const keyAt = markup.indexOf("data-wall-key");
+    expect(keyAt).toBeGreaterThan(-1);
+    const crops = markup.slice(0, keyAt);
+    expect(crops).not.toMatch(/tabindex="0"|<a |<button/);
     expect(markup).not.toContain("cursor:pointer");
     expect(text(markup)).toContain("Rule 1 · round 1");
     expect(markup.indexOf("data-crop-caption")).toBeGreaterThan(markup.indexOf('role="img"'));

@@ -10,7 +10,8 @@ export { AisleWall, type AisleWallProps } from "./aisle-wall";
 export { BIN_HEIGHT, BIN_WIDTH, Bin, CODE_MIN_WIDTH } from "./bin";
 export { CLASS_FILL } from "./class-fill";
 export { cropLayout } from "./crop";
-export { Frame, Key, KeySwatch, SELECTED_FRAME } from "./key";
+export { ColourPopoverBody, type ColourPopoverBodyProps, KeyColourAnnouncer, KeyColourButton } from "./colour-popover";
+export { Frame, Key, KEY_COLOUR_OF, KeySwatch, SELECTED_FRAME } from "./key";
 export {
   type CellBest,
   cellRect,

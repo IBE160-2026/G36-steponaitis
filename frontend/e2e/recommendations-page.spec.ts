@@ -267,12 +267,23 @@ test("uj1 wall crops in the recommendation detail, show on the wall and the plan
   await expect(crop.locator("[data-move-arrow]")).toHaveCount(1);
   await expect(detail.getByText(`Rule ${ruleNumber} · round 1`, { exact: true })).toBeVisible();
   await expect(detail.locator("[data-wall-key]")).toHaveCount(1);
-  // The crops add no tab stops; the eyebrow's link is followed straight by Apply.
-  await expect(
-    detail.locator('[data-crops] a, [data-crops] button, [data-crops] [tabindex]:not([tabindex="-1"])'),
-  ).toHaveCount(0);
+  // The crops add no tab stops; only the Key under them has its six colour buttons (Story 11.3),
+  // so the eyebrow's link is followed by those and then Apply.
+  const cropStops = await detail.locator("[data-crops]").evaluate(
+    (crops) =>
+      [...crops.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])')].filter(
+        (element) => element.closest("[data-wall-key]") === null,
+      ).length,
+  );
+  expect(cropStops).toBe(0);
+  const keyButtons = detail.locator("[data-crops] [data-wall-key] button");
+  await expect(keyButtons).toHaveCount(6);
   const link = detail.getByRole("link", { name: "Show on the Locations wall" });
   await link.focus();
+  for (let i = 0; i < 6; i += 1) {
+    await page.keyboard.press("Tab");
+    await expect(keyButtons.nth(i)).toBeFocused();
+  }
   await page.keyboard.press("Tab");
   await expect(detail.getByRole("button", { name: "Apply", exact: true })).toBeFocused();
   await expect(detail.getByText("No moves in the planning copy yet.")).toBeVisible();

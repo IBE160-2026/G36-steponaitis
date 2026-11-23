@@ -1,5 +1,5 @@
-// Key colours (FR-42): colour maths, presets and checks (pure), and the browser-only store that
-// applies the eight `--colour-*` variables and keeps them in localStorage (storage.ts). No React.
+// Key colours (FR-42): colour maths, presets, checks and popover warnings (pure), and the
+// browser-only store that applies the eight `--colour-*` variables and keeps them in localStorage (storage.ts). No React.
 
 export {
   contrastRatio,
@@ -54,9 +54,11 @@ export {
   getKeyColours,
   isColourStorageAvailable,
   parseStoredColours,
+  previewKeyColour,
   resetKeyColour,
   setKeyColour,
   subscribeKeyColours,
   type ColourValues,
   type ColourVariable,
 } from "./storage";
+export { colourWarnings, type ColourWarning } from "./warnings";
