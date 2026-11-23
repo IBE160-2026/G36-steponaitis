@@ -3,71 +3,21 @@
 // its three-letter code in the label window, open slots as dark recesses, BEST rails and tags on L2
 // and L1, the demo part's bin lifted out of L4 with an accent arrow to a dashed empty best target on
 // L1. Every colour is a DESIGN.md token read as a CSS variable, so the picture follows the theme.
-// Epic 10 has no shared large Bin yet, so the bin is drawn here; the glyph is the shared ClassGlyph.
+// Bins and slots are the shared wall primitives (components/common/wall) at the large size.
 
-import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
+import type { MovementClass } from "@/components/common/class-glyph";
+import { Bin, Slot } from "@/components/common/wall";
 
-import { BEST_TAG, CLASS_CODES, WALL_LABEL, WALL_SECTION } from "./copy";
+import { BEST_TAG, WALL_LABEL, WALL_SECTION } from "./copy";
 
+/** The front page draws bins at the large size, where the shared Bin shows its class code. */
 export const BIN_WIDTH = 56;
 export const BIN_HEIGHT = 54;
 
-// Written out in full: Tailwind emits a theme variable only when it finds its whole name in the source.
-const CLASS_FILLS: Record<MovementClass, string> = {
-  fast: "var(--color-class-fast)",
-  medium: "var(--color-class-medium)",
-  slow: "var(--color-class-slow)",
-  dead: "var(--color-class-dead)",
-};
-
-/** One bin, 56 × 54 at (x, y): body, darker lip and bottom line, label window with glyph and code. */
-export function LargeBin({ movementClass, x = 0, y = 0 }: { movementClass: MovementClass; x?: number; y?: number }) {
-  return (
-    <g data-bin={movementClass}>
-      <rect x={x} y={y} width={BIN_WIDTH} height={BIN_HEIGHT} rx={3} fill={CLASS_FILLS[movementClass]} />
-      <rect x={x} y={y} width={BIN_WIDTH} height={6} rx={2} fill="rgba(0,0,0,0.22)" />
-      <rect x={x} y={y + BIN_HEIGHT - 2} width={BIN_WIDTH} height={2} fill="rgba(0,0,0,0.18)" />
-      <rect x={x + 4} y={y + 15} width={48} height={26} rx={1.5} fill="var(--color-label-window)" />
-      <g transform={`translate(${x + 8} ${y + 23})`}>
-        <ClassGlyph movementClass={movementClass} size={10} />
-      </g>
-      <text
-        x={x + 21}
-        y={y + 32.5}
-        fontSize={12}
-        className="font-code font-bold"
-        fill="var(--color-glyph)"
-      >
-        {CLASS_CODES[movementClass]}
-      </text>
-    </g>
-  );
-}
-
-/** An open slot: a dark recess with a light rim, a slat near the top and a base line. */
-function EmptySlot({ x, y }: { x: number; y: number }) {
-  return (
-    <g data-slot="empty">
-      <rect
-        x={x + 0.5}
-        y={y + 0.5}
-        width={BIN_WIDTH - 1}
-        height={BIN_HEIGHT - 1}
-        rx={2}
-        fill="var(--color-slot-empty)"
-        stroke="var(--color-slot-rim)"
-        strokeWidth={1}
-      />
-      <rect x={x + 15} y={y + 4} width={26} height={2.6} rx={1.3} fill="var(--color-wall-slat)" />
-      <path d={`M${x + 3} ${y + BIN_HEIGHT - 4} H${x + BIN_WIDTH - 3}`} stroke="var(--color-slot-line)" strokeWidth={1} />
-    </g>
-  );
-}
-
-type Slot = MovementClass | null;
+type SlotContent = MovementClass | null;
 
 /** The section's levels, top (L4) to bottom (L1); null is an open slot. */
-const LEVELS: readonly { label: string; best: boolean; slots: readonly [Slot, Slot, Slot, Slot] }[] = [
+const LEVELS: readonly { label: string; best: boolean; slots: readonly [SlotContent, SlotContent, SlotContent, SlotContent] }[] = [
   { label: "L4", best: false, slots: ["dead", null, null, "slow"] },
   { label: "L3", best: false, slots: ["fast", "medium", null, "slow"] },
   { label: "L2", best: true, slots: ["slow", "medium", "dead", "fast"] },
@@ -156,9 +106,9 @@ export function BinWall({ className }: { className?: string }) {
             />
             {level.slots.map((slot, position) =>
               slot === null ? (
-                <EmptySlot key={position} x={slotX(position)} y={top} />
+                <Slot key={position} x={slotX(position)} y={top} width={BIN_WIDTH} height={BIN_HEIGHT} />
               ) : (
-                <LargeBin key={position} movementClass={slot} x={slotX(position)} y={top} />
+                <Bin key={position} parts={[slot]} x={slotX(position)} y={top} width={BIN_WIDTH} height={BIN_HEIGHT} />
               ),
             )}
           </g>
@@ -193,7 +143,7 @@ export function BinWall({ className }: { className?: string }) {
       </g>
       {/* The demo part's bin, lifted above its slot on L4. */}
       <g filter={`url(#${LIFT_ID})`} data-lifted="">
-        <LargeBin movementClass="fast" x={LIFTED.x} y={LIFTED.y} />
+        <Bin parts={["fast"]} x={LIFTED.x} y={LIFTED.y} width={BIN_WIDTH} height={BIN_HEIGHT} />
       </g>
     </svg>
   );

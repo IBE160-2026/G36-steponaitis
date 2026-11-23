@@ -13,9 +13,10 @@ import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { SkipLink } from "@/components/common/app-shell/skip-link";
 import { buttonClassName } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
+import { Bin } from "@/components/common/wall";
 import { LOGIN_HREF, SIGNUP_HREF } from "@/lib/view-state/urls";
 
-import { BIN_HEIGHT, BIN_WIDTH, BinWall, LargeBin } from "./bin-wall";
+import { BIN_HEIGHT, BIN_WIDTH, BinWall } from "./bin-wall";
 import {
   BEST_TAG,
   CLASSIFIED_CAPTION,
@@ -166,7 +167,7 @@ function ClassifiedFast() {
         aria-hidden="true"
         focusable="false"
       >
-        <LargeBin movementClass="fast" />
+        <Bin parts={["fast"]} width={BIN_WIDTH} height={BIN_HEIGHT} />
       </svg>
       <p className="pt-2 font-code text-[30px] leading-none font-bold">{CLASSIFIED_PICKS}</p>
       <p className="type-reason text-ink-secondary">{CLASSIFIED_CAPTION}</p>

@@ -2,7 +2,7 @@
 // The demo part 4410281 is followed from its export row to its printed move-list line; every
 // number here is illustrative and matches the static pictures, not a plan.
 
-import type { MovementClass } from "@/lib/copy";
+export { BEST_TAG, CLASS_CODES } from "@/lib/copy";
 
 export const PRODUCT_NAME = "Smart Warehouse Planner";
 export const HOW_IT_WORKS = "How it works";
@@ -15,18 +15,9 @@ export const LEAD =
   "Smart Warehouse Planner reads your warehouse exports and suggests which parts to move where. You decide each one.";
 export const DEMO_CAPTION = "Demo version skips the login and opens the app with a demo account.";
 
-/** The three-letter code in a large bin's label window (DESIGN.md "Bin"). */
-export const CLASS_CODES: Record<MovementClass, string> = {
-  fast: "FST",
-  medium: "MED",
-  slow: "SLW",
-  dead: "DED",
-};
-
 export const WALL_LABEL =
   "A shelf wall in aisle G, section 14: part 4410281 lifted out of level 4 and moved to an empty best location on level 1.";
 export const WALL_SECTION = "Aisle G · Section 14";
-export const BEST_TAG = "BEST";
 
 export const DEMO_PART = { number: "4410281", description: "Brake pads, front" } as const;
 export const DEMO_FROM = "G-14-04-02";

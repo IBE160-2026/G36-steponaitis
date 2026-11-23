@@ -231,12 +231,12 @@ test("uj7 opens a part from the locations table and moves it", async ({ page, re
   const detail = await getJson<Detail>(request, `/api/plans/${planId}/parts/${encodeURIComponent(part)}`);
   const target = await emptyTarget(request, planId);
 
-  await page.goto(`/plans/${planId}/locations`);
+  await page.goto(`/plans/${planId}/locations?mode=list`);
   const table = page.getByRole("main").getByRole("table", { name: "Locations" });
   const opener = table.locator(`[data-open-part="${part}"]`).first();
   await opener.focus();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?part=${encodeURIComponent(part)}$`));
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?mode=list&part=${encodeURIComponent(part)}$`));
   const panel = page.getByRole("complementary", { name: part });
   await expect(panel.getByRole("heading", { name: part, level: 2 })).toBeFocused();
 

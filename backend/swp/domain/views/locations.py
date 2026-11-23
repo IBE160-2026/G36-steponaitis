@@ -5,8 +5,6 @@ never writes. Lists every location in the import once, in `ordering.location_ord
 plan's marks in `ordering.mark_order` and the import's distinct levels in `level_key` order.
 """
 
-from decimal import ROUND_HALF_UP, Decimal
-
 from pydantic import BaseModel
 
 from swp.domain.import_data import ImportData
@@ -20,6 +18,7 @@ from swp.domain.planning import (
 )
 from swp.domain.state import BestMark, PlanState
 from swp.domain.values import Dec
+from swp.domain.views.common import occupied_percent
 
 
 class LocationContent(BaseModel):
@@ -54,14 +53,6 @@ class LocationsView(BaseModel):
     warehouse: Occupancy
     marks: list[BestMark]
     levels: list[str]
-
-
-def occupied_percent(occupied: int, total: int) -> str:
-    """`occupied / total * 100` with one decimal, rounded half-up ("0.0" when total is 0)."""
-    if total == 0:
-        return "0.0"
-    pct = (Decimal(occupied) * 100 / Decimal(total)).quantize(Decimal("0.1"), ROUND_HALF_UP)
-    return f"{pct:.1f}"
 
 
 def _occupancy(rows: list[LocationRow]) -> tuple[int, int, int, str]:

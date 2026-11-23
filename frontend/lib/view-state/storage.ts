@@ -27,3 +27,8 @@ export function bestLocationsModeKey(planId: string): string {
 export function planViewKey(planId: string): string {
   return `swp:plan:${planId}:view`;
 }
+
+/** The Locations wall's last aisle (`{aisle}` JSON, Story 10.2). */
+export function planWallStorageKey(planId: string): string {
+  return `swp:plan:${planId}:wall`;
+}

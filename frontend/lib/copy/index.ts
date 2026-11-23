@@ -5,6 +5,7 @@
 // recommendations say them the same way.
 
 import type {
+  AisleCounts,
   AppliedInfo,
   ApplyAllDoneEvent,
   ClassThreshold,
@@ -20,6 +21,7 @@ import type {
   RunMeta,
   StepUndoneEvent,
   UndoPreview,
+  WarehouseCounts,
 } from "@/lib/api/plans";
 import { formatDate, formatDateTime, formatNumber, formatTime } from "@/lib/format";
 
@@ -51,6 +53,14 @@ export const CLASS_LABELS: Record<MovementClass, string> = {
 function plural(count: number, one: string, many: string): string {
   return `${formatNumber(count)} ${count === 1 ? one : many}`;
 }
+
+/** The three-letter code in a bin's label window, shown only when the bin is drawn ≥56px wide (DESIGN.md "Bin"). */
+export const CLASS_CODES: Record<MovementClass, string> = {
+  fast: "FST",
+  medium: "MED",
+  slow: "SLW",
+  dead: "DED",
+};
 
 /** "24 or more", "6–23", "1–5" or "0", from the server's limits (never hard-coded). */
 export function thresholdText(threshold: ClassThreshold): string {
@@ -409,4 +419,93 @@ export function ruleCellText(line: Pick<MoveListLine, "rule" | "swap">): string 
 /** The swap's locations under the rule cell: "A-02-01-01 ↔ G-14-04-02"; null for an ordinary line. */
 export function swapLocationsText(line: Pick<MoveListLine, "swap">): string | null {
   return line.swap ? `${line.swap.locations[0]} ↔ ${line.swap.locations[1]}` : null;
+}
+
+// The Locations wall (Story 10.2, FR-42, UX-DR40/41/45/48). Every count comes from the server.
+
+export const BEST_TAG = "BEST";
+export const OPEN_AS_LIST = "Open as list";
+export const OPEN_AS_WALL = "Open as wall";
+export const EDIT_BEST_MARKS = "Edit best-location marks";
+export const AISLE_TABS_LABEL = "Aisles";
+export const KEY_TITLE = "Key";
+
+/** The Key's entries, in their fixed order: glossary names, never colour words (UX-DR45). */
+export const KEY_LABELS = {
+  fast: CLASS_LABELS.fast,
+  medium: CLASS_LABELS.medium,
+  slow: CLASS_LABELS.slow,
+  dead: CLASS_LABELS.dead,
+  empty: "Empty",
+  best: "Best location",
+  selected: "Selected",
+  twoParts: "2 parts",
+} as const;
+
+export type KeyEntry = keyof typeof KEY_LABELS;
+
+export const KEY_ORDER: readonly KeyEntry[] = ["fast", "medium", "slow", "dead", "empty", "best", "selected", "twoParts"];
+
+/** "Aisle A": the open aisle's heading. */
+export function aisleHeading(aisle: string): string {
+  return `Aisle ${aisle}`;
+}
+
+/** The wall picture's accessible name. */
+export function wallImageLabel(aisle: string): string {
+  return `Bin wall of aisle ${aisle}. Open as list reads every location as text.`;
+}
+
+/** The wall's scroll box: a keyboard user tabs to it to scroll a wall wider than the page. */
+export function wallScrollLabel(aisle: string): string {
+  return `Aisle ${aisle} wall, scrollable`;
+}
+
+/** "L1": a level's label on the wall. */
+export function levelLabel(level: string): string {
+  return `L${level}`;
+}
+
+/** "BEST 3": a level label's count of single best locations in that level of one run. */
+export function bestCountTag(count: number): string {
+  return `${BEST_TAG} ${formatNumber(count)}`;
+}
+
+/** "7 moves" / "1 move": the latest run's moves touching an aisle, on its tab. */
+export function aisleTabMoves(count: number): string {
+  return plural(count, "move", "moves");
+}
+
+/** "86.8%": an occupied percent from the server. */
+export function percentText(percent: string): string {
+  return `${percent}%`;
+}
+
+/** "79.2% whole warehouse · 1,584 of 2,000 · 416 empty · 174 best". */
+export function wholeWarehouseFigure(counts: WarehouseCounts): string {
+  return [
+    `${percentText(counts.occupied_percent)} whole warehouse`,
+    `${formatNumber(counts.occupied)} of ${formatNumber(counts.locations)}`,
+    `${formatNumber(counts.empty)} empty`,
+    `${formatNumber(counts.best)} best`,
+  ].join(" · ");
+}
+
+/**
+ * "86.8% occupied · 198 of 228 locations · 30 empty · 117 best locations (3 empty) · Walk Path 0–2,270":
+ * the open aisle's line, its Walk Path range from the layout.
+ */
+export function wallAisleLine(counts: AisleCounts, walkPathFirst: string, walkPathLast: string): string {
+  return [
+    `${percentText(counts.occupied_percent)} occupied`,
+    `${formatNumber(counts.occupied)} of ${plural(counts.locations, "location", "locations")}`,
+    `${formatNumber(counts.empty)} empty`,
+    `${plural(counts.best, "best location", "best locations")} (${formatNumber(counts.empty_best)} empty)`,
+    `Walk Path ${formatNumber(walkPathFirst)}–${formatNumber(walkPathLast)}`,
+  ].join(" · ");
+}
+
+/** "End of aisle A · Walk Path 2,270 →": the wall's end cap. */
+export function endCapLabel(aisle: string, walkPathLast: string): string {
+  return `End of aisle ${aisle} · Walk Path ${formatNumber(walkPathLast)} →`;
 }

@@ -332,6 +332,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/wall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Wall */
+        get: operations["get_plan_wall_api_plans__plan_id__wall_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/session": {
         parameters: {
             query?: never;
@@ -376,6 +393,27 @@ export interface components {
             moved_out: string[];
             occupied: components["schemas"]["Count"];
             pick_groups_together: components["schemas"]["Count"];
+        };
+        /** AisleCounts */
+        AisleCounts: {
+            /** Aisle */
+            aisle: string;
+            /** Aisle Marked */
+            aisle_marked: boolean;
+            /** Best */
+            best: number;
+            /** Empty */
+            empty: number;
+            /** Empty Best */
+            empty_best: number;
+            /** Locations */
+            locations: number;
+            /** Moves */
+            moves: number;
+            /** Occupied */
+            occupied: number;
+            /** Occupied Percent */
+            occupied_percent: string;
         };
         /** AisleLayout */
         AisleLayout: {
@@ -1791,6 +1829,66 @@ export interface components {
             /** To Location */
             to_location: string;
         };
+        /** WallLocation */
+        WallLocation: {
+            /** Covering Marks */
+            covering_marks: (components["schemas"]["AisleMark"] | components["schemas"]["LevelMark"] | components["schemas"]["LocationMark"])[];
+            location: components["schemas"]["LocationRef"];
+            /** Occupied */
+            occupied: boolean;
+            /** Parts */
+            parts: components["schemas"]["WallPart"][];
+            top_part: components["schemas"]["WallPart"] | null;
+            /** Walk Path */
+            walk_path: string;
+        };
+        /** WallPart */
+        WallPart: {
+            /** Description */
+            description: string;
+            /** Kept In Place */
+            kept_in_place: boolean;
+            /**
+             * Movement Class
+             * @enum {string}
+             */
+            movement_class: "fast" | "medium" | "slow" | "dead";
+            /** Part */
+            part: string;
+            /** Picks */
+            picks: number;
+            /** Stock */
+            stock: string;
+        };
+        /** WallView */
+        WallView: {
+            /** Aisle */
+            aisle: string;
+            /** Aisles */
+            aisles: components["schemas"]["AisleCounts"][];
+            /** Locations */
+            locations: components["schemas"]["WallLocation"][];
+            /** Rail Levels */
+            rail_levels: string[];
+            /** Version */
+            version: number;
+            warehouse: components["schemas"]["WarehouseCounts"];
+        };
+        /** WarehouseCounts */
+        WarehouseCounts: {
+            /** Best */
+            best: number;
+            /** Empty */
+            empty: number;
+            /** Empty Best */
+            empty_best: number;
+            /** Locations */
+            locations: number;
+            /** Occupied */
+            occupied: number;
+            /** Occupied Percent */
+            occupied_percent: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2725,6 +2823,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_wall_api_plans__plan_id__wall_get: {
+        parameters: {
+            query: {
+                aisle: string;
+            };
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WallView"];
                 };
             };
             /** @description Error */

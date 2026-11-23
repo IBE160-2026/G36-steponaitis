@@ -2,6 +2,7 @@
 // class glyph in its white label window. Mirrors the product mark. Decorative unless `label` is given.
 
 import { ClassGlyph, type MovementClass } from "@/components/common/class-glyph";
+import { CLASS_FILL } from "@/components/common/wall/class-fill";
 
 type BinSwatchProps = {
   movementClass: MovementClass;
@@ -27,7 +28,7 @@ export function BinSwatch({ movementClass, label, className }: BinSwatchProps) {
       {...a11y}
     >
       {/* Bin body in the class colour */}
-      <rect x="0.75" y="0.75" width="22.5" height="24.5" rx="2" fill={`var(--color-class-${movementClass})`} />
+      <rect x="0.75" y="0.75" width="22.5" height="24.5" rx="2" fill={CLASS_FILL[movementClass]} />
       {/* Darker top lip and bottom line */}
       <rect x="0.75" y="0.75" width="22.5" height="3.5" rx="1.5" fill="rgba(0,0,0,0.22)" />
       <rect x="0.75" y="23.75" width="22.5" height="1.5" fill="rgba(0,0,0,0.18)" />

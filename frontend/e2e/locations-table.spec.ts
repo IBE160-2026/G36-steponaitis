@@ -34,6 +34,10 @@ test("uj1 reads the locations table with occupancy, filters it and opens a locat
 
   const main = page.getByRole("main");
   await expect(main.getByRole("heading", { name: "Locations", level: 1 })).toBeVisible();
+  // The table is the wall's Open as list (Story 10.2).
+  await main.getByRole("button", { name: "Open as list" }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A&mode=list$`));
+  await main.getByRole("combobox", { name: "Aisle" }).selectOption("");
   await expect(main.getByText("Whole warehouse · 79.2% occupied · 1,584 of 2,000 locations · 416 empty")).toBeVisible();
   await expect(main.getByText("2,000 locations", { exact: true })).toBeVisible();
 
@@ -45,7 +49,7 @@ test("uj1 reads the locations table with occupancy, filters it and opens a locat
   // Aisle A: the URL carries the filter; the rows and the aisle line match the API.
   const aisleA = view.aisles.find((aisle) => aisle.aisle === "A")!;
   await aisleSelect.selectOption("A");
-  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A$`));
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A&mode=list$`));
   await expect(body).toHaveCount(aisleA.locations);
   expect(aisleA.locations).toBe(223);
   await expect(main.getByText(occupancyLine("Aisle A", aisleA), { exact: true })).toBeVisible();
@@ -99,7 +103,7 @@ test("uj1 changing the aisle keeps the occupancy filter", async ({ page, request
   const aisleA = view.aisles.find((aisle) => aisle.aisle === "A")!;
   const aisleB = view.aisles.find((aisle) => aisle.aisle === "B")!;
 
-  await page.goto(`/plans/${planId}/locations`);
+  await page.goto(`/plans/${planId}/locations?mode=list`);
   const main = page.getByRole("main");
   const body = main.getByRole("table", { name: "Locations" }).locator("tbody tr");
   await expect(body).toHaveCount(2_000);
@@ -111,12 +115,12 @@ test("uj1 changing the aisle keeps the occupancy filter", async ({ page, request
   // The table's aisle change writes `?aisle=` itself; the Occupancy and Best filters stay on.
   const aisleSelect = main.getByRole("combobox", { name: "Aisle" });
   await aisleSelect.selectOption("A");
-  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A$`));
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=A&mode=list$`));
   await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
   await expect(notBest).toHaveAttribute("aria-pressed", "true");
   await expect(body).toHaveCount(aisleA.empty);
   await aisleSelect.selectOption("B");
-  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=B$`));
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=B&mode=list$`));
   await expect(emptyButton).toHaveAttribute("aria-pressed", "true");
   await expect(body).toHaveCount(aisleB.empty);
 

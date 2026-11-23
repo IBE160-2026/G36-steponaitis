@@ -160,7 +160,7 @@ test("uj1 marks aisle A and level 1 in all aisles, removes a mark and keeps the 
     (row) => row.location.aisle === "A" && row.location.is_best,
   ).length;
   expect(bestInA).toBeGreaterThan(0);
-  await page.goto(`/plans/${planId}/locations?aisle=A`);
+  await page.goto(`/plans/${planId}/locations?aisle=A&mode=list`);
   await expect(main.getByRole("heading", { name: "Locations", level: 1 })).toBeVisible();
   await main.getByRole("group", { name: "Filter by best location" }).getByRole("button", { name: "Best", exact: true }).click();
   await expect(body).toHaveCount(bestInA);

@@ -41,13 +41,15 @@ test.describe("uj3 reopen a plan", () => {
     const main = page.getByRole("main");
     await page.getByRole("navigation", { name: "Plan steps" }).getByRole("link", { name: /Locations/ }).click();
     await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/locations$`));
+    await main.getByRole("button", { name: "Open as list" }).click();
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/locations\\?aisle=A&mode=list$`));
     const aisleSelect = main.getByRole("combobox", { name: "Aisle" });
     await aisleSelect.selectOption("B");
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/locations\\?aisle=B$`));
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/locations\\?aisle=B&mode=list$`));
     const opener = main.getByRole("table", { name: "Locations" }).locator(`[data-open-part="${part}"]`).first();
     await opener.focus();
     await page.keyboard.press("Enter");
-    const viewUrl = new RegExp(`/plans/${plan.id}/locations\\?aisle=B&part=${encodeURIComponent(part)}$`);
+    const viewUrl = new RegExp(`/plans/${plan.id}/locations\\?aisle=B&mode=list&part=${encodeURIComponent(part)}$`);
     await expect(page).toHaveURL(viewUrl);
     await expect(page.getByRole("complementary", { name: part })).toBeVisible();
 

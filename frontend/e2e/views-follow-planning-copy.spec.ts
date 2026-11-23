@@ -42,7 +42,7 @@ test("uj1 locations show the emptied location after a manual move", async ({ pag
   const before = await getJson<LocationsView>(request, `/api/plans/${planId}/locations`);
   const aisleBefore = before.aisles.find((aisle) => aisle.aisle === source.aisle)!;
 
-  await page.goto(`/plans/${planId}/locations?aisle=${source.aisle}&part=${encodeURIComponent(part)}`);
+  await page.goto(`/plans/${planId}/locations?aisle=${source.aisle}&mode=list&part=${encodeURIComponent(part)}`);
   const main = page.getByRole("main");
   const line = main.locator(`[data-occupancy-line="${source.aisle}"]`);
   await expect(line).toHaveText(occupancyLine(`Aisle ${source.aisle}`, aisleBefore));

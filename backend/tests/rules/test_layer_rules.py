@@ -176,6 +176,8 @@ KERNEL_MODULES = {
     "swp.domain.state",
     "swp.domain.state_migrations",
     "swp.domain.values",
+    # Small figures shared by the plan views (Story 10.2).
+    "swp.domain.views.common",
 }
 
 

@@ -164,6 +164,7 @@ def test_fr40_lone_surrogate_username_gives_wrong_login(client: TestClient, acco
         "/api/plans/{id}/move-list",  # move_list
         "/api/plans/{id}/recommendations",  # recommendations
         "/api/imports/{id}/layout",  # layout
+        "/api/plans/{id}/wall?aisle=A",  # wall
     ],
 )
 def test_fr40_guard_covers_every_data_router(client: TestClient, path: str) -> None:

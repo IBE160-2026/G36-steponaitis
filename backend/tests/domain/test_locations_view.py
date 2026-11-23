@@ -5,7 +5,8 @@ from decimal import Decimal
 from swp.domain.import_data import ImportData, InventoryLine, LocationData
 from swp.domain.ordering import location_order
 from swp.domain.state import AisleMark, LevelMark, LocationMark, PlanState
-from swp.domain.views.locations import LocationsView, build_locations_view, occupied_percent
+from swp.domain.views.common import occupied_percent
+from swp.domain.views.locations import LocationsView, build_locations_view
 from tests.domain.answer_key import answer_key_import, expected
 
 

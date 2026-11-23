@@ -4,7 +4,8 @@
 // with its delete (Story 6.4), the parts roster (Story 2.3), the locations table (Story 2.4), the
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
 // preview (Story 4.3), before/after (Story 4.6), the recommendations view (Stories 5.5,
-// 5.7), a recommendation's other locations (Story 7.2) and the move list (Story 8.3). The reads are GETs and never
+// 5.7), a recommendation's other locations (Story 7.2), the move list (Story 8.3) and an aisle's
+// wall (Story 10.2). The reads are GETs and never
 // change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -87,6 +88,15 @@ export type MoveListLine = components["schemas"]["MoveListLine"];
 /** A line's place in an intact swap: line `index` of `size`, between `locations[0]` and `locations[1]`. */
 export type MoveListSwap = components["schemas"]["MoveListSwap"];
 
+/** One aisle's wall (FR-42): its locations with occupancy, parts and best, and every aisle's counts. */
+export type WallView = components["schemas"]["WallView"];
+export type WallLocation = components["schemas"]["WallLocation"];
+/** A part with stock at a wall location, most picks first; `top_part` is the first. */
+export type WallPart = components["schemas"]["WallPart"];
+/** An aisle's counts on the wall: occupancy, best, the latest run's moves touching it, and its aisle mark. */
+export type AisleCounts = components["schemas"]["AisleCounts"];
+export type WarehouseCounts = components["schemas"]["WarehouseCounts"];
+
 export const PLANS_KEY = ["plans"] as const;
 
 /** `['plan', planId]`: the prefix of every plan query key, the one place it is spelled out. */
@@ -120,6 +130,11 @@ export function planRecommendationsKey(planId: string) {
 
 export function planMoveListKey(planId: string) {
   return [...planRootKey(planId), "move-list"] as const;
+}
+
+/** Under `['plan', planId]`, so a confirmed command refetches every aisle's wall. */
+export function planWallKey(planId: string, aisle: string) {
+  return [...planRootKey(planId), "wall", aisle] as const;
 }
 
 /** Under `planRecommendationsKey`, so the command refetch of `['plan', planId]` refreshes it. */
@@ -173,6 +188,23 @@ export function fetchPlanLocations(planId: string): Promise<LocationsView> {
 
 export function usePlanLocations(planId: string) {
   return useQuery({ queryKey: planLocationsKey(planId), queryFn: () => fetchPlanLocations(planId) });
+}
+
+export function fetchPlanWall(planId: string, aisle: string): Promise<WallView> {
+  return getJson<WallView>(`/api/plans/${encodeURIComponent(planId)}/wall?${new URLSearchParams({ aisle })}`);
+}
+
+/**
+ * One aisle's wall (Story 10.2); runs only while `enabled` (an aisle is chosen). The previous
+ * aisle's wall stays shown while the next one loads.
+ */
+export function usePlanWall(planId: string, aisle: string, enabled: boolean) {
+  return useQuery({
+    queryKey: planWallKey(planId, aisle),
+    queryFn: () => fetchPlanWall(planId, aisle),
+    enabled,
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function fetchPlanPickGroups(planId: string): Promise<PickGroupsView> {

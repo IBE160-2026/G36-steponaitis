@@ -23,6 +23,7 @@ from swp.api.routers import (
     recommendations,
     search,
     session,
+    wall,
 )
 from swp.api.session_guard import current_user
 from swp.api.upload_limit import UploadLimit
@@ -69,6 +70,7 @@ def create_app(*, check_settings: bool = True) -> FastAPI:
         before_after.router,
         move_list.router,
         recommendations.router,
+        wall.router,
     ):
         app.include_router(router, prefix="/api", dependencies=guarded)
     return app

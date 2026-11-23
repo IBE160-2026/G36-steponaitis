@@ -145,12 +145,12 @@ test("uj7 searches for a part, opens its panel and closes it with Esc", async ({
   };
   const nextAisle = otherAisle.aisles.find((entry) => entry.aisle !== target.aisle)!.aisle;
   await page.getByRole("main").getByLabel("Aisle", { exact: true }).selectOption(nextAisle);
-  await expect(page).toHaveURL(new RegExp(`aisle=${nextAisle}&part=${encodeURIComponent(firstPart)}$`));
+  await expect(page).toHaveURL(new RegExp(`aisle=${nextAisle}&mode=list&part=${encodeURIComponent(firstPart)}$`));
   await expect(locPanel).toBeVisible();
   await locPanel.getByRole("heading", { name: firstPart, level: 2 }).focus();
   await page.keyboard.press("Escape");
   await expect(locPanel).toHaveCount(0);
-  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=${nextAisle}$`));
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/locations\\?aisle=${nextAisle}&mode=list$`));
   await expect(locField).toBeFocused();
 });
 

@@ -18,7 +18,8 @@ from swp.domain.planning import (
     replay,
 )
 from swp.domain.state import PlanState
-from swp.domain.views.locations import LocationsView, build_locations_view, occupied_percent
+from swp.domain.views.common import occupied_percent
+from swp.domain.views.locations import LocationsView, build_locations_view
 from swp.domain.views.parts import build_part_detail, build_parts_view
 from swp.domain.views.pick_groups import build_pick_groups_view
 from swp.domain.views.search import build_search_view

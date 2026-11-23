@@ -9,10 +9,11 @@ import { type StepKey, stepFromKey, stepFromSegment, stepSegment } from "@/lib/v
 import { planViewKey, readStored, writeStored } from "@/lib/view-state/storage";
 
 /**
- * The view state carried in the URL: the Locations aisle filter and a location to focus, and the
- * part whose panel is open.
+ * The view state carried in the URL: the Locations aisle (the wall's open aisle, or the table's
+ * aisle filter), a location to focus, `mode=list` for the table (Story 10.2), and the part whose
+ * panel is open.
  */
-export type LocationParams = { aisle?: string; loc?: string; part?: string };
+export type LocationParams = { aisle?: string; loc?: string; mode?: string; part?: string };
 
 /** The saved-plans list, the start page (FR-8, AD-20). */
 export const SAVED_PLANS_HREF = "/plans";
@@ -46,7 +47,7 @@ export function newPlanFromHref(planId: string): string {
 }
 
 /** The query keys that make up a plan view (and the only ones its stored last view keeps). */
-export const VIEW_QUERY_KEYS = ["aisle", "loc", "part", "tab", "rec", "move"] as const;
+export const VIEW_QUERY_KEYS = ["aisle", "loc", "mode", "part", "tab", "rec", "move"] as const;
 
 export type ViewQueryKey = (typeof VIEW_QUERY_KEYS)[number];
 
@@ -145,10 +146,10 @@ export function parseNewPlanFrom(searchParams: SearchParamsInput): string | unde
   return firstValue(searchParams, "from");
 }
 
-/** `?aisle=&loc=&part=` → `{aisle?, loc?, part?}`: the first value of each; empty values are dropped. */
+/** `?aisle=&loc=&mode=&part=` → `{aisle?, loc?, mode?, part?}`: the first value of each; empty values are dropped. */
 export function parseLocationParams(searchParams: SearchParamsInput): LocationParams {
   const params: LocationParams = {};
-  for (const key of ["aisle", "loc", "part"] as const) {
+  for (const key of ["aisle", "loc", "mode", "part"] as const) {
     const value = firstValue(searchParams, key);
     if (value !== undefined) params[key] = value;
   }
