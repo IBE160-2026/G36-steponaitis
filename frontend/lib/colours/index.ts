@@ -1,0 +1,46 @@
+// Key colours (FR-42): colour maths, presets and checks. Pure, no React, DOM or storage.
+
+export {
+  contrastRatio,
+  deltaE,
+  fromHsl,
+  isHexColour,
+  mixOverWhite,
+  normaliseHex,
+  parseHex,
+  relativeLuminance,
+  toHex,
+  toHsl,
+  toLab,
+  type Hsl,
+  type Lab,
+  type Rgb,
+} from "./maths";
+export {
+  COLOUR_PRESETS,
+  DEFAULT_BEST_ON_LIGHT,
+  DEFAULT_COLOURS,
+  DEFAULT_SELECTED_TINT,
+  INK,
+  KEY_COLOUR_ENTRIES,
+  OPEN_SLOT,
+  WALL,
+  WHITE,
+  type KeyColourEntry,
+  type KeyColours,
+} from "./presets";
+export {
+  GRAPHIC_CONTRAST,
+  LIKENESS_THRESHOLD,
+  TEXT_CONTRAST,
+  checkContrast,
+  darkenForWhiteText,
+  deriveBestOnLight,
+  deriveSelectedTint,
+  similarPairs,
+  tooAlike,
+  type ContrastBackground,
+  type ContrastCheck,
+  type ContrastPair,
+  type SimilarPair,
+} from "./checks";
