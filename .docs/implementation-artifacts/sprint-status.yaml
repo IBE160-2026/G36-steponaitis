@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 12:07
+last_updated: 11-23-2026 12:50
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -115,14 +115,14 @@ development_status:
   9-7-production-like-auth-configuration-readme-and-secrets: done
   epic-9-retrospective: done
 
-  epic-10: in-progress
+  epic-10: done
   10-1-wall-layout-as-an-import-scoped-domain-view: done
   10-2-draw-one-aisle-as-a-bin-wall-with-its-key: done
   10-3-navigate-the-wall-by-keyboard-and-read-its-tooltips: done
   10-4-see-recommendations-and-moves-on-the-wall: done
   10-5-wall-crops-in-the-recommendation-detail: done
   10-6-whole-warehouse-view: done
-  10-7-mark-best-locations-on-the-wall: in-progress
+  10-7-mark-best-locations-on-the-wall: done
   epic-10-retrospective: optional
 
   epic-11: backlog
