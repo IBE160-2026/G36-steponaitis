@@ -38,6 +38,7 @@ forbidden_modules =
     annotated_doc
     annotated_types
     anyio
+    bcrypt
     click
     defusedxml
     dotenv
@@ -50,6 +51,7 @@ forbidden_modules =
     idna
     importlinter
     iniconfig
+    jwt
     mako
     markdown_it
     markupsafe
@@ -119,3 +121,4 @@ modules =
     swp.domain.rules
     swp.domain.recommendations
     swp.domain.move_list
+    swp.domain.accounts

@@ -8,7 +8,7 @@ from sqlalchemy import delete
 
 from swp.app.bootstrap import bootstrap
 from swp.store.db import get_engine
-from swp.store.models import ImportRow, PlanRow
+from swp.store.models import ImportRow, PlanRow, UserRow
 from tests.conftest import _clear_caches
 
 
@@ -27,9 +27,10 @@ def app_database(
 
 @pytest.fixture
 def empty_tables(app_database: str) -> Iterator[str]:
-    """Migrated database with no plans or imports (Postgres tests share one database)."""
+    """Migrated database with no plans, imports or users (Postgres tests share one database)."""
     bootstrap(upgrade=True, seed=False)
     with get_engine().begin() as conn:
         conn.execute(delete(PlanRow))
         conn.execute(delete(ImportRow))
+        conn.execute(delete(UserRow))
     yield app_database

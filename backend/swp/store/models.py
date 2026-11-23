@@ -1,4 +1,4 @@
-"""Declarative rows for the tables created by migration 0001 (AD-4, AD-9).
+"""Declarative rows for the tables created by migrations 0001 and 0002 (AD-4, AD-9, AD-10).
 
 JSON columns hold `model_dump(mode="json")` of the domain models; they are upcast
 through `swp.domain.state_migrations` on read (see `swp.store.plans`).
@@ -8,7 +8,7 @@ import uuid
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import JSON, Date, ForeignKey, Integer, String, Uuid
+from sqlalchemy import JSON, Date, ForeignKey, Integer, String, UniqueConstraint, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from swp.store.types import UtcDateTime
@@ -44,3 +44,14 @@ class PlanRow(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     analysis: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     state: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+
+
+class UserRow(Base):
+    __tablename__ = "users"
+    __table_args__ = (UniqueConstraint("username_key", name="uq_users_username_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    username: Mapped[str] = mapped_column(String, nullable=False)
+    username_key: Mapped[str] = mapped_column(String, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)

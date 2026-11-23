@@ -9,6 +9,9 @@ import type { components } from "@/lib/api/schema";
 
 export type Session = components["schemas"]["Session"];
 
+/** The query key of GET /api/session; invalidated after Create account (Story 9.1). */
+export const SESSION_KEY = ["session"] as const;
+
 export async function fetchSession(): Promise<Session> {
   const response = await fetch("/api/session");
   if (!response.ok) throw parseErrorBody(response.status, await response.text());
@@ -16,5 +19,5 @@ export async function fetchSession(): Promise<Session> {
 }
 
 export function useSession() {
-  return useQuery({ queryKey: ["session"], queryFn: fetchSession, staleTime: Infinity });
+  return useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, staleTime: Infinity });
 }

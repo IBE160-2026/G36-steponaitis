@@ -1,4 +1,5 @@
-"""AD-11 envelope, AD-19 same-origin guard (NFR-6), AD-12 limits, session and request log."""
+"""AD-11 envelope, AD-19 same-origin guard (NFR-6), AD-12 limits, session, auth flag and
+request log."""
 
 import logging
 from collections.abc import Iterator
@@ -11,7 +12,7 @@ from sqlalchemy import func, select
 
 from swp.api.app import create_app
 from swp.store.db import get_engine
-from swp.store.models import ImportRow, PlanRow
+from swp.store.models import ImportRow, PlanRow, UserRow
 from tests.app.test_import_readers import INV_CSV, LOC_CSV, TX_CSV
 from tests.conftest import _clear_caches
 
@@ -331,3 +332,83 @@ def test_nfr_malformed_multipart_returns_validation_envelope(client: TestClient)
         "details": [],
     }
     assert _counts() == (0, 0)
+
+
+SIGNUP = {"username": "Kari7", "password": "secret", "password_repeat": "secret"}
+NOT_FOUND_ERROR = {"code": "not_found", "message": "Not found.", "details": []}
+
+
+def _user_count() -> int:
+    with get_engine().connect() as conn:
+        return conn.execute(select(func.count()).select_from(UserRow)).scalar_one()
+
+
+@pytest.fixture
+def auth_client(database_path: Path, monkeypatch) -> Iterator[TestClient]:
+    monkeypatch.setenv("FEATURE_AUTH", "true")
+    _clear_caches()
+    with TestClient(create_app()) as test_client:
+        yield test_client
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("POST", "/api/auth/signup"),
+        ("GET", "/api/auth/signup"),
+        ("POST", "/api/auth/login"),
+        ("POST", "/api/auth/nope/deeper"),
+        ("GET", "/api/auth"),
+        ("GET", "/api/auth/"),
+        ("DELETE", "/api/auth/session"),
+    ],
+)
+def test_fr39_auth_paths_not_found_when_flag_off(
+    client: TestClient, method: str, path: str
+) -> None:
+    response = client.request(method, path, json=SIGNUP, headers=SAME_ORIGIN)
+
+    assert response.status_code == 404
+    assert _error(response) == NOT_FOUND_ERROR
+    assert "set-cookie" not in response.headers
+    assert _user_count() == 0
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [("GET", "/api/auth/signup"), ("POST", "/api/auth/nope"), ("PUT", "/api/auth/signup")],
+)
+def test_fr39_unknown_auth_paths_not_found_when_flag_on(
+    auth_client: TestClient, method: str, path: str
+) -> None:
+    response = auth_client.request(method, path, json=SIGNUP, headers=SAME_ORIGIN)
+
+    assert response.status_code == 404
+    assert _error(response) == NOT_FOUND_ERROR
+
+
+def test_nfr6_cross_site_signup_rejected(auth_client: TestClient) -> None:
+    response = auth_client.post(
+        "/api/auth/signup", json=SIGNUP, headers={"Sec-Fetch-Site": "cross-site", **SAME_ORIGIN}
+    )
+
+    assert response.status_code == 403
+    assert _error(response)["code"] == "forbidden_origin"
+    assert "set-cookie" not in response.headers
+    assert _user_count() == 0
+
+
+def test_fr39_signup_missing_field_rejected(auth_client: TestClient) -> None:
+    response = auth_client.post(
+        "/api/auth/signup", json={"username": "Kari7", "password": "secret"}, headers=SAME_ORIGIN
+    )
+
+    assert response.status_code == 422
+    error = _error(response)
+    assert error["code"] == "validation_failed"
+    assert [d["field"] for d in error["details"]] == ["password_repeat"]  # type: ignore[union-attr]
+    assert _user_count() == 0
+
+
+def test_fr39_session_user_null_without_cookie_when_flag_on(auth_client: TestClient) -> None:
+    assert auth_client.get("/api/session").json()["user"] is None

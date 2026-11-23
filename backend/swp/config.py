@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 VAR_DIR = BACKEND_DIR / "var"
 DEFAULT_DATABASE_URL = f"sqlite:///{VAR_DIR / 'swp.db'}"
+DEFAULT_JWT_SECRET = "swp-local-development-jwt-secret-not-for-production"
 
 
 class Settings(BaseSettings):
@@ -22,6 +23,9 @@ class Settings(BaseSettings):
     # Feature flags (env FEATURE_AUTH, FEATURE_DEMO); both off in M1, shown by GET /api/session.
     feature_auth: bool = False
     feature_demo: bool = False
+    # HS256 key for the `swp_session` JWT (env JWT_SECRET, AD-10). The default is for local
+    # runs only; production must set its own (checked at startup from Story 9.7).
+    jwt_secret: str = DEFAULT_JWT_SECRET
 
     @field_validator("database_url")
     @classmethod

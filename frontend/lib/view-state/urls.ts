@@ -17,6 +17,18 @@ export type LocationParams = { aisle?: string; loc?: string; part?: string };
 /** The saved-plans list, the start page (FR-8, AD-20). */
 export const SAVED_PLANS_HREF = "/plans";
 
+/** Create account (FR-39, Story 9.1). */
+export const SIGNUP_HREF = "/signup";
+
+/** Log in (FR-40, Story 9.2). */
+export const LOGIN_HREF = "/login";
+
+/** True on the Log in and Create account pages, whose toolbar holds only the logo and name. */
+export function isAuthPath(pathname: string): boolean {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  return path === SIGNUP_HREF || path === LOGIN_HREF;
+}
+
 /** New Plan (FR-1). */
 export const NEW_PLAN_HREF = "/plans/new";
 

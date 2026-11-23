@@ -4,6 +4,7 @@
 // plan plate and the flow bar. Sticky while the viewport is at least 500px tall; below that it
 // scrolls with the page. It lives in the root layout, so it learns the open plan from the URL
 // (AD-20) and reads only the plan summary and saved-plans queries (AD-3). Off plan paths the steps are plain text.
+// On Log in and Create account (Story 9.1) it holds only the product mark and name.
 // On plan paths the launcher slot (Story 6.5) follows the flow bar; the toolbar never imports a module.
 
 import Link from "next/link";
@@ -16,7 +17,7 @@ import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
 import { type StepKey, stepFromSegment } from "@/lib/view-state/steps";
-import { parsePlanPath, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
+import { isAuthPath, parsePlanPath, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   const summary = usePlanSummary(planId);
@@ -51,7 +52,8 @@ export type ToolbarProps = {
 };
 
 export function Toolbar({ launcher }: ToolbarProps) {
-  const planPath = parsePlanPath(usePathname() ?? "");
+  const pathname = usePathname() ?? "";
+  const planPath = parsePlanPath(pathname);
   return (
     <header
       data-surface="graphite"
@@ -68,7 +70,7 @@ export function Toolbar({ launcher }: ToolbarProps) {
           <PlanToolbarParts key={planPath.planId} planId={planPath.planId} view={planPath.view} />
           {launcher}
         </>
-      ) : (
+      ) : isAuthPath(pathname) ? null : (
         <FlowBar />
       )}
     </header>
