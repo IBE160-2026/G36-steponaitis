@@ -4,10 +4,11 @@ Pure: `build_move_list_rounds` turns the effective moves from `planning.replay` 
 per move, grouped by round. Within a round a line that moves a part into a location comes
 after every line that empties it; lines that form a cycle keep Walk Path order, and the rest
 follow Walk Path order wherever that rule allows. The lines of an intact swap (FR-51, AD-16/17:
-moves sharing a `swap_id`, every logged step of it its own effective move, in one round,
-both ways between one pair of locations) follow each other and carry `swap`; any other
-line, including a cycle of plain manual moves, has `swap = None`. `build_move_list_view` is
-the view behind GET /api/plans/{id}/move-list: one `replay` per request, it never writes.
+moves sharing a `swap_id`, every step of it still logged - its stored `swap_size` - and each
+its own effective move, in one round, both ways between one pair of locations) follow each
+other and carry `swap`; any other line, including a cycle of plain manual moves, has
+`swap = None`. `build_move_list_view` is the view behind GET /api/plans/{id}/move-list: one
+`replay` per request, it never writes.
 """
 
 import heapq
@@ -108,16 +109,17 @@ def _components(successors: list[list[int]]) -> list[list[int]]:
 
 
 def _intact_swaps(moves: Sequence[EffectiveMove], steps: Sequence[Step]) -> set[str]:
-    """The swap ids whose swap is intact (AD-17): at least two logged steps, each its own
+    """The swap ids whose swap is intact (AD-17): every step of it still logged (exactly its
+    stored `swap_size`; at least two for an older step stored without a size), each its own
     effective move (none undone, combined or moved back), all in one round, and the moves
-    go both ways between one pair of locations.
-
-    The log stores no swap size: a swap with several back-parts where only some back-steps
-    were undone still looks intact here (left to Epic 12 / Story 12.4)."""
+    go both ways between one pair of locations."""
     logged: dict[str, list[int]] = {}
+    sizes: dict[str, int] = {}
     for step in steps:
         if step.swap_id is not None:
             logged.setdefault(step.swap_id, []).append(step.move_number)
+            if step.swap_size is not None:
+                sizes.setdefault(step.swap_id, step.swap_size)
     grouped: dict[str, list[EffectiveMove]] = {}
     for move in moves:
         if move.swap_id is not None:
@@ -125,7 +127,10 @@ def _intact_swaps(moves: Sequence[EffectiveMove], steps: Sequence[Step]) -> set[
     intact: set[str] = set()
     for swap_id, group in grouped.items():
         numbers = logged.get(swap_id, [])
-        if len(numbers) < 2 or sorted(numbers) != sorted(m.move_number for m in group):
+        size = sizes.get(swap_id)
+        if len(numbers) < 2 or (size is not None and len(numbers) != size):
+            continue
+        if sorted(numbers) != sorted(m.move_number for m in group):
             continue
         # Safeguard for AD-17's "its own effective move": replay already clears `swap_id`
         # on a combined move, so this cannot fire on replay output today.

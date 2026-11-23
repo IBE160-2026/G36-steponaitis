@@ -264,6 +264,19 @@ describe("fr51 swap toast", () => {
     expect(swapToast([MOVE_MADE("4410281", 8)])).toBeNull();
   });
 
+  it("fr51_fr34_swap_toast_counts_only_legs_that_are_their_own_move", () => {
+    const made = (moveNumbers: number[]): CommandEvent => ({
+      type: "swap_made",
+      swap_id: "s",
+      from_location: "G-14-04-02",
+      to_location: "G-14-01-03",
+      move_numbers: moveNumbers,
+      round: 1,
+    });
+    expect(swapToast([made([8])])).toBe("Swapped G-14-04-02 ↔ G-14-01-03 · 1 manual move, round 1.");
+    expect(swapToast([made([])])).toBe("Swapped G-14-04-02 ↔ G-14-01-03 · 0 manual moves, round 1.");
+  });
+
   it("fr33_put_together_toast_reuses_the_drop_wording", () => {
     const drop = { from: "G-14-04-02", to: "G-14-01-03" };
     const one = moveMade("4410281", 8, "G-14-04-02", "G-14-01-03");

@@ -43,8 +43,9 @@ def _move(
     )
 
 
-def _steps(moves: list[EffectiveMove]) -> list[Step]:
-    """The step log behind `moves` when each move is its own step."""
+def _steps(moves: list[EffectiveMove], swap_size: int | None = None) -> list[Step]:
+    """The step log behind `moves` when each move is its own step; a swap step carries
+    `swap_size` (None models a step stored before sizes were kept)."""
     return [
         Step(
             move_number=m.move_number,
@@ -54,6 +55,7 @@ def _steps(moves: list[EffectiveMove]) -> list[Step]:
             rule=m.rule,
             round=m.round,
             swap_id=m.swap_id,
+            swap_size=swap_size if m.swap_id is not None else None,
         )
         for m in sorted(moves, key=lambda m: m.move_number)
     ]
@@ -321,7 +323,14 @@ def test_fr38_no_moves_gives_no_rounds(data: ImportData) -> None:
     }
 
 
-def _swap_step(number: int, part: str, source: str, target: str, swap_id: str | None) -> Step:
+def _swap_step(
+    number: int,
+    part: str,
+    source: str,
+    target: str,
+    swap_id: str | None,
+    swap_size: int | None = None,
+) -> Step:
     return Step(
         move_number=number,
         part=part,
@@ -330,13 +339,14 @@ def _swap_step(number: int, part: str, source: str, target: str, swap_id: str | 
         rule="manual",
         round=0,
         swap_id=swap_id,
+        swap_size=swap_size,
     )
 
 
 # The answer key's 9100 (at D-01-02-02) and 9200 (at D-01-02-03) swapped as one swap "s1".
 _SWAP = [
-    _swap_step(1, "9100", "D-01-02-02", "D-01-02-03", "s1"),
-    _swap_step(2, "9200", "D-01-02-03", "D-01-02-02", "s1"),
+    _swap_step(1, "9100", "D-01-02-02", "D-01-02-03", "s1", 2),
+    _swap_step(2, "9200", "D-01-02-03", "D-01-02-02", "s1", 2),
 ]
 
 
@@ -388,6 +398,7 @@ def test_fr38_swap_mark_only_when_intact(data: ImportData) -> None:
             rule="manual",
             round=0,
             swap_id="s4",
+            swap_size=3,
         ),
         Step(
             move_number=2,
@@ -397,6 +408,7 @@ def test_fr38_swap_mark_only_when_intact(data: ImportData) -> None:
             rule="manual",
             round=0,
             swap_id="s4",
+            swap_size=3,
         ),
         Step(
             move_number=3,
@@ -406,6 +418,7 @@ def test_fr38_swap_mark_only_when_intact(data: ImportData) -> None:
             rule="manual",
             round=0,
             swap_id="s4",
+            swap_size=3,
         ),
         Step(
             move_number=4, part="p2", from_location="Lb", to_location="La", rule="manual", round=0
@@ -419,8 +432,46 @@ def test_fr38_swap_mark_only_when_intact(data: ImportData) -> None:
         _move(1, "x", "La", "Lb", 1, swap_id="s3"),
         _move(2, "y", "Lb", "La", 2, "manual", "s3"),
     )
-    split = build_move_list_rounds(data_ab, [there, back], steps=_steps([there, back]))
+    split = build_move_list_rounds(data_ab, [there, back], steps=_steps([there, back], 2))
     assert [line.swap for line in _lines(split)] == [None, None]
+
+
+def test_fr38_fr35_partly_undone_swap_of_three_loses_its_marks() -> None:
+    """Epic-8 retro item 72: p La → Lb with back-parts q1, q2 Lb → La (one swap of three
+    steps); undoing q2's step leaves one move each way between the pair, which the stored
+    size shows is not the whole swap."""
+    data_ab = _data({"La": 10, "Lb": 20})
+    p = _move(1, "p", "La", "Lb", swap_id="s5")
+    q1 = _move(2, "q1", "Lb", "La", swap_id="s5")
+    q2 = _move(3, "q2", "Lb", "La", swap_id="s5")
+
+    whole = _lines(build_move_list_rounds(data_ab, [p, q1, q2], steps=_steps([p, q1, q2], 3)))
+    partly = _lines(build_move_list_rounds(data_ab, [p, q1], steps=_steps([p, q1], 3)))
+
+    assert [(line.part, line.swap and line.swap.index) for line in whole] == [
+        ("p", 1),
+        ("q1", 2),
+        ("q2", 3),
+    ]
+    assert {line.swap.size for line in whole if line.swap} == {3}
+    assert [(line.part, line.rule, line.swap) for line in partly] == [
+        ("p", "manual", None),
+        ("q1", "manual", None),
+    ]
+
+
+def test_fr38_nfr12_swap_stored_without_size_keeps_the_old_rule() -> None:
+    """Steps stored before swap sizes were kept: two logged steps both ways count as intact."""
+    data_ab = _data({"La": 10, "Lb": 20})
+    p = _move(1, "p", "La", "Lb", swap_id="s6")
+    q = _move(2, "q", "Lb", "La", swap_id="s6")
+
+    lines = _lines(build_move_list_rounds(data_ab, [p, q], steps=_steps([p, q])))
+
+    assert [line.swap for line in lines] == [
+        MoveListSwap(index=1, size=2, locations=("La", "Lb")),
+        MoveListSwap(index=2, size=2, locations=("La", "Lb")),
+    ]
 
 
 def test_fr38_swap_lines_follow_each_other() -> None:

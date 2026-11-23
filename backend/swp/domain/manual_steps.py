@@ -19,6 +19,7 @@ def append_manual_step(
     to_location: str,
     *,
     swap_id: str | None = None,
+    swap_size: int | None = None,
 ) -> tuple[PlanState, Event]:
     """Append a manual step moving all of `part`'s stock at `from_location` to `to_location`
     and return the new state and its event (`move_made`, `moves_combined` or
@@ -35,6 +36,7 @@ def append_manual_step(
         to_location=step.to_location,
         rule="manual",
         swap_id=swap_id,
+        swap_size=swap_size,
     )
     event: Event
     match check.effect:

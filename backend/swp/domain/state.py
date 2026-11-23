@@ -40,6 +40,8 @@ class Step(BaseModel):
 
     A step moves all of `part`'s stock at `from_location` to `to_location`. The move
     number is never reused; `round` is the plan's current round when the step was added.
+    The steps of one drag swap share `swap_id` and carry its step count as `swap_size`
+    (None on older stored steps and on every non-swap step).
     """
 
     model_config = ConfigDict(frozen=True)
@@ -52,6 +54,7 @@ class Step(BaseModel):
     round: int = Field(ge=0)
     recommendation_id: str | None = None
     swap_id: str | None = None
+    swap_size: int | None = Field(default=None, ge=2)
 
 
 RecommendationRule = Literal["rule_1", "rule_2", "rule_3"]

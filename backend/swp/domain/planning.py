@@ -401,6 +401,7 @@ def _next_step(
     rule: Rule,
     recommendation_id: str | None = None,
     swap_id: str | None = None,
+    swap_size: int | None = None,
 ) -> Step:
     """The step `append_step` would append: the current round, the next move number."""
     return Step(
@@ -412,6 +413,7 @@ def _next_step(
         round=current_round(state),
         recommendation_id=recommendation_id,
         swap_id=swap_id,
+        swap_size=swap_size,
     )
 
 
@@ -424,6 +426,7 @@ def append_step(
     rule: Rule,
     recommendation_id: str | None = None,
     swap_id: str | None = None,
+    swap_size: int | None = None,
 ) -> PlanState:
     """A new state with one step appended in the current round under the next move number."""
     step = _next_step(
@@ -434,6 +437,7 @@ def append_step(
         rule=rule,
         recommendation_id=recommendation_id,
         swap_id=swap_id,
+        swap_size=swap_size,
     )
     return state.model_copy(
         update={"steps": [*state.steps, step], "next_move_number": state.next_move_number + 1}

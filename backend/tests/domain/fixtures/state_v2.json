@@ -62,7 +62,8 @@
       "rule": "rule_1",
       "round": 1,
       "recommendation_id": "4c6e0d9e-0000-5000-8000-000000000001:1",
-      "swap_id": null
+      "swap_id": null,
+      "swap_size": null
     },
     {
       "move_number": 2,
@@ -72,7 +73,8 @@
       "rule": "manual",
       "round": 1,
       "recommendation_id": null,
-      "swap_id": null
+      "swap_id": null,
+      "swap_size": null
     },
     {
       "move_number": 3,
@@ -82,7 +84,8 @@
       "rule": "manual",
       "round": 1,
       "recommendation_id": null,
-      "swap_id": "swap-1"
+      "swap_id": "swap-1",
+      "swap_size": 2
     },
     {
       "move_number": 4,
@@ -92,7 +95,8 @@
       "rule": "manual",
       "round": 1,
       "recommendation_id": null,
-      "swap_id": "swap-1"
+      "swap_id": "swap-1",
+      "swap_size": 2
     }
   ],
   "next_move_number": 6,

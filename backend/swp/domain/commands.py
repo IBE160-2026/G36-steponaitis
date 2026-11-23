@@ -246,8 +246,9 @@ class MoveRemoved(BaseModel):
 
 class SwapMade(BaseModel):
     """A swap was saved as manual steps sharing `swap_id` (FR-51). `move_numbers` are the
-    move numbers of the swap's steps; an FR-34 combine or removal can fold a step into
-    another move, so a number need not be an effective move of its own."""
+    move numbers of the swap's steps that stand as their own move, in step order; a step
+    FR-34 combined or removed is left out (its own event reports it), so the list can be
+    empty."""
 
     type: Literal["swap_made"] = "swap_made"
     swap_id: str

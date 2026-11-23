@@ -221,9 +221,12 @@ def test_fr51_swap_expands_with_one_swap_id(data: ImportData) -> None:
     applied = _do(data, PlanState.new(), cmd)
 
     swap_id = str(uuid.uuid5(command_id, "swap:1"))
-    assert [(s.part, s.from_location, s.to_location, s.swap_id) for s in applied.state.steps] == [
-        ("9100", "D-01-02-02", "D-01-02-03", swap_id),
-        ("9200", "D-01-02-03", "D-01-02-02", swap_id),
+    assert [
+        (s.part, s.from_location, s.to_location, s.swap_id, s.swap_size)
+        for s in applied.state.steps
+    ] == [
+        ("9100", "D-01-02-02", "D-01-02-03", swap_id, 2),
+        ("9200", "D-01-02-03", "D-01-02-02", swap_id, 2),
     ]
     assert applied.events[0] == SwapMade(
         swap_id=swap_id,
@@ -243,6 +246,7 @@ def test_fr51_move_parts_and_put_together_steps_have_no_swap_id(data: ImportData
     applied = _do(data, state, _drag("move_parts", "D-01-02-03", EMPTY, ["9200"]))
 
     assert all(step.swap_id is None for step in applied.state.steps)
+    assert all(step.swap_size is None for step in applied.state.steps)
 
 
 def test_fr51_fr32_kept_part_may_be_swapped_and_stays_kept(data: ImportData) -> None:
@@ -385,10 +389,10 @@ def test_fr51_ad6_drag_commands_are_in_the_closed_union() -> None:
     assert parsed[2].model_dump(by_alias=True)["from"] == "A"
 
 
-def test_fr51_fr34_swap_leg_folded_keeps_step_numbers_and_events(data: ImportData) -> None:
+def test_fr51_fr34_swap_folded_leg_is_not_listed_in_swap_made(data: ImportData) -> None:
     """Move 1: 8300 D-01-01-01 → D-01-02-03; move 2: 9100 D-01-02-02 → D-01-01-01. The swap
     returns 8300 to D-01-01-01 (move 1 removed) and carries 9100 on to D-01-02-03 (combined
-    into move 2)."""
+    into move 2): neither step stands as its own move, so `swap_made` lists none."""
     state = _two_parts(data)
     state = _do(data, state, _drag("move_parts", "D-01-02-02", "D-01-01-01", ["9100"])).state
     command_id = uuid.uuid4()
@@ -404,7 +408,7 @@ def test_fr51_fr34_swap_leg_folded_keeps_step_numbers_and_events(data: ImportDat
             swap_id=swap_id,
             from_location="D-01-02-03",
             to_location="D-01-01-01",
-            move_numbers=[3, 4],
+            move_numbers=[],
             round=0,
         ),
         MoveRemoved(move_number=1, part="8300", location="D-01-01-01", round=0, step_move_number=3),
@@ -420,6 +424,47 @@ def test_fr51_fr34_swap_leg_folded_keeps_step_numbers_and_events(data: ImportDat
     assert [(s.move_number, s.swap_id) for s in applied.state.steps[2:]] == [
         (3, swap_id),
         (4, swap_id),
+    ]
+
+
+def test_fr51_fr34_swap_lists_only_the_leg_that_is_its_own_move(data: ImportData) -> None:
+    """Move 1: 9100 D-01-02-02 → B-01-04-01. The swap moves 9200 D-01-02-03 → B-01-04-01
+    (move 2, its own move) and carries 9100 on to D-01-02-03 (combined into move 1)."""
+    state = _do(data, PlanState.new(), _drag("move_parts", "D-01-02-02", EMPTY, ["9100"])).state
+    command_id = uuid.uuid4()
+    cmd = _drag("swap", "D-01-02-03", EMPTY, ["9200"], back_parts=["9100"], command_id=command_id)
+
+    applied = _do(data, state, cmd)
+
+    swap_id = str(uuid.uuid5(command_id, "swap:1"))
+    assert applied.events == [
+        SwapMade(
+            swap_id=swap_id,
+            from_location="D-01-02-03",
+            to_location=EMPTY,
+            move_numbers=[2],
+            round=0,
+        ),
+        MoveMade(
+            move_number=2,
+            part="9200",
+            from_location="D-01-02-03",
+            to_location=EMPTY,
+            rule="manual",
+            round=0,
+        ),
+        MovesCombined(
+            move_number=1,
+            part="9100",
+            from_location="D-01-02-02",
+            to_location="D-01-02-03",
+            round=0,
+            step_move_number=3,
+        ),
+    ]
+    assert [(s.swap_id, s.swap_size) for s in applied.state.steps[1:]] == [
+        (swap_id, 2),
+        (swap_id, 2),
     ]
 
 

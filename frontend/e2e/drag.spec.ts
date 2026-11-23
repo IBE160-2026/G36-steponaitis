@@ -10,7 +10,8 @@ import { createSamplePlan } from "./support/sample-plan";
 // preview; `Esc` cancels; a one-part drop sends `move_parts` at once; several parts open the drop
 // dialog; a drop on an occupied location opens the occupied dialog (Story 12.3: Swap, Put together
 // or Cancel, nothing sent until chosen); the Best locations wall and Whole warehouse never start a
-// drag.
+// drag. Story 12.4: a swap outdates the recommendation it touched, prints as two marked move-list
+// lines, and one undo leaves a plain Manual line (FR-29, FR-35, FR-38).
 
 type WallPart = { part: string; kept_in_place: boolean };
 type WallLocation = { location: { code: string; aisle: string }; occupied: boolean; parts: WallPart[] };
@@ -476,13 +477,19 @@ test("uj1 drops a bin on an occupied location to swap or put it together", async
   await expect(swap3).toHaveAccessibleDescription("Choose at least one part to move back.");
   await expect(together3).not.toHaveAttribute("aria-disabled", /.*/);
 
-  // Swap one chosen part with one back-part: only those move.
+  // Swap one chosen part with one back-part: only those move. A leg that carries a set-up part on
+  // from the location it was put into combines with its set-up move (FR-34), so the toast counts
+  // only the legs that stand as their own move (Story 12.4).
   await toggle(page, partBox(backGroup, backB));
   await expect(swap3).not.toHaveAttribute("aria-disabled", /.*/);
   await swap3.focus();
   await page.keyboard.press("Enter");
+  const ownMoves = 2 - [lifted === partsAt(initial, donor1)[0], backB === partsAt(initial, donor2)[0]].filter(Boolean).length;
   await expect(
-    toasts(page).getByText(`Swapped ${host1} ↔ ${host2} · 2 manual moves, round 0.`, { exact: true }),
+    toasts(page).getByText(
+      `Swapped ${host1} ↔ ${host2} · ${ownMoves} manual ${ownMoves === 1 ? "move" : "moves"}, round 0.`,
+      { exact: true },
+    ),
   ).toBeVisible();
   await expect(dialog3).toHaveCount(0);
   expect(await planVersion(request, planId)).toBe(before + 3);
@@ -542,4 +549,96 @@ test("uj1 no drag starts on the Best locations wall or in Whole warehouse", asyn
   await expect(page.locator("[data-drag-lifted]")).toHaveCount(0);
   await page.mouse.up();
   expect(await planVersion(request, planId)).toBe(before);
+});
+
+type Rec = { id: string; number: number; part: string; from_location: string; to_location: string; status: string };
+type MoveListView = { rounds: { lines: { move_number: number; swap: { locations: [string, string] } | null }[] }[] };
+
+test("uj1 swaps by drag, undoes once and prints the move list", async ({ page, request }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Drag undo ${randomUUID().slice(0, 8)}`)).id;
+  // Round 1 by API: aisle B is best, so some open recommendation moves a part out of a one-part
+  // location in aisle A.
+  await postCommand(request, planId, { type: "set_best_mark", mark: { kind: "aisle", aisle: "B" } });
+  await postCommand(request, planId, { type: "run" });
+  const wall = await wallOf(page, planId);
+  const onePart = onePartLocations(wall).map((entry) => entry.location.code);
+  const { recommendations } = await getJson<{ recommendations: Rec[] }>(request, `/api/plans/${planId}/recommendations`);
+  const rec = recommendations.find((row) => row.status === "open" && onePart.includes(row.from_location));
+  expect(rec, "an open recommendation out of a one-part location in aisle A").toBeDefined();
+  const from = rec!.from_location;
+  const part = rec!.part;
+
+  await page.goto(`/plans/${planId}/locations?aisle=${AISLE}`);
+  await expect(grid(page)).toBeVisible();
+  const fromCell = cellOf(page, from);
+  await fromCell.scrollIntoViewIfNeeded();
+  // T holds another part than the dragged one, or the swap is refused ("cannot move both ways").
+  const otherPart = onePart.filter((code) => partsAt(wall, code)[0] !== part);
+  const [to] = await nearestInView(page, from, otherPart);
+  expect(to).toBeDefined();
+  const back = partsAt(wall, to)[0];
+  const toCell = cellOf(page, to);
+
+  // Drag F onto T and choose Swap.
+  await dropOnOccupied(page, fromCell, toCell);
+  const dialog = page.getByRole("dialog", { name: `${to} is occupied` });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Swap", exact: true }).click();
+  await expect(
+    toasts(page).getByText(`Swapped ${from} ↔ ${to} · 2 manual moves, round 1.`, { exact: true }),
+  ).toBeVisible();
+  await expect(dialog).toHaveCount(0);
+  const swapped = await wallOf(page, planId);
+  expect(partsAt(swapped, to)).toEqual([part]);
+  expect(partsAt(swapped, from)).toEqual([back]);
+
+  // The recommendation for the dragged part is outdated: it has been moved.
+  await page.goto(`/plans/${planId}/recommendations?tab=outdated`);
+  const main = page.getByRole("main");
+  await expect(main.getByRole("tab", { name: /^Outdated, / })).toHaveAttribute("aria-selected", "true");
+  const list = main.getByRole("listbox", { name: "Recommendations" });
+  await expect(list.getByRole("option", { name: new RegExp(`^#${rec!.number}, ${part}, `) })).toHaveAccessibleName(
+    new RegExp(`, outdated, ${part} has been moved\\.$`),
+  );
+
+  // The move list: two adjacent lines marked "Manual · Swap 1/2" and "2/2", "A ↔ B" under each, the footnote.
+  const view = await getJson<MoveListView>(request, `/api/plans/${planId}/move-list`);
+  const lines = view.rounds.flatMap((round) => round.lines);
+  expect(lines.map((line) => line.move_number).sort()).toEqual([1, 2]);
+  const pair = lines[0].swap!.locations;
+  expect([...pair].sort()).toEqual([from, to].sort());
+  await page.goto(`/plans/${planId}/print`);
+  const rows = main.locator("[data-move-line]");
+  await expect(rows).toHaveCount(2);
+  const ruleCell = (row: Locator) => row.locator("td").nth(6);
+  for (const [index, row] of [rows.nth(0), rows.nth(1)].entries()) {
+    await expect(ruleCell(row).locator("span").first()).toHaveText(`Manual · Swap ${index + 1}/2`);
+    await expect(row.locator("[data-swap-locations]")).toHaveText(`${pair[0]} ↔ ${pair[1]}`);
+  }
+  await expect(main.locator('[data-footnote="swap"]')).toHaveText(
+    "Swap: set one bin aside, move the other into its place, then put the first one in.",
+  );
+
+  // Undo last move names the back-part's move (move 2) and undoes only it.
+  await page.goto(`/plans/${planId}/recommendations?tab=open`);
+  const undo = main.getByRole("button", { name: "Undo last move", exact: true });
+  await expect(undo).toHaveAccessibleDescription(`Undo move 2: ${back} ${to} → ${from}`);
+  await undo.click();
+  await expect(
+    toasts(page).getByText(
+      "Undid move 2. Unapplied recommendations of round 1 are now outdated. Run recommendations to continue.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(undo).toHaveAccessibleDescription(`Undo move 1: ${part} ${from} → ${to}`);
+
+  // The rest of the swap prints as one plain Manual line: no swap text, no swap footnote.
+  await page.goto(`/plans/${planId}/print`);
+  await expect(rows).toHaveCount(1);
+  await expect(main.locator('[data-move-line="1"]')).toBeVisible();
+  await expect(ruleCell(rows.first())).toHaveText("Manual");
+  await expect(main.locator("[data-swap-locations]")).toHaveCount(0);
+  await expect(main.locator('[data-footnote="swap"]')).toHaveCount(0);
 });

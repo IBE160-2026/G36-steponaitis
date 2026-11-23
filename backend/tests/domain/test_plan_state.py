@@ -245,4 +245,24 @@ def test_nfr12_state_v2_fixture_is_rich() -> None:
     assert all(rec.outdated for rec in run.recommendations if rec.status == "outdated")
     assert run.no_space
     assert [step.swap_id for step in state.steps].count("swap-1") == 2
+    assert [step.swap_size for step in state.steps if step.swap_id == "swap-1"] == [2, 2]
     assert state.next_move_number > max(step.move_number for step in state.steps)
+
+
+def test_fr51_nfr12_step_stored_without_swap_size_validates() -> None:
+    """A swap step stored before Story 12.4 has `swap_id` but no `swap_size` (FR-9)."""
+    legacy = {
+        "move_number": 3,
+        "part": "9100",
+        "from_location": "D-01-02-02",
+        "to_location": "D-01-02-03",
+        "rule": "manual",
+        "round": 1,
+        "swap_id": "swap-1",
+    }
+
+    step = Step.model_validate(legacy)
+
+    assert (step.swap_id, step.swap_size) == ("swap-1", None)
+    with pytest.raises(ValidationError):
+        Step.model_validate({**legacy, "swap_size": 1})

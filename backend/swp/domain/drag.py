@@ -12,6 +12,7 @@ from swp.domain.commands import (
     Applied,
     CommandContext,
     Event,
+    MoveMade,
     MoveParts,
     PutTogether,
     Swap,
@@ -110,11 +111,13 @@ def _expand(
     moves: Sequence[tuple[str, str, str]],
     swap_id: str | None = None,
 ) -> tuple[PlanState, list[Event]]:
-    """Append one manual step per (part, from, to) in order, folding on the new state."""
+    """Append one manual step per (part, from, to) in order, folding on the new state. With
+    a `swap_id` every step also carries the swap's size, `len(moves)`."""
+    swap_size = len(moves) if swap_id is not None else None
     events: list[Event] = []
     for part, from_location, to_location in moves:
         state, event = append_manual_step(
-            data, state, part, from_location, to_location, swap_id=swap_id
+            data, state, part, from_location, to_location, swap_id=swap_id, swap_size=swap_size
         )
         events.append(event)
     return state, events
@@ -146,7 +149,8 @@ def put_together(
 
 def swap(state: PlanState, command: Swap, _ctx: CommandContext, data: ImportData) -> Applied:
     """Move the chosen parts from → to, then the back-parts to → from, as manual steps
-    sharing one swap id; `swap_made` comes before the per-step events."""
+    sharing one swap id; `swap_made` comes before the per-step events and lists only the
+    steps that stand as their own move (`move_made`), not those FR-34 folded."""
     frm, to = command.from_location, command.to_location
     _check(data, state, frm, to, command.parts, command.back_parts)
     swap_id = str(uuid.uuid5(command.command_id, "swap:1"))
@@ -154,13 +158,12 @@ def swap(state: PlanState, command: Swap, _ctx: CommandContext, data: ImportData
         *((part, frm, to) for part in command.parts),
         *((part, to, frm) for part in command.back_parts),
     ]
-    first = state.next_move_number
     new_state, events = _expand(data, state, steps, swap_id)
     made = SwapMade(
         swap_id=swap_id,
         from_location=frm,
         to_location=to,
-        move_numbers=list(range(first, new_state.next_move_number)),
+        move_numbers=[e.move_number for e in events if isinstance(e, MoveMade)],
         round=current_round(state),
     )
     return Applied(state=new_state, events=[made, *events])

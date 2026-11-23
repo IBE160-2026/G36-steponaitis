@@ -93,7 +93,8 @@ export function dragMoveToast(events: readonly CommandEvent[], drop: { from: str
 
 /**
  * A confirmed swap's toast from its `swap_made` event: "Swapped <from> ↔ <to> · N manual moves,
- * round R.", N being the swap's move numbers. Null without a `swap_made`.
+ * round R.", N counting only the swap's legs that stand as their own move (an FR-34 combined or
+ * removed leg is not counted, so N can be 1 or 0). Null without a `swap_made`.
  */
 export function swapToast(events: readonly CommandEvent[]): string | null {
   const swap = events.find((event) => event.type === "swap_made");
