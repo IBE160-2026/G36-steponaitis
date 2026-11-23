@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-23-2026 22:05
+last_updated: 11-24-2026 00:04
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -137,7 +137,7 @@ development_status:
   12-3-drop-on-an-occupied-location-to-swap-or-put-together: done
   12-4-swaps-through-undo-outdated-recommendations-and-the-move-lis: done
   12-5-milestone-2-gate: done
-  epic-12-retrospective: optional
+  epic-12-retrospective: done
 
   epic-13: backlog
   13-1-keyword-rules-are-stored-globally-and-give-each-part-a-categ: backlog
@@ -909,3 +909,52 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
+  - id: "epic-12-retro-item-99-fix-the-occupied-drop-dialog-so-swap-can"
+    epic: 12
+    action: "Fix the occupied drop dialog so Swap cannot offer a part on both sides
+      (leave chosen parts out of the back list or give swapReason a reason); add a
+      Vitest case and an e2e drop onto a target that also holds the dragged part (R1)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-12-retro-item-100-extend-test_nfr8_timing-py-to-time-wall"
+    epic: 12
+    action: "Extend test_nfr8_timing.py to time /wall, /warehouse, /move-list and
+      /moves/preview under 1 s, and debounce drag-over previews in drag-context.tsx
+      (R2, R3)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-12-retro-item-101-count-moves-preview-requests-per-target"
+    epic: 12
+    action: "Count /moves/preview requests per target in drag.spec.ts and add fr51
+      (fr35/fr38 at :491) to the five drag.spec.ts titles so SM-7 counts them (R4,
+      R5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-12-retro-item-102-merge-dropmovereason-and-puttogetherreas"
+    epic: 12
+    action: "Merge dropMoveReason and putTogetherReason into one helper and correct
+      drag.py docstring: the drag check also refuses a virtual or unknown from-location
+      (A3, R6)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-12-retro-item-103-reconcile-spine-and-epics-md-with-epic-1"
+    epic: 12
+    action: "Reconcile spine and epics.md with Epic 12 as built: swap_size and intact
+      rule in AD-17/spine:111, m1-flow to sm2-flow at epics.md:1418, the Moved N parts
+      toast, stale spec-12-1:186 note; decide keyboard swap marks (NFR-10) (A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-12-retro-item-104-before-epic-13-run-the-12-5-follow-up-re"
+    epic: 12
+    action: "Before Epic 13: run the 12.5 follow-up review, schedule the rest of epic-10
+      item 89 (WallGrid 703 lines), trace the locations-wall.spec.ts:512 flake, decide
+      CI firefox/msedge, add the build-agent runbook guard (recurred in 12.1), carry
+      AD-18 gzip and quadratic Apply all into 16.2/NFR-7 (A2, P1, P3, P4)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
