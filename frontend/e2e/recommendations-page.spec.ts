@@ -320,8 +320,14 @@ test("uj1 wall crops in the recommendation detail, show on the wall and the plan
   await page.goto(`/plans/${planId}/recommendations?tab=open&rec=${encodeURIComponent(cross!.recommendation_id!)}`);
   const panels = detail.locator('[data-crops] [data-wall-panel][role="img"]');
   await expect(panels.first()).toBeVisible();
+  // Counted per run with locator counts, not one `evaluateAll`: in Playwright 1.65's Firefox 159
+  // build, `waitFor` on a role-scoped locator followed by `evaluateAll` on another role-scoped
+  // locator crashes the content process (SIGSEGV, null pointer in XUL) on this page at any width,
+  // even with `(g) => g.length` (Story 12.5, epic-10 retro item 84). The page's own DOM and style
+  // reads in `page.evaluate` do not crash, so the app is not at fault.
   const runs = detail.locator("[data-crops] [data-wall-panel] [data-run]");
-  const counts = await runs.evaluateAll((groups) => groups.map((group) => group.querySelectorAll("[data-section]").length));
+  const counts: number[] = [];
+  for (const run of await runs.all()) counts.push(await run.locator("[data-section]").count());
   expect(counts.length).toBeGreaterThan(0);
   expect(Math.max(...counts)).toBe(2);
 });

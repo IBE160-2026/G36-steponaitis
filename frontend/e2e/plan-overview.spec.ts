@@ -151,6 +151,31 @@ test.describe("uj1 plan overview", () => {
     await expect(page.getByRole("main").getByRole("heading", { name: "Overview" })).toBeVisible();
   });
 
+  test("uj1 ux_dr5 the flow bar keeps its place while the plan plate loads", async ({ page, request }) => {
+    // The plate's slot is held while the summary loads, so a step clicked at that moment is the
+    // step that opens (Story 12.5: the flow bar used to shift right when the plate appeared).
+    const plan = await createPlan(request, `Steady ${randomUUID().slice(0, 8)}`);
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    await page.route(`**/api/plans/${plan.id}`, async (route) => {
+      await held;
+      await route.continue();
+    });
+
+    await page.goto(`/plans/${plan.id}/overview`);
+    const nav = page.getByRole("navigation", { name: "Plan steps" });
+    const moveList = nav.getByRole("link", { name: /^\d*Move list/ });
+    await expect(moveList).toBeVisible();
+    await expect(plate(page)).toHaveCount(0);
+    const before = await moveList.boundingBox();
+    release();
+    await expect(plate(page)).toContainText(plan.name);
+    expect(await moveList.boundingBox()).toEqual(before);
+
+    await moveList.click();
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/print$`));
+  });
+
   test("uj1 start page lists the plan just created", async ({ page, request }) => {
     const older = await createPlan(request, `Older ${randomUUID().slice(0, 8)}`);
     await page.goto(`/plans/${older.id}/overview`);

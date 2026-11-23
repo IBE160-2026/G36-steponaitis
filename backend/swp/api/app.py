@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 
 from swp.api.errors import install_error_handlers
 from swp.api.origin_guard import OriginGuard
@@ -48,7 +49,11 @@ def create_app(*, check_settings: bool = True) -> FastAPI:
     app = FastAPI(title="Smart Warehouse Planner", lifespan=lifespan)
     install_error_handlers(app)
     # Added last = outermost: the request log sees every response, then the origin guard
-    # rejects cross-site writes before the upload limit buffers any body.
+    # rejects cross-site writes before the upload limit buffers any body. GZip is innermost:
+    # a max-size plan's parts and locations views are over 4 MB as plain JSON, and AD-18
+    # keeps every response body under 4 MB (Vercel's 4.5 MB function limit); compressed,
+    # they are a fraction of that.
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
     app.add_middleware(UploadLimit)
     app.add_middleware(OriginGuard)
     app.add_middleware(RequestLog)

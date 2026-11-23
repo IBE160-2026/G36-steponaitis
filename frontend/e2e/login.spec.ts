@@ -49,8 +49,10 @@ test.describe("fr40 uj3 log in and log out", () => {
     expect((await section.boundingBox())?.width).toBe(380);
     await expect(section.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible();
     await expect(section.getByText("Plans are shared by everyone who logs in.")).toBeVisible();
+    // The used height, not `boundingBox()`: Firefox reports the box of a field at a fractional y as
+    // 39.99998px (float rounding of top and bottom), Chromium as 40px.
     for (const field of [page.getByLabel("Username"), page.getByLabel("Password", { exact: true })]) {
-      expect((await field.boundingBox())?.height).toBe(40);
+      await expect(field).toHaveCSS("height", "40px");
     }
     const submit = section.getByRole("button", { name: "Log in" });
     const form = section.locator("form");

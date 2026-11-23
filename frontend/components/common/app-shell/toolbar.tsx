@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { FlowBar } from "@/components/common/app-shell/flow-bar";
-import { PlanPlate, planMenuItems } from "@/components/common/app-shell/plan-plate";
+import { PlanPlate, PlanPlatePlaceholder, planMenuItems } from "@/components/common/app-shell/plan-plate";
 import { ProductMark } from "@/components/common/app-shell/product-mark";
 import { usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
@@ -28,7 +28,7 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
   const doneSteps = summary.data?.steps.filter((step) => step.checked).map((step) => step.key as StepKey) ?? [];
   return (
     <>
-      {summary.data && (
+      {summary.data ? (
         <PlanPlate
           name={summary.data.name}
           menu={planMenuItems(planId, plans.data)}
@@ -37,6 +37,8 @@ function PlanToolbarParts({ planId, view }: { planId: string; view: string }) {
           round={summary.data.current_round}
           saved={saved}
         />
+      ) : (
+        <PlanPlatePlaceholder />
       )}
       <FlowBar
         currentStep={stepFromSegment(view)}

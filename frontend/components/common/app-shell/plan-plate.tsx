@@ -54,6 +54,34 @@ export type PlanPlateProps = {
   saved?: boolean;
 };
 
+/**
+ * The plate's fixed slot (UX-DR5: at least 214px wide): 240px whether the plan has loaded or not, so
+ * the flow bar after it never moves when the summary arrives (a click aimed at a step while the
+ * plan loads lands on that step). A long name is truncated; the button's name keeps all of it.
+ */
+export const PLATE_SLOT_CLASS = "w-60 shrink-0";
+
+/** The plate button's box (border, padding, two text lines); the placeholder copies it. */
+const PLATE_BOX_CLASS = "flex w-full min-w-0 items-center gap-2 rounded-lg border px-3 py-1 text-left";
+
+/**
+ * Holds the plate's place in the toolbar while the plan summary loads: the same box and two text
+ * lines, invisible, so both its width and its height match the plate that replaces it.
+ */
+export function PlanPlatePlaceholder() {
+  return (
+    <span aria-hidden="true" className={cn("invisible inline-flex", PLATE_SLOT_CLASS)} data-plan-plate-placeholder="">
+      <span className={PLATE_BOX_CLASS}>
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate type-body-strong">&nbsp;</span>
+          <span className="truncate type-caption">&nbsp;</span>
+        </span>
+        <span className="size-4 shrink-0" />
+      </span>
+    </span>
+  );
+}
+
 export function plateMeta(dataAsOf: string, round: number): string {
   return `Data as of ${formatDate(dataAsOf)} · round ${round}`;
 }
@@ -67,7 +95,7 @@ export function PlanPlate({ name, menu, dataAsOf, uploadedAt, round, saved = fal
   // Escape hides the tooltip until the pointer leaves or focus moves away (WCAG 1.4.13).
   const [dismissed, setDismissed] = useState(false);
   return (
-    <span className="group relative inline-flex min-w-0" onMouseLeave={() => setDismissed(false)}>
+    <span className={cn("group relative inline-flex", PLATE_SLOT_CLASS)} onMouseLeave={() => setDismissed(false)}>
       <DropdownMenu.Root modal={false}>
         <DropdownMenu.Trigger asChild>
           <button
@@ -77,7 +105,7 @@ export function PlanPlate({ name, menu, dataAsOf, uploadedAt, round, saved = fal
               if (event.key === "Escape") setDismissed(true);
             }}
             onBlur={() => setDismissed(false)}
-            className="flex min-w-0 items-center gap-2 rounded-lg border border-flow-track-edge bg-flow-track px-3 py-1 text-left"
+            className={cn(PLATE_BOX_CLASS, "border-flow-track-edge bg-flow-track")}
           >
             <span className="flex min-w-0 flex-col">
               <span className="truncate type-body-strong text-white">{name}</span>

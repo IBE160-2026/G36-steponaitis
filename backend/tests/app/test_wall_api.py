@@ -1,17 +1,15 @@
 """FR-42/FR-14/FR-22: GET /api/plans/{id}/wall?aisle= on the sample data; it never writes."""
 
 import uuid
-from decimal import Decimal
 from typing import Any
 
 from fastapi.testclient import TestClient
 
 from swp.api.app import create_app
 from swp.app import plans
-from swp.domain.import_data import InventoryLine
+from tests.app.max_size import NOW, stocked_max_size_import
 from tests.app.test_apply_command import _answer_key_after_run, _command, _state
 from tests.app.test_create_plan import SAME_ORIGIN
-from tests.app.test_layout_api import NOW, _max_size_import
 from tests.app.test_manual_move_api import _move
 from tests.app.test_parts_api import _sample_plan
 from tests.app.test_plan_summary import _row
@@ -267,15 +265,8 @@ def test_fr42_warehouse_endpoint_unknown_plan(empty_tables: str) -> None:
 
 
 def test_fr42_warehouse_endpoint_max_size_under_4_mb(empty_tables: str) -> None:
-    imported = _max_size_import()
     # Worst case for size: every location stocked, so every row carries a class.
-    stocked = [
-        InventoryLine(part=f"P{n % 100:03}", location=code, quantity=Decimal(1))
-        for n, code in enumerate(imported.data.locations)
-    ]
-    parts = {f"P{n:03}": f"Part {n}" for n in range(100)}
-    data = imported.data.model_copy(update={"inventory": stocked, "parts": parts})
-    created = plans.create("Max", imported.model_copy(update={"data": data}), now=NOW)
+    created = plans.create("Max", stocked_max_size_import(), now=NOW)
 
     with TestClient(create_app()) as client:
         response = client.get(f"/api/plans/{created.id}/warehouse")

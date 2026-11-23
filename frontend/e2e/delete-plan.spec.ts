@@ -6,7 +6,8 @@ import { type APIRequestContext, expect, type Page, test, toasts } from "./suppo
 // UJ-3: delete a plan from the saved-plans list (Story 6.4; FR-12, FR-2, UX-DR16, UX-DR18). The
 // confirm puts Cancel first with the focus; Cancel or `Esc` return focus to the row's menu
 // button; after a delete focus moves to the next row, or to New Plan when the list is empty.
-// Other specs add plans in parallel, so the tests read row positions rather than assume the list.
+// Other specs add and delete plans in parallel, so the real-backend test narrows the saved-plans
+// list reply to its own two plans (`ownPlansOnly`); the backend still serves and deletes them.
 
 const QUESTION = (name: string) =>
   `Delete “${name}”? The plan, its marks, moves and recommendations are deleted for everyone. There is no archive.`;
@@ -43,6 +44,22 @@ function mockedPlan(prefix: string) {
   };
 }
 
+type ListedPlan = { id: string };
+
+/**
+ * Narrows every saved-plans list reply to `ids` (in the server's order), so plans that parallel
+ * specs create or delete never change this page's rows. Only the list GET is routed: the DELETE,
+ * the plan pages and everything else reach the real backend.
+ */
+async function ownPlansOnly(page: Page, ids: string[]) {
+  await page.route("**/api/plans", async (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    const response = await route.fetch();
+    const plans = (await response.json()) as ListedPlan[];
+    await route.fulfill({ response, json: plans.filter((plan) => ids.includes(plan.id)) });
+  });
+}
+
 /** Opens the row menu from the keyboard (row → Tab → Enter) and chooses Delete…. */
 async function openDeleteWithKeyboard(page: Page, plan: CreatedPlan) {
   await row(page, plan).focus();
@@ -64,6 +81,8 @@ test.describe("uj3 delete a plan", () => {
     test.setTimeout(120_000);
     const b = await createSamplePlan(request, `Keep ${randomUUID().slice(0, 8)}`);
     const a = await createSamplePlan(request, `Delete ${randomUUID().slice(0, 8)}`);
+    // Newest first: the list is a, then b.
+    await ownPlansOnly(page, [a.id, b.id]);
 
     await page.goto("/plans");
     await expect(row(page, a)).toBeVisible();
@@ -94,20 +113,15 @@ test.describe("uj3 delete a plan", () => {
     await expect(menuButton(page, a)).toBeFocused();
     expect((await request.get(`/api/plans/${a.id}`)).status()).toBe(200);
 
-    // Delete plan: the row goes, focus moves to the row that followed it.
-    const index = Number(await row(page, a).getAttribute("data-row-index"));
-    const following = table(page).locator(`tr[data-row-index="${index + 1}"]`);
-    const followingId = (await following.locator('button[id^="plan-actions-"]').getAttribute("id"))!.replace(
-      "plan-actions-",
-      "",
-    );
+    // Delete plan: the row goes, focus moves to the row that followed it (b).
+    await expect(table(page).locator("tbody tr")).toHaveCount(2);
     await openDeleteWithKeyboard(page, a);
     await dialog.getByRole("button", { name: "Delete plan" }).click();
     await expect(dialog).toHaveCount(0);
     await expect(row(page, a)).toHaveCount(0);
     const focused = table(page).locator("tr:focus");
     await expect(focused).toHaveCount(1);
-    await expect(focused.locator(`#plan-actions-${followingId}`)).toHaveCount(1);
+    await expect(focused.locator(`#plan-actions-${b.id}`)).toHaveCount(1);
     expect((await request.get(`/api/plans/${a.id}`)).status()).toBe(404);
     // The other plan is still there.
     expect((await request.get(`/api/plans/${b.id}`)).status()).toBe(200);

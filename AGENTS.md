@@ -23,9 +23,11 @@ Run every command from the repo root. Required: Node 24.x, Python 3.12, uv.
 
 - Install: `npm install` (its `postinstall` runs `uv sync --directory backend --locked`).
 - Dev: `npm run dev` (backend on 127.0.0.1:8000, frontend on localhost:3000 proxying `/api/*`). Single side: `npm run dev:backend` / `npm run dev:frontend`.
-- Lint: `npm run lint:py` (ruff), `npm run lint:imports` (import-linter layer contracts), `npm run lint` (ESLint, frontend), `npm run typecheck` (tsc).
+- Lint: `npm run lint:py` (ruff), `uv run --directory backend --locked ruff format --check`, `npm run lint:imports` (import-linter layer contracts), `npm run lint` (ESLint, frontend), `npm run typecheck` (tsc).
 - Test: `npm test` (runs `npm run test:py` = pytest, then `npm run test:web` = Vitest).
-- E2E: `npm run e2e -- --project=chromium`; plain `npm run e2e` also runs firefox and msedge, which need those browsers installed. Install Chromium once with `npx --workspace frontend playwright install chromium`. Playwright builds and starts the production app itself (`npm run e2e:serve`: `next build` + `next start`, backend with 4 uvicorn workers) against `backend/var/e2e.db`, and reuses a running server on :3000 outside CI.
+- Traceability: `npm run trace` (SM-7) lists every core FR and NFR with the test names carrying its ID and fails when a core FR has none. Name new tests with their IDs (`test_fr17_…`, `it("fr21_…")`, e2e titles `uj1 …`).
+- E2E gate (local): `npm run e2e` runs chromium, firefox and msedge; all three must pass with 0 failed, 0 flaky, 0 skipped. Install once with `npx --workspace frontend playwright install chromium firefox`; Edge is the installed Microsoft Edge (macOS Edge gets `--disable-gpu` from the config). `npm run e2e -- --project=chromium` is what CI runs. Playwright builds and starts the production app itself (`npm run e2e:serve`: `next build` + `next start`, backend with 4 uvicorn workers) against `backend/var/e2e.db`, which `e2e:reset-db` deletes on every server start; it reuses a running server on :3000 outside CI, so only one run at a time.
+- `npm run e2e:production` runs the production-mode journey (APP_ENV=production, demo on); it never reuses a server, so port 3000 must be free.
 - Run Python tools through uv (`uv run --directory backend --locked <tool>`), never bare `pytest`/`ruff`, which run outside the locked environment.
 
 ## Conventions that differ from defaults

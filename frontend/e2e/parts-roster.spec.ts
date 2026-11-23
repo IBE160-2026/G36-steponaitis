@@ -36,11 +36,14 @@ test("uj7 reads the parts roster, filters by class, sorts by picks and moves by 
   await nav.getByRole("link", { name: /^\d*Parts/ }).click();
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/parts$`));
 
-  const main = page.getByRole("main");
+  // CSS, not role, for the landmark and the table: in Firefox a role lookup walks every element
+  // of the 1,545-row roster (about 38k) and costs about a second per action, which made this
+  // journey run out of time under the parallel three-browser suite.
+  const main = page.locator("main");
   await expect(main.getByRole("heading", { name: "Parts", level: 1 })).toBeVisible();
   await expect(main.getByText("1,545 parts", { exact: true })).toBeVisible();
 
-  const table = main.getByRole("table", { name: "Parts" });
+  const table = main.locator('table[aria-label="Parts"]');
   const body = table.locator("tbody tr");
   await expect(body).toHaveCount(1_545);
   const first = body.first();
@@ -56,7 +59,8 @@ test("uj7 reads the parts roster, filters by class, sorts by picks and moves by 
   await expect(noStockRow.locator("[data-why-line]")).toContainText("No current location (no stock above zero)");
 
   // Class filter: only Fast-moving rows, rank numbers unchanged.
-  const fastChip = main.getByRole("button", { name: "Fast-moving" });
+  // Role lookups are scoped to the chip group and the header row, never the whole roster.
+  const fastChip = main.getByRole("group", { name: "Filter by movement class" }).getByRole("button", { name: "Fast-moving" });
   await fastChip.click();
   await expect(fastChip).toHaveAttribute("aria-pressed", "true");
   await expect(main.getByText("80 of 1,545 parts", { exact: true })).toBeVisible();
@@ -69,8 +73,9 @@ test("uj7 reads the parts roster, filters by class, sorts by picks and moves by 
   await expect(body).toHaveCount(1_545);
 
   // Picks ascending: the lowest-pick part first, ties in server order.
-  await table.getByRole("button", { name: "Picks" }).click();
-  await expect(table.getByRole("columnheader", { name: "Picks" })).toHaveAttribute("aria-sort", "ascending");
+  const header = table.locator("thead");
+  await header.getByRole("button", { name: "Picks" }).click();
+  await expect(header.getByRole("columnheader", { name: "Picks" })).toHaveAttribute("aria-sort", "ascending");
   const lowest = Math.min(...rows.map((row) => row.picks));
   const ties = rows.filter((row) => row.picks === lowest).slice(0, 3);
   for (const [index, row] of ties.entries()) {

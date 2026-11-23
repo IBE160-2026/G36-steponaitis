@@ -14,6 +14,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from swp.api.app import create_app
+from swp.app import plans
+from tests.app.max_size import NOW, full_max_size_import
 from tests.app.test_create_plan import SAME_ORIGIN, _multipart
 from tests.app.test_import_readers import _data_files
 
@@ -21,6 +23,7 @@ IMPORT_BUDGET_S = 10.0
 RUN_BUDGET_S = 5.0
 ACTION_BUDGET_S = 1.0
 VIEWS = ["", "/parts", "/locations", "/pick-groups", "/recommendations", "/before-after"]
+VIEW_LIMIT_BYTES = 4_000_000
 
 
 @pytest.fixture
@@ -101,3 +104,36 @@ def test_nfr8_command_plus_views_under_1_s(client: TestClient) -> None:
 
     slow = {name: f"{seconds:.2f} s" for name, seconds in timings.items()}
     assert sum(timings.values()) < ACTION_BUDGET_S, slow
+
+
+def test_ad18_nfr8_max_size_plan_views_under_4_mb(client: TestClient) -> None:
+    """Every file at MAX_ROWS_PER_FILE rows, best marks, a run and one apply: each plan view
+    response body stays under 4 MB as sent (AD-18). The API gzips its responses; plain JSON,
+    the parts and locations views of this import are 6-8 MB."""
+    imported = full_max_size_import()
+    created = plans.create("Max", imported, now=NOW)
+    plan_id = str(created.id)
+    marks = [{"kind": "aisle", "aisle": "A"}, {"kind": "level", "level": "1"}]
+    for version, mark in enumerate(marks, start=1):
+        _command(client, plan_id, {"type": "set_best_mark", "base_version": version, "mark": mark})
+    run = _command(client, plan_id, {"type": "run", "base_version": len(marks) + 1})
+    assert run.json()["events"][0]["type"] == "run_done"
+    # One applied recommendation, so the move list and before/after are not empty.
+    recs = client.get(f"/api/plans/{plan_id}/recommendations").json()["recommendations"]
+    rec = next((r for r in recs if r["status"] == "open"), None)
+    assert rec is not None, "the max-size run gave no open recommendation to apply"
+    apply = {"type": "apply", "base_version": len(marks) + 2, "recommendation_id": rec["id"]}
+    _command(client, plan_id, apply)
+
+    aisles = sorted({location.aisle for location in imported.data.locations.values()})
+    urls = [f"/api/plans/{plan_id}{view}" for view in [*VIEWS, "/move-list", "/warehouse"]]
+    urls += [f"/api/plans/{plan_id}/wall?aisle={aisle}" for aisle in aisles]
+    urls.append(f"/api/imports/{created.import_id}/layout")
+    sizes: dict[str, int] = {}
+    for url in urls:
+        response = client.get(url, headers={"Accept-Encoding": "gzip"})
+        assert response.status_code == 200, f"{url}: {response.text}"
+        sizes[url] = response.num_bytes_downloaded
+
+    too_big = {url: size for url, size in sizes.items() if size >= VIEW_LIMIT_BYTES}
+    assert not too_big, f"views at or over 4 MB (bytes): {too_big}"

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
 import { expect, type Locator, test, toasts } from "./support/test";
@@ -5,10 +6,13 @@ import { expect, type Locator, test, toasts } from "./support/test";
 import { type Detail, getJson, locationRows, moveFromPanel, partDetail } from "./support/plan-api";
 import { SAMPLE, SAMPLE_FILES } from "./support/sample-plan";
 
-// Milestone 1 gate (Story 5.8; UJ-1, FR-1, FR-13, FR-19, FR-21, FR-23, FR-28, FR-33, FR-37): the
-// whole milestone 1 journey through the UI on `data/sample/`: New Plan → Overview → Parts → Pick
+// Milestone 2 gate, SM-2 (Story 12.5, extending the milestone 1 flow of Story 5.8; UJ-1, UJ-2,
+// FR-1, FR-13, FR-16, FR-19, FR-21, FR-23, FR-28, FR-33, FR-37, FR-38, NFR-9): README demo steps
+// 3-8, 10 and 11 through the UI on `data/sample/`: New Plan → Overview → Parts (classes) → Pick
 // groups → mark aisle A and level 1 → run → apply one → one manual move → Before/after shows the
-// change. Any uncaught page error fails the test.
+// change → Move list lists both moves → it prints (print media: only the paper). Undo and outdated
+// recommendations (step 8) are covered by undo.spec.ts and recommendations-outdated.spec.ts, the
+// drag and swap on the wall (step 9) by drag.spec.ts. Any uncaught page error fails the test.
 
 type Row = { id: string; rule: string; part: string; from_location: string; to_location: string; status: string };
 type View = { recommendations: Row[] };
@@ -17,7 +21,7 @@ function aisleRow(table: Locator, aisle: string): Locator {
   return table.locator("tbody tr").filter({ has: table.page().getByRole("cell", { name: aisle, exact: true }) });
 }
 
-test("uj1 milestone 1 flow on the sample data", async ({ page, request }) => {
+test("uj1 uj2 sm2 fr38 nfr9 milestone 2 flow on the sample data", async ({ page, request }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   const pageErrors: string[] = [];
@@ -26,7 +30,7 @@ test("uj1 milestone 1 flow on the sample data", async ({ page, request }) => {
   // New Plan with the three sample files.
   await page.goto("/plans/new");
   await expect(page.getByRole("heading", { name: "New Plan" })).toBeVisible();
-  await page.getByLabel("Plan name").fill("Milestone 1 demo");
+  await page.getByLabel("Plan name").fill(`Milestone 2 demo ${randomUUID().slice(0, 8)}`);
   await page.getByLabel("Locations", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.locations));
   await page.getByLabel("Inventory", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.inventory));
   await page.getByLabel("Transactions", { exact: true }).setInputFiles(join(SAMPLE, SAMPLE_FILES.transactions));
@@ -42,6 +46,8 @@ test("uj1 milestone 1 flow on the sample data", async ({ page, request }) => {
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/parts$`));
   await expect(main.getByRole("heading", { name: "Parts", level: 1 })).toBeVisible();
   await expect(main.getByRole("table", { name: "Parts" }).locator("tbody tr").first()).toBeVisible();
+  const classes = main.getByRole("group", { name: "Filter by movement class" });
+  await expect(classes.getByRole("button", { name: "Fast-moving" })).toBeVisible();
   await nav.getByRole("link", { name: /^\d*Pick groups/ }).click();
   await expect(page).toHaveURL(new RegExp(`/plans/${planId}/pick-groups$`));
   await expect(main.getByRole("heading", { name: "Pick groups", level: 1 })).toBeVisible();
@@ -120,6 +126,37 @@ test("uj1 milestone 1 flow on the sample data", async ({ page, request }) => {
   await expect(main.getByText("No moves yet: before and after are the same.", { exact: true })).toHaveCount(0);
   await expect(aisleRow(table, target.aisle).locator("td").nth(1)).toContainText(part);
   await expect(aisleRow(table, source.aisle).locator("td").nth(2)).toContainText(part);
+
+  // Move list: the applied recommendation (move 1) and the manual move (move 2), round 1.
+  await nav.getByRole("link", { name: /^\d*Move list/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/print$`));
+  const lines = main.locator("[data-move-line]");
+  await expect(lines).toHaveCount(2);
+  const applied = main.locator('[data-move-line="1"]');
+  await expect(applied).toContainText(first.part);
+  await expect(applied).toContainText(first.from_location);
+  await expect(applied).toContainText(first.to_location);
+  await expect(applied).toContainText(`Rule ${first.rule.slice(-1)}`);
+  const manual = main.locator('[data-move-line="2"]');
+  await expect(manual).toContainText(part);
+  await expect(manual).toContainText(source.code);
+  await expect(manual).toContainText(target.code);
+  await expect(manual).toContainText("Manual");
+
+  // Print media: the app chrome is hidden, the header and both lines print.
+  const print = main.getByRole("button", { name: "Print", exact: true });
+  await expect(print).toBeVisible();
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator('header[data-surface="graphite"]')).toHaveCSS("display", "none");
+  await expect(page.getByRole("banner")).toHaveCount(0);
+  await expect(print).toBeHidden();
+  await expect(main.locator("[data-move-list-title]")).toContainText("Milestone 2 demo");
+  await expect(main.locator("[data-move-list-data]")).toContainText("Data as of");
+  await expect(main.locator("[data-round-band]")).toHaveCount(1);
+  await expect(applied).toBeVisible();
+  await expect(manual).toBeVisible();
+  await page.emulateMedia({ media: "screen" });
+  await expect(print).toBeVisible();
 
   expect(pageErrors).toEqual([]);
 });

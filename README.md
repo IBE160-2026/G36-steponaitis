@@ -47,6 +47,7 @@ Checks:
 | Python format (ruff) | `uv run --directory backend --locked ruff format --check` |
 | TypeScript typecheck | `npm run typecheck` |
 | Tests (pytest and Vitest) | `npm test` |
+| Requirement traceability (SM-7) | `npm run trace` |
 | End-to-end, all browsers (Playwright: Chromium, Firefox, Edge) | `npm run e2e` |
 | End-to-end, Chromium only (what CI runs) | `npm run e2e -- --project=chromium` |
 | End-to-end, production-like build with the demo on (Chromium, also in CI) | `npm run e2e:production` |
@@ -96,20 +97,22 @@ Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_url
 
 The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. Setting its Vercel environment variables is Story 16.2.
 
-## Milestone 1 demo
+## Milestone 2 demo
 
-A step-by-step walk through milestone 1 (Epics 1–5) on the synthetic files in `data/sample/`. The public deployment holds synthetic data only; real company data is never uploaded there or committed here.
+A step-by-step walk through milestone 2 (Epics 1–12) on the synthetic files in `data/sample/`. The public deployment holds synthetic data only; real company data is never uploaded there or committed here.
 
 1. **Install:** `npm install` (Node.js 24, uv and Python 3.12 as in *Run locally*).
 2. **Start:** `npm run dev`, then open http://localhost:3000.
 3. **New Plan:** choose **New Plan**, type a plan name and pick the three files from `data/sample/`: `Locations.xlsx` for Locations, `Inventory.xlsx` for Inventory and `transactions.xlsx` for Transactions. Press **New Plan**. The plan opens on **Overview** with "Data as of 2026-09-30".
-4. **Look around:** **Parts** lists every part with its class (fast, medium, slow, dead) and picks; **Pick groups** lists the parts that are picked together; **Locations** shows occupancy per aisle.
-5. **Best locations:** open **Best locations**. With **Whole aisle** selected, pick aisle `A` and press **Mark aisle A**. Then choose **Level**, pick level `1`, choose **in all aisles** and press **Mark level 1 in all aisles**.
-6. **Run recommendations:** open **Recommendations** and press **Run recommendations**. Round 1 lists the moves under rule 1, rule 2 and rule 3, each with its reason in numbers, plus the "no space" entries.
+4. **Look around:** **Parts** lists every part with its class (fast, medium, slow, dead) and picks; the class buttons filter the list. **Pick groups** lists the parts that are picked together; **Locations** shows the bin wall per aisle (**One aisle**) or the whole warehouse (**Whole warehouse**).
+5. **Best locations:** open **Best locations** and press **Open as list**. Pick aisle `A` and press **Mark aisle A**. Then choose **Level**, pick level `1`, choose **in all aisles** and press **Mark level 1 in all aisles**. (The step also opens as a wall where you mark by clicking.)
+6. **Run recommendations:** open **Recommendations** and press **Run recommendations**. Round 1 lists the moves under rule 1, rule 2 and rule 3, each with its reason in numbers and a crop of the wall, plus the "no space" entries.
 7. **Apply:** select a recommendation and press **Apply** (or `Alt`/`⌥`+`A`). A toast confirms "Applied · move 1, round 1 · …". **Apply all (n)** applies every open recommendation of the run at once.
-8. **Manual move (optional):** search for a part (`Ctrl`+`/`), open it, press **Manual move…**, type an empty to-location and confirm.
-9. **Before/after:** open **Before/after** to see, per aisle, which parts moved in and out, fast-moving parts in best locations, pick groups kept together and occupancy, before → after.
-10. **Run every check:**
+8. **Planning copy — manual move and undo:** search for a part (`Ctrl`+`/`), open it, press **Manual move…**, type an empty to-location and confirm. The remaining recommendations that the move touches show as outdated. **Undo last move** in the Recommendations header (or **Undo** in the toast) takes back the latest move, one move at a time.
+9. **Drag on the wall:** open **Locations**, keep **One aisle**, and drag a bin with the mouse onto an empty location to move it, or onto an occupied one and choose **Swap** (or **Put together**). A swap is two manual moves; undo takes them back one at a time. Every drag move can also be made with the keyboard through **Manual move…**.
+10. **Before/after:** open **Before/after** to see, per aisle, which parts moved in and out, fast-moving parts in best locations, pick groups kept together and occupancy, before → after.
+11. **Move list and print:** open **Move list**. It lists every move by round in walking order, with the rule (or Manual, and "Swap 1/2" for a swap). Press **Print** for the black-and-white A4 list.
+12. **Run every check:**
 
     ```sh
     npm run lint:py
@@ -118,8 +121,12 @@ A step-by-step walk through milestone 1 (Epics 1–5) on the synthetic files in 
     npm run lint
     npm run typecheck
     npm test
+    npm run trace
     npx --workspace frontend playwright install chromium firefox   # once; Edge as above
     npm run e2e
+    npm run e2e:production
     ```
 
-    `npm test` includes the answer-key suite (`backend/tests/domain/test_answer_key.py`: answer-key steps 1–14; steps 15–20, the move list, the final current locations, the final before/after and the settled check show as skipped until Epics 7 and 8) and the timing check (`backend/tests/app/test_nfr8_timing.py`: import under 10 s, a run under 5 s, one command plus the plan views under 1 s in total). `npm run e2e` includes `frontend/e2e/m1-flow.spec.ts`, which in Chromium, Firefox and Edge goes through New Plan, Overview, Parts, Pick groups, the aisle A and level 1 marks, a run, applying one recommendation, one manual move and Before/after.
+    `npm test` includes the answer-key suite (`backend/tests/domain/test_answer_key.py`, all 20 answer-key steps, the move list and the final state, with no skips), the timing check (`backend/tests/app/test_nfr8_timing.py`: import under 10 s, a run under 5 s, one command plus the plan views under 1 s in total, and every plan view under 4 MB on a generated import at `MAX_ROWS_PER_FILE`) and the traceability check. `npm run trace` prints every core requirement (FR-1–FR-40, FR-42, FR-50, FR-51) and every NFR with the test names that carry its ID, and fails if a core FR has no test (SM-7). `npm run e2e` includes `frontend/e2e/sm2-flow.spec.ts`, which in Chromium, Firefox and Edge goes through New Plan, Overview, Parts, Pick groups, the aisle A and level 1 marks, a run, applying one recommendation, one manual move, Before/after and the Move list with its print layout.
+
+Still to do before submission (SM-2): someone outside the group follows this README from a clean checkout and runs the demo flow.

@@ -1,8 +1,7 @@
 """FR-42/AD-15: GET /api/imports/{import_id}/layout on stored imports; it never writes."""
 
 import uuid
-from datetime import UTC, date, datetime
-from decimal import Decimal
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi.testclient import TestClient
@@ -10,9 +9,9 @@ from sqlalchemy import select
 
 from swp.api.app import create_app
 from swp.app import plans
-from swp.domain.import_data import ImportData, LocationData, NormalizedImport
 from swp.store.db import get_engine
 from swp.store.models import ImportRow
+from tests.app.max_size import max_size_import
 from tests.app.test_create_plan import SAME_ORIGIN, _multipart
 from tests.app.test_import_readers import _data_files
 
@@ -92,27 +91,8 @@ def test_fr42_layout_unknown_or_malformed_import_404(empty_tables: str) -> None:
         assert "immutable" not in response.headers.get("cache-control", "")
 
 
-def _max_size_import() -> NormalizedImport:
-    """10 aisles x 25 sections x 5 levels x 20 positions = 25,000 locations."""
-    locations: dict[str, LocationData] = {}
-    for aisle in "ABCDEFGHIJ":
-        for section in range(1, 26):
-            for level in range(1, 6):
-                for position in range(1, 21):
-                    code = f"{aisle}-{section:02}-{level:02}-{position:02}"
-                    locations[code] = LocationData(
-                        walk_path=Decimal(len(locations) * 10),
-                        aisle=aisle,
-                        level=str(level),
-                        section=str(section),
-                        position=str(position),
-                    )
-    data = ImportData(locations=locations, inventory=[], parts={}, transactions=[])
-    return NormalizedImport(data_as_of=date(2026, 11, 1), data=data)
-
-
 def test_fr42_layout_max_size_under_4_mb(empty_tables: str) -> None:
-    created = plans.create("Max", _max_size_import(), now=NOW)
+    created = plans.create("Max", max_size_import(), now=NOW)
 
     with TestClient(create_app()) as client:
         response = client.get(f"/api/imports/{created.import_id}/layout")

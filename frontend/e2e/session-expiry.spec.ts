@@ -99,9 +99,10 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await expect(page).toHaveURL(/\/login$/);
 
     await logIn(page, username);
+    // The held change's toast first: it shows for 10 s, so it is read before the slower checks.
+    await expect(toasts(page).getByText("Best-location marks changed.", { exact: true }).last()).toBeVisible();
     await expect(page).toHaveURL(planUrl);
     await expect(main.getByRole("list", { name: "Best-location marks" }).getByText("Aisle A", { exact: true })).toBeVisible();
-    await expect(toasts(page).getByText("Best-location marks changed.", { exact: true }).last()).toBeVisible();
 
     // Saved once, by this user.
     const view = (await (await request.get(`/api/plans/${plan.id}/locations`)).json()) as { marks: unknown[] };
