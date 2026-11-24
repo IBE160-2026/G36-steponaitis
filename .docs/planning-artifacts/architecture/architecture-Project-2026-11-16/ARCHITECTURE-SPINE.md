@@ -179,7 +179,7 @@ flowchart LR
     - Local: `DATABASE_URL` defaults to `<backend>/var/swp.db`, resolved from `config.py`'s location, with `var/` created if missing.
     - Demo: Supabase Postgres through the transaction pooler (port 6543, `NullPool`, psycopg `prepare_threshold=None`). A `postgresql://` URL is rewritten to `postgresql+psycopg://`.
     - Migrations use `MIGRATION_DATABASE_URL` (the session pooler, 5432) when it is set.
-  - **Migrate and seed.** `swp.app.bootstrap(upgrade, seed)` is the only path that does either. The CLI `swp db upgrade` calls it. The FastAPI lifespan calls it only when `APP_ENV=local`. Migrations are expand-only.
+  - **Migrate and seed.** `swp.app.bootstrap(upgrade, seed)` is the only path that does either. The CLI `swp db upgrade` calls it. The FastAPI lifespan calls it only when `APP_ENV=local`. Migrations are expand-only. The seed writes the `demo` account (FR-50) and then the starter categories from `backend/settings/starter_categories.toml` (FR-47), loaded only when both `keyword_rules` and `aisle_categories` are empty, so it never overwrites the planner's lists.
   - **Tests.** Persistence tests run on SQLite. CI also runs `tests/app` against Postgres 17.
 
 ### AD-10: Identity, sessions and feature flags [ADOPTED]
@@ -331,7 +331,7 @@ flowchart LR
 | Fonts and network | Fonts are self-hosted through `@fontsource` packages, never `next/font/google` or a CDN. The dev scripts set `NEXT_TELEMETRY_DISABLED=1`. The local app makes no runtime network calls (NFR-2). |
 | Git-ignored | `backend/var/` (with the SQLite `-wal`/`-shm`/`-journal` files), `data/private/*`, `.env*` except the examples, and the test and Playwright outputs (NFR-4). The scaffold story checks `.gitignore` against this list. |
 | Tests | Every test names its FR or NFR (SM-7), e.g. `test_fr26_partner_with_recommendation_waits`. Test locations: domain in `backend/tests/domain`; services and persistence in `backend/tests/app` (SQLite, plus Postgres in CI); HTTP in `backend/tests/api` (TestClient with httpx2); frontend in Vitest; end-to-end in Playwright `frontend/e2e`, with projects `chromium`, `firefox` and `msedge`, each with a move-list print check (NFR-9), on `data/sample/` (SM-2). One timing test, `tests/app/test_nfr8_timing.py`, covers import, run, and a command plus the plan views on `data/sample/`. |
-| Data | Only synthetic data in tests, fixtures and seeds (NFR-4). The demo account is the only seed. No plan is preloaded (FR-50). |
+| Data | Only synthetic data in tests, fixtures and seeds (NFR-4). There are two seeds: the demo account and the starter categories (keyword rules and aisle categories drafted from `data/sample/`, loaded only when both category tables are empty). No plan is preloaded (FR-50). |
 | Accessibility | UX-owned (DESIGN.md, EXPERIENCE.md, NFR-10). The architecture guarantees that every drag command (AD-16) has a keyboard path through `manual_move`, one part at a time. |
 | UI copy | English (NFR-11). Wording follows EXPERIENCE.md. Ownership is set in AD-11. |
 
@@ -472,7 +472,7 @@ The walking skeleton runs `GET /api/health` and one page locally. Deployment to 
 - **Endpoint fields and view payloads.** Each story sets its own. AD-3, AD-6, AD-11 and AD-13 bind their shape, and the generated types keep both sides in step.
 - **How the wall is drawn** (SVG or DOM) and the component breakdown. DESIGN.md and EXPERIENCE.md govern the look; AD-15 governs the data.
 - **FR-41 concurrent-edit warning** (if time allows). It warns when `base_version` is behind, then applies the command on top of the current state. There is no whole-plan overwrite.
-- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is still decided after the milestone 2 gate. The stories that build the rest update this spine in the same change: Story 13.4 (starter categories become a second seed, next to the demo account), Story 14.1 (QR library in the Stack table) and Story 15.1 (error code `plan_changed` added to AD-11).
+- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is still decided after the milestone 2 gate. The stories that build the rest update this spine in the same change: Story 14.1 (QR library in the Stack table) and Story 15.1 (error code `plan_changed` added to AD-11).
 - **Operations the demo doesn't need:** backups, monitoring beyond the keep-alive, Redis, file storage, email, payments, maintenance page. The data is synthetic and the scale is NFR-7.
 - **IP-based rate limiting.** Serverless instances share no memory. AD-18's per-username throttle is enough for the demo.
 

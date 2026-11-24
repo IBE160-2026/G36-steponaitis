@@ -39,7 +39,7 @@ ORDER_INVALID = {
 
 
 @pytest.fixture
-def client(empty_tables: str) -> Iterator[TestClient]:
+def client(without_starter_categories: str) -> Iterator[TestClient]:
     with TestClient(create_app()) as test_client:
         yield test_client
 

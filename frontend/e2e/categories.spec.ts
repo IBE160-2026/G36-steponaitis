@@ -7,8 +7,10 @@ import { expect, type Page, test } from "./support/test";
 
 // UJ-8, Story 13.2 (FR-43, FR-45, UX-DR7, UX-DR16, UX-DR18): CAT opens the Categories page, where
 // the planner keeps the global keyword rules and gives aisles their categories. Rules and aisle
-// categories are global and the browsers run this spec at the same time, so every keyword and
-// category is unique to the run, each browser uses its own aisle, and only its own rows are read.
+// categories are global, start from the seeded starter list (FR-47) and the browsers run this spec
+// at the same time, so every keyword and category is unique to the run, each browser uses its own
+// aisle, only its own rows are read, and the test removes only its own chip, so the aisle keeps
+// its starter categories.
 
 /** One aisle per browser project, so parallel runs never replace each other's aisle list. */
 const AISLE_BY_PROJECT: Record<string, string> = { chromium: "G", firefox: "H", msedge: "I" };
@@ -118,7 +120,7 @@ test.describe("uj8 categories", () => {
     await expect(chip).toBeVisible();
     await expect(row).toContainText(`${first.category}· no keyword rule gives this category`);
 
-    // Leave the aisle as it was.
+    // Leave the aisle as it was: only the run's chip goes, its starter categories stay.
     await chip.click();
     await expect(chip).toHaveCount(0);
   });

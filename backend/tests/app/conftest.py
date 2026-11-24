@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import delete
 
+from swp.app import categories
 from swp.app.bootstrap import bootstrap
 from swp.store.db import get_engine
 from swp.store.models import (
@@ -48,3 +49,11 @@ def empty_tables(app_database: str) -> Iterator[str]:
         conn.execute(delete(KeywordRuleRow))
         conn.execute(delete(AisleCategoryRow))
     yield app_database
+
+
+@pytest.fixture
+def without_starter_categories(empty_tables: str, monkeypatch: pytest.MonkeyPatch) -> str:
+    """`empty_tables` where `bootstrap(seed=True)` (the TestClient lifespan) seeds no starter
+    categories (FR-47), for tests that start from empty keyword rules and aisle categories."""
+    monkeypatch.setattr(categories, "seed_starter_categories", lambda **_: False)
+    return empty_tables

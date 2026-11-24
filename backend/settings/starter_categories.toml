@@ -1,0 +1,236 @@
+# Starter keyword rules and aisle categories for the demo data (FR-47, AD-9).
+#
+# Synthetic data only (NFR-4): drafted by AI (Claude Code) only from the synthetic part
+# descriptions and aisles in data/sample/; awaiting the author's check (Story 13.4 AC 1).
+#
+# `swp db upgrade` (and the local lifespan) loads this file once, only when both the
+# keyword_rules and aisle_categories tables are empty; it never overwrites the planner's lists.
+# Rules are in order: the first rule whose keyword is a whole word of the part description
+# gives the category ("Oil filter" is a filter because `filter` comes before `oil`).
+
+[[rules]]
+keyword = "filter"
+category = "Filters"
+
+[[rules]]
+keyword = "brake"
+category = "Brakes"
+
+[[rules]]
+keyword = "handbrake"
+category = "Brakes"
+
+[[rules]]
+keyword = "exhaust"
+category = "Exhaust"
+
+[[rules]]
+keyword = "muffler"
+category = "Exhaust"
+
+[[rules]]
+keyword = "catalytic"
+category = "Exhaust"
+
+[[rules]]
+keyword = "sensor"
+category = "Sensors"
+
+[[rules]]
+keyword = "switch"
+category = "Sensors"
+
+[[rules]]
+keyword = "gasket"
+category = "Engine"
+
+[[rules]]
+keyword = "oil"
+category = "Fluids"
+
+[[rules]]
+keyword = "coolant"
+category = "Fluids"
+
+[[rules]]
+keyword = "spark"
+category = "Ignition"
+
+[[rules]]
+keyword = "glow"
+category = "Ignition"
+
+[[rules]]
+keyword = "ignition"
+category = "Ignition"
+
+[[rules]]
+keyword = "headlight"
+category = "Lighting"
+
+[[rules]]
+keyword = "light"
+category = "Lighting"
+
+[[rules]]
+keyword = "tailgate"
+category = "Body"
+
+[[rules]]
+keyword = "door"
+category = "Body"
+
+[[rules]]
+keyword = "window"
+category = "Body"
+
+[[rules]]
+keyword = "bumper"
+category = "Body"
+
+[[rules]]
+keyword = "wiper"
+category = "Body"
+
+[[rules]]
+keyword = "drain"
+category = "Engine"
+
+[[rules]]
+keyword = "washer"
+category = "Body"
+
+[[rules]]
+keyword = "alternator"
+category = "Electrical"
+
+[[rules]]
+keyword = "starter"
+category = "Electrical"
+
+[[rules]]
+keyword = "horn"
+category = "Electrical"
+
+[[rules]]
+keyword = "fuse"
+category = "Electrical"
+
+[[rules]]
+keyword = "radiator"
+category = "Cooling"
+
+[[rules]]
+keyword = "thermostat"
+category = "Cooling"
+
+[[rules]]
+keyword = "water"
+category = "Cooling"
+
+[[rules]]
+keyword = "expansion"
+category = "Cooling"
+
+[[rules]]
+keyword = "heater"
+category = "Cooling"
+
+[[rules]]
+keyword = "ac"
+category = "Cooling"
+
+[[rules]]
+keyword = "intercooler"
+category = "Engine"
+
+[[rules]]
+keyword = "clutch"
+category = "Drivetrain"
+
+[[rules]]
+keyword = "gearbox"
+category = "Drivetrain"
+
+[[rules]]
+keyword = "cv"
+category = "Drivetrain"
+
+[[rules]]
+keyword = "drive"
+category = "Drivetrain"
+
+[[rules]]
+keyword = "shock"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "spring"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "strut"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "stabilizer"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "arm"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "ball"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "rod"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "steering"
+category = "Suspension and steering"
+
+[[rules]]
+keyword = "wheel"
+category = "Wheels"
+
+[[rules]]
+keyword = "timing"
+category = "Engine"
+
+[[rules]]
+keyword = "belt"
+category = "Engine"
+
+[[rules]]
+keyword = "turbocharger"
+category = "Engine"
+
+[[rules]]
+keyword = "egr"
+category = "Engine"
+
+[[rules]]
+keyword = "fuel"
+category = "Engine"
+
+[[rules]]
+keyword = "throttle"
+category = "Engine"
+
+[[rules]]
+keyword = "mount"
+category = "Engine"
+
+[aisles]
+A = ["Filters", "Fluids"]
+B = ["Brakes"]
+C = ["Engine"]
+D = ["Ignition", "Sensors", "Electrical"]
+E = ["Cooling"]
+F = ["Exhaust", "Drivetrain"]
+G = ["Suspension and steering"]
+H = ["Wheels", "Lighting"]
+I = ["Body"]

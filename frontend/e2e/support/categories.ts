@@ -1,7 +1,8 @@
 import { type APIRequestContext, expect, type Locator, type Page } from "./test";
 
-// Shared by the specs that use the Categories page (Story 13.2, 13.3): keyword rules and aisle
-// categories are global, so each spec adds unique rules and cleans them up through the API.
+// Shared by the specs that use the Categories page (Story 13.2–13.4): keyword rules and aisle
+// categories are global and seeded with the starter list (FR-47), so each spec adds unique rules
+// and, through the API, deletes them and gives any aisle it changed its earlier list back.
 
 const SAME_ORIGIN = { "Sec-Fetch-Site": "same-origin" };
 
@@ -31,8 +32,22 @@ export async function addAisleCategory(page: Page, aisle: string, category: stri
   await expect(row.getByRole("button", { name: `Remove ${category} from aisle ${aisle}` })).toBeVisible();
 }
 
-/** Cleanup: deletes the rules with these keywords and clears `aisle`'s categories (API). */
-export async function removeCategories(request: APIRequestContext, keywords: readonly string[], aisle: string) {
+/** An aisle's stored categories (API), without leftover `Aisle <8 hex>` entries of killed runs. */
+export async function aisleCategoryList(request: APIRequestContext, aisle: string): Promise<string[]> {
+  const response = await request.get(`/api/aisle-categories/${encodeURIComponent(aisle)}`);
+  expect(response.ok(), await response.text()).toBe(true);
+  const { categories } = (await response.json()) as { categories: { category: string }[] };
+  return categories.map((entry) => entry.category).filter((category) => !/^Aisle [0-9a-f]{8}$/.test(category));
+}
+
+/** Cleanup: deletes the rules with these keywords and sets `aisle`'s categories to `restore`
+ * (the list it had before the test, e.g. the seeded starter categories) through the API. */
+export async function removeCategories(
+  request: APIRequestContext,
+  keywords: readonly string[],
+  aisle: string,
+  restore: readonly string[],
+) {
   const response = await request.get("/api/keyword-rules");
   expect(response.ok(), await response.text()).toBe(true);
   const { rules } = (await response.json()) as { rules: { id: string; keyword: string }[] };
@@ -40,9 +55,9 @@ export async function removeCategories(request: APIRequestContext, keywords: rea
     const deleted = await request.delete(`/api/keyword-rules/${rule.id}`, { headers: SAME_ORIGIN });
     expect(deleted.ok(), await deleted.text()).toBe(true);
   }
-  const cleared = await request.put(`/api/aisle-categories/${encodeURIComponent(aisle)}`, {
-    data: { categories: [] },
+  const restored = await request.put(`/api/aisle-categories/${encodeURIComponent(aisle)}`, {
+    data: { categories: restore },
     headers: SAME_ORIGIN,
   });
-  expect(cleared.ok(), await cleared.text()).toBe(true);
+  expect(restored.ok(), await restored.text()).toBe(true);
 }

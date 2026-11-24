@@ -35,7 +35,7 @@ LOC_CSV = (
 
 
 @pytest.fixture
-def client(empty_tables: str) -> Iterator[TestClient]:
+def client(without_starter_categories: str) -> Iterator[TestClient]:
     with TestClient(create_app()) as test_client:
         yield test_client
 
@@ -298,7 +298,7 @@ def test_fr45_cross_site_put_forbidden(client: TestClient) -> None:
 
 @pytest.mark.parametrize("method", ["GET", "PUT", "PLAN"])
 def test_fr45_login_required_when_auth_on(
-    empty_tables: str, monkeypatch: pytest.MonkeyPatch, method: str
+    without_starter_categories: str, monkeypatch: pytest.MonkeyPatch, method: str
 ) -> None:
     plan_id = _plan()
     monkeypatch.setenv("FEATURE_AUTH", "true")

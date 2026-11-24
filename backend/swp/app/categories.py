@@ -4,14 +4,21 @@ Rules: list, create, edit, delete and reorder. Values are stripped, checked by
 `swp.domain.categories` inside the store's write lock, and stored. The caller passes `now`; new
 ids come from uuid4 here. Aisle categories: read one aisle, replace its whole list, or read every
 aisle of a plan's import (read-only, it never writes the plan). The category check (FR-46) reads
-the plan and both tables and writes nothing.
+the plan and both tables and writes nothing. The starter categories (FR-47) come from
+`backend/settings/starter_categories.toml` and are seeded only by `bootstrap`.
 """
 
+import logging
+import tomllib
 import uuid
 from collections.abc import Callable
 from datetime import datetime
+from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
 
 from swp.app.plans import require
+from swp.config import BACKEND_DIR
 from swp.domain.categories import (
     AisleCategories,
     CategoryCheck,
@@ -27,10 +34,15 @@ from swp.domain.categories import (
 from swp.domain.errors import DomainError, FieldError
 from swp.domain.ordering import aisle_order
 from swp.store import aisle_categories as aisle_store
+from swp.store import category_seed
 from swp.store import keyword_rules as store
 from swp.store.aisle_categories import AisleCategoriesBusy
+from swp.store.category_seed import CategorySeedBusy
 from swp.store.keyword_rules import RuleDraft, RulesBusy, StoredKeywordRule
 
+logger = logging.getLogger("swp.categories")
+
+STARTER_CATEGORIES_PATH = BACKEND_DIR / "settings" / "starter_categories.toml"
 RULE_NOT_FOUND = "That keyword rule no longer exists."
 ORDER_INVALID = "List every keyword rule exactly once."
 RULES_BUSY = "The keyword rules are busy. Try again."
@@ -198,3 +210,58 @@ def category_check(plan_id: uuid.UUID) -> CategoryCheck:
         _domain_rules(),
         aisle_store.list_all(),
     )
+
+
+class StarterRule(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    keyword: str
+    category: str
+
+
+class StarterCategories(BaseModel):
+    """The starter list (FR-47): keyword rules in rule order, then each aisle's categories."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    rules: list[StarterRule]
+    aisles: dict[str, list[str]]
+
+
+def load_starter_categories(path: Path = STARTER_CATEGORIES_PATH) -> StarterCategories:
+    """The checked starter list from `path`, values stripped; raise ValueError naming the first
+    invalid entry (a bug in the shipped file, never skipped)."""
+    with path.open("rb") as file:
+        raw = StarterCategories.model_validate(tomllib.load(file))
+    rules: list[StarterRule] = []
+    taken: set[str] = set()
+    for index, rule in enumerate(raw.rules):
+        errors = rule_errors(rule.keyword, rule.category, taken)
+        if errors:
+            raise ValueError(
+                f"{path.name}: rules[{index}] ({rule.keyword!r} -> {rule.category!r}): "
+                f"{errors[0]['field']}: {errors[0]['message']}"
+            )
+        taken.add(keyword_key(rule.keyword))
+        rules.append(StarterRule(keyword=rule.keyword.strip(), category=rule.category.strip()))
+    for aisle, categories in raw.aisles.items():
+        errors = aisle_category_errors(aisle, categories)
+        if errors:
+            raise ValueError(
+                f"{path.name}: aisles.{aisle!r}: {errors[0]['field']}: {errors[0]['message']}"
+            )
+    aisles = {aisle: [c.strip() for c in categories] for aisle, categories in raw.aisles.items()}
+    return StarterCategories(rules=rules, aisles=aisles)
+
+
+def seed_starter_categories(*, now: datetime, path: Path | None = None) -> bool:
+    """Store the starter list once, only when both category tables are empty (FR-47, AD-9);
+    True when it wrote. A busy lock means another writer holds the category tables (e.g. another
+    worker seeding): logged and skipped."""
+    starter = load_starter_categories(path or STARTER_CATEGORIES_PATH)
+    drafts = [RuleDraft(uuid.uuid4(), rule.keyword, rule.category) for rule in starter.rules]
+    try:
+        return category_seed.seed_if_empty(drafts, starter.aisles, now=now)
+    except CategorySeedBusy:
+        logger.info("Starter categories skipped: another writer holds the category tables.")
+        return False

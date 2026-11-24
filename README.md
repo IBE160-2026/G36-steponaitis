@@ -65,7 +65,7 @@ cp backend/.env.example backend/.env
 set -a; . backend/.env; set +a; npm run dev
 ```
 
-Log in as `demo` with the password `demo`. This demo account is created when the backend starts or `swp db upgrade` runs (set `DEMO_PASSWORD` before the first start to choose another password). A local install has no front page and no Demo version button.
+Log in as `demo` with the password `demo`. This demo account is created when the backend starts or `swp db upgrade` runs (set `DEMO_PASSWORD` before the first start to choose another password). The same seed loads the starter categories with `demo`: the keyword rules and aisle categories in `backend/settings/starter_categories.toml`, drafted from the synthetic `data/sample/` files, stored only when both category lists are empty, so the planner's own rules and aisle categories are never overwritten. If both lists are emptied, the next backend start (or `swp db upgrade`) loads the starter list again. A local install has no front page and no Demo version button.
 
 Every setting is a backend environment variable; `backend/.env.example` lists them all with placeholder values only. Never commit a real value. The frontend reads no environment variable: it gets the flags at runtime from `GET /api/session`, so there is no frontend example file.
 
@@ -91,7 +91,7 @@ The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to st
 4. in production, `DEMO_PASSWORD` is not set;
 5. in production, `DATABASE_URL` is not set.
 
-Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
+Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` and the starter categories through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
 
 `npm run e2e:production` runs the same checks locally: Playwright builds and starts the app with `APP_ENV=production`, `FEATURE_AUTH` and `FEATURE_DEMO` on and throwaway secrets it generates for that run, then walks the examiner journey (front page, Demo version as `demo`, Log out). It never reuses a running server, so stop `npm run dev` first.
 
@@ -112,7 +112,8 @@ A step-by-step walk through milestone 2 (Epics 1–12) on the synthetic files in
 9. **Drag on the wall:** open **Locations**, keep **One aisle**, and drag a bin with the mouse onto an empty location to move it, or onto an occupied one and choose **Swap** (or **Put together**). A swap is two manual moves; undo takes them back one at a time. Every drag move can also be made with the keyboard through **Manual move…**.
 10. **Before/after:** open **Before/after** to see, per aisle, which parts moved in and out, fast-moving parts in best locations, pick groups kept together and occupancy, before → after.
 11. **Move list and print:** open **Move list**. It lists every move by round in walking order, with the rule (or Manual, and "Swap 1/2" for a swap). Press **Print** for the black-and-white A4 list.
-12. **Run every check:**
+12. **Category check:** press `Ctrl`+`K`, type `CAT` and open **Categories**. **Keyword rules** already holds the starter rules (for example `filter` → Filters) and **Aisle categories** gives each aisle A–I its categories, so there is nothing to set up. Press **Category check**: it lists the parts whose category is not among their aisle's categories, with a count line "… parts outside their aisle's categories · 0 aisles without categories". Open a part to move it, as in step 8.
+13. **Run every check:**
 
     ```sh
     npm run lint:py

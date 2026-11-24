@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { HEADLINE, logIn, PANELS, PASSWORD, signUp, turnDemoOn, uniqueUsername } from "./support/auth";
 import { aisleRow } from "./support/before-after";
-import { addAisleCategory, addRule, removeCategories } from "./support/categories";
+import { addAisleCategory, addRule, aisleCategoryList, removeCategories, ruleRow } from "./support/categories";
 import { DEFAULT_SLOW_RGB, expectSlowBin, printOffenders, rootSlow, SHADE_6, SHADE_6_RGB } from "./support/colours";
 import { dragOver, startDrag, targetFor } from "./support/drag";
 import { gridButton, launcher, planReady, searchField, STEPS } from "./support/launcher";
@@ -1218,16 +1218,73 @@ test.describe("user journeys of a logged-in planner", () => {
 
 // -------------------------------------------------------------------------------------------------
 // UJ-1 stage 2 (Epic 13): the category check of the planning copy. Keyword rules and aisle
-// categories are global and the browsers run at the same time, so each project uses its own aisle
-// (categories.spec uses F–I), every rule and category is unique to the run, only the test's own row
-// is read, and its rules and aisle categories are removed afterwards.
+// categories are global, seeded with the starter list (FR-47), and the browsers run at the same
+// time, so each project changes only its own aisle (categories.spec uses G–I; no test writes aisle
+// A), every added rule and category is unique to the run, only the test's own row is read, and the
+// test deletes its rule and gives its aisle the list it had before.
 
 /** One aisle per browser project, so parallel runs never replace each other's aisle list. */
 const CHECK_AISLE_BY_PROJECT: Record<string, string> = { chromium: "C", firefox: "D", msedge: "E" };
 
+type CheckView = {
+  rows: { part: string; category: string; current_location: Ref; aisle_categories: string[] }[];
+  outside_count: number;
+};
+
+const COUNT_LINE = /^[\d,]+ parts? outside (its|their) aisle's categories · [\d,]+ aisles? without categories$/;
+
+/** Opens the Categories page of the plan with CAT from the launcher. */
+async function openCategories(page: Page, planId: string) {
+  await page.goto(`/plans/${planId}/overview`);
+  await planReady(page);
+  await page.keyboard.press("Control+k");
+  await expect(searchField(page)).toBeFocused();
+  await page.keyboard.type("CAT");
+  await launcher(page).getByRole("option", { name: /Keyword rules and aisle categories/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories$`));
+}
+
+/** Follows the Category check link and waits for the heading, the plate and the count line. */
+async function openCategoryCheck(page: Page, planId: string): Promise<Locator> {
+  await page.getByRole("main").getByRole("link", { name: "Category check", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check$`));
+  const main = page.getByRole("main");
+  await expect(main.getByRole("heading", { level: 1, name: "Category check" })).toBeVisible();
+  await expect(plate(page)).toBeVisible();
+  await expect(main.getByText(COUNT_LINE)).toBeVisible();
+  return main.getByRole("table", { name: "Category check" });
+}
+
 test.describe("user journey steps of stage 2", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
+  });
+
+  test("uj1 fr47 the starter categories make the category check list parts with no setup", async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(120_000);
+    const run = randomUUID().slice(0, 8);
+    const planId = (await createSamplePlan(request, `Starter categories ${run}`)).id;
+
+    // CAT: the starter rule filter → Filters, and aisle A's starter categories.
+    await openCategories(page, planId);
+    await expect(ruleRow(page, "filter").getByRole("cell", { name: "Filters", exact: true })).toBeVisible();
+    await page.getByRole("tab", { name: "Aisle categories" }).click();
+    const aisleA = page.getByRole("listitem", { name: "Aisle A", exact: true });
+    for (const category of ["Filters", "Fluids"]) {
+      await expect(aisleA.getByRole("button", { name: `Remove ${category} from aisle A` })).toBeVisible();
+    }
+
+    // Category check: the count line and at least one part outside aisle A's categories.
+    const table = await openCategoryCheck(page, planId);
+    const inAisleA = table.locator("tbody tr").filter({
+      has: page.getByRole("cell", { name: "Filters, Fluids", exact: true }),
+    });
+    await expect(inAisleA.first()).toBeVisible();
+    await expect(inAisleA.first().getByRole("cell").nth(4)).toHaveText("A");
+    await expect(inAisleA.first().getByRole("cell").nth(2)).not.toHaveText(/^(Filters|Fluids)$/);
   });
 
   test("uj1 fr46 the category check lists a part outside its aisle's categories", async ({ page, request }, testInfo) => {
@@ -1235,60 +1292,51 @@ test.describe("user journey steps of stage 2", () => {
     const run = randomUUID().slice(0, 8);
     const aisle = CHECK_AISLE_BY_PROJECT[testInfo.project.name] ?? "B";
     const planId = (await createSamplePlan(request, `Category check ${run}`)).id;
-    // A randomly chosen lone part in the aisle: its whole description is its keyword (sample
-    // descriptions are unique, and none is a word run inside another).
-    const wall = await wallOf(request, planId, aisle);
-    const shuffled = [...wall.locations].sort(() => Math.random() - 0.5);
-    const lone = await lonePart(request, planId, shuffled, new Set());
-    const { description } = await getJson<{ description: string }>(
-      request,
-      `/api/plans/${planId}/parts/${encodeURIComponent(lone.part)}`,
-    );
-    testInfo.annotations.push({ type: "part", description: `${lone.part} at ${lone.from}: ${description}` });
-    const checked = { keyword: description, category: `Checked ${run}` };
     const aisleRule = { keyword: `kwz${run}`, category: `Aisle ${run}` };
     const empty = (await locationRows(request, planId)).find((row) => !row.occupied && row.location.aisle === "A");
     expect(empty, "an empty location in aisle A").toBeDefined();
     if (!empty) return;
     const target = empty.location.code;
+    // Aisle A keeps its starter categories (no test writes it); the moved part's category is one of them.
+    const aisleACategories = await aisleCategoryList(request, "A");
+    expect(aisleACategories.length, "aisle A has categories").toBeGreaterThan(0);
 
-    // Pre-cleanup: a run killed before its `finally` may have left a rule with this keyword.
-    await removeCategories(request, [checked.keyword, aisleRule.keyword], aisle);
+    // Save the aisle's list (leftovers of a killed run dropped) and clear it.
+    const saved = await aisleCategoryList(request, aisle);
+    await removeCategories(request, [aisleRule.keyword], aisle, []);
     try {
-      // Open Categories with CAT and add the two rules: the part's category, and the one the aisle gets.
-      await page.goto(`/plans/${planId}/overview`);
-      await planReady(page);
-      await page.keyboard.press("Control+k");
-      await expect(searchField(page)).toBeFocused();
-      await page.keyboard.type("CAT");
-      await launcher(page).getByRole("option", { name: /Keyword rules and aisle categories/ }).click();
-      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories$`));
-      await addRule(page, checked.keyword, checked.category);
+      // Open Categories with CAT, add a rule whose category the aisle then gets.
+      await openCategories(page, planId);
       await addRule(page, aisleRule.keyword, aisleRule.category);
-
-      // Give the part's aisle the other category on the Aisle categories tab.
       await page.getByRole("tab", { name: "Aisle categories" }).click();
       await addAisleCategory(page, aisle, aisleRule.category);
 
+      // Every categorised part in the aisle is now outside: pick a lone one whose category aisle A has.
+      const view = await getJson<CheckView>(request, `/api/plans/${planId}/category-check`);
+      const keys = new Set(aisleACategories.map((category) => category.toLowerCase()));
+      const fits = new Map(
+        view.rows
+          .filter((row) => row.current_location.aisle === aisle && keys.has(row.category.toLowerCase()))
+          .map((row) => [row.part, row.category]),
+      );
+      const wall = await wallOf(request, planId, aisle);
+      const shuffled = [...wall.locations]
+        .filter((entry) => entry.parts.length === 1 && fits.has(entry.parts[0].part))
+        .sort(() => Math.random() - 0.5);
+      const lone = await lonePart(request, planId, shuffled, new Set());
+      const category = fits.get(lone.part) ?? "";
+      testInfo.annotations.push({ type: "part", description: `${lone.part} at ${lone.from}: ${category}` });
+
       // Category check: the toolbar plate, the count line and the part's row.
-      await page.getByRole("main").getByRole("link", { name: "Category check", exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check$`));
-      const main = page.getByRole("main");
-      await expect(main.getByRole("heading", { level: 1, name: "Category check" })).toBeVisible();
-      await expect(plate(page)).toBeVisible();
-      await expect(
-        main.getByText(/^[\d,]+ parts? outside (its|their) aisle's categories · [\d,]+ aisles? without categories$/),
-      ).toBeVisible();
-      const table = main.getByRole("table", { name: "Category check" });
+      const table = await openCategoryCheck(page, planId);
       const row = table.locator("tbody tr").filter({ has: page.locator(`[data-open-part="${lone.part}"]`) });
       await expect(row).toHaveCount(1);
-      await expect(row.getByRole("cell").nth(1)).toHaveText(description);
-      await expect(row.getByRole("cell").nth(2)).toHaveText(checked.category);
+      await expect(row.getByRole("cell").nth(2)).toHaveText(category);
       await expect(row.locator(`[data-location-chip="${lone.from}"]`)).toBeVisible();
       await expect(row.getByRole("cell").nth(4)).toHaveText(aisle);
       await expect(row.getByRole("cell").nth(5)).toHaveText(aisleRule.category);
 
-      // The part button opens its panel; a manual move into aisle A (no categories) clears the row.
+      // The part button opens its panel; a manual move into aisle A (meant for its category) clears the row.
       await row.locator(`[data-open-part="${lone.part}"]`).click();
       await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check\\?part=`));
       const panel = page.getByRole("complementary", { name: lone.part });
@@ -1314,7 +1362,7 @@ test.describe("user journey steps of stage 2", () => {
       );
       await expect(panel.getByRole("heading", { name: lone.part, level: 2 })).toBeFocused();
     } finally {
-      await removeCategories(request, [checked.keyword, aisleRule.keyword], aisle);
+      await removeCategories(request, [aisleRule.keyword], aisle, saved);
     }
   });
 });

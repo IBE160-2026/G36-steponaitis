@@ -146,7 +146,7 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
 
 
 def seed_demo_account(*, now: datetime) -> None:
-    """Create the `demo` account with `DEMO_PASSWORD` once (FR-50, AD-10); the only seed.
+    """Create the `demo` account with `DEMO_PASSWORD` once (FR-50, AD-10); seeded by `bootstrap`.
 
     An existing `demo` row is never changed. A concurrent seed that wins the unique
     constraint counts as success.
