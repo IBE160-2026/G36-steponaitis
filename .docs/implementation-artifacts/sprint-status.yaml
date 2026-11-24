@@ -148,7 +148,7 @@ development_status:
 
   epic-14: done
   14-1-print-location-labels-for-an-aisle: done
-  epic-14-retrospective: optional
+  epic-14-retrospective: done
 
   epic-15: done
   15-1-warn-when-someone-else-saved-the-plan: done
@@ -1014,3 +1014,33 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-14-retro-item-112-scan-a-chrome-printed-location-label-qr"
+    epic: 14
+    action: "Scan a Chrome-printed location-label QR code with a phone camera, record
+      it in a session log and tick issues.md:223 (clears the epic-14 verdict, V1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
+  - id: "epic-14-retro-item-113-move-the-duplicated-unmarked-locationref"
+    epic: 14
+    action: "Move the duplicated unmarked LocationRef builder (_ref in domain/labels.py
+      and domain/layout.py) into the domain kernel and the IMMUTABLE Cache-Control
+      constant into a shared API module (D1, D2)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
+  - id: "epic-14-retro-item-114-withdraw-the-mark-epics-14-15-dropped-pa"
+    epic: 14
+    action: "Withdraw the mark-Epics-14-15-dropped part of epic-13 item 108 and clear
+      the uj3 fr41 and uj5 skip placeholders through Story 15.1 and Epic 16 (G1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
+  - id: "epic-14-retro-item-115-land-the-epic-13-item-111-rule-before-th"
+    epic: 14
+    action: "Land the epic-13 item-111 rule before the next story: a story with a
+      human-only AC stays in review until confirmed, and build sub-agents start no
+      dev servers on 3000/8000 while an e2e gate is pending (V1, P2)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
