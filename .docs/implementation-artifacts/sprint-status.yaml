@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-24-2026 11:17
+last_updated: 11-24-2026 11:28
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -144,7 +144,7 @@ development_status:
   13-2-manage-keyword-rules-and-aisle-categories: done
   13-3-run-the-category-check-on-the-planning-copy: done
   13-4-starter-categories-for-the-demo-data: done
-  epic-13-retrospective: optional
+  epic-13-retrospective: done
 
   epic-14: backlog
   14-1-print-location-labels-for-an-aisle: backlog
@@ -958,3 +958,59 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-105-make-the-starter-seed-safe-at-startup-ch"
+    epic: 13
+    action: "Make the starter seed safe at startup: check both tables empty before
+      reading the TOML, retry or log the real cause on a busy SQLite lock, fix the
+      bootstrap docstring (R5, R6)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-106-add-a-stale-list-precondition-409-to-put"
+    epic: 13
+    action: "Add a stale-list precondition (409) to PUT /api/keyword-rules/order and
+      make Edit send only changed fields (R2, R8)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-107-close-epic-13-test-gaps-unmocked-concurr"
+    epic: 13
+    action: "Close epic-13 test gaps: unmocked concurrent rule/aisle write test, exact
+      aisle-text in check, check invalidation, 503 toast, finally in categories.spec.ts,
+      isolate the global reorder across browsers (R1, R3, R17, R21)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-108-reconcile-epics-md-context-ad-9-with-epi"
+    epic: 13
+    action: "Reconcile epics.md/context/AD-9 with Epic 13 (plan aisle-categories endpoint,
+      re-seed when empty), mark Epics 14-15 dropped in epics.md and sprint status,
+      resolve the skip placeholders against the 0-skipped gate, tick issues.md:210,212
+      (A4, A5)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-109-unify-category-aisle-text-normalisation"
+    epic: 13
+    action: "Unify category/aisle text normalisation (whitespace, NFC, format chars,
+      picker = server) and merge sendJson and postJson into lib/api (R10, R11, R14,
+      A2)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-110-check-the-ai-drafted-starter_categories"
+    epic: 13
+    action: "Check the AI-drafted starter_categories.toml (13.4 AC 1), record it in
+      the session log and file header, and decide the 90% outside demo result, renamed/invisible
+      aisle categories (V1, R9, R15, R19)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
+  - id: "epic-13-retro-item-111-run-the-13-1-follow-up-review-with-the-o"
+    epic: 13
+    action: "Run the 13.1 follow-up review with the outstanding ones, add the runbook
+      guard for followup_review_recommended, and keep stories with a human-only AC
+      out of done until confirmed (P1-P3)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
