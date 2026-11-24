@@ -4,6 +4,7 @@ import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-qu
 import { useRouter } from "next/navigation";
 import { type ReactNode, useLayoutEffect, useState } from "react";
 
+import { askPlanChanged, PlanChangedDialogHost } from "@/components/common/plan-changed-dialog";
 import { showToast, Toaster } from "@/components/common/toast";
 import { handleQueryError, type QueryErrorEffects } from "@/lib/api/query-errors";
 import { type Session, SESSION_KEY } from "@/lib/api/session";
@@ -41,6 +42,8 @@ export function Providers({ children }: { children: ReactNode }) {
         router.replace(LOGIN_HREF);
         return restored;
       },
+      // Someone else saved the plan (FR-41): Reload plan or Keep going, asked in a dialog.
+      planChanged: askPlanChanged,
     };
     return { queryClient: client, effects: shared };
   });
@@ -48,6 +51,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <CommandsProvider effects={effects}>{children}</CommandsProvider>
       <Toaster />
+      <PlanChangedDialogHost />
     </QueryClientProvider>
   );
 }

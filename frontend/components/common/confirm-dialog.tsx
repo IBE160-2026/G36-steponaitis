@@ -24,6 +24,10 @@ type ConfirmDialogProps = {
   onCloseAutoFocus?: (event: Event) => void;
   /** The confirm action loses something (default): the destructive button. `false` gives the primary one. */
   destructive?: boolean;
+  /** The label of the button in the Cancel position (default "Cancel"). */
+  cancelLabel?: string;
+  /** Runs when the Cancel-position button is clicked (Escape and closing call only `onOpenChange`). */
+  onCancel?: () => void;
 };
 
 const FADE =
@@ -38,6 +42,8 @@ export function ConfirmDialog({
   onConfirm,
   onCloseAutoFocus,
   destructive = true,
+  cancelLabel = "Cancel",
+  onCancel,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -53,7 +59,9 @@ export function ConfirmDialog({
             {CONFIRM_BUTTON_ORDER.map((kind) =>
               kind === "cancel" ? (
                 <AlertDialog.Cancel key={kind} asChild>
-                  <Button variant="tertiary">Cancel</Button>
+                  <Button variant="tertiary" onClick={onCancel}>
+                    {cancelLabel}
+                  </Button>
                 </AlertDialog.Cancel>
               ) : (
                 <AlertDialog.Action key={kind} asChild>

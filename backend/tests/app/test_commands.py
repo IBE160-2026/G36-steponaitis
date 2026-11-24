@@ -43,6 +43,11 @@ def _remove(mark: BestMark, base_version: int = 1) -> RemoveBestMark:
     return RemoveBestMark(command_id=uuid.uuid4(), base_version=base_version, mark=mark)
 
 
+def _version(plan_id: uuid.UUID) -> int:
+    """The plan's current version: what a client that saw the last save sends (FR-41)."""
+    return _row(plan_id)[0]
+
+
 def test_fr21_set_mark_over_http(empty_tables: str) -> None:
     plan_id = _create("Marks", CREATED)
 
@@ -93,9 +98,9 @@ def test_fr11_last_edited_by_planner(empty_tables: str) -> None:
 def test_fr21_overlapping_marks_keep_location_best(empty_tables: str) -> None:
     plan_id = _create("Overlap", CREATED)
     run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
-    run_command(plan_id, _set(LevelMark(level="1", aisle=None)), now=NOW)
+    run_command(plan_id, _set(LevelMark(level="1", aisle=None), _version(plan_id)), now=NOW)
 
-    run_command(plan_id, _remove(AisleMark(aisle="A")), now=NOW)
+    run_command(plan_id, _remove(AisleMark(aisle="A"), _version(plan_id)), now=NOW)
 
     with TestClient(create_app()) as client:
         summary = client.get(f"/api/plans/{plan_id}")
@@ -121,7 +126,7 @@ def test_fr10_repeated_command_id_after_other_commands(empty_tables: str) -> Non
     plan_id = _create("Idempotent later", CREATED)
     command = _set(AisleMark(aisle="A"))
     first = run_command(plan_id, command, now=NOW)
-    run_command(plan_id, _set(LocationMark(location="A-01")), now=NOW)
+    run_command(plan_id, _set(LocationMark(location="A-01"), _version(plan_id)), now=NOW)
 
     again = run_command(plan_id, command, now=NOW + timedelta(hours=1))
 
@@ -132,8 +137,8 @@ def test_fr10_repeated_command_id_after_other_commands(empty_tables: str) -> Non
 @pytest.mark.parametrize(
     "command",
     [
-        pytest.param(lambda: _set(AisleMark(aisle="A")), id="set existing"),
-        pytest.param(lambda: _remove(LocationMark(location="X")), id="remove missing"),
+        pytest.param(lambda: _set(AisleMark(aisle="A"), 2), id="set existing"),
+        pytest.param(lambda: _remove(LocationMark(location="X"), 2), id="remove missing"),
     ],
 )
 def test_fr21_noop_mark_does_not_bump_version(empty_tables: str, command: Any) -> None:
@@ -152,26 +157,39 @@ def test_fr21_noop_mark_does_not_bump_version(empty_tables: str, command: Any) -
     assert str(noop.command_id) not in {e["command_id"] for e in state_after.recent_commands}
 
 
-def test_fr10_stale_base_version_applies_and_is_recorded(empty_tables: str) -> None:
+def test_fr10_fr41_stale_base_version_is_refused_then_current_is_recorded(
+    empty_tables: str,
+) -> None:
     plan_id = _create("Stale", CREATED)
     run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
-    run_command(plan_id, _set(AisleMark(aisle="B")), now=NOW)
+    run_command(plan_id, _set(AisleMark(aisle="B"), 2), now=NOW)
+    before = (_row(plan_id), plans.require(plan_id).state)
     stale = _set(LocationMark(location="A-01"), base_version=1)
 
-    result = run_command(plan_id, stale, now=NOW)
+    with pytest.raises(DomainError) as refused:
+        run_command(plan_id, stale, now=NOW + timedelta(hours=1))
+
+    assert refused.value.code == "plan_changed"
+    assert refused.value.details == [
+        {"current_version": 3, "last_edited_by": "planner", "last_edited_at": NOW.isoformat()}
+    ]
+    assert (_row(plan_id), plans.require(plan_id).state) == before
+
+    current = stale.model_copy(update={"base_version": 3})
+    result = run_command(plan_id, current, now=NOW)
 
     assert result.version == 4
     entry = plans.require(plan_id).state.recent_commands[-1]
     assert entry == {
         "command_id": str(stale.command_id),
-        "base_version": 1,
+        "base_version": 3,
         "result": result.model_dump(mode="json"),
     }
 
 
 def test_fr10_recent_commands_keep_last_50(empty_tables: str) -> None:
     plan_id = _create("Fifty", CREATED)
-    commands = [_set(LocationMark(location=f"L-{n:02d}")) for n in range(51)]
+    commands = [_set(LocationMark(location=f"L-{n:02d}"), n + 1) for n in range(51)]
     for command in commands:
         run_command(plan_id, command, now=NOW)
 
@@ -180,7 +198,7 @@ def test_fr10_recent_commands_keep_last_50(empty_tables: str) -> None:
     assert _row(plan_id)[0] == 52
 
 
-def test_fr10_concurrent_commands_both_apply(
+def test_fr10_fr41_concurrent_commands_one_applies_other_is_warned(
     empty_tables: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     plan_id = _create("Concurrent", CREATED)
@@ -217,11 +235,16 @@ def test_fr10_concurrent_commands_both_apply(
     for thread in threads:
         thread.join()
 
-    assert errors == []
+    # Both were built on version 1: the write lock serialises them, the first applies and
+    # the second reads version 2 under the lock and is warned (FR-41), never applied blindly.
     assert overlaps == []
-    assert sorted(result.version for result in results) == [2, 3]
-    assert _row(plan_id)[0] == 3
-    assert set(plans.require(plan_id).state.best_marks) == {c.mark for c in commands}
+    assert [result.version for result in results] == [2]
+    assert len(errors) == 1
+    assert isinstance(errors[0], DomainError)
+    assert errors[0].code == "plan_changed"
+    assert errors[0].details[0]["current_version"] == 2
+    assert _row(plan_id)[0] == 2
+    assert len(plans.require(plan_id).state.best_marks) == 1
 
 
 def test_fr10_lost_race_is_retried(empty_tables: str, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -244,6 +267,35 @@ def test_fr10_lost_race_is_retried(empty_tables: str, monkeypatch: pytest.Monkey
     assert _row(plan_id)[0] == 2
     assert plans.require(plan_id).state.best_marks == [AisleMark(aisle="A")]
     assert len(plans.require(plan_id).state.recent_commands) == 1
+
+
+def test_fr41_lost_race_to_another_save_warns(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan_id = _create("Lost race", CREATED)
+    original = store_plans.PlanWriter.save_state
+    calls: list[int] = []
+
+    def other_saves_first(self: store_plans.PlanWriter, *args: Any, **kwargs: Any) -> bool:
+        calls.append(1)
+        if len(calls) == 1:
+            # Another planner's save lands between this read and this save.
+            state = self.plan.state.model_copy(update={"best_marks": [AisleMark(aisle="B")]})
+            assert original(self, state, last_edited_by="Ola", last_edited_at=NOW)
+            return False
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(store_plans.PlanWriter, "save_state", other_saves_first)
+
+    with pytest.raises(DomainError) as refused:
+        run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
+
+    assert len(calls) == 1
+    assert refused.value.code == "plan_changed"
+    assert refused.value.details == [
+        {"current_version": 2, "last_edited_by": "Ola", "last_edited_at": NOW.isoformat()}
+    ]
+    assert plans.require(plan_id).state.best_marks == [AisleMark(aisle="B")]
 
 
 def test_fr10_conditional_update_on_changed_version_writes_nothing(empty_tables: str) -> None:

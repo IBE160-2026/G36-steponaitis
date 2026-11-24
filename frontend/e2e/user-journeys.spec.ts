@@ -26,8 +26,8 @@ import { type APIRequestContext, expect, type Locator, type Page, test, toasts }
 // numbers. The API is used only to set up the state a journey takes as given ("a plan saved last
 // week", "another plan Spring re-slot") and to read view JSON for data-dependent picks (which part,
 // which location): the example values in EXPERIENCE.md are illustrative. UJ-1's category check
-// (Epic 13) and UJ-2's location labels (Epic 14) run near the end; steps that need Epics 15–16 are
-// declared as skipped tests after them.
+// (Epic 13), UJ-2's location labels (Epic 14) and UJ-3's concurrent-edit warning (Epic 15) run near
+// the end; the step that needs Epic 16 is declared as a skipped test after them.
 // The existing specs stay the per-step detail tests:
 //
 // - UJ-1: new-plan, plan-overview, locations-wall, best-locations-wall, recommendations-page,
@@ -1419,5 +1419,105 @@ test.describe("user journey steps of stage 2: location labels", () => {
 // -------------------------------------------------------------------------------------------------
 // Journey steps that need later epics: declared here so the report lists them as skipped.
 
-test.skip("uj3 fr41 a concurrent edit by another planner shows the warning (Epic 15, if time allows)", async () => {});
+test.describe("user journey steps of stage 2: concurrent edits", () => {
+  const PLAN_CHANGED_TEXT =
+    "Someone saved this plan after you opened it. Reload it to see their changes, or keep going and your change is added on top of theirs.";
+
+  /** Opens Best locations in Level · in all aisles mode; returns the marks list. */
+  async function openLevelMarking(page: Page, planId: string): Promise<Locator> {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/plans/${planId}/best-locations`);
+    const main = page.getByRole("main");
+    await expect(main.getByRole("grid", { name: "Aisle A bin wall" })).toBeVisible();
+    await main.getByRole("radiogroup", { name: "Marking mode" }).getByRole("radio", { name: "Level", exact: true }).click();
+    await main.getByRole("radiogroup", { name: "Level scope" }).getByRole("radio", { name: "in all aisles" }).click();
+    return main.getByRole("list", { name: "Best-location marks" });
+  }
+
+  /** Marks `level` in all aisles from the keyboard (the dialog's focus returns to this button). */
+  async function markLevel(page: Page, level: number) {
+    const button = page.getByRole("main").locator(`[data-level-mark="${level}"]`).first();
+    await expect(button).toHaveAccessibleName(`Mark level ${level} in all aisles`);
+    await button.focus();
+    await page.keyboard.press("Enter");
+  }
+
+  test("uj3 fr41 a concurrent edit by another planner shows the warning", async ({ page, browser, storageState, request }) => {
+    test.setTimeout(120_000);
+    // Given: one plan open in two sessions, A (this page) and B (a second browser context).
+    const planId = (await createSamplePlan(request, `Shared ${randomUUID().slice(0, 8)}`)).id;
+    const contextB = await browser.newContext({ storageState });
+    try {
+      const pageB = await contextB.newPage();
+      const marksA = await openLevelMarking(page, planId);
+      const marksB = await openLevelMarking(pageB, planId);
+      await expect(marksA.getByRole("listitem")).toHaveCount(0);
+
+      // B saves a change; A, still on the older version, then changes the plan: the dialog.
+      await markLevel(pageB, 1);
+      await expectMarksSaved(pageB);
+      await expect(marksB.getByRole("listitem")).toHaveText(["Level 1 in all aisles"]);
+      await markLevel(page, 2);
+      const dialog = page.getByRole("alertdialog", { name: "This plan has changed" });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByText(PLAN_CHANGED_TEXT, { exact: true })).toBeVisible();
+      await expect(dialog.getByRole("button")).toHaveText(["Reload plan", "Keep going"]);
+      await expect(dialog.getByRole("button", { name: "Reload plan" })).toBeFocused();
+      // The change is held: nothing of B's or A's shows in A yet.
+      await expect(marksA.getByRole("listitem")).toHaveCount(0);
+
+      // Keep going: A's change is added after B's, and both are visible.
+      await dialog.getByRole("button", { name: "Keep going" }).click();
+      await expect(dialog).toHaveCount(0);
+      await expectMarksSaved(page);
+      await expect(marksA.getByRole("listitem")).toHaveText(["Level 1 in all aisles", "Level 2 in all aisles"]);
+
+      // Second round: B (opened again) saves another change; A changes again and chooses Reload plan.
+      await openLevelMarking(pageB, planId);
+      await expect(marksB.getByRole("listitem")).toHaveText(["Level 1 in all aisles", "Level 2 in all aisles"]);
+      await markLevel(pageB, 3);
+      await expectMarksSaved(pageB);
+      await markLevel(page, 4);
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "Reload plan" })).toBeFocused();
+      await dialog.getByRole("button", { name: "Reload plan" }).click();
+      await expect(dialog).toHaveCount(0);
+      // B's change shows, A's does not.
+      await expect(marksA.getByRole("listitem")).toHaveText([
+        "Level 1 in all aisles",
+        "Level 2 in all aisles",
+        "Level 3 in all aisles",
+      ]);
+      await expect(page.getByRole("main").locator('[data-level-mark="4"]').first()).toHaveAccessibleName(
+        "Mark level 4 in all aisles",
+      );
+      await expect(page.getByRole("main").getByText("Saving the last change…")).toHaveCount(0);
+      expect((await summaryOf(request, planId)).version).toBe(4);
+
+      // Third round: B removes level 1; A changes again and closes the dialog with Escape, which
+      // is Reload plan: A's change is not saved and nothing is left saving.
+      await openLevelMarking(pageB, planId);
+      const unmark1 = pageB.getByRole("main").locator('[data-level-mark="1"]').first();
+      await expect(unmark1).toHaveAccessibleName("Unmark level 1 in all aisles");
+      await unmark1.focus();
+      await pageB.keyboard.press("Enter");
+      await expectMarksSaved(pageB);
+      await expect(marksB.getByRole("listitem")).toHaveText(["Level 2 in all aisles", "Level 3 in all aisles"]);
+      await markLevel(page, 4);
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "Reload plan" })).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0);
+      await expect(marksA.getByRole("listitem")).toHaveText(["Level 2 in all aisles", "Level 3 in all aisles"]);
+      await expect(page.getByRole("main").locator('[data-level-mark="4"]').first()).toHaveAccessibleName(
+        "Mark level 4 in all aisles",
+      );
+      await expect(page.getByRole("main").getByText("Saving the last change…")).toHaveCount(0);
+      expect((await summaryOf(request, planId)).version).toBe(5);
+    } finally {
+      await contextB.close();
+    }
+  });
+});
+
 test.skip("uj5 the examiner opens the public deployment's demo front page (Epic 16, deployment)", async () => {});

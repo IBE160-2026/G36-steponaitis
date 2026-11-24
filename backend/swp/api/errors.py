@@ -21,6 +21,7 @@ STATUS_BY_CODE: Mapping[str, int] = {
     "import_invalid": 422,
     "validation_failed": 422,
     "command_rejected": 409,
+    "plan_changed": 409,
     "plan_not_found": 404,
     "not_found": 404,
     "unauthenticated": 401,

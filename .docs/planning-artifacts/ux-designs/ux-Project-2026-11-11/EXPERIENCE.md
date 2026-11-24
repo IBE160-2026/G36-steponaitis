@@ -406,7 +406,7 @@ Justas, the warehouse planner, suspects the fast-moving parts have drifted to th
 6. **Climax:** the new printout's header carries a new generated time, so the fresh list is clearly told apart from last week's paper on the desk.
 7. To try a different set of best locations without losing this plan, Justas uses **New Plan from this import** from the plan plate menu. The new plan has the same import and none of the marks or moves.
 
-**Failure path (if time allows):** another planner has saved the same plan meanwhile. Justas's next change shows the FR-41 warning. Justas reloads or continues, and the last save wins.
+**Failure path (if time allows):** another planner has saved the same plan meanwhile. Justas's next change shows the FR-41 warning. Justas reloads or continues, and a continued change is added on top of theirs.
 
 ### UJ-4. Justas changes a colour from the Key
 

@@ -127,7 +127,7 @@ flowchart LR
 
     Commands refer to marks by value and to recommendations by `id`, never by index, number or part.
   - **Result.** The response is `{version, events[]}`. `events` is a closed union built by the domain: `move_made`, `moves_combined`, `move_removed`, `swap_made`, `step_undone`, `recommendations_outdated{count, cause}`, `run_done{round, recommendations, no_space}`, `plan_reset{moves_removed}`, `mark_set`, `mark_removed`, `keep_set`, `keep_removed`, `apply_all_done{applied[], skipped[{number, cause}]}`. A repeated `command_id` returns the stored result. A no-op (setting a mark that already exists, removing one that doesn't) returns 200 with no events and does not bump `version` or `last_edited_*`.
-  - **Service.** `swp.app` reads the plan, runs `domain.apply(state, command, ctx)` and then `domain.recommendations.revalidate`, and saves with `UPDATE … SET state=…, version=version+1 … WHERE id=:id AND version=:read_version`. When 0 rows change, it re-reads and re-applies, up to 3 times. SQLite transactions start with `BEGIN IMMEDIATE`; Postgres may also use `SELECT … FOR UPDATE`. `base_version` is recorded but not enforced, so the command applies on top of the current state. FR-41 later adds a warning.
+  - **Service.** `swp.app` reads the plan, runs `domain.apply(state, command, ctx)` and then `domain.recommendations.revalidate`, and saves with `UPDATE … SET state=…, version=version+1 … WHERE id=:id AND version=:read_version`. When 0 rows change, it re-reads and re-applies, up to 3 times. SQLite transactions start with `BEGIN IMMEDIATE`; Postgres may also use `SELECT … FOR UPDATE`. `base_version` is recorded and checked (FR-41, Story 15.1): after the stored result of a repeated `command_id` is looked up and before the command is applied, a `base_version` below the `version` read under the write lock is refused with `plan_changed`, and nothing is saved. A lost race re-reads the version and is refused the same way. The client then reloads, or resends the same command with the new `base_version` so it applies on top of the current state.
   - **Apply all.** It folds over the latest run's recommendations in `number` order. Each one is applied if it is open, its part is not kept in place, and it passes `revalidate` on the intermediate state, with `revalidate` run again after each apply. The whole fold is one transaction and one version bump.
   - **Other writes.** The only other writes are New Plan (`POST /api/plans`, multipart, not idempotent: the client disables submit while it is in flight and never retries it) and Delete (`DELETE /api/plans/{id}`). GET requests never write (FR-9).
 
@@ -209,6 +209,7 @@ flowchart LR
   | `import_invalid` | 422 | details: AD-8 |
   | `validation_failed` | 422 | details: `[{field, message}]`; also replaces FastAPI's request-validation errors |
   | `command_rejected` | 409 | |
+  | `plan_changed` | 409 | `base_version` is behind the plan's `version` (FR-41); details: `[{current_version, last_edited_by, last_edited_at}]` |
   | `plan_not_found` | 404 | |
   | `not_found` | 404 | |
   | `unauthenticated` | 401 | |
@@ -231,6 +232,7 @@ flowchart LR
   - **While unconfirmed.** Every plan-changing control is `aria-disabled` with the reason "Saving the last change…". Transient UI that is not plan state may show until the response arrives: the dragged bin, "Running…".
   - **Network error or 502/503/504.** Retry with the same `command_id` after 1, 2, 4 and 8 s, showing "The last change was not saved yet. Trying again." After that, or after a 500: drop the command, refetch, and show "The change was not saved. Try again." For `run`, show the "Run failed" state from EXPERIENCE.md instead.
   - **`unauthenticated`.** Keep the command, go to Log in, and resend it after login.
+  - **`plan_changed`** (FR-41). Keep the command, still pending, and ask in a dialog: **Reload plan** drops it and refetches; **Keep going** refetches and resends the same `command_id` with the new `base_version` (the highest version the client has seen). Without an answer, reload.
   - **`plan_not_found`** (from any request). Show "This plan was deleted." and open the saved-plans list (milestone 1: New Plan).
   - **Other 4xx.** Drop the command, show `message`, refetch.
   - One TanStack Query error hook applies the same 401/404 rules to GETs.
@@ -474,8 +476,8 @@ The walking skeleton runs `GET /api/health` and one page locally. Deployment to 
 
 - **Endpoint fields and view payloads.** Each story sets its own. AD-3, AD-6, AD-11 and AD-13 bind their shape, and the generated types keep both sides in step.
 - **How the wall is drawn** (SVG or DOM) and the component breakdown. DESIGN.md and EXPERIENCE.md govern the look; AD-15 governs the data.
-- **FR-41 concurrent-edit warning** (if time allows). It warns when `base_version` is behind, then applies the command on top of the current state. There is no whole-plan overwrite.
-- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is decided (Story 14.1): `uqr` 0.1.3, bundled, draws each label's QR code as inline SVG with no network call, and `jsqr` 1.4.0 decodes them in tests only. The story that builds the rest updates this spine in the same change: Story 15.1 (error code `plan_changed` added to AD-11).
+- **FR-41 concurrent-edit warning:** built in Story 15.1 (AD-6, AD-11 `plan_changed`, AD-12). There is no whole-plan overwrite.
+- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is decided (Story 14.1): `uqr` 0.1.3, bundled, draws each label's QR code as inline SVG with no network call, and `jsqr` 1.4.0 decodes them in tests only. Story 15.1 added the error code `plan_changed` to AD-11 in its own change.
 - **Operations the demo doesn't need:** backups, monitoring beyond the keep-alive, Redis, file storage, email, payments, maintenance page. The data is synthetic and the scale is NFR-7.
 - **IP-based rate limiting.** Serverless instances share no memory. AD-18's per-username throttle is enough for the demo.
 

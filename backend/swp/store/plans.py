@@ -202,6 +202,8 @@ class LockedPlan:
     id: uuid.UUID
     version: int
     state: PlanState
+    last_edited_by: str
+    last_edited_at: datetime
 
 
 class PlanBusy(Exception):
@@ -265,13 +267,19 @@ class PlanWriter:
 
 @contextmanager
 def plan_for_update(plan_id: uuid.UUID) -> Iterator[PlanWriter | None]:
-    """The plan's id, version and state locked for a read-modify-write in one transaction;
-    None if there is no such plan. Raise PlanBusy when the lock cannot be taken.
+    """The plan's id, version, state and last edit locked for a read-modify-write in one
+    transaction; None if there is no such plan. Raise PlanBusy when the lock cannot be taken.
 
     The transaction commits when the block ends and rolls back if it raises.
     """
     query = (
-        select(PlanRow.id, PlanRow.version, PlanRow.state)
+        select(
+            PlanRow.id,
+            PlanRow.version,
+            PlanRow.state,
+            PlanRow.last_edited_by,
+            PlanRow.last_edited_at,
+        )
         .where(PlanRow.id == plan_id)
         .with_for_update()
     )
@@ -290,6 +298,8 @@ def plan_for_update(plan_id: uuid.UUID) -> Iterator[PlanWriter | None]:
             id=row.id,
             version=row.version,
             state=PlanState.model_validate(upcast("state", row.state)),
+            last_edited_by=row.last_edited_by,
+            last_edited_at=row.last_edited_at,
         )
         yield PlanWriter(session, plan)
 

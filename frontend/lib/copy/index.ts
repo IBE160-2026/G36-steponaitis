@@ -338,6 +338,15 @@ export function undoneToast(event: StepUndoneEvent, outdatedCount: number, round
 export const MORE_ACTIONS = "More actions";
 /** The menu item and the launcher action. */
 export const RESET_ITEM = "Reset…";
+/** The plan-changed dialog (FR-41, Story 15.1): someone else saved the plan since it was opened. */
+export const PLAN_CHANGED_TITLE = "This plan has changed";
+export const PLAN_CHANGED_TEXT =
+  "Someone saved this plan after you opened it. Reload it to see their changes, or keep going and your change is added on top of theirs.";
+/** Cancel position: drops the held change and shows the plan as it is now. */
+export const PLAN_CHANGED_RELOAD = "Reload plan";
+/** Primary: sends the held change again on top of the other planner's changes. */
+export const PLAN_CHANGED_KEEP = "Keep going";
+
 /** The confirm dialog's title. */
 export const RESET_TITLE = "Reset plan";
 /** The confirm dialog's destructive button. */

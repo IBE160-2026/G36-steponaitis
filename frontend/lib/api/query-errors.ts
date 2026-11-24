@@ -16,6 +16,11 @@ export type QueryErrorEffects = {
    * Resolves after the next successful Log in.
    */
   sessionExpired: () => Promise<void>;
+  /**
+   * Someone else saved the plan since this planner's command was built (FR-41): ask whether to
+   * reload the plan (drop the command) or keep going (send it again on top). Absent: reload.
+   */
+  planChanged?: () => Promise<"reload" | "keep">;
 };
 
 export function handleQueryError(error: unknown, effects: QueryErrorEffects): void {

@@ -1,7 +1,9 @@
 // Client command flow (AD-12, Story 3.3): the one way the client changes a plan. One command at a
 // time per plan, each with a new `command_id` and the current `base_version`; transient failures
 // retry with the same body; a command that meets an ended session waits for Log in and is then
-// sent again unchanged (Story 9.3); nothing changes on screen until the server confirms and the plan
+// sent again unchanged (Story 9.3); a command built on an older version than the plan's
+// (`plan_changed`, FR-41) is held while the planner chooses Reload plan (drop it) or Keep going (send
+// it again with the new `base_version`); nothing changes on screen until the server confirms and the plan
 // queries are refetched. Framework-free: React bindings live in `./react.tsx`, effects (toast,
 // navigation) are injected so `lib/` never imports `components/`.
 
@@ -96,6 +98,12 @@ export function staleIndexes(datas: readonly unknown[]): number[] {
   return defined.flatMap((version, index) => (version < highest ? [index] : []));
 }
 
+/** `details[0].current_version` of a `plan_changed` error, when it is a number. */
+function currentVersionOf(error: ApiError): number | undefined {
+  const version = (error.details[0] as { current_version?: unknown } | undefined)?.current_version;
+  return typeof version === "number" ? version : undefined;
+}
+
 type PostOutcome = { ok: CommandResult } | "transient" | ApiError;
 
 export class CommandClient {
@@ -105,6 +113,8 @@ export class CommandClient {
   private readonly randomId: () => string;
   private readonly states = new Map<string, PlanCommandState>();
   private readonly listeners = new Set<() => void>();
+  /** The last version per plan this client saw confirmed or reported by `plan_changed` (FR-41). */
+  private readonly seenVersions = new Map<string, number>();
 
   constructor(queryClient: QueryClient, effects: QueryErrorEffects, options: CommandClientOptions = {}) {
     this.queryClient = queryClient;
@@ -145,7 +155,7 @@ export class CommandClient {
         command = {
           ...body,
           command_id: this.randomId(),
-          base_version: baseVersion(this.queryClient, planId),
+          base_version: this.baseFor(planId),
         } as Command;
       } catch {
         return { outcome: await this.fail(planId), events: [] };
@@ -160,6 +170,21 @@ export class CommandClient {
           await this.effects.sessionExpired();
           continue;
         }
+        if (outcome instanceof ApiError && outcome.code === "plan_changed") {
+          // Someone else saved the plan (FR-41): hold the command, still pending, until the planner
+          // chooses. Reload plan drops it; Keep going refetches and sends the same `command_id` again
+          // with the new `base_version`, so it is applied on top of the other changes.
+          const current = currentVersionOf(outcome);
+          if (current !== undefined) this.see(planId, current);
+          this.update(planId, { notice: null });
+          if ((await this.askPlanChanged()) !== "keep") {
+            return { outcome: await this.dropForReload(planId), events: [] };
+          }
+          await this.refetchPlan(planId);
+          command = { ...command, base_version: this.baseFor(planId) } as Command;
+          attempt = 0;
+          continue;
+        }
         if (outcome !== "transient") break;
         if (attempt === RETRY_DELAYS_MS.length) return { outcome: await this.fail(planId), events: [] };
         this.update(planId, { notice: "retrying" });
@@ -167,6 +192,7 @@ export class CommandClient {
         attempt++;
       }
       if (outcome instanceof ApiError) return { outcome: await this.reject(planId, outcome), events: [] };
+      this.see(planId, outcome.ok.version);
       await this.refetchConsistent(planId, outcome.ok.version);
       this.update(planId, { pending: false, notice: null, saved: true });
       return { outcome: "confirmed", events: Array.isArray(outcome.ok.events) ? outcome.ok.events : [] };
@@ -203,6 +229,35 @@ export class CommandClient {
     } catch {
       return internalError(500);
     }
+  }
+
+  /**
+   * The `base_version` to send: the highest cached plan version or the last version this client saw
+   * confirmed or reported, so a refetch that failed after an own command never warns falsely.
+   */
+  private baseFor(planId: string): number {
+    return Math.max(baseVersion(this.queryClient, planId), this.seenVersions.get(planId) ?? 0);
+  }
+
+  private see(planId: string, version: number): void {
+    if (version > (this.seenVersions.get(planId) ?? 0)) this.seenVersions.set(planId, version);
+  }
+
+  /** The planner's choice on `plan_changed`; no effect (or a failing one) means Reload plan. */
+  private async askPlanChanged(): Promise<"reload" | "keep"> {
+    if (!this.effects.planChanged) return "reload";
+    try {
+      return await this.effects.planChanged();
+    } catch {
+      return "reload";
+    }
+  }
+
+  /** Reload plan: drop the held command, refetch every plan query, clear the notice. */
+  private async dropForReload(planId: string): Promise<"dropped"> {
+    await this.refetchPlan(planId);
+    this.update(planId, { pending: false, notice: null, saved: false });
+    return "dropped";
   }
 
   /** 500 or retries exhausted: drop, refetch, show the failed notice. */

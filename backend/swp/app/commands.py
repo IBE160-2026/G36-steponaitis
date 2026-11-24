@@ -1,10 +1,12 @@
 """Command service: the one write path for plan changes (AD-6, FR-10, FR-11).
 
 Reads the plan in a write transaction, applies the command in the domain and saves it with
-a conditional update on the version read. A repeated `command_id` returns its stored result,
-a no-op writes nothing, and a lost race is re-read and re-applied up to 3 times. The import
-and the analysis are read once before the lock (neither ever changes); a busy database
-answers `unavailable` at once and the client retries (AD-12).
+a conditional update on the version read. A repeated `command_id` returns its stored result;
+a command built on an older version than the plan's is then refused with `plan_changed`
+before it is applied (FR-41); a no-op writes nothing; and a lost race is re-read (and warned
+if the other save moved the version past `base_version`) up to 3 times. The import and the
+analysis are read once before the lock (neither ever changes); a busy database answers
+`unavailable` at once and the client retries (AD-12).
 """
 
 import uuid
@@ -16,12 +18,13 @@ from swp.domain.commands import Command, CommandContext, CommandResult
 from swp.domain.errors import DomainError
 from swp.domain.recommendations import revalidate
 from swp.domain.state import PlanState
-from swp.store.plans import PlanBusy, PlanInputs, get_plan_inputs, plan_for_update
+from swp.store.plans import LockedPlan, PlanBusy, PlanInputs, get_plan_inputs, plan_for_update
 
 MAX_ATTEMPTS = 4  # the first attempt and 3 retries
 RECENT_COMMANDS = 50
 NOT_SAVED = "The change was not saved. Try again."
 PLAN_BUSY = "The plan is busy. Try again."
+PLAN_CHANGED = "Someone saved this plan after you opened it."
 
 
 def _stored_result(state: PlanState, command_id: uuid.UUID) -> CommandResult | None:
@@ -30,6 +33,18 @@ def _stored_result(state: PlanState, command_id: uuid.UUID) -> CommandResult | N
         if entry.get("command_id") == key:
             return CommandResult.model_validate(entry["result"])
     return None
+
+
+def _plan_changed(plan: LockedPlan) -> DomainError:
+    """The command was built on an older version: someone else saved the plan since (FR-41)."""
+    details: list[dict[str, object]] = [
+        {
+            "current_version": plan.version,
+            "last_edited_by": plan.last_edited_by,
+            "last_edited_at": plan.last_edited_at.isoformat(),
+        }
+    ]
+    return DomainError("plan_changed", PLAN_CHANGED, details)
 
 
 def run_command(
@@ -57,6 +72,9 @@ def _run(
             stored = _stored_result(plan.state, command.command_id)
             if stored is not None:
                 return stored
+            # Checked on the version read under the lock, so a lost race's re-read warns too.
+            if command.base_version < plan.version:
+                raise _plan_changed(plan)
             applied = apply(plan.state, command, ctx, inputs.data, inputs.analysis)
             if not applied.events:
                 return CommandResult(version=plan.version, events=[])

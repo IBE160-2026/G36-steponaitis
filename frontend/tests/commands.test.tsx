@@ -495,6 +495,101 @@ describe("ad12 retries and failures", () => {
   });
 });
 
+describe("fr41 someone else saved the plan", () => {
+  // Story 15.1: a `plan_changed` 409 holds the command while the planner chooses.
+  const changed = (current: number) =>
+    json(409, {
+      error: {
+        code: "plan_changed",
+        message: "Someone saved this plan after you opened it.",
+        details: [{ current_version: current, last_edited_by: "Ola8", last_edited_at: "2026-11-24T10:00:00+00:00" }],
+      },
+    });
+
+  function withChoice(h: ReturnType<typeof setup>, ...choices: ("reload" | "keep")[]) {
+    const planChanged = vi.fn(async () => choices.shift() ?? "reload");
+    h.client.setEffects({ ...h.effects, planChanged });
+    return planChanged;
+  }
+
+  it("fr41_reload_plan_drops_the_command_and_refetches", async () => {
+    const h = setup({ summary: [6], locations: [6] });
+    const planChanged = withChoice(h, "reload");
+    const fetchMock = mockFetch(changed(6));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(planChanged).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(h.summaryFn).toHaveBeenCalledTimes(1);
+    expect(h.locationsFn).toHaveBeenCalledTimes(1);
+    expect(h.effects.notify).not.toHaveBeenCalled();
+    expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: null, saved: false });
+  });
+
+  it("fr41_keep_going_resends_the_same_command_id_with_the_new_base_version", async () => {
+    const h = setup({ summary: [6, 7], locations: [6, 7] });
+    const choice = deferred<"reload" | "keep">();
+    const planChanged = vi.fn(() => choice.promise);
+    h.client.setEffects({ ...h.effects, planChanged });
+    const fetchMock = mockFetch(changed(6), json(200, { version: 7, events: [] }));
+    const sending = h.client.send(PLAN, MARK_A);
+    await vi.waitFor(() => expect(planChanged).toHaveBeenCalledTimes(1));
+    // Held while the dialog is open: still pending ("Saving the last change…"), no notice.
+    expect(h.client.getState(PLAN)).toEqual({ pending: true, notice: null, saved: false });
+    choice.resolve("keep");
+    expect(await sending).toBe("confirmed");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(bodyOf(fetchMock, 0)).toEqual({ ...MARK_A, command_id: "cmd-1", base_version: 4 });
+    expect(bodyOf(fetchMock, 1)).toEqual({ ...MARK_A, command_id: "cmd-1", base_version: 6 });
+    expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: null, saved: true });
+  });
+
+  it("fr41_keep_going_uses_the_reported_version_when_the_refetch_lags", async () => {
+    const h = setup({ summary: [5], locations: [5] });
+    withChoice(h, "keep");
+    const fetchMock = mockFetch(changed(6), json(200, { version: 7, events: [] }));
+    await h.client.send(PLAN, MARK_A);
+    expect(bodyOf(fetchMock, 1).base_version).toBe(6);
+  });
+
+  it("fr41_warned_again_asks_again", async () => {
+    const h = setup({ summary: [6, 8, 9], locations: [6, 8, 9] });
+    const planChanged = withChoice(h, "keep", "keep");
+    const fetchMock = mockFetch(changed(6), changed(8), json(200, { version: 9, events: [] }));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("confirmed");
+    expect(planChanged).toHaveBeenCalledTimes(2);
+    expect([0, 1, 2].map((call) => bodyOf(fetchMock, call).base_version)).toEqual([4, 6, 8]);
+    expect(new Set([0, 1, 2].map((call) => bodyOf(fetchMock, call).command_id))).toEqual(new Set(["cmd-1"]));
+  });
+
+  it("fr41_keep_going_that_no_longer_fits_is_rejected_like_any_command", async () => {
+    const h = setup({ summary: [6], locations: [6] });
+    withChoice(h, "keep");
+    mockFetch(changed(6), envelope(409, "command_rejected", "Recommendation #1 is outdated."));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(h.effects.notify).toHaveBeenCalledWith("Recommendation #1 is outdated.");
+    expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: null, saved: false });
+  });
+
+  it("fr41_without_a_plan_changed_effect_it_reloads", async () => {
+    const h = setup({ summary: [6], locations: [6] });
+    const fetchMock = mockFetch(changed(6));
+    expect(await h.client.send(PLAN, MARK_A)).toBe("dropped");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(h.summaryFn).toHaveBeenCalledTimes(1);
+    expect(h.effects.notify).not.toHaveBeenCalled();
+    expect(h.client.getState(PLAN).pending).toBe(false);
+  });
+
+  it("fr41_base_version_is_never_below_the_last_confirmed_version", async () => {
+    // The refetch after the own command fails to bring the views past version 4.
+    const h = setup({ summary: [4], locations: [4] });
+    const fetchMock = mockFetch(json(200, { version: 5, events: [] }), json(200, { version: 6, events: [] }));
+    await h.client.send(PLAN, MARK_A);
+    await h.client.send(PLAN, MARK_A);
+    expect(bodyOf(fetchMock, 1).base_version).toBe(5);
+  });
+});
+
 describe("ad12 version-consistent plan data", () => {
   const v = (version: number) => ({ version });
 

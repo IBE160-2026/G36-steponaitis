@@ -106,14 +106,18 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   );
   await expect(main.getByText("Applied · move 1, round 1").first()).toBeVisible();
 
-  // 409: the next open row is applied elsewhere; Apply in the page shows the server's message and
-  // the refetched view shows the row as applied.
+  // 409: the next open row is applied elsewhere. The page's Apply is built on the older version, so
+  // the plan-changed dialog asks first (FR-41); Keep going resends it, and the server's message
+  // shows and the refetched view shows the row as applied.
   await main.getByRole("tab", { name: /^Open, / }).click();
   const now = visibleOpen(await getJson<View>(request, `/api/plans/${planId}/recommendations`));
   const taken = now[0];
   await expect(eyebrow).toHaveText(eyebrowOf(taken));
   await command(request, planId, { type: "apply", recommendation_id: taken.id });
   await detail.getByRole("button", { name: "Apply", exact: true }).click();
+  const planChanged = page.getByRole("alertdialog", { name: "This plan has changed" });
+  await planChanged.getByRole("button", { name: "Keep going" }).click();
+  await expect(planChanged).toHaveCount(0);
   await expect(toasts(page).getByText(`Recommendation #${taken.number} is already applied.`, { exact: true })).toBeVisible();
   await expect(listbox.getByRole("option", { name: new RegExp(`^#${taken.number}, `) })).toHaveCount(0);
   await main.getByRole("tab", { name: /^Applied, / }).click();

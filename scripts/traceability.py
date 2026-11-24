@@ -20,8 +20,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 # Core FRs: epics.md Story 12.5 AC (FR-1–FR-40, FR-42, FR-50, FR-51); NFRs: PRD NFR-1–NFR-12.
 CORE_FRS = [*(f"FR-{n}" for n in range(1, 41)), "FR-42", "FR-50", "FR-51"]
-# Stage 2 (spine: category check and labels, FR-43–FR-48): listed, never a failure.
-STAGE2_FRS = [f"FR-{n}" for n in range(43, 49)]
+# Stage 2 (spine: concurrent-edit warning FR-41, category check and labels FR-43–FR-48):
+# listed, never a failure.
+STAGE2_FRS = ["FR-41", *(f"FR-{n}" for n in range(43, 49))]
 NFRS = [f"NFR-{n}" for n in range(1, 13)]
 
 # An ID token: `fr`/`nfr` + digits, not preceded by a letter (so `nfr8` is never `fr8`) and
