@@ -152,7 +152,7 @@ development_status:
 
   epic-15: done
   15-1-warn-when-someone-else-saved-the-plan: done
-  epic-15-retrospective: optional
+  epic-15-retrospective: done
 
   epic-16: backlog
   16-1-live-on-the-public-vercel-url: backlog
@@ -1044,3 +1044,24 @@ action_items:
     owner: "Justas"
     status: open
     ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
+  - id: "epic-15-retro-item-116-write-the-session-log-for-story-15-1-wit"
+    epic: 15
+    action: "Write the session log for Story 15.1 with sesjonslogg, with its residual
+      risks as open points in issues.md (P1, R1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
+  - id: "epic-15-retro-item-117-reconcile-the-lost-race-path-with-fr-41"
+    epic: 15
+    action: "Reconcile the lost-race path with FR-41: drop the re-apply retry in app/commands.py
+      _run or reword AD-6 and the docstring (A2)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
+  - id: "epic-15-retro-item-118-run-each-epic-retrospective-before-the-n"
+    epic: 15
+    action: "Run each epic retrospective before the next epic first story so before-the-next-story
+      items can land (P2)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
