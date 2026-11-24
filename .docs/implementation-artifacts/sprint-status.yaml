@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-24-2026 09:30
+last_updated: 11-24-2026 10:13
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -142,7 +142,7 @@ development_status:
   epic-13: in-progress
   13-1-keyword-rules-are-stored-globally-and-give-each-part-a-categ: done
   13-2-manage-keyword-rules-and-aisle-categories: done
-  13-3-run-the-category-check-on-the-planning-copy: in-progress
+  13-3-run-the-category-check-on-the-planning-copy: done
   13-4-starter-categories-for-the-demo-data: backlog
   epic-13-retrospective: optional
 
