@@ -207,6 +207,23 @@ export function planSettingsHref(planId: string): string {
   return `/plans/${encodeURIComponent(planId)}/settings`;
 }
 
+/** The tabs of the Categories page (FR-43, FR-45): Keyword rules · Aisle categories. */
+export type CategoriesTab = "keywords" | "aisles";
+
+const CATEGORIES_TABS: readonly CategoriesTab[] = ["keywords", "aisles"];
+
+/** `/plans/<id>/categories` (Keyword rules), or `?tab=<tab>` for one tab. Not a flow step. */
+export function planCategoriesHref(planId: string, tab?: CategoriesTab): string {
+  const href = `/plans/${encodeURIComponent(planId)}/categories`;
+  return tab === undefined ? href : `${href}?${new URLSearchParams({ tab })}`;
+}
+
+/** `?tab=` → the Categories tab; Keyword rules when missing or unknown. */
+export function parseCategoriesTab(searchParams: SearchParamsInput): CategoriesTab {
+  const value = firstValue(searchParams, "tab");
+  return CATEGORIES_TABS.find((tab) => tab === value) ?? "keywords";
+}
+
 export type PlanPath = { planId: string; view: string };
 
 /** `/plans/<id>/<view>` → `{planId, view}`; anything else (including `/plans/new`) → null. */

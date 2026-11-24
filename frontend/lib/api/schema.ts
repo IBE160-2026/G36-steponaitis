@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+    "/api/aisle-categories/{aisle}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Aisle Categories */
+        get: operations["get_aisle_categories_api_aisle_categories__aisle__get"];
+        /** Put Aisle Categories */
+        put: operations["put_aisle_categories_api_aisle_categories__aisle__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/demo": {
         parameters: {
             query?: never;
@@ -193,6 +211,23 @@ export interface paths {
         post?: never;
         /** Delete Plan */
         delete: operations["delete_plan_api_plans__plan_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/{plan_id}/aisle-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Aisle Categories */
+        get: operations["get_plan_aisle_categories_api_plans__plan_id__aisle_categories_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -463,6 +498,34 @@ export interface components {
             moved_out: string[];
             occupied: components["schemas"]["Count"];
             pick_groups_together: components["schemas"]["Count"];
+        };
+        /**
+         * AisleCategories
+         * @description One aisle (exact Aisle text) and its categories (FR-45).
+         */
+        AisleCategories: {
+            /** Aisle */
+            aisle: string;
+            /** Categories */
+            categories: components["schemas"]["AisleCategory"][];
+        };
+        /**
+         * AisleCategoriesUpdate
+         * @description The aisle's whole new category list (FR-45); an empty list clears it.
+         */
+        AisleCategoriesUpdate: {
+            /** Categories */
+            categories: string[];
+        };
+        /**
+         * AisleCategory
+         * @description One category on an aisle; `has_rule` is false when no keyword rule gives it any more.
+         */
+        AisleCategory: {
+            /** Category */
+            category: string;
+            /** Has Rule */
+            has_rule: boolean;
         };
         /** AisleCounts */
         AisleCounts: {
@@ -1475,6 +1538,16 @@ export interface components {
             version: number;
         };
         /**
+         * PlanAisleCategories
+         * @description Every aisle of a plan's import with its categories, and the rule categories to pick.
+         */
+        PlanAisleCategories: {
+            /** Aisles */
+            aisles: components["schemas"]["AisleCategories"][];
+            /** Rule Categories */
+            rule_categories: string[];
+        };
+        /**
          * PlanReset
          * @description The plan was reset; `moves_removed` effective moves were deleted (FR-35, AD-5).
          */
@@ -2236,6 +2309,108 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_aisle_categories_api_aisle_categories__aisle__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aisle: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AisleCategories"];
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    put_aisle_categories_api_aisle_categories__aisle__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aisle: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AisleCategoriesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AisleCategories"];
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     demo_api_auth_demo_post: {
         parameters: {
             query?: never;
@@ -2971,6 +3146,55 @@ export interface operations {
             };
             /** @description Error */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_aisle_categories_api_plans__plan_id__aisle_categories_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanAisleCategories"];
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

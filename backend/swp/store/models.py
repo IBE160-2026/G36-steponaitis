@@ -1,4 +1,4 @@
-"""Declarative rows for the tables created by migrations 0001 to 0004 (AD-4, AD-9, AD-10,
+"""Declarative rows for the tables created by migrations 0001 to 0005 (AD-4, AD-9, AD-10,
 AD-18).
 
 JSON columns hold `model_dump(mode="json")` of the domain models; they are upcast
@@ -76,3 +76,12 @@ class KeywordRuleRow(Base):
     keyword: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[str] = mapped_column(String, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+
+
+class AisleCategoryRow(Base):
+    """One category on one aisle (FR-45): global, keyed by the exact Aisle text of imports."""
+
+    __tablename__ = "aisle_categories"
+
+    aisle: Mapped[str] = mapped_column(String, primary_key=True)
+    category: Mapped[str] = mapped_column(String, primary_key=True)

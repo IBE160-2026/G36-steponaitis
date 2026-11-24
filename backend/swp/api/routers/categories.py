@@ -1,8 +1,9 @@
-"""Keyword rules (FR-43): one global, ordered list, the same in every plan.
+"""Keyword rules (FR-43) and aisle categories (FR-45): global, the same in every plan.
 
-GET/POST /api/keyword-rules, PATCH/DELETE /api/keyword-rules/{rule_id} and
-PUT /api/keyword-rules/order. Writes pass the same-origin guard (AD-19); errors use the
-AD-11 envelope.
+GET/POST /api/keyword-rules, PATCH/DELETE /api/keyword-rules/{rule_id},
+PUT /api/keyword-rules/order, GET/PUT /api/aisle-categories/{aisle} (the aisle's whole list) and
+GET /api/plans/{plan_id}/aisle-categories (read-only). Writes pass the same-origin guard
+(AD-19); errors use the AD-11 envelope.
 """
 
 from collections.abc import Iterable
@@ -12,6 +13,7 @@ from fastapi import APIRouter, Response, status
 
 from swp.api.errors import error_responses
 from swp.api.schemas.categories import (
+    AisleCategoriesUpdate,
     KeywordRule,
     KeywordRuleCreate,
     KeywordRuleEdit,
@@ -19,6 +21,8 @@ from swp.api.schemas.categories import (
     KeywordRules,
 )
 from swp.app import categories
+from swp.app.plans import parse_plan_id
+from swp.domain.categories import AisleCategories, PlanAisleCategories
 
 router = APIRouter()
 
@@ -63,3 +67,19 @@ def edit_keyword_rule(rule_id: str, body: KeywordRuleEdit) -> KeywordRule:
 def delete_keyword_rule(rule_id: str) -> Response:
     categories.delete_rule(rule_id, now=datetime.now(UTC))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# `:path` so an aisle text containing "/" still reaches the service (it is matched exactly).
+@router.get("/aisle-categories/{aisle:path}", responses=error_responses(401, 422))
+def get_aisle_categories(aisle: str) -> AisleCategories:
+    return categories.aisle_categories(aisle)
+
+
+@router.put("/aisle-categories/{aisle:path}", responses=error_responses(401, 403, 422, 503))
+def put_aisle_categories(aisle: str, body: AisleCategoriesUpdate) -> AisleCategories:
+    return categories.set_aisle_categories(aisle, body.categories)
+
+
+@router.get("/plans/{plan_id}/aisle-categories", responses=error_responses(401, 404, 422))
+def get_plan_aisle_categories(plan_id: str) -> PlanAisleCategories:
+    return categories.plan_aisle_categories(parse_plan_id(plan_id))

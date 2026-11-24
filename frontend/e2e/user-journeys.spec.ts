@@ -1190,7 +1190,7 @@ test.describe("user journeys of a logged-in planner", () => {
     await planReady(page);
 
     // Failure path: "xyz" matches nothing; Esc closes the drawer and focus returns to the grid
-    // button; the stage-2 plates read "Coming in stage 2" and do not open.
+    // button; CAT is an active link, and LBL reads "Coming in stage 2" and does not open.
     await page.keyboard.press("Control+k");
     await page.keyboard.type("xyz");
     await expect(launcher(page).getByText("No feature or saved plan matches “xyz”.")).toBeVisible();
@@ -1198,11 +1198,14 @@ test.describe("user journeys of a logged-in planner", () => {
     await expect(launcher(page)).toBeHidden();
     await expect(gridButton(page)).toBeFocused();
     await page.keyboard.press("Control+k");
-    const cat = launcher(page).getByRole("button", { name: /CAT/ });
-    await expect(cat).toContainText("Coming in stage 2");
-    await expect(cat).toHaveAttribute("aria-disabled", "true");
+    const cat = launcher(page).getByRole("link", { name: /CAT/ });
+    await expect(cat).not.toContainText("Coming in stage 2");
+    await expect(cat).not.toHaveAttribute("aria-disabled");
+    const lbl = launcher(page).getByRole("button", { name: /LBL/ });
+    await expect(lbl).toContainText("Coming in stage 2");
+    await expect(lbl).toHaveAttribute("aria-disabled", "true");
     const url = page.url();
-    await cat.focus();
+    await lbl.focus();
     await page.keyboard.press("Enter");
     await expect(launcher(page)).toBeVisible();
     expect(page.url()).toBe(url);

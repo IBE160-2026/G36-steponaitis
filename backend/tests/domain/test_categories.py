@@ -1,18 +1,27 @@
-"""FR-44 part categories from the description; FR-43 keyword rule checks."""
+"""FR-44 part categories from the description; FR-43 keyword rule checks; FR-45 aisle
+categories."""
 
 import pytest
 
 from swp.domain.categories import (
+    AISLE_EMPTY,
     CATEGORY_EMPTY,
+    CATEGORY_TAKEN,
     KEYWORD_EMPTY,
     KEYWORD_NO_WORD,
     KEYWORD_TAKEN,
     TEXT_INVALID,
     TOO_LONG,
+    AisleCategory,
     KeywordRule,
+    aisle_category_errors,
+    aisle_category_list,
+    category_key,
     category_of,
     keyword_key,
     part_categories,
+    plan_aisle_categories_view,
+    rule_categories,
     rule_errors,
     words,
 )
@@ -118,3 +127,65 @@ def test_fr43_unstorable_text_fails_per_field(text: str) -> None:
 
 def test_fr43_too_long_message_names_the_limit() -> None:
     assert TOO_LONG == "Use at most 64 characters."
+
+
+def test_fr45_category_key_strips_and_casefolds() -> None:
+    assert category_key(" Oils ") == category_key("OILS") == "oils"
+    assert category_key("Straße") == category_key("STRASSE")
+
+
+def test_fr45_rule_categories_dedupe_by_key_in_rule_order() -> None:
+    rules = [
+        KeywordRule(keyword="filter", category="Filters"),
+        KeywordRule(keyword="oil", category="Oils"),
+        KeywordRule(keyword="air filter", category="filters"),
+        KeywordRule(keyword="grease", category="Oils"),
+    ]
+
+    assert rule_categories(rules) == ["Filters", "Oils"]
+    assert rule_categories([]) == []
+
+
+def test_fr45_valid_list_has_no_errors() -> None:
+    assert aisle_category_errors("A", [" Oils", "Filters "]) == []
+    assert aisle_category_errors("A", []) == []
+
+
+def test_fr45_errors_name_aisle_then_each_category() -> None:
+    errors = aisle_category_errors(" ", ["", "x" * 65, "Oils", "oils ", "a\x00"])
+
+    assert errors == [
+        {"field": "aisle", "message": AISLE_EMPTY},
+        {"field": "categories[0]", "message": CATEGORY_EMPTY},
+        {"field": "categories[1]", "message": TOO_LONG},
+        {"field": "categories[3]", "message": CATEGORY_TAKEN},
+        {"field": "categories[4]", "message": TEXT_INVALID},
+    ]
+
+
+def test_fr45_aisle_too_long_or_unstorable() -> None:
+    assert aisle_category_errors("A" * 65, []) == [{"field": "aisle", "message": TOO_LONG}]
+    assert aisle_category_errors("A\ud800", []) == [{"field": "aisle", "message": TEXT_INVALID}]
+
+
+def test_fr45_aisle_list_sorted_by_key_and_marked_has_rule() -> None:
+    listed = aisle_category_list(["oils", "Filters", "Belts", "Oils"], [OIL, FILTER])
+
+    assert listed == [
+        AisleCategory(category="Belts", has_rule=False),
+        AisleCategory(category="Filters", has_rule=True),
+        AisleCategory(category="Oils", has_rule=True),
+        AisleCategory(category="oils", has_rule=True),
+    ]
+
+
+def test_fr45_plan_view_keeps_aisle_order_and_empty_aisles() -> None:
+    view = plan_aisle_categories_view(["A", "B"], {"B": ["Oils"], "Z": ["Filters"]}, [OIL])
+
+    assert view.model_dump() == {
+        "aisles": [
+            {"aisle": "A", "categories": []},
+            {"aisle": "B", "categories": [{"category": "Oils", "has_rule": True}]},
+        ],
+        "rule_categories": ["Oils"],
+    }

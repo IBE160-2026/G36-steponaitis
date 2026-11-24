@@ -25,6 +25,7 @@ def test_nfr2_cli_db_upgrade_runs_migrations(database_path: Path) -> None:
         "users",
         "login_attempts",
         "keyword_rules",
+        "aisle_categories",
     } <= _tables(database_path)
 
 

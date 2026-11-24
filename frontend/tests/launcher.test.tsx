@@ -9,6 +9,7 @@ import { SAVING_REASON, type SendResult } from "@/lib/commands";
 import { applyAllQuestion, NO_OPEN_TO_APPLY, resetQuestion } from "@/lib/copy";
 import {
   BAND_ENTRIES,
+  CATEGORIES_ENTRY,
   isLauncherShortcut,
   KEYBOARD_NOTE,
   KEYBOARD_SHORTCUTS,
@@ -26,7 +27,14 @@ import {
   stepState,
 } from "@/lib/launcher";
 import { FLOW_STEPS } from "@/lib/view-state/steps";
-import { NEW_PLAN_HREF, newPlanFromHref, planSettingsHref, planStepHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
+import {
+  NEW_PLAN_HREF,
+  newPlanFromHref,
+  planCategoriesHref,
+  planSettingsHref,
+  planStepHref,
+  SAVED_PLANS_HREF,
+} from "@/lib/view-state/urls";
 import { LauncherBody, type LauncherResults, resolveActions } from "@/modules/launcher/launcher";
 
 // Story 6.5 (UX-DR7, UX-DR8, UJ-8): the launcher's data lists, its pure helpers and the drawer
@@ -128,10 +136,12 @@ describe("ux_dr7 launcher data", () => {
       ["NEW", "New Plan from this import", newPlanFromHref(PLAN)],
       ["SET", "Settings", planSettingsHref(PLAN)],
     ]);
-    expect(STAGE2_PLATES.map((plate) => `${plate.code} ${plate.name}`)).toEqual([
-      "CAT Category check",
-      "LBL Location labels",
+    expect([CATEGORIES_ENTRY.code, CATEGORIES_ENTRY.name, CATEGORIES_ENTRY.href(PLAN)]).toEqual([
+      "CAT",
+      "Categories",
+      planCategoriesHref(PLAN),
     ]);
+    expect(STAGE2_PLATES.map((plate) => `${plate.code} ${plate.name}`)).toEqual(["LBL Location labels"]);
     expect(KEYBOARD_SHORTCUTS.map((shortcut) => shortcut.keys)).toEqual(["Ctrl K", "Ctrl /", "Alt A", "Esc"]);
     expect(KEYBOARD_NOTE).toBe("⌘ and ⌥ on a Mac.");
     expect(SEARCH_PLACEHOLDER).toBe("Search features, actions and plans");
@@ -210,6 +220,17 @@ describe("ux_dr8 launcher search", () => {
     expect(run.flatMap((group) => group.items.map((item) => item.id))).toEqual(["action:run-recommendations"]);
     const plan = launcherResults("autumn", { actions, plans }) ?? [];
     expect(plan).toEqual([{ label: "Saved plans", items: [{ kind: "plan", id: `plan:${OTHER.id}`, plan: OTHER }] }]);
+  });
+
+  it("ux_dr7_cat_is_found_by_code_and_category", () => {
+    for (const query of ["CAT", "Category", "keyword rules"]) {
+      const groups = launcherResults(query, { actions, plans }) ?? [];
+      const ids = groups.flatMap((group) => group.items.map((item) => item.id));
+      expect(ids).toContain("band:categories");
+      expect(groups.find((group) => group.items.some((item) => item.id === "band:categories"))?.label).toBe(
+        "Actions",
+      );
+    }
   });
 
   it("ux_dr8_no_match_sentence", () => {
@@ -320,6 +341,20 @@ describe("uj8 launcher drawer", () => {
     expect(text(markup)).toContain("Autumn trial");
     expect(text(markup)).toContain("Data as of 2026-09-30 · round 1");
     expect(text(markup)).toContain(KEYBOARD_NOTE);
+  });
+
+  it("ux_dr7_cat_is_an_active_link_and_lbl_stays_inert", () => {
+    const stage2 = column(body(), "Stage 2");
+    const cat = stage2.slice(stage2.indexOf("<a"), stage2.indexOf("</a>"));
+    expect(cat).toContain(`href="${planCategoriesHref(PLAN)}"`);
+    expect(text(cat)).toContain("CAT");
+    expect(text(cat)).toContain("Categories");
+    expect(cat).not.toContain("aria-disabled");
+    expect(text(cat)).not.toContain("Coming in stage 2");
+    const lbl = stage2.slice(stage2.indexOf("<button"));
+    expect(text(lbl)).toContain("LBL");
+    expect(lbl).toContain('aria-disabled="true"');
+    expect(text(lbl)).toContain("Coming in stage 2");
   });
 
   it("uj8_before_the_summary_columns_show_links_and_states_only", () => {

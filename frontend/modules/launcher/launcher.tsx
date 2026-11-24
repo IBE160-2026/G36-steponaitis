@@ -3,7 +3,7 @@
 // Launcher (UX-DR7, UX-DR8, UJ-8, Story 6.5): the toolbar grid button and the flow map drawer, a
 // modal dialog opened by the button or `Ctrl+K` / `⌘K` (also inside text fields). Eight step
 // columns with their state, live counts (plan summary only, AD-3) and registered actions, a band
-// with the plans, SAV/NEW/SET, the inert stage-2 plates and the Keyboard box. Typing replaces the
+// with the plans, SAV/NEW/SET, the stage-2 plates (CAT opens Categories; LBL is inert) and the Keyboard box. Typing replaces the
 // columns with grouped results. Everything that is not a flow step comes from the data lists in
 // lib/launcher; an action appended to `LAUNCHER_ACTIONS` shows here with no change to this file.
 // While the drawer is open, `#content` and the toolbar are `inert`; closing drops `inert` first and
@@ -33,6 +33,7 @@ import { type PlanSummary, usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
 import {
   BAND_ENTRIES,
+  CATEGORIES_ENTRY,
   isLauncherShortcut,
   KEYBOARD_NOTE,
   KEYBOARD_SHORTCUTS,
@@ -365,31 +366,47 @@ function PlansBand({
   );
 }
 
-function Stage2Band() {
+function Stage2Band({ planId, onActivate }: { planId: string; onActivate: (item: Item) => void }) {
+  const entry = CATEGORIES_ENTRY;
   return (
-    <RovingGroup label="Stage 2" count={STAGE2_PLATES.length} className="flex flex-col gap-2">
-      {(item) =>
-        STAGE2_PLATES.map((plate, index) => (
-          <button
-            key={plate.code}
-            type="button"
-            {...item(index)}
-            aria-disabled="true"
-            onClick={(event) => event.preventDefault()}
+    <RovingGroup label="Stage 2" count={1 + STAGE2_PLATES.length} className="flex flex-col gap-2">
+      {(item) => (
+        <>
+          <Link
+            href={entry.href(planId)}
+            {...item(0)}
+            onClick={preventAnd(() => onActivate({ kind: "band", id: `band:${entry.id}`, entry }))}
             className={cn(
               ENTRY_LINK,
-              "flex w-52 cursor-not-allowed flex-col items-start rounded border-[1.4px] border-dashed border-stage2-outline bg-slot-empty px-3 py-2 text-left",
+              "flex w-52 flex-col items-start rounded border-[1.4px] border-border bg-surface px-3 py-2 text-left text-ink",
             )}
           >
-            <span className="flex items-center gap-2">
-              <span className="font-code text-[34px] leading-none font-bold text-stage2-code">{plate.code}</span>
-              <Icon name="lock" size={16} className="text-stage2-text" />
-            </span>
-            <span className="type-body-strong text-stage2-text">{plate.name}</span>
-            <span className="type-caption text-stage2-text">{STAGE2_TEXT}</span>
-          </button>
-        ))
-      }
+            <span className="font-code text-[34px] leading-none font-bold">{entry.code}</span>
+            <span className="type-body-strong">{entry.name}</span>
+            <span className="type-caption text-ink-secondary">{entry.description}</span>
+          </Link>
+          {STAGE2_PLATES.map((plate, index) => (
+            <button
+              key={plate.code}
+              type="button"
+              {...item(index + 1)}
+              aria-disabled="true"
+              onClick={(event) => event.preventDefault()}
+              className={cn(
+                ENTRY_LINK,
+                "flex w-52 cursor-not-allowed flex-col items-start rounded border-[1.4px] border-dashed border-stage2-outline bg-slot-empty px-3 py-2 text-left",
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-code text-[34px] leading-none font-bold text-stage2-code">{plate.code}</span>
+                <Icon name="lock" size={16} className="text-stage2-text" />
+              </span>
+              <span className="type-body-strong text-stage2-text">{plate.name}</span>
+              <span className="type-caption text-stage2-text">{STAGE2_TEXT}</span>
+            </button>
+          ))}
+        </>
+      )}
     </RovingGroup>
   );
 }
@@ -541,7 +558,7 @@ export function LauncherBody({
       </div>
       <div className="grid gap-3 border-t border-hairline pt-4 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
         <PlansBand planId={planId} summary={summary} plans={plans} onActivate={onActivate} />
-        <Stage2Band />
+        <Stage2Band planId={planId} onActivate={onActivate} />
         <KeyboardBox />
       </div>
     </div>

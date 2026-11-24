@@ -1073,3 +1073,62 @@ export function swappedToast(from: string, to: string, moves: number, round: num
   const noun = moves === 1 ? "manual move" : "manual moves";
   return `Swapped ${from} ↔ ${to} · ${formatNumber(moves)} ${noun}, round ${formatNumber(round)}.`;
 }
+
+// Categories page (Story 13.2, FR-43, FR-45): keyword rules and aisle categories.
+
+export const CATEGORIES_TITLE = "Categories";
+export const KEYWORD_RULES_TAB = "Keyword rules";
+export const AISLE_CATEGORIES_TAB = "Aisle categories";
+export const KEYWORD_RULES_NOTE =
+  "A part gets the category of the first rule whose keyword is a whole word in its description. The rules are the same in every plan.";
+export const AISLE_CATEGORIES_NOTE =
+  "Each aisle of this plan's import with its categories. An aisle's categories apply to every plan with that aisle.";
+export const KEYWORD_LABEL = "Keyword";
+export const CATEGORY_LABEL = "Category";
+export const POSITION_LABEL = "Position";
+export const ADD_RULE = "Add rule";
+export const EDIT_RULE_ITEM = "Edit";
+export const EDIT_RULE_TITLE = "Edit rule";
+export const SAVE_RULE = "Save";
+export const DELETE_RULE_ITEM = "Delete…";
+export const DELETE_RULE_TITLE = "Delete rule";
+export const DELETE_RULE_CONFIRM = "Delete rule";
+export const MOVE_UP = "Move up";
+export const MOVE_DOWN = "Move down";
+export const FIRST_RULE_REASON = "This is the first rule.";
+export const LAST_RULE_REASON = "This is the last rule.";
+export const NO_KEYWORD_RULES = "No keyword rules yet.";
+export const LOADING_KEYWORD_RULES = "Loading the keyword rules…";
+export const LOADING_AISLE_CATEGORIES = "Loading the aisle categories…";
+export const SAVING_CATEGORIES = "Saving the last change…";
+export const NO_RULE_GIVES_CATEGORY = "no keyword rule gives this category";
+export const ADD_RULE_FIRST = "Add a keyword rule first to give aisles categories.";
+export const NO_AISLE_CATEGORIES = "No categories";
+export const EVERY_CATEGORY_ON_AISLE = "Every rule category is on this aisle.";
+export const ADD_CATEGORY = "Add";
+export const NO_AISLES = "This plan's import has no aisles.";
+
+/** The delete confirm's question: "Delete the rule “oil” → Oils?". */
+export function deleteRuleQuestion(keyword: string, category: string): string {
+  return `Delete the rule “${keyword}” → ${category}?`;
+}
+
+/** The accessible name of a chip's × button: "Remove Oils from aisle A". */
+export function removeCategoryLabel(category: string, aisle: string): string {
+  return `Remove ${category} from aisle ${aisle}`;
+}
+
+/** The accessible name of an aisle's category picker: "Category to add to aisle A". */
+export function categoryPickerLabel(aisle: string): string {
+  return `Category to add to aisle ${aisle}`;
+}
+
+/** The accessible name of an aisle's Add button: "Add the category to aisle A". */
+export function addCategoryLabel(aisle: string): string {
+  return `Add the category to aisle ${aisle}`;
+}
+
+/** A rule row button's accessible name: "Edit oil", "Delete oil…", "Move up oil". */
+export function ruleButtonLabel(label: string, keyword: string): string {
+  return label.endsWith("…") ? `${label.slice(0, -1)} ${keyword}…` : `${label} ${keyword}`;
+}

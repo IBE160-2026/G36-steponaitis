@@ -1,21 +1,37 @@
-"""Keyword rules service (FR-43): list, create, edit, delete and reorder the global rules.
+"""Keyword rules (FR-43) and aisle categories (FR-45) service: the global category tables.
 
-Values are stripped, checked by `swp.domain.categories` inside the store's write lock, and
-stored. The caller passes `now`; new ids come from uuid4 here.
+Rules: list, create, edit, delete and reorder. Values are stripped, checked by
+`swp.domain.categories` inside the store's write lock, and stored. The caller passes `now`; new
+ids come from uuid4 here. Aisle categories: read one aisle, replace its whole list, or read every
+aisle of a plan's import (read-only, it never writes the plan).
 """
 
 import uuid
 from collections.abc import Callable
 from datetime import datetime
 
-from swp.domain.categories import keyword_key, rule_errors
+from swp.app.plans import require
+from swp.domain.categories import (
+    AisleCategories,
+    KeywordRule,
+    PlanAisleCategories,
+    aisle_categories_view,
+    aisle_category_errors,
+    keyword_key,
+    plan_aisle_categories_view,
+    rule_errors,
+)
 from swp.domain.errors import DomainError, FieldError
+from swp.domain.ordering import aisle_order
+from swp.store import aisle_categories as aisle_store
 from swp.store import keyword_rules as store
+from swp.store.aisle_categories import AisleCategoriesBusy
 from swp.store.keyword_rules import RuleDraft, RulesBusy, StoredKeywordRule
 
 RULE_NOT_FOUND = "That keyword rule no longer exists."
 ORDER_INVALID = "List every keyword rule exactly once."
 RULES_BUSY = "The keyword rules are busy. Try again."
+AISLES_BUSY = "The aisle categories are busy. Try again."
 
 
 def _validation_failed(errors: list[FieldError]) -> DomainError:
@@ -133,3 +149,35 @@ def reorder_rules(raw_ids: list[str], *, now: datetime) -> list[StoredKeywordRul
         return [_draft(by_id[rule_id]) for rule_id in ids]
 
     return _write(change, now=now)
+
+
+def _domain_rules() -> list[KeywordRule]:
+    return [KeywordRule(keyword=r.keyword, category=r.category) for r in store.list_rules()]
+
+
+def aisle_categories(aisle: str) -> AisleCategories:
+    """The categories of `aisle` (exact text); an aisle with none has an empty list."""
+    errors = aisle_category_errors(aisle, [])
+    if errors:
+        raise _validation_failed(errors)
+    return aisle_categories_view(aisle, aisle_store.list_for(aisle), _domain_rules())
+
+
+def set_aisle_categories(aisle: str, categories: list[str]) -> AisleCategories:
+    """Replace the whole category list of `aisle`; an empty list clears it."""
+    errors = aisle_category_errors(aisle, categories)
+    if errors:
+        raise _validation_failed(errors)
+    try:
+        aisle_store.replace(aisle, [category.strip() for category in categories])
+    except AisleCategoriesBusy as error:
+        raise DomainError("unavailable", AISLES_BUSY) from error
+    return aisle_categories(aisle)
+
+
+def plan_aisle_categories(plan_id: uuid.UUID) -> PlanAisleCategories:
+    """Every distinct aisle of the plan's import in `aisle_order` with its categories, and the
+    distinct rule categories in rule order; raise `plan_not_found` for an unknown id."""
+    plan = require(plan_id)
+    aisles = aisle_order(location.aisle for location in plan.imported.data.locations.values())
+    return plan_aisle_categories_view(aisles, aisle_store.list_all(), _domain_rules())

@@ -45,12 +45,17 @@ test.describe("uj8 launcher", () => {
     const parts = launcher(page).getByRole("group", { name: "Parts", exact: true });
     await expect(parts.getByText("You are here")).toBeVisible();
     await expect(parts.getByText(/^[\d,]+ parts$/)).toBeVisible();
-    const cat = launcher(page).getByRole("button", { name: /CAT/ });
-    await expect(cat).toHaveAttribute("aria-disabled", "true");
-    await expect(cat).toContainText("Coming in stage 2");
+    // Stage 2: CAT is an active link (Story 13.2); LBL stays inert.
+    const cat = launcher(page).getByRole("link", { name: /CAT/ });
+    await expect(cat).toHaveAttribute("href", `/plans/${plan.id}/categories`);
+    await expect(cat).not.toHaveAttribute("aria-disabled");
+    await expect(cat).not.toContainText("Coming in stage 2");
+    const lbl = launcher(page).getByRole("button", { name: /LBL/ });
+    await expect(lbl).toHaveAttribute("aria-disabled", "true");
+    await expect(lbl).toContainText("Coming in stage 2");
 
-    // Stage 2: Enter on CAT does nothing and the drawer stays open.
-    await cat.focus();
+    // Enter on LBL does nothing and the drawer stays open.
+    await lbl.focus();
     await page.keyboard.press("Enter");
     await expect(launcher(page)).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/parts$`));

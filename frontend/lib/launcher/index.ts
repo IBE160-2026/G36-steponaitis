@@ -25,6 +25,7 @@ import { FLOW_STEPS, type StepKey } from "@/lib/view-state/steps";
 import {
   NEW_PLAN_HREF,
   newPlanFromHref,
+  planCategoriesHref,
   planSettingsHref,
   planStepHref,
   SAVED_PLANS_HREF,
@@ -168,12 +169,14 @@ export const LAUNCHER_ACTIONS: readonly LauncherAction[] = [
   RESET_ACTION,
 ];
 
-/** A plan-level entry of the band (SAV, NEW, SET). */
+/** A plan-level entry of the band (SAV, NEW, SET, and the stage-2 CAT). */
 export type BandEntry = {
   id: string;
   code: string;
   name: string;
   description: string;
+  /** Extra search words besides the code and name. */
+  keywords?: readonly string[];
   href: (planId: string) => string;
 };
 
@@ -208,11 +211,21 @@ export const BAND_ENTRIES: readonly BandEntry[] = [
   },
 ];
 
-/** The stage-2 features, shown as inert plates. */
-export const STAGE2_PLATES = [
-  { code: "CAT", name: "Category check" },
-  { code: "LBL", name: "Location labels" },
-] as const;
+/** CAT (Story 13.2, UX-DR7): the first active stage-2 plate; it opens the Categories page. */
+export const CATEGORIES_ENTRY: BandEntry = {
+  id: "categories",
+  code: "CAT",
+  name: "Categories",
+  description: "Keyword rules and aisle categories",
+  keywords: ["category check", "keyword rules", "aisle categories"],
+  href: (planId) => planCategoriesHref(planId),
+};
+
+/** Every band entry search finds, listed under Actions: the Plans band's, then CAT. */
+export const SEARCH_BAND_ENTRIES: readonly BandEntry[] = [...BAND_ENTRIES, CATEGORIES_ENTRY];
+
+/** The stage-2 features not built yet, shown as inert plates. */
+export const STAGE2_PLATES = [{ code: "LBL", name: "Location labels" }] as const;
 
 export const STAGE2_TEXT = "Coming in stage 2";
 
@@ -295,7 +308,7 @@ export type LauncherResultGroup<A extends SearchableAction = SearchableAction> =
 /**
  * Search results, grouped Steps / Actions / Saved plans with empty groups dropped. The trimmed
  * query matches case-insensitively as a substring of a step's code or name, an action's label or
- * keywords, a band entry's code or name (listed under Actions) or a plan's name. Items keep list
+ * keywords, a band entry's code, name or keywords (listed under Actions) or a plan's name. Items keep list
  * order. A blank query gives null (the columns show).
  */
 export function launcherResults<A extends SearchableAction>(
@@ -303,7 +316,7 @@ export function launcherResults<A extends SearchableAction>(
   {
     steps = LAUNCHER_STEPS,
     actions,
-    band = BAND_ENTRIES,
+    band = SEARCH_BAND_ENTRIES,
     plans,
   }: {
     steps?: readonly LauncherStep[];
@@ -329,7 +342,7 @@ export function launcherResults<A extends SearchableAction>(
           .filter((action) => matches(action.label, ...(action.keywords ?? [])))
           .map((action): LauncherResult<A> => ({ kind: "action", id: `action:${action.id}`, action })),
         ...band
-          .filter((entry) => matches(entry.code, entry.name))
+          .filter((entry) => matches(entry.code, entry.name, ...(entry.keywords ?? [])))
           .map((entry): LauncherResult<A> => ({ kind: "band", id: `band:${entry.id}`, entry })),
       ],
     },

@@ -1,4 +1,4 @@
-"""/api/keyword-rules request and response bodies (FR-43)."""
+"""/api/keyword-rules and /api/aisle-categories request and response bodies (FR-43, FR-45)."""
 
 import uuid
 
@@ -35,3 +35,9 @@ class KeywordRule(BaseModel):
 
 class KeywordRules(BaseModel):
     rules: list[KeywordRule]
+
+
+class AisleCategoriesUpdate(BaseModel):
+    """The aisle's whole new category list (FR-45); an empty list clears it."""
+
+    categories: list[str]

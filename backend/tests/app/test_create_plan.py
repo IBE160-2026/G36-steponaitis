@@ -55,7 +55,7 @@ def test_fr18_analysis_toml_matches_answer_key() -> None:
     assert plans.load_analysis_settings().model_dump() == _answer_key_settings()
 
 
-def test_nfr12_migration_creates_exactly_imports_plans_users_login_attempts_and_keyword_rules(
+def test_nfr12_migration_creates_exactly_imports_plans_users_login_attempts_and_categories(
     empty_tables: str,
 ) -> None:
     inspector = inspect(get_engine())
@@ -63,7 +63,8 @@ def test_nfr12_migration_creates_exactly_imports_plans_users_login_attempts_and_
     # FR-39: migration 0002 only adds `users` (checked in tests/app/test_signup.py); FR-40:
     # migration 0003 only adds `login_attempts` (checked in tests/app/test_fr40_login_throttle.py);
     # FR-43: migration 0004 only adds `keyword_rules` (checked in
-    # tests/app/test_fr43_keyword_rules_api.py).
+    # tests/app/test_fr43_keyword_rules_api.py); FR-45: migration 0005 only adds
+    # `aisle_categories` (checked in tests/app/test_fr45_aisle_categories_api.py).
     assert set(inspector.get_table_names()) == {
         "alembic_version",
         "imports",
@@ -71,6 +72,7 @@ def test_nfr12_migration_creates_exactly_imports_plans_users_login_attempts_and_
         "users",
         "login_attempts",
         "keyword_rules",
+        "aisle_categories",
     }
     assert [c["name"] for c in inspector.get_columns("imports")] == [
         "id",
