@@ -8,6 +8,9 @@ match wins; no match gives no category. The part number is never read: part numb
 Aisle categories (FR-45) are global and keyed by the exact Aisle text; categories compare by
 `category_key` (stripped, casefolded).
 
+The category check (FR-46) lists every part whose category is not among the categories of the
+aisle of its current location in the planning copy (one `replay`).
+
 Pure: no storage, ids or clock here. `swp.app.categories` stores the rules and aisle categories.
 """
 
@@ -15,7 +18,18 @@ from collections.abc import Collection, Iterable, Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
+from swp.domain.analysis import Analysis
 from swp.domain.errors import FieldError
+from swp.domain.import_data import ImportData
+from swp.domain.ordering import category_check_order
+from swp.domain.planning import (
+    LocationRef,
+    current_location,
+    listed_parts,
+    location_ref,
+    planning_copy,
+)
+from swp.domain.state import PlanState
 
 TEXT_MAX = 64
 
@@ -241,3 +255,73 @@ def aisle_category_errors(aisle: str, categories: Sequence[str]) -> list[FieldEr
         if message is not None:
             errors.append({"field": f"categories[{index}]", "message": message})
     return errors
+
+
+class CategoryCheckRow(BaseModel):
+    """A part outside its aisle's categories (FR-46); the aisle is `current_location.aisle`."""
+
+    part: str
+    description: str
+    category: str
+    current_location: LocationRef
+    aisle_categories: list[str]
+
+
+class CategoryCheck(BaseModel):
+    """The category check of the plan as it is now (FR-46, AD-3)."""
+
+    version: int
+    rows: list[CategoryCheckRow]
+    outside_count: int
+    aisles_without_categories: int
+
+
+def check(
+    data: ImportData,
+    analysis: Analysis,
+    state: PlanState,
+    version: int,
+    rules: Sequence[KeywordRule],
+    aisle_categories: Mapping[str, Iterable[str]],
+) -> CategoryCheck:
+    """Every listed part whose category is not one of its current aisle's categories (FR-46).
+
+    Not checked: parts without a category, parts with no current location (no stock above
+    zero) and parts in an aisle without categories. Aisles are matched by their exact text,
+    categories by `category_key`. Rows come in `ordering.category_check_order`.
+    `aisles_without_categories` counts the import's distinct aisles with no stored category.
+    """
+    copy = planning_copy(data, state)
+    parts = listed_parts(data, analysis)
+    sorted_lists = {
+        aisle: sorted(values, key=lambda category: (category_key(category), category))
+        for aisle, values in aisle_categories.items()
+    }
+    by_aisle = {aisle: found for aisle, found in sorted_lists.items() if found}
+    outside: dict[str, str] = {}
+    outside_category: dict[str, str] = {}
+    for part, category in part_categories({p: data.parts[p] for p in parts}, rules).items():
+        current = current_location(copy, part)
+        if category is None or current is None:
+            continue
+        aisle_list = by_aisle.get(copy.locations[current].aisle)
+        if aisle_list and category_key(category) not in {category_key(c) for c in aisle_list}:
+            outside[part] = current
+            outside_category[part] = category
+    rows = [
+        CategoryCheckRow(
+            part=part,
+            description=data.parts[part],
+            category=outside_category[part],
+            current_location=location_ref(copy, outside[part], state.best_marks),
+            aisle_categories=by_aisle[copy.locations[outside[part]].aisle],
+        )
+        for part in category_check_order(outside, copy.locations)
+    ]
+    aisles = {location.aisle for location in data.locations.values()}
+    return CategoryCheck(
+        version=version,
+        rows=rows,
+        outside_count=len(rows),
+        aisles_without_categories=sum(1 for aisle in aisles if aisle not in by_aisle),
+    )

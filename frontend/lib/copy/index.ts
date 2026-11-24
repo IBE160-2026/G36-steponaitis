@@ -1132,3 +1132,25 @@ export function addCategoryLabel(aisle: string): string {
 export function ruleButtonLabel(label: string, keyword: string): string {
   return label.endsWith("…") ? `${label.slice(0, -1)} ${keyword}…` : `${label} ${keyword}`;
 }
+
+// Category check (Story 13.3, FR-46): parts outside their aisle's categories.
+
+export const CATEGORY_CHECK_TITLE = "Category check";
+export const CATEGORY_CHECK_NOTE =
+  "Parts whose category is not one of the categories of the aisle they are in now. Parts without a category, parts with no stock and aisles without categories are not checked.";
+export const CATEGORY_CHECK_EMPTY = "Every checked part is in an aisle meant for its category.";
+export const CATEGORY_CHECK_PART = "Part";
+export const CATEGORY_CHECK_DESCRIPTION = "Description";
+export const CATEGORY_CHECK_CURRENT_LOCATION = "Current location";
+export const CATEGORY_CHECK_AISLE = "Aisle";
+export const CATEGORY_CHECK_AISLE_CATEGORIES = "Aisle categories";
+
+/** "12 parts outside their aisle's categories · 4 aisles without categories" (singular "1 part
+ * outside its aisle's categories", "1 aisle without categories"). */
+export function categoryCheckCountLine(outside: number, aislesWithout: number): string {
+  const parts =
+    outside === 1 ? "1 part outside its aisle's categories" : `${formatNumber(outside)} parts outside their aisle's categories`;
+  const aisles =
+    aislesWithout === 1 ? "1 aisle without categories" : `${formatNumber(aislesWithout)} aisles without categories`;
+  return `${parts} · ${aisles}`;
+}

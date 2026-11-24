@@ -26,14 +26,14 @@ Stage 2, started only after the milestone 2 gate. The planner keeps one global, 
 
 ## Technical Decisions
 
-- **Storage (AD-9, decided and recorded in the spine by Story 13.1):** keyword rules and aisle categories are global tables owned by `swp/store`, not part of any plan's `state`. Migrations are expand-only: the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`); `aisle_categories` (`aisle`, `category`, unique together) follows in its own expand-only migration in Story 13.2. Portable types only (SQLite + Postgres).
-- **Domain slice:** new pure module `domain/categories.py` (stdlib + pydantic only) for categorising parts and `check`. The check endpoint runs one `replay` then `domain.categories.check`.
+- **Storage (AD-9, recorded in the spine):** keyword rules and aisle categories are global tables owned by `swp/store`, not part of any plan's `state`. Both now exist from their own expand-only migrations: `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`) and `aisle_categories` (`aisle`, `category`, unique together). Any further change stays expand-only and uses portable types only (SQLite + Postgres).
+- **Domain slice:** new pure module `domain/categories.py` (stdlib + pydantic only) for categorising parts and `check`. The check endpoint runs one `replay` then `domain.categories.check`; the backend keeps no cross-request cache of plan state, and everything a request returns comes from that one fold.
 - **API:** `api/routers/categories.py`, JSON, behind the same-origin guard and login. `GET/POST /api/keyword-rules`, `PATCH/DELETE /api/keyword-rules/{id}`, `PUT /api/keyword-rules/order` (full ordered id list); `GET/PUT /api/aisle-categories/{aisle}` (sets the aisle's full list); `GET /api/plans/{id}/category-check`. `swp.api` never imports `swp.store` directly.
 - **Errors (AD-11):** closed envelope `{"error": {code, message, details}}`; backend writes final English `message`.
 - **Views (AD-3):** the check view carries the plan `version`; client refetches it after every move, undo and reset like other plan views; frontend computes nothing.
 - **Ordering (AD-14):** check rows come in domain order from `domain/ordering.py`; the frontend shows server order.
 - **Wire types (AD-13):** regenerate `frontend/lib/api/schema.ts` from `swp openapi`; CI fails on diff.
-- **Seeding (AD-9):** `swp.app.bootstrap(seed)` is the only seed path. It loads `backend/settings/starter_categories.toml` idempotently only when both category tables are empty (never overwrites). This makes starter categories a second seed beside the demo account; Story 13.4 updates the spine's "demo account is the only seed" convention.
+- **Seeding (AD-9):** `swp.app.bootstrap(upgrade, seed)` is the only migrate/seed path (CLI `swp db upgrade`; the FastAPI lifespan only when `APP_ENV=local`). It loads `backend/settings/starter_categories.toml` idempotently only when both category tables are empty (never overwrites). This makes starter categories a second seed beside the demo account; Story 13.4 updates the spine in the same change (the "demo account is the only seed" data convention and the stage 2 Deferred note). Seeds use synthetic data only.
 
 ## UX & Interaction Patterns
 
@@ -45,8 +45,7 @@ Stage 2, started only after the milestone 2 gate. The planner keeps one global, 
 
 ## Cross-Story Dependencies
 
-- 13.1 (done: `keyword_rules` table, domain matching, rule API, schema, spine storage decision) is the base for 13.2–13.4.
-- 13.2 adds the `aisle_categories` table and API that 13.3 and 13.4 need.
+- 13.1 (done: `keyword_rules` table, domain matching in `domain/categories.py`, rule API, schema, spine storage decision) and 13.2 (done: `aisle_categories` table and API, Categories page with both tabs) are the base for 13.3 and 13.4.
 - 13.3 relies on `replay` and the planning copy, the PartPanel and the plan-view refetch pattern from earlier epics.
 - 13.4 needs both tables and the check; its README step joins the SM-2 demo flow.
 - Epic 13 starts only after the milestone 2 gate (Story 12.5).

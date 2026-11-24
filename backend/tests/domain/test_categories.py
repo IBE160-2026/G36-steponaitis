@@ -1,8 +1,11 @@
 """FR-44 part categories from the description; FR-43 keyword rule checks; FR-45 aisle
 categories."""
 
+from decimal import Decimal
+
 import pytest
 
+from swp.domain.analysis import Analysis, PartAnalysis
 from swp.domain.categories import (
     AISLE_EMPTY,
     CATEGORY_EMPTY,
@@ -18,6 +21,7 @@ from swp.domain.categories import (
     aisle_category_list,
     category_key,
     category_of,
+    check,
     keyword_key,
     part_categories,
     plan_aisle_categories_view,
@@ -25,6 +29,9 @@ from swp.domain.categories import (
     rule_errors,
     words,
 )
+from swp.domain.import_data import ImportData, InventoryLine, LocationData
+from swp.domain.ordering import category_check_order
+from swp.domain.state import AisleMark, PlanState, Step
 
 OIL = KeywordRule(keyword="oil", category="Oils")
 FILTER = KeywordRule(keyword="filter", category="Filters")
@@ -189,3 +196,122 @@ def test_fr45_plan_view_keeps_aisle_order_and_empty_aisles() -> None:
         ],
         "rule_categories": ["Oils"],
     }
+
+
+def _location(walk_path: int, aisle: str, level: str = "1") -> LocationData:
+    return LocationData(
+        walk_path=Decimal(walk_path), aisle=aisle, level=level, section=None, position=None
+    )
+
+
+# Aisle B comes first on the Walk Path; the check still lists aisle A first (location order).
+CHECK_LOCATIONS = {
+    "B-01": _location(0, "B"),
+    "A-02": _location(1, "A", "2"),
+    "A-01": _location(2, "A"),
+    "C-01": _location(3, "C"),
+    "D-01": _location(4, "D"),
+}
+CHECK_PARTS = {
+    "P9": "Engine oil",
+    "P2": "Oil, 5L",
+    "P1": "Gear oil",
+    "P3": "Air filter",
+    "P4": "Bolt M8",
+    "P5": "Hydraulic oil",
+    "P6": "Brake oil",
+}
+CHECK_STOCK = [
+    ("P9", "A-01", 2),
+    ("P2", "B-01", 1),
+    ("P1", "A-01", 3),
+    ("P3", "A-02", 1),  # Filters in aisle A: in its aisle
+    ("P4", "A-02", 5),  # no category: not checked
+    ("P5", "A-01", 0),  # no stock: not checked
+    ("P6", "C-01", 4),  # aisle C has no categories: not checked
+]
+
+
+def _check_data() -> ImportData:
+    return ImportData(
+        locations=CHECK_LOCATIONS,
+        inventory=[
+            InventoryLine(part=part, location=code, quantity=Decimal(quantity))
+            for part, code, quantity in CHECK_STOCK
+        ],
+        parts=CHECK_PARTS,
+        transactions=[],
+    )
+
+
+def _check_analysis(analysis: Analysis) -> Analysis:
+    parts = {part: PartAnalysis(picks=1, movement_class="slow") for part in CHECK_PARTS}
+    return analysis.model_copy(update={"parts": parts, "pick_groups": []})
+
+
+CHECK_AISLES = {"A": ["Filters", "belts"], "B": [" FILTERS"], "Z": ["Oils"], "D": []}
+
+
+def test_fr46_check_lists_parts_outside_their_aisle(analysis: Analysis) -> None:
+    result = check(
+        _check_data(), _check_analysis(analysis), PlanState.new(), 7, [OIL, FILTER], CHECK_AISLES
+    )
+
+    assert result.version == 7
+    assert [(row.part, row.current_location.code) for row in result.rows] == [
+        ("P1", "A-01"),
+        ("P9", "A-01"),
+        ("P2", "B-01"),
+    ]
+    first = result.rows[0]
+    assert first.description == "Gear oil"
+    assert first.category == "Oils"
+    assert first.current_location.aisle == "A"
+    assert first.aisle_categories == ["belts", "Filters"]
+    assert result.rows[2].aisle_categories == [" FILTERS"]
+    assert result.outside_count == 3
+    # C and D have no categories ("Z" is not an aisle of the import).
+    assert result.aisles_without_categories == 2
+
+
+def test_fr46_category_in_aisle_matches_any_case(analysis: Analysis) -> None:
+    result = check(
+        _check_data(), _check_analysis(analysis), PlanState.new(), 1, [OIL], {"A": [" oils"]}
+    )
+
+    assert [row.part for row in result.rows] == []
+    assert result.aisles_without_categories == 3
+
+
+def test_fr46_not_checked_without_category_stock_or_aisle_categories(
+    analysis: Analysis,
+) -> None:
+    result = check(
+        _check_data(), _check_analysis(analysis), PlanState.new(), 1, [OIL, FILTER], CHECK_AISLES
+    )
+
+    assert {"P3", "P4", "P5", "P6"}.isdisjoint(row.part for row in result.rows)
+
+
+def test_fr46_check_follows_the_planning_copy(analysis: Analysis) -> None:
+    move = Step(
+        move_number=1, part="P2", from_location="B-01", to_location="C-01", rule="manual", round=0
+    )
+    state = PlanState(steps=[move], best_marks=[AisleMark(aisle="A")])
+
+    result = check(_check_data(), _check_analysis(analysis), state, 2, [OIL, FILTER], CHECK_AISLES)
+
+    assert [row.part for row in result.rows] == ["P1", "P9"]
+    assert result.rows[0].current_location.is_best is True
+
+
+def test_fr46_check_is_deterministic(analysis: Analysis) -> None:
+    args = (_check_data(), _check_analysis(analysis), PlanState.new(), 1, [OIL], CHECK_AISLES)
+
+    assert check(*args).model_dump_json() == check(*args).model_dump_json()
+
+
+def test_fr46_category_check_order_by_location_then_part() -> None:
+    current = {"P2": "B-01", "P9": "A-01", "P1": "A-01", "P3": "A-02", "P0": "X-99"}
+
+    assert category_check_order(current, CHECK_LOCATIONS) == ["P1", "P9", "P3", "P2", "P0"]

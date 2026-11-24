@@ -70,6 +70,21 @@ def location_order(locations: Mapping[str, LocationData]) -> list[str]:
     return sorted(locations, key=key)
 
 
+def category_check_order(
+    current: Mapping[str, str], locations: Mapping[str, LocationData]
+) -> list[str]:
+    """The category check's rows (FR-46): the parts of `current` (part → current location
+    code) by their location's `location_order` position, then part number (`str`). A code
+    missing from `locations` sorts after every known one, by code."""
+    position = {code: index for index, code in enumerate(location_order(locations))}
+
+    def key(part: str) -> tuple[object, ...]:
+        code = current[part]
+        return (code not in position, position.get(code, 0), code, part)
+
+    return sorted(current, key=key)
+
+
 def mark_order(marks: Iterable[BestMark], locations: Mapping[str, LocationData]) -> list[BestMark]:
     """Aisle marks (by aisle); then level marks (by `level_key` over the import's levels, all
     aisles before one aisle, then by aisle); then location marks (by `location_order`

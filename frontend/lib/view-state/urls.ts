@@ -86,7 +86,11 @@ export type ViewQuery = Partial<Record<ViewQueryKey, string>>;
 
 /** `/plans/<id>/<segment>` of `step` (`print` for Move list), with only the non-empty `params` appended as a query. */
 export function planStepHref(planId: string, step: StepKey, params?: ViewQuery): string {
-  const path = `/plans/${encodeURIComponent(planId)}/${stepSegment(step)}`;
+  return withViewQuery(`/plans/${encodeURIComponent(planId)}/${stepSegment(step)}`, params);
+}
+
+/** `path` with only the non-empty `params` appended as a query. */
+function withViewQuery(path: string, params?: ViewQuery): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value) query.append(key, value);
@@ -224,17 +228,28 @@ export function parseCategoriesTab(searchParams: SearchParamsInput): CategoriesT
   return CATEGORIES_TABS.find((tab) => tab === value) ?? "keywords";
 }
 
+/** The Category check (FR-46): `/plans/<id>/categories/check`, with only the non-empty `params`
+ * (e.g. `?part=`) appended. A sub-page of Categories, not a flow step. */
+export function planCategoryCheckHref(planId: string, params?: ViewQuery): string {
+  return withViewQuery(`${planCategoriesHref(planId)}/check`, params);
+}
+
 export type PlanPath = { planId: string; view: string };
 
-/** `/plans/<id>/<view>` → `{planId, view}`; anything else (including `/plans/new`) → null. */
+/**
+ * `/plans/<id>/<view>` → `{planId, view}`, and the one sub-page `/plans/<id>/categories/check` →
+ * view `"categories/check"`; anything else (including `/plans/new`) → null.
+ */
 export function parsePlanPath(pathname: string): PlanPath | null {
   const segments = pathname.split("/").filter(Boolean);
-  if (segments.length !== 3 || segments[0] !== "plans") return null;
+  if (segments[0] !== "plans") return null;
+  const isCheck = segments.length === 4 && segments[2] === "categories" && segments[3] === "check";
+  if (segments.length !== 3 && !isCheck) return null;
   let planId: string;
   try {
     planId = decodeURIComponent(segments[1]);
   } catch {
     return null;
   }
-  return { planId, view: segments[2] };
+  return { planId, view: isCheck ? "categories/check" : segments[2] };
 }

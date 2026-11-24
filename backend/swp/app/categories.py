@@ -3,7 +3,8 @@
 Rules: list, create, edit, delete and reorder. Values are stripped, checked by
 `swp.domain.categories` inside the store's write lock, and stored. The caller passes `now`; new
 ids come from uuid4 here. Aisle categories: read one aisle, replace its whole list, or read every
-aisle of a plan's import (read-only, it never writes the plan).
+aisle of a plan's import (read-only, it never writes the plan). The category check (FR-46) reads
+the plan and both tables and writes nothing.
 """
 
 import uuid
@@ -13,10 +14,12 @@ from datetime import datetime
 from swp.app.plans import require
 from swp.domain.categories import (
     AisleCategories,
+    CategoryCheck,
     KeywordRule,
     PlanAisleCategories,
     aisle_categories_view,
     aisle_category_errors,
+    check,
     keyword_key,
     plan_aisle_categories_view,
     rule_errors,
@@ -181,3 +184,17 @@ def plan_aisle_categories(plan_id: uuid.UUID) -> PlanAisleCategories:
     plan = require(plan_id)
     aisles = aisle_order(location.aisle for location in plan.imported.data.locations.values())
     return plan_aisle_categories_view(aisles, aisle_store.list_all(), _domain_rules())
+
+
+def category_check(plan_id: uuid.UUID) -> CategoryCheck:
+    """The category check of the plan as it is now (FR-46): one replay, read-only (it never
+    writes the plan or the category tables); raise `plan_not_found` for an unknown id."""
+    plan = require(plan_id)
+    return check(
+        plan.imported.data,
+        plan.analysis,
+        plan.state,
+        plan.version,
+        _domain_rules(),
+        aisle_store.list_all(),
+    )

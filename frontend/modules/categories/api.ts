@@ -3,13 +3,14 @@
 // Categories API (FR-43, FR-45, Story 13.2): the global keyword rules and aisle categories. Reads
 // are queries under `CATEGORIES_KEY`; every write goes to the server and then refetches them, so
 // the page shows only what the server confirmed (no optimistic update). A failed write throws its
-// AD-11 `ApiError` (a network failure throws `internal`).
+// AD-11 `ApiError` (a network failure throws `internal`). The category check (FR-46) is a plan view:
+// its query sits under `planRootKey`, so every confirmed move, undo or reset refetches it (AD-3).
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
 import { internalError, parseErrorBody } from "@/lib/api/errors";
-import { getJson } from "@/lib/api/plans";
+import { getJson, planRootKey } from "@/lib/api/plans";
 import type { components } from "@/lib/api/schema";
 
 export type KeywordRule = components["schemas"]["KeywordRule"];
@@ -17,6 +18,8 @@ export type KeywordRules = components["schemas"]["KeywordRules"];
 export type AisleCategory = components["schemas"]["AisleCategory"];
 export type AisleCategories = components["schemas"]["AisleCategories"];
 export type PlanAisleCategories = components["schemas"]["PlanAisleCategories"];
+export type CategoryCheck = components["schemas"]["CategoryCheck"];
+export type CategoryCheckRow = components["schemas"]["CategoryCheckRow"];
 
 /** The prefix of every categories query: rules and aisle categories are refetched together. */
 export const CATEGORIES_KEY = ["categories"] as const;
@@ -27,6 +30,24 @@ export function keywordRulesKey() {
 
 export function planAisleCategoriesKey(planId: string) {
   return [...CATEGORIES_KEY, "aisles", planId] as const;
+}
+
+/** Under `['plan', planId]`, so a confirmed command refetches it. */
+export function planCategoryCheckKey(planId: string) {
+  return [...planRootKey(planId), "category-check"] as const;
+}
+
+/** True for the category check query of any plan (`planCategoryCheckKey`'s shape). */
+export function isCategoryCheckKey(queryKey: readonly unknown[]): boolean {
+  const [root, , view] = queryKey;
+  return queryKey.length === 3 && root === planRootKey("")[0] && view === "category-check";
+}
+
+export function usePlanCategoryCheck(planId: string) {
+  return useQuery({
+    queryKey: planCategoryCheckKey(planId),
+    queryFn: () => getJson<CategoryCheck>(`/api/plans/${encodeURIComponent(planId)}/category-check`),
+  });
 }
 
 export function useKeywordRules() {
@@ -75,7 +96,7 @@ export const categoriesApi = {
 };
 
 /**
- * Runs a write, then waits for the categories queries to refetch; rethrows a failed write. A failed
+ * Runs a write, then waits for the categories queries (and every category check) to refetch; rethrows a failed write. A failed
  * write refetches too, so a rule someone else deleted or moved shows as the server has it.
  */
 export function useCategoriesWrite() {
@@ -85,7 +106,11 @@ export function useCategoriesWrite() {
       try {
         return await write();
       } finally {
-        await queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+          // Every plan's check reads the rules and aisle categories: a write makes it stale.
+          queryClient.invalidateQueries({ predicate: (query) => isCategoryCheckKey(query.queryKey) }),
+        ]);
       }
     },
     [queryClient],

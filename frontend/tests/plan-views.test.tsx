@@ -173,12 +173,14 @@ describe("ad20 plan urls", () => {
     expect(parsePlanPath("/plans/x/overview")).toEqual({ planId: "x", view: "overview" });
     expect(parsePlanPath("/plans/x/settings")).toEqual({ planId: "x", view: "settings" });
     expect(parsePlanPath(planStepHref(PLAN_ID, "parts"))).toEqual({ planId: PLAN_ID, view: "parts" });
+    expect(parsePlanPath("/plans/x/categories/check")).toEqual({ planId: "x", view: "categories/check" });
   });
 
   it("ad20_parse_plan_path_rejects_other_paths", () => {
     expect(parsePlanPath("/plans/new")).toBeNull();
     expect(parsePlanPath("/")).toBeNull();
     expect(parsePlanPath("/plans/x/overview/extra")).toBeNull();
+    expect(parsePlanPath("/plans/x/categories/other")).toBeNull();
     expect(parsePlanPath("/other/x/overview")).toBeNull();
   });
 

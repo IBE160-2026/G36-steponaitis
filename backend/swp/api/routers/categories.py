@@ -1,8 +1,9 @@
 """Keyword rules (FR-43) and aisle categories (FR-45): global, the same in every plan.
 
 GET/POST /api/keyword-rules, PATCH/DELETE /api/keyword-rules/{rule_id},
-PUT /api/keyword-rules/order, GET/PUT /api/aisle-categories/{aisle} (the aisle's whole list) and
-GET /api/plans/{plan_id}/aisle-categories (read-only). Writes pass the same-origin guard
+PUT /api/keyword-rules/order, GET/PUT /api/aisle-categories/{aisle} (the aisle's whole list),
+GET /api/plans/{plan_id}/aisle-categories and the category check (FR-46)
+GET /api/plans/{plan_id}/category-check (both read-only). Writes pass the same-origin guard
 (AD-19); errors use the AD-11 envelope.
 """
 
@@ -22,7 +23,7 @@ from swp.api.schemas.categories import (
 )
 from swp.app import categories
 from swp.app.plans import parse_plan_id
-from swp.domain.categories import AisleCategories, PlanAisleCategories
+from swp.domain.categories import AisleCategories, CategoryCheck, PlanAisleCategories
 
 router = APIRouter()
 
@@ -83,3 +84,8 @@ def put_aisle_categories(aisle: str, body: AisleCategoriesUpdate) -> AisleCatego
 @router.get("/plans/{plan_id}/aisle-categories", responses=error_responses(401, 404, 422))
 def get_plan_aisle_categories(plan_id: str) -> PlanAisleCategories:
     return categories.plan_aisle_categories(parse_plan_id(plan_id))
+
+
+@router.get("/plans/{plan_id}/category-check", responses=error_responses(401, 404, 422))
+def get_category_check(plan_id: str) -> CategoryCheck:
+    return categories.category_check(parse_plan_id(plan_id))

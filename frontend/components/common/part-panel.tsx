@@ -67,32 +67,41 @@ export function ManualMoveButton({
   );
 }
 
+/** The href of the page showing the panel with `params`: a flow step's, or a page's own builder. */
+export type PanelHref = StepKey | ((params: LocationParams) => string);
+
 /**
  * Reads the open part from the URL's `?part=`, records the opener, pushes `?part=` on open, and on
- * close replaces the URL without it (keeping `aisle`/`loc`).
+ * close replaces the URL without it (keeping `aisle`/`loc`). `page` is the flow step showing the
+ * panel, or the href builder of a page that is not a step (e.g. the Category check).
  */
-export function usePartPanel(planId: string, step: StepKey) {
+export function usePartPanel(planId: string, page: PanelHref) {
   const opener = useRef<HTMLElement | null>(null);
   const { part, ...rest } = parseLocationParams(useSearchParams());
   const restKey = JSON.stringify(rest);
+
+  const href = useCallback(
+    (params: LocationParams) => (typeof page === "function" ? page(params) : planStepHref(planId, page, params)),
+    [planId, page],
+  );
 
   const open = useCallback(
     (next: string, from?: HTMLElement | null) => {
       const active = typeof document === "undefined" ? null : document.activeElement;
       opener.current = from ?? (active instanceof HTMLElement ? active : null);
       const current = JSON.parse(restKey) as LocationParams;
-      window.history.pushState(null, "", planStepHref(planId, step, { ...current, part: next }));
+      window.history.pushState(null, "", href({ ...current, part: next }));
     },
-    [planId, step, restKey],
+    [href, restKey],
   );
 
   const close = useCallback(() => {
     const current = JSON.parse(restKey) as LocationParams;
-    window.history.replaceState(null, "", planStepHref(planId, step, current));
+    window.history.replaceState(null, "", href(current));
     const element = opener.current;
     opener.current = null;
     if (element && element.isConnected) element.focus();
-  }, [planId, step, restKey]);
+  }, [href, restKey]);
 
   return { part, open, close };
 }

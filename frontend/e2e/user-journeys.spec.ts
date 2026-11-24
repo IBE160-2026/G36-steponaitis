@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { HEADLINE, logIn, PANELS, PASSWORD, signUp, turnDemoOn, uniqueUsername } from "./support/auth";
 import { aisleRow } from "./support/before-after";
+import { addAisleCategory, addRule, removeCategories } from "./support/categories";
 import { DEFAULT_SLOW_RGB, expectSlowBin, printOffenders, rootSlow, SHADE_6, SHADE_6_RGB } from "./support/colours";
 import { dragOver, startDrag, targetFor } from "./support/drag";
 import { gridButton, launcher, planReady, searchField, STEPS } from "./support/launcher";
@@ -24,8 +25,9 @@ import { type APIRequestContext, expect, type Locator, type Page, test, toasts }
 // and failure path and asserts what the user sees at each step; the comments name the step
 // numbers. The API is used only to set up the state a journey takes as given ("a plan saved last
 // week", "another plan Spring re-slot") and to read view JSON for data-dependent picks (which part,
-// which location): the example values in EXPERIENCE.md are illustrative. Steps that need Epics
-// 13–16 are declared as skipped tests at the end. The existing specs stay the per-step detail tests:
+// which location): the example values in EXPERIENCE.md are illustrative. UJ-1's category check
+// (Epic 13) runs near the end; steps that need Epics 14–16 are declared as skipped tests after it.
+// The existing specs stay the per-step detail tests:
 //
 // - UJ-1: new-plan, plan-overview, locations-wall, best-locations-wall, recommendations-page,
 //   other-location, keep-in-place, manual-move, drag, before-after, login, sm2-flow
@@ -1215,9 +1217,111 @@ test.describe("user journeys of a logged-in planner", () => {
 });
 
 // -------------------------------------------------------------------------------------------------
+// UJ-1 stage 2 (Epic 13): the category check of the planning copy. Keyword rules and aisle
+// categories are global and the browsers run at the same time, so each project uses its own aisle
+// (categories.spec uses F–I), every rule and category is unique to the run, only the test's own row
+// is read, and its rules and aisle categories are removed afterwards.
+
+/** One aisle per browser project, so parallel runs never replace each other's aisle list. */
+const CHECK_AISLE_BY_PROJECT: Record<string, string> = { chromium: "C", firefox: "D", msedge: "E" };
+
+test.describe("user journey steps of stage 2", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  });
+
+  test("uj1 fr46 the category check lists a part outside its aisle's categories", async ({ page, request }, testInfo) => {
+    test.setTimeout(180_000);
+    const run = randomUUID().slice(0, 8);
+    const aisle = CHECK_AISLE_BY_PROJECT[testInfo.project.name] ?? "B";
+    const planId = (await createSamplePlan(request, `Category check ${run}`)).id;
+    // A randomly chosen lone part in the aisle: its whole description is its keyword (sample
+    // descriptions are unique, and none is a word run inside another).
+    const wall = await wallOf(request, planId, aisle);
+    const shuffled = [...wall.locations].sort(() => Math.random() - 0.5);
+    const lone = await lonePart(request, planId, shuffled, new Set());
+    const { description } = await getJson<{ description: string }>(
+      request,
+      `/api/plans/${planId}/parts/${encodeURIComponent(lone.part)}`,
+    );
+    testInfo.annotations.push({ type: "part", description: `${lone.part} at ${lone.from}: ${description}` });
+    const checked = { keyword: description, category: `Checked ${run}` };
+    const aisleRule = { keyword: `kwz${run}`, category: `Aisle ${run}` };
+    const empty = (await locationRows(request, planId)).find((row) => !row.occupied && row.location.aisle === "A");
+    expect(empty, "an empty location in aisle A").toBeDefined();
+    if (!empty) return;
+    const target = empty.location.code;
+
+    // Pre-cleanup: a run killed before its `finally` may have left a rule with this keyword.
+    await removeCategories(request, [checked.keyword, aisleRule.keyword], aisle);
+    try {
+      // Open Categories with CAT and add the two rules: the part's category, and the one the aisle gets.
+      await page.goto(`/plans/${planId}/overview`);
+      await planReady(page);
+      await page.keyboard.press("Control+k");
+      await expect(searchField(page)).toBeFocused();
+      await page.keyboard.type("CAT");
+      await launcher(page).getByRole("option", { name: /Keyword rules and aisle categories/ }).click();
+      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories$`));
+      await addRule(page, checked.keyword, checked.category);
+      await addRule(page, aisleRule.keyword, aisleRule.category);
+
+      // Give the part's aisle the other category on the Aisle categories tab.
+      await page.getByRole("tab", { name: "Aisle categories" }).click();
+      await addAisleCategory(page, aisle, aisleRule.category);
+
+      // Category check: the toolbar plate, the count line and the part's row.
+      await page.getByRole("main").getByRole("link", { name: "Category check", exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check$`));
+      const main = page.getByRole("main");
+      await expect(main.getByRole("heading", { level: 1, name: "Category check" })).toBeVisible();
+      await expect(plate(page)).toBeVisible();
+      await expect(
+        main.getByText(/^[\d,]+ parts? outside (its|their) aisle's categories · [\d,]+ aisles? without categories$/),
+      ).toBeVisible();
+      const table = main.getByRole("table", { name: "Category check" });
+      const row = table.locator("tbody tr").filter({ has: page.locator(`[data-open-part="${lone.part}"]`) });
+      await expect(row).toHaveCount(1);
+      await expect(row.getByRole("cell").nth(1)).toHaveText(description);
+      await expect(row.getByRole("cell").nth(2)).toHaveText(checked.category);
+      await expect(row.locator(`[data-location-chip="${lone.from}"]`)).toBeVisible();
+      await expect(row.getByRole("cell").nth(4)).toHaveText(aisle);
+      await expect(row.getByRole("cell").nth(5)).toHaveText(aisleRule.category);
+
+      // The part button opens its panel; a manual move into aisle A (no categories) clears the row.
+      await row.locator(`[data-open-part="${lone.part}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check\\?part=`));
+      const panel = page.getByRole("complementary", { name: lone.part });
+      await expect(panel.getByRole("heading", { name: lone.part, level: 2 })).toBeFocused();
+      await moveFromPanel(page, panel, lone.part, lone.from, target);
+      await expect(row).toHaveCount(0);
+
+      // Undo last move: the part is back in its aisle and so is its row.
+      await panel.getByRole("button", { name: "Undo last move", exact: true }).click();
+      await expect(toasts(page).getByText("Undid move 1.", { exact: true })).toBeVisible();
+      await expect(row).toHaveCount(1);
+      await expect(row.locator(`[data-location-chip="${lone.from}"]`)).toBeVisible();
+
+      // Esc closes the panel and drops `?part=`; Enter on the part's focused row opens it again.
+      await panel.getByRole("heading", { name: lone.part, level: 2 }).focus();
+      await page.keyboard.press("Escape");
+      await expect(panel).toHaveCount(0);
+      await expect(page).toHaveURL(new RegExp(`/plans/${planId}/categories/check$`));
+      await row.focus();
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(
+        new RegExp(`/plans/${planId}/categories/check\\?part=${encodeURIComponent(lone.part)}$`),
+      );
+      await expect(panel.getByRole("heading", { name: lone.part, level: 2 })).toBeFocused();
+    } finally {
+      await removeCategories(request, [checked.keyword, aisleRule.keyword], aisle);
+    }
+  });
+});
+
+// -------------------------------------------------------------------------------------------------
 // Journey steps that need later epics: declared here so the report lists them as skipped.
 
-test.skip("uj1 fr46 the category check of a plan's parts and aisles (Epic 13, stage 2)", async () => {});
 test.skip("uj2 fr48 location labels with QR codes printed from a plan (Epic 14, stage 2)", async () => {});
 test.skip("uj3 fr41 a concurrent edit by another planner shows the warning (Epic 15, if time allows)", async () => {});
 test.skip("uj5 the examiner opens the public deployment's demo front page (Epic 16, deployment)", async () => {});

@@ -250,6 +250,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plans/{plan_id}/category-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Category Check */
+        get: operations["get_category_check_api_plans__plan_id__category_check_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/{plan_id}/commands": {
         parameters: {
             query?: never;
@@ -742,6 +759,35 @@ export interface components {
             name: string;
             /** Transactions */
             transactions?: string | null;
+        };
+        /**
+         * CategoryCheck
+         * @description The category check of the plan as it is now (FR-46, AD-3).
+         */
+        CategoryCheck: {
+            /** Aisles Without Categories */
+            aisles_without_categories: number;
+            /** Outside Count */
+            outside_count: number;
+            /** Rows */
+            rows: components["schemas"]["CategoryCheckRow"][];
+            /** Version */
+            version: number;
+        };
+        /**
+         * CategoryCheckRow
+         * @description A part outside its aisle's categories (FR-46); the aisle is `current_location.aisle`.
+         */
+        CategoryCheckRow: {
+            /** Aisle Categories */
+            aisle_categories: string[];
+            /** Category */
+            category: string;
+            current_location: components["schemas"]["LocationRef"];
+            /** Description */
+            description: string;
+            /** Part */
+            part: string;
         };
         /** ClassCounts */
         ClassCounts: {
@@ -3222,6 +3268,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BeforeAfterView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_category_check_api_plans__plan_id__category_check_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryCheck"];
+                };
+            };
+            /** @description Error */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Error */
