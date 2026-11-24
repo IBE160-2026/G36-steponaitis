@@ -1154,3 +1154,21 @@ export function categoryCheckCountLine(outside: number, aislesWithout: number): 
     aislesWithout === 1 ? "1 aisle without categories" : `${formatNumber(aislesWithout)} aisles without categories`;
   return `${parts} · ${aisles}`;
 }
+
+// Location labels (Story 14.1, FR-48): the print view's title, aisle picker, heading and count.
+// Aisles, locations and their order are the server's (AD-3); only the words are made here.
+
+export const LABELS_TITLE = "Location labels";
+export const LABELS_AISLE = "Aisle";
+export const BACK_TO_OVERVIEW = "Back to Overview";
+export const LABELS_LOAD_FAILED = "The location labels could not be loaded.";
+
+/** "Location labels · Aisle A". */
+export function labelsHeading(aisle: string): string {
+  return `${LABELS_TITLE} · ${LABELS_AISLE} ${aisle}`;
+}
+
+/** "123 labels" (singular "1 label"). */
+export function labelsCountLine(count: number): string {
+  return plural(count, "label", "labels");
+}

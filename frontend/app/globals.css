@@ -373,10 +373,11 @@ tr[data-row-index]:focus-visible {
 }
 
 /*
- * Print (Story 8.4, UX-DR52, AD-17, NFR-9): the move list prints on A4 portrait, black on white.
- * The components hide their own chrome with `print:` utilities; here is only what has no
- * component handle: the page box, its page numbers (best effort; Firefox may not render margin
- * boxes), the page ground and the sonner toast portal.
+ * Print (Story 8.4, UX-DR52, AD-17, NFR-9): the move list (Story 8.4) and the location labels
+ * (Story 14.1, FR-48) print on A4 portrait, black on white. The components hide their own chrome
+ * and set their break rules with `print:` utilities; here is only what has no component handle:
+ * the page box, its page numbers (best effort; Firefox may not render margin boxes), the page
+ * ground and the sonner toast portal.
  */
 @media print {
   @page {

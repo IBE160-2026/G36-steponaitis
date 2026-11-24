@@ -33,7 +33,6 @@ import { type PlanSummary, usePlans, usePlanSummary } from "@/lib/api/plans";
 import { usePlanCommands } from "@/lib/commands";
 import {
   BAND_ENTRIES,
-  CATEGORIES_ENTRY,
   isLauncherShortcut,
   KEYBOARD_NOTE,
   KEYBOARD_SHORTCUTS,
@@ -49,8 +48,7 @@ import {
   NO_MATCH,
   type PlanRef,
   SEARCH_PLACEHOLDER,
-  STAGE2_PLATES,
-  STAGE2_TEXT,
+  STAGE2_ENTRIES,
   STEP_DONE,
   stepCountLines,
   stepState,
@@ -367,43 +365,25 @@ function PlansBand({
 }
 
 function Stage2Band({ planId, onActivate }: { planId: string; onActivate: (item: Item) => void }) {
-  const entry = CATEGORIES_ENTRY;
   return (
-    <RovingGroup label="Stage 2" count={1 + STAGE2_PLATES.length} className="flex flex-col gap-2">
+    <RovingGroup label="Stage 2" count={STAGE2_ENTRIES.length} className="flex flex-col gap-2">
       {(item) => (
         <>
-          <Link
-            href={entry.href(planId)}
-            {...item(0)}
-            onClick={preventAnd(() => onActivate({ kind: "band", id: `band:${entry.id}`, entry }))}
-            className={cn(
-              ENTRY_LINK,
-              "flex w-52 flex-col items-start rounded border-[1.4px] border-border bg-surface px-3 py-2 text-left text-ink",
-            )}
-          >
-            <span className="font-code text-[34px] leading-none font-bold">{entry.code}</span>
-            <span className="type-body-strong">{entry.name}</span>
-            <span className="type-caption text-ink-secondary">{entry.description}</span>
-          </Link>
-          {STAGE2_PLATES.map((plate, index) => (
-            <button
-              key={plate.code}
-              type="button"
-              {...item(index + 1)}
-              aria-disabled="true"
-              onClick={(event) => event.preventDefault()}
+          {STAGE2_ENTRIES.map((entry, index) => (
+            <Link
+              key={entry.id}
+              href={entry.href(planId)}
+              {...item(index)}
+              onClick={preventAnd(() => onActivate({ kind: "band", id: `band:${entry.id}`, entry }))}
               className={cn(
                 ENTRY_LINK,
-                "flex w-52 cursor-not-allowed flex-col items-start rounded border-[1.4px] border-dashed border-stage2-outline bg-slot-empty px-3 py-2 text-left",
+                "flex w-52 flex-col items-start rounded border-[1.4px] border-border bg-surface px-3 py-2 text-left text-ink",
               )}
             >
-              <span className="flex items-center gap-2">
-                <span className="font-code text-[34px] leading-none font-bold text-stage2-code">{plate.code}</span>
-                <Icon name="lock" size={16} className="text-stage2-text" />
-              </span>
-              <span className="type-body-strong text-stage2-text">{plate.name}</span>
-              <span className="type-caption text-stage2-text">{STAGE2_TEXT}</span>
-            </button>
+              <span className="font-code text-[34px] leading-none font-bold">{entry.code}</span>
+              <span className="type-body-strong">{entry.name}</span>
+              <span className="type-caption text-ink-secondary">{entry.description}</span>
+            </Link>
           ))}
         </>
       )}

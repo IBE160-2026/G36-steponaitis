@@ -45,26 +45,29 @@ test.describe("uj8 launcher", () => {
     const parts = launcher(page).getByRole("group", { name: "Parts", exact: true });
     await expect(parts.getByText("You are here")).toBeVisible();
     await expect(parts.getByText(/^[\d,]+ parts$/)).toBeVisible();
-    // Stage 2: CAT is an active link (Story 13.2); LBL stays inert.
+    // Stage 2: CAT (Story 13.2) and LBL (Story 14.1) are active links.
     const cat = launcher(page).getByRole("link", { name: /CAT/ });
     await expect(cat).toHaveAttribute("href", `/plans/${plan.id}/categories`);
     await expect(cat).not.toHaveAttribute("aria-disabled");
     await expect(cat).not.toContainText("Coming in stage 2");
-    const lbl = launcher(page).getByRole("button", { name: /LBL/ });
-    await expect(lbl).toHaveAttribute("aria-disabled", "true");
-    await expect(lbl).toContainText("Coming in stage 2");
-
-    // Enter on LBL does nothing and the drawer stays open.
-    await lbl.focus();
-    await page.keyboard.press("Enter");
-    await expect(launcher(page)).toBeVisible();
-    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/parts$`));
+    const lbl = launcher(page).getByRole("link", { name: /LBL/ });
+    await expect(lbl).toHaveAttribute("href", `/plans/${plan.id}/labels`);
+    await expect(lbl).not.toHaveAttribute("aria-disabled");
+    await expect(lbl).not.toContainText("Coming in stage 2");
+    await expect(launcher(page).getByRole("button", { name: /LBL/ })).toHaveCount(0);
 
     await page.keyboard.press("Escape");
     await expect(launcher(page)).toBeHidden();
     await expect(gridButton(page)).toBeFocused();
     await expect(page.locator("#content")).not.toHaveAttribute("inert");
     await expect(gridButton(page)).toHaveAttribute("aria-expanded", "false");
+
+    // Enter on LBL opens the location labels on the first aisle (Story 14.1).
+    await page.keyboard.press("Control+k");
+    await expect(launcher(page)).toBeVisible();
+    await launcher(page).getByRole("link", { name: /LBL/ }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/labels\\?aisle=[^&]+$`));
   });
 
   test("uj8 types mov and opens the move list with the keyboard only", async ({ page, request }) => {

@@ -26,12 +26,13 @@ import { type APIRequestContext, expect, type Locator, type Page, test, toasts }
 // numbers. The API is used only to set up the state a journey takes as given ("a plan saved last
 // week", "another plan Spring re-slot") and to read view JSON for data-dependent picks (which part,
 // which location): the example values in EXPERIENCE.md are illustrative. UJ-1's category check
-// (Epic 13) runs near the end; steps that need Epics 14–16 are declared as skipped tests after it.
+// (Epic 13) and UJ-2's location labels (Epic 14) run near the end; steps that need Epics 15–16 are
+// declared as skipped tests after them.
 // The existing specs stay the per-step detail tests:
 //
 // - UJ-1: new-plan, plan-overview, locations-wall, best-locations-wall, recommendations-page,
 //   other-location, keep-in-place, manual-move, drag, before-after, login, sm2-flow
-// - UJ-2: move-list, move-list-print
+// - UJ-2: move-list, move-list-print, labels-print
 // - UJ-3: saved-plans, reopen-plan, session-expiry, undo, recommendations-outdated, reuse-import
 // - UJ-4: key-colours
 // - UJ-5: front-page, demo-version, signup, login
@@ -1192,7 +1193,7 @@ test.describe("user journeys of a logged-in planner", () => {
     await planReady(page);
 
     // Failure path: "xyz" matches nothing; Esc closes the drawer and focus returns to the grid
-    // button; CAT is an active link, and LBL reads "Coming in stage 2" and does not open.
+    // button; CAT and LBL are active links.
     await page.keyboard.press("Control+k");
     await page.keyboard.type("xyz");
     await expect(launcher(page).getByText("No feature or saved plan matches “xyz”.")).toBeVisible();
@@ -1203,14 +1204,10 @@ test.describe("user journeys of a logged-in planner", () => {
     const cat = launcher(page).getByRole("link", { name: /CAT/ });
     await expect(cat).not.toContainText("Coming in stage 2");
     await expect(cat).not.toHaveAttribute("aria-disabled");
-    const lbl = launcher(page).getByRole("button", { name: /LBL/ });
-    await expect(lbl).toContainText("Coming in stage 2");
-    await expect(lbl).toHaveAttribute("aria-disabled", "true");
-    const url = page.url();
-    await lbl.focus();
-    await page.keyboard.press("Enter");
-    await expect(launcher(page)).toBeVisible();
-    expect(page.url()).toBe(url);
+    const lbl = launcher(page).getByRole("link", { name: /LBL/ });
+    await expect(lbl).not.toContainText("Coming in stage 2");
+    await expect(lbl).not.toHaveAttribute("aria-disabled");
+    await expect(lbl).toHaveAttribute("href", `/plans/${spring.id}/labels`);
     await page.keyboard.press("Escape");
     await expect(launcher(page)).toBeHidden();
   });
@@ -1368,8 +1365,59 @@ test.describe("user journey steps of stage 2", () => {
 });
 
 // -------------------------------------------------------------------------------------------------
+// UJ-2 stage 2 (Epic 14): location labels with QR codes, printed from a plan for one aisle.
+
+test.describe("user journey steps of stage 2: location labels", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  });
+
+  test("uj2 fr48 location labels with QR codes printed from a plan", async ({ page, request }) => {
+    test.setTimeout(120_000);
+    const planId = (await createSamplePlan(request, `Labels ${randomUUID().slice(0, 8)}`)).id;
+    const summary = await getJson<Summary>(request, `/api/plans/${planId}`);
+    const labels = await getJson<{ aisles: { aisle: string; locations: Ref[] }[] }>(
+      request,
+      `/api/imports/${summary.import_id}/labels`,
+    );
+    const b = labels.aisles.find((aisle) => aisle.aisle === "B")?.locations.map((ref) => ref.code) ?? [];
+    expect(b.length).toBeGreaterThan(1);
+    await page.goto(`/plans/${planId}/overview`);
+    await planReady(page);
+
+    // The launcher's LBL plate opens the label print view on the first aisle.
+    await page.keyboard.press("Control+k");
+    await expect(launcher(page)).toBeVisible();
+    const lbl = launcher(page).getByRole("link", { name: /LBL/ });
+    await expect(lbl).not.toHaveAttribute("aria-disabled");
+    await lbl.click();
+    await expect(page).toHaveURL(new RegExp(`/plans/${planId}/labels\\?aisle=A$`));
+    const main = page.getByRole("main");
+    const picker = main.getByLabel("Aisle", { exact: true });
+    await expect(picker).toHaveValue("A");
+    await expect(picker.locator("option")).toHaveText(labels.aisles.map((aisle) => aisle.aisle));
+
+    // Picking aisle B shows its labels in the server's order.
+    await picker.selectOption("B");
+    await expect(page).toHaveURL(new RegExp(`/plans/${planId}/labels\\?aisle=B$`));
+    await expect(main.getByRole("heading", { name: "Location labels · Aisle B", level: 1 })).toBeVisible();
+    const cards = main.locator("[data-label]");
+    await expect(cards).toHaveCount(b.length);
+    await expect(cards.first()).toHaveAttribute("data-label", b[0]);
+    await expect(cards.last()).toHaveAttribute("data-label", b[b.length - 1]);
+    await expect(cards.first().getByRole("img")).toHaveAttribute("aria-label", `QR code ${b[0]}`);
+    await expect(cards.last().getByRole("img")).toHaveAttribute("aria-label", `QR code ${b[b.length - 1]}`);
+
+    // Print is the one primary button.
+    const print = main.getByRole("button", { name: "Print", exact: true });
+    await expect(print).toBeVisible();
+    await expect(main.locator("button.bg-ink, a.bg-ink")).toHaveCount(1);
+    await expect(main.locator("button.bg-ink, a.bg-ink")).toHaveText("Print");
+  });
+});
+
+// -------------------------------------------------------------------------------------------------
 // Journey steps that need later epics: declared here so the report lists them as skipped.
 
-test.skip("uj2 fr48 location labels with QR codes printed from a plan (Epic 14, stage 2)", async () => {});
 test.skip("uj3 fr41 a concurrent edit by another planner shows the warning (Epic 15, if time allows)", async () => {});
 test.skip("uj5 the examiner opens the public deployment's demo front page (Epic 16, deployment)", async () => {});

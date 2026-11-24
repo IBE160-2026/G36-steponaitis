@@ -26,6 +26,7 @@ import {
   NEW_PLAN_HREF,
   newPlanFromHref,
   planCategoriesHref,
+  planLabelsHref,
   planSettingsHref,
   planStepHref,
   SAVED_PLANS_HREF,
@@ -221,13 +222,21 @@ export const CATEGORIES_ENTRY: BandEntry = {
   href: (planId) => planCategoriesHref(planId),
 };
 
-/** Every band entry search finds, listed under Actions: the Plans band's, then CAT. */
-export const SEARCH_BAND_ENTRIES: readonly BandEntry[] = [...BAND_ENTRIES, CATEGORIES_ENTRY];
+/** LBL (Story 14.1, FR-48): the second stage-2 plate; it opens the location labels print view. */
+export const LABELS_ENTRY: BandEntry = {
+  id: "labels",
+  code: "LBL",
+  name: "Location labels",
+  description: "Print a QR label for every location in an aisle",
+  keywords: ["labels", "qr"],
+  href: (planId) => planLabelsHref(planId),
+};
 
-/** The stage-2 features not built yet, shown as inert plates. */
-export const STAGE2_PLATES = [{ code: "LBL", name: "Location labels" }] as const;
+/** The stage-2 plates, in band order: CAT, then LBL. */
+export const STAGE2_ENTRIES: readonly BandEntry[] = [CATEGORIES_ENTRY, LABELS_ENTRY];
 
-export const STAGE2_TEXT = "Coming in stage 2";
+/** Every band entry search finds, listed under Actions: the Plans band's, then CAT and LBL. */
+export const SEARCH_BAND_ENTRIES: readonly BandEntry[] = [...BAND_ENTRIES, ...STAGE2_ENTRIES];
 
 /** The Keyboard box. */
 export const KEYBOARD_SHORTCUTS = [

@@ -117,6 +117,7 @@ modules =
     swp.domain.views.locations
     swp.domain.views.wall
     swp.domain.layout
+    swp.domain.labels
     swp.domain.views.pick_groups
     swp.domain.views.search
     swp.domain.views.move_preview

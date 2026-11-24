@@ -10,6 +10,7 @@ import { applyAllQuestion, NO_OPEN_TO_APPLY, resetQuestion } from "@/lib/copy";
 import {
   BAND_ENTRIES,
   CATEGORIES_ENTRY,
+  LABELS_ENTRY,
   isLauncherShortcut,
   KEYBOARD_NOTE,
   KEYBOARD_SHORTCUTS,
@@ -21,7 +22,7 @@ import {
   NO_MATCH,
   RESET_ACTION,
   SEARCH_PLACEHOLDER,
-  STAGE2_PLATES,
+  STAGE2_ENTRIES,
   STEP_CODES,
   stepCountLines,
   stepState,
@@ -31,6 +32,7 @@ import {
   NEW_PLAN_HREF,
   newPlanFromHref,
   planCategoriesHref,
+  planLabelsHref,
   planSettingsHref,
   planStepHref,
   SAVED_PLANS_HREF,
@@ -141,7 +143,13 @@ describe("ux_dr7 launcher data", () => {
       "Categories",
       planCategoriesHref(PLAN),
     ]);
-    expect(STAGE2_PLATES.map((plate) => `${plate.code} ${plate.name}`)).toEqual(["LBL Location labels"]);
+    expect([LABELS_ENTRY.code, LABELS_ENTRY.name, LABELS_ENTRY.href(PLAN)]).toEqual([
+      "LBL",
+      "Location labels",
+      planLabelsHref(PLAN),
+    ]);
+    expect(LABELS_ENTRY.href(PLAN)).toBe(`/plans/${PLAN}/labels`);
+    expect(STAGE2_ENTRIES.map((entry) => entry.code)).toEqual(["CAT", "LBL"]);
     expect(KEYBOARD_SHORTCUTS.map((shortcut) => shortcut.keys)).toEqual(["Ctrl K", "Ctrl /", "Alt A", "Esc"]);
     expect(KEYBOARD_NOTE).toBe("⌘ and ⌥ on a Mac.");
     expect(SEARCH_PLACEHOLDER).toBe("Search features, actions and plans");
@@ -230,6 +238,14 @@ describe("ux_dr8 launcher search", () => {
       expect(groups.find((group) => group.items.some((item) => item.id === "band:categories"))?.label).toBe(
         "Actions",
       );
+    }
+  });
+
+  it("fr48_lbl_is_found_by_code_and_keywords", () => {
+    for (const query of ["LBL", "labels", "qr"]) {
+      const groups = launcherResults(query, { actions, plans }) ?? [];
+      const group = groups.find((candidate) => candidate.items.some((item) => item.id === "band:labels"));
+      expect(group?.label).toBe("Actions");
     }
   });
 
@@ -336,25 +352,30 @@ describe("uj8 launcher drawer", () => {
     expect(text(rec)).toContain("Reset…");
     expect(text(column(markup, "Move list"))).toContain("Output");
     const stage2 = column(markup, "Stage 2");
-    expect(stage2).toContain('aria-disabled="true"');
-    expect(text(stage2)).toContain("Coming in stage 2");
+    expect(stage2).not.toContain("aria-disabled");
+    expect(text(stage2)).not.toContain("Coming in stage 2");
     expect(text(markup)).toContain("Autumn trial");
     expect(text(markup)).toContain("Data as of 2026-09-30 · round 1");
     expect(text(markup)).toContain(KEYBOARD_NOTE);
   });
 
-  it("ux_dr7_cat_is_an_active_link_and_lbl_stays_inert", () => {
+  it("fr48_cat_and_lbl_are_active_links", () => {
     const stage2 = column(body(), "Stage 2");
-    const cat = stage2.slice(stage2.indexOf("<a"), stage2.indexOf("</a>"));
+    expect(stage2).not.toContain("<button");
+    const [cat, lbl] = stage2
+      .split("<a")
+      .slice(1)
+      .map((link) => link.slice(0, link.indexOf("</a>")));
     expect(cat).toContain(`href="${planCategoriesHref(PLAN)}"`);
     expect(text(cat)).toContain("CAT");
     expect(text(cat)).toContain("Categories");
-    expect(cat).not.toContain("aria-disabled");
-    expect(text(cat)).not.toContain("Coming in stage 2");
-    const lbl = stage2.slice(stage2.indexOf("<button"));
+    expect(lbl).toContain(`href="${planLabelsHref(PLAN)}"`);
     expect(text(lbl)).toContain("LBL");
-    expect(lbl).toContain('aria-disabled="true"');
-    expect(text(lbl)).toContain("Coming in stage 2");
+    expect(text(lbl)).toContain("Location labels");
+    for (const link of [cat, lbl]) {
+      expect(link).not.toContain("aria-disabled");
+      expect(text(link)).not.toContain("Coming in stage 2");
+    }
   });
 
   it("uj8_before_the_summary_columns_show_links_and_states_only", () => {

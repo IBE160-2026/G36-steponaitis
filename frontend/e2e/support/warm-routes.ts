@@ -20,6 +20,7 @@ const PLAN_STEPS = [
   "recommendations",
   "print",
   "move-list",
+  "labels",
 ];
 
 export default async function warmRoutes(config: FullConfig): Promise<void> {

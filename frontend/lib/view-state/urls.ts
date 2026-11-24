@@ -222,6 +222,13 @@ export function planCategoriesHref(planId: string, tab?: CategoriesTab): string 
   return tab === undefined ? href : `${href}?${new URLSearchParams({ tab })}`;
 }
 
+/** The location labels print view (FR-48): `/plans/<id>/labels`, or `?aisle=<aisle>` for one aisle.
+ * Not a flow step. */
+export function planLabelsHref(planId: string, aisle?: string): string {
+  const href = `/plans/${encodeURIComponent(planId)}/labels`;
+  return aisle === undefined ? href : `${href}?${new URLSearchParams({ aisle })}`;
+}
+
 /** `?tab=` → the Categories tab; Keyword rules when missing or unknown. */
 export function parseCategoriesTab(searchParams: SearchParamsInput): CategoriesTab {
   const value = firstValue(searchParams, "tab");

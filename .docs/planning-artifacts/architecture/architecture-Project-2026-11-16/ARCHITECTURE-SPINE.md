@@ -362,11 +362,13 @@ flowchart LR
 | TanStack Query | 5.107.1 |
 | zod (form input only) | 4.6.7 |
 | @dnd-kit/core | 6.3.1 |
+| uqr (bundled QR encoder, location labels) | 0.1.3 |
 | sonner | 2.0.8 |
 | lucide-react | 1.73.0 |
 | @fontsource/figtree / @fontsource/barlow-semi-condensed | 5.3.0 / 5.3.0 |
 | openapi-typescript | 7.13.0 |
 | Vitest | 5.1.0 |
+| jsqr (QR decoder, tests only) | 1.4.0 |
 | Playwright | 1.65.1 |
 | concurrently (root dev script) | 10.0.7 |
 | Vercel Services (Beta) | `services` key in `vercel.json` |
@@ -465,14 +467,15 @@ The walking skeleton runs `GET /api/health` and one page locally. Deployment to 
 | Accounts, login, Demo version (FR-39, FR-40, FR-50) | `app/auth`, `modules/auth` | AD-10, AD-18, AD-19 |
 | Warehouse wall (FR-42) | `domain/layout`, `modules/locations` | AD-15, AD-3, AD-20 |
 | Drag to move or swap (FR-51) | `modules/locations`, `domain/drag` (handlers for `move_parts`, `put_together`, `swap`, dispatched by `domain.apply`) | AD-16, AD-5, AD-3 (preview) |
-| Stage 2: category check, labels (FR-43–FR-48) | new `domain` modules plus global tables | Deferred |
+| Stage 2: category check (FR-43–FR-47) | new `domain` modules plus global tables | Deferred |
+| Stage 2: location labels (FR-48) | `domain/labels`, `modules/labels` (QR drawn as inline SVG by the bundled `uqr`) | AD-3, AD-14 |
 
 ## Deferred
 
 - **Endpoint fields and view payloads.** Each story sets its own. AD-3, AD-6, AD-11 and AD-13 bind their shape, and the generated types keep both sides in step.
 - **How the wall is drawn** (SVG or DOM) and the component breakdown. DESIGN.md and EXPERIENCE.md govern the look; AD-15 governs the data.
 - **FR-41 concurrent-edit warning** (if time allows). It warns when `base_version` is behind, then applies the command on top of the current state. There is no whole-plan overwrite.
-- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is still decided after the milestone 2 gate. The stories that build the rest update this spine in the same change: Story 14.1 (QR library in the Stack table) and Story 15.1 (error code `plan_changed` added to AD-11).
+- **Stage 2.** Storage for keyword rules and aisle categories is decided (Story 13.1, AD-9): they are global tables owned by `swp/store`, not part of any plan's `state`. Their migrations are expand-only; the first stage 2 migration creates only `keyword_rules` (`id`, `position`, `keyword`, `category`, `updated_at`), and `aisle_categories` (`aisle`, `category`) now exists from its own expand-only migration (Story 13.2). The QR library is decided (Story 14.1): `uqr` 0.1.3, bundled, draws each label's QR code as inline SVG with no network call, and `jsqr` 1.4.0 decodes them in tests only. The story that builds the rest updates this spine in the same change: Story 15.1 (error code `plan_changed` added to AD-11).
 - **Operations the demo doesn't need:** backups, monitoring beyond the keep-alive, Redis, file storage, email, payments, maintenance page. The data is synthetic and the scale is NFR-7.
 - **IP-based rate limiting.** Serverless instances share no memory. AD-18's per-username throttle is enough for the demo.
 

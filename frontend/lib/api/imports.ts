@@ -1,8 +1,9 @@
 "use client";
 
-// Import reads (Story 10.1, AD-3): the wall layout of an import (FR-42, AD-15). An import never
-// changes, so its queries live under `['import', importId]`, outside every `['plan', planId]`
-// key: a confirmed command never refetches them, and they are cached for the whole session.
+// Import reads (Story 10.1, AD-3): the wall layout (FR-42, AD-15) and the location labels (FR-48)
+// of an import. An import never changes, so its queries live under `['import', importId]`, outside
+// every `['plan', planId]` key: a confirmed command never refetches them, and they are cached for
+// the whole session.
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
@@ -42,4 +43,30 @@ export function importLayoutQueryOptions(importId: string) {
 
 export function useImportLayout(importId: string) {
   return useQuery(importLayoutQueryOptions(importId));
+}
+
+/** Location labels (FR-48): every aisle with its locations in Walk Path order, in server order. */
+export type LabelsView = components["schemas"]["LabelsView"];
+export type AisleLabels = components["schemas"]["AisleLabels"];
+
+export function importLabelsKey(importId: string) {
+  return [...importRootKey(importId), "labels"] as const;
+}
+
+export function fetchImportLabels(importId: string): Promise<LabelsView> {
+  return getJson<LabelsView>(`/api/imports/${encodeURIComponent(importId)}/labels`);
+}
+
+/** Immutable like the layout: fetched once per import and never refetched or garbage-collected. */
+export function importLabelsQueryOptions(importId: string) {
+  return queryOptions({
+    queryKey: importLabelsKey(importId),
+    queryFn: () => fetchImportLabels(importId),
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+}
+
+export function useImportLabels(importId: string) {
+  return useQuery(importLabelsQueryOptions(importId));
 }

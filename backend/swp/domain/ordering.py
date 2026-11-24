@@ -58,6 +58,11 @@ def location_code_order(codes: Iterable[str]) -> list[str]:
     return sorted(set(codes))
 
 
+def walk_path_order(codes: Iterable[str], locations: Mapping[str, LocationData]) -> list[str]:
+    """Distinct location codes by Walk Path (numeric), ties by code (`str`) (FR-48)."""
+    return sorted(set(codes), key=lambda code: (locations[code].walk_path, code))
+
+
 def location_order(locations: Mapping[str, LocationData]) -> list[str]:
     """By aisle (`str`), level (`level_key` over the whole import), Walk Path (numeric),
     then code (`str`)."""
