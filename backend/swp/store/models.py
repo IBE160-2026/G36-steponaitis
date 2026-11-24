@@ -1,4 +1,5 @@
-"""Declarative rows for the tables created by migrations 0001 to 0003 (AD-4, AD-9, AD-10, AD-18).
+"""Declarative rows for the tables created by migrations 0001 to 0004 (AD-4, AD-9, AD-10,
+AD-18).
 
 JSON columns hold `model_dump(mode="json")` of the domain models; they are upcast
 through `swp.domain.state_migrations` on read (see `swp.store.plans`).
@@ -63,3 +64,15 @@ class LoginAttemptRow(Base):
     username_key: Mapped[str] = mapped_column(String, primary_key=True)
     failures: Mapped[int] = mapped_column(Integer, nullable=False)
     locked_until: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
+
+
+class KeywordRuleRow(Base):
+    """A global keyword rule (FR-43): not part of any plan's `state`."""
+
+    __tablename__ = "keyword_rules"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    keyword: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)

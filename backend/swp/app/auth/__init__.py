@@ -18,13 +18,12 @@ from swp.domain.accounts import (
     LOGIN_LOCKED,
     PASSWORD_MAX_BYTES,
     TAKEN,
-    FieldError,
     is_locked,
     signup_errors,
     username_error,
     username_key,
 )
-from swp.domain.errors import DomainError
+from swp.domain.errors import DomainError, FieldError
 from swp.store import login_attempts
 from swp.store import users as store
 

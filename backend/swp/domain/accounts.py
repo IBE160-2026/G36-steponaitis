@@ -7,15 +7,8 @@ Pure: no clock, ids or hashing here. `swp.app.auth` hashes, stores and signs the
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import TypedDict
 
-
-class FieldError(TypedDict):
-    """One failing form field, as a `validation_failed` detail (AD-11)."""
-
-    field: str
-    message: str
-
+from swp.domain.errors import FieldError
 
 USERNAME_MAX = 32
 PASSWORD_MIN = 4

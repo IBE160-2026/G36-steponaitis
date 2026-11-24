@@ -12,6 +12,7 @@ from swp.api.request_log import RequestLog, configure_logging
 from swp.api.routers import (
     auth,
     before_after,
+    categories,
     commands,
     health,
     layout,
@@ -76,6 +77,7 @@ def create_app(*, check_settings: bool = True) -> FastAPI:
         move_list.router,
         recommendations.router,
         wall.router,
+        categories.router,
     ):
         app.include_router(router, prefix="/api", dependencies=guarded)
     return app

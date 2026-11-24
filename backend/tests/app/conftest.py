@@ -8,7 +8,7 @@ from sqlalchemy import delete
 
 from swp.app.bootstrap import bootstrap
 from swp.store.db import get_engine
-from swp.store.models import ImportRow, LoginAttemptRow, PlanRow, UserRow
+from swp.store.models import ImportRow, KeywordRuleRow, LoginAttemptRow, PlanRow, UserRow
 from tests.conftest import _clear_caches
 
 
@@ -27,7 +27,7 @@ def app_database(
 
 @pytest.fixture
 def empty_tables(app_database: str) -> Iterator[str]:
-    """Migrated database with no plans, imports, users or login attempts.
+    """Migrated database with no plans, imports, users, login attempts or keyword rules.
 
     Postgres tests share one database, so every table is emptied first.
     """
@@ -37,4 +37,5 @@ def empty_tables(app_database: str) -> Iterator[str]:
         conn.execute(delete(ImportRow))
         conn.execute(delete(UserRow))
         conn.execute(delete(LoginAttemptRow))
+        conn.execute(delete(KeywordRuleRow))
     yield app_database

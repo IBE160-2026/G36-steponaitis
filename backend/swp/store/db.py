@@ -9,6 +9,7 @@ from typing import Any
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import Engine, create_engine, event, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from swp.config import get_settings
@@ -62,6 +63,23 @@ def write_transaction() -> Iterator[Session]:
         elif dialect == "postgresql":
             session.execute(text(f"SET LOCAL lock_timeout = '{PG_LOCK_TIMEOUT}'"))
         yield session
+
+
+_SQLITE_BUSY_CODES = (5, 6)  # SQLITE_BUSY, SQLITE_LOCKED (primary result codes)
+_SQLITE_BUSY_TEXT = ("database is locked", "database is busy")
+_PG_LOCK_NOT_AVAILABLE = "55P03"
+
+
+def is_busy(error: OperationalError) -> bool:
+    """True when `error` means another writer holds the lock."""
+    orig = error.orig
+    code = getattr(orig, "sqlite_errorcode", None)
+    if isinstance(code, int) and code & 0xFF in _SQLITE_BUSY_CODES:
+        return True
+    if getattr(orig, "sqlstate", None) == _PG_LOCK_NOT_AVAILABLE:
+        return True
+    text = str(orig).lower()
+    return any(fragment in text for fragment in _SQLITE_BUSY_TEXT)
 
 
 def ping() -> None:

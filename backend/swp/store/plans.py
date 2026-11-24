@@ -14,6 +14,7 @@ from swp.domain.analysis import Analysis
 from swp.domain.import_data import ImportData
 from swp.domain.state import PlanState
 from swp.domain.state_migrations import upcast
+from swp.store.db import is_busy as _is_busy
 from swp.store.db import transaction, write_transaction
 from swp.store.models import ImportRow, PlanRow
 
@@ -260,23 +261,6 @@ class PlanWriter:
             .execution_options(synchronize_session=False)
         )
         return result.rowcount == 1
-
-
-_SQLITE_BUSY_CODES = (5, 6)  # SQLITE_BUSY, SQLITE_LOCKED (primary result codes)
-_SQLITE_BUSY_TEXT = ("database is locked", "database is busy")
-_PG_LOCK_NOT_AVAILABLE = "55P03"
-
-
-def _is_busy(error: OperationalError) -> bool:
-    """True when `error` means another writer holds the lock."""
-    orig = error.orig
-    code = getattr(orig, "sqlite_errorcode", None)
-    if isinstance(code, int) and code & 0xFF in _SQLITE_BUSY_CODES:
-        return True
-    if getattr(orig, "sqlstate", None) == _PG_LOCK_NOT_AVAILABLE:
-        return True
-    text = str(orig).lower()
-    return any(fragment in text for fragment in _SQLITE_BUSY_TEXT)
 
 
 @contextmanager

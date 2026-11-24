@@ -1,4 +1,13 @@
-"""Kernel error type: the domain raises DomainError; only swp.api maps it to HTTP (AD-11)."""
+"""Kernel error types: the domain raises DomainError; only swp.api maps it to HTTP (AD-11)."""
+
+from typing import TypedDict
+
+
+class FieldError(TypedDict):
+    """One failing form field, as a `validation_failed` detail (AD-11)."""
+
+    field: str
+    message: str
 
 
 class DomainError(Exception):

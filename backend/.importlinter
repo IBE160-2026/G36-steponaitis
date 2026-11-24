@@ -125,3 +125,4 @@ modules =
     swp.domain.recommendations
     swp.domain.move_list
     swp.domain.accounts
+    swp.domain.categories
