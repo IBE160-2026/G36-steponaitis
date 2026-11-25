@@ -5,7 +5,12 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+from sqlalchemy import event
+from sqlalchemy.pool import NullPool
+
 from swp.app.bootstrap import bootstrap
+from swp.config import get_settings
 from swp.domain.analysis import AnalysisSettings, build_analysis
 from swp.domain.state import PlanState
 from swp.store.db import get_engine
@@ -68,3 +73,40 @@ def test_nfr7_plan_saves_while_a_reader_holds_a_read_transaction(database_path: 
     stored = get_plan(plan.id)
     assert stored is not None
     assert stored.name == "WAL plan"
+
+
+class _ConnectCaptured(Exception):
+    """Raised by the do_connect listener so no real Postgres connection is attempted."""
+
+
+def test_nfr6_postgres_engine_is_transaction_pooler_safe(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Supabase transaction pooler (port 6543): no pooled connections, no prepared statements.
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pw@pooler.example.invalid:6543/postgres")
+    get_settings.cache_clear()
+    get_engine.cache_clear()
+    try:
+        engine = get_engine()
+        captured: dict[str, object] = {}
+
+        @event.listens_for(engine, "do_connect")
+        def _capture(_dialect, _record, _cargs, cparams):  # noqa: ANN001, ANN202
+            captured.update(cparams)
+            raise _ConnectCaptured
+
+        assert engine.dialect.driver == "psycopg"
+        assert isinstance(engine.pool, NullPool)
+        with pytest.raises(_ConnectCaptured):
+            engine.connect()
+        assert "prepare_threshold" in captured
+        assert captured["prepare_threshold"] is None
+    finally:
+        get_settings.cache_clear()
+        get_engine.cache_clear()
+
+
+def test_nfr6_sqlite_engine_keeps_its_pool(database_path: Path) -> None:
+    engine = get_engine()
+
+    assert not isinstance(engine.pool, NullPool)
+    with engine.connect() as conn:
+        assert conn.exec_driver_sql("PRAGMA foreign_keys").scalar() == 1

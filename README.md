@@ -98,7 +98,38 @@ Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_url
 
 `npm run e2e:production` runs the same checks locally: Playwright builds and starts the app with `APP_ENV=production`, `FEATURE_AUTH` and `FEATURE_DEMO` on and throwaway secrets it generates for that run, then walks the examiner journey (front page, Demo version as `demo`, Log out). It never reuses a running server, so stop `npm run dev` first.
 
-The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. Setting its Vercel environment variables is Story 16.2.
+The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. *Deploy* below sets it up with `APP_ENV`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET` and `DEMO_PASSWORD`; turning on login and the demo (`FEATURE_AUTH`, `FEATURE_DEMO`) comes with Story 16.2.
+
+## Deploy
+
+The public URL https://g36steponaitis.vercel.app is one Vercel project with two services from `vercel.json`: the Next.js app in `frontend/` and the FastAPI backend in `backend/` (`swp.main:app`). Requests to `/api/*` go to the backend with their path unchanged; everything else goes to Next.js, so the browser keeps calling relative `/api/*` on one origin. Only `main` deploys (to Production); preview deployments are off. The steps below are done once, by hand, in the Supabase and Vercel dashboards. Never commit a connection string or password.
+
+1. **Supabase:** create a project (free plan) and note its database password. Under *Connect*, copy two connection strings:
+   - the **transaction pooler** (port `6543`): the app's `DATABASE_URL`. The backend uses no connection pool and no prepared statements on Postgres, as this pooler requires;
+   - the **session pooler** (port `5432`): `MIGRATION_DATABASE_URL`, which `swp db upgrade` migrates through.
+
+   Both name the same database. Put the password into each and URL-encode special characters.
+2. **Migrate and seed (first time, and before every deploy that changes the schema):** production does not migrate or seed on startup, so run from the repo root, with the values only in your shell:
+
+   ```sh
+   APP_ENV=production JWT_SECRET=… DEMO_PASSWORD=… \
+     DATABASE_URL='postgresql://…:6543/postgres' MIGRATION_DATABASE_URL='postgresql://…:5432/postgres' \
+     uv run --directory backend --locked swp db upgrade
+   ```
+
+   The line holds the database password and secrets, so keep it out of your shell history: start it with a space (zsh: `setopt HIST_IGNORE_SPACE`; bash: `HISTCONTROL=ignorespace`) or delete the line from the history afterwards. Run the upgrade *before* pushing a commit that contains a new migration: every push to `main` deploys at once, so pushing first means the new code briefly runs against the old schema.
+
+   It migrates through `MIGRATION_DATABASE_URL` and seeds the `demo` account and the starter categories through `DATABASE_URL`. The startup checks need `JWT_SECRET` and `DEMO_PASSWORD` even here: use the same values you store in Vercel in step 4. `DEMO_PASSWORD` sets the password the `demo` account is created with on this first run and is never applied again, so keep it identical in both places and out of the repo. Migrations only add, so the running deployment keeps working against the upgraded schema.
+3. **Vercel project:** *Add New → Project*, import this GitHub repository and keep the repository root as the root directory; Vercel reads `vercel.json` and builds both services (Python dependencies from `backend/pyproject.toml` and `uv.lock`).
+4. **Environment variables** (*Settings → Environment Variables*), each for **Production** only:
+   - `APP_ENV=production`
+   - `DATABASE_URL` (transaction pooler) and `MIGRATION_DATABASE_URL` (session pooler)
+   - `JWT_SECRET`: generate it with `python -c "import secrets; print(secrets.token_urlsafe(48))"` (at least 32 bytes)
+   - `DEMO_PASSWORD`: the demo account's password, the same value as in step 2
+
+   Production refuses to start without `APP_ENV=production`, `DATABASE_URL`, `JWT_SECRET` or `DEMO_PASSWORD` (see *Accounts, secrets and the public demo*). `MIGRATION_DATABASE_URL` is not checked: it is what `swp db upgrade` migrates through, and without it the upgrade falls back to `DATABASE_URL`, the transaction pooler, which must not be used for migrations. `FEATURE_AUTH` and `FEATURE_DEMO` stay unset (off) until Story 16.2, so login and Demo version are hidden until then.
+5. **Deploy:** push to `main` (or *Redeploy* the latest Production deployment after changing a variable). Check that https://g36steponaitis.vercel.app opens and that https://g36steponaitis.vercel.app/api/health answers `{"status":"ok"}`.
+6. **Keep-alive:** a free Supabase project pauses after a week without traffic. `.github/workflows/keep-alive.yml` calls `/api/health` (which runs `SELECT 1`) once a day; run it by hand under *Actions → Keep-alive → Run workflow* after the first deploy. A failed run means the site or the database is down, and GitHub emails the repository owner. GitHub disables scheduled workflows after 60 days without repository activity: re-enable it under *Actions → Keep-alive*. A project that has already paused does not wake from an HTTP request; restore it in the Supabase dashboard.
 
 ## Milestone 2 demo
 

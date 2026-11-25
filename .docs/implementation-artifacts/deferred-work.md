@@ -5,3 +5,7 @@
 - source_spec: `.docs/implementation-artifacts/spec-16-0-production-hardening-before-going-public.md`
   summary: The Recommendations page ignores Alt+A (and Alt+K, Alt+O) without feedback while a change is saving.
   evidence: `recommendations-page.tsx` `onRegionKeyDown` returns when `savingReason` is set; the e2e flake at `recommendations-page.spec.ts:25` (2/20 on baseline) was this. The test now waits for Apply to be enabled; the shortcut itself still gives no feedback.
+
+- source_spec: `.docs/implementation-artifacts/spec-16-1-live-on-the-public-vercel-url.md`
+  summary: Unverified (would be medium): the `api` service's `functions."swp/main.py".excludeFiles` in `vercel.json` may resolve against the repo root instead of the service root, so `backend/tests/` and `backend/var/` (local SQLite files) could be bundled into the Vercel function.
+  evidence: Vercel's Services docs do not say what a service's `functions` key is relative to; the first Production build log (function bundle contents and size) settles it.

@@ -8,9 +8,10 @@ from typing import Any
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine, event, text
+from sqlalchemy import Engine, create_engine, event, make_url, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from swp.config import get_settings
 
@@ -34,7 +35,15 @@ def _configure_sqlite_connection(dbapi_connection: Any, _record: Any) -> None:
 
 @lru_cache
 def get_engine() -> Engine:
-    engine = create_engine(get_settings().database_url)
+    url = get_settings().database_url
+    if make_url(url).get_backend_name() == "postgresql":
+        # Supabase's transaction pooler (port 6543) hands each transaction any server
+        # connection: keep no connections between serverless invocations (NullPool) and send no
+        # server-side prepared statements, which a later transaction may not find (AD-9). It
+        # applies to every Postgres URL on purpose (also CI's direct connection), where it is
+        # harmless.
+        return create_engine(url, poolclass=NullPool, connect_args={"prepare_threshold": None})
+    engine = create_engine(url)
     if engine.dialect.name == "sqlite":
         event.listen(engine, "connect", _configure_sqlite_connection)
     return engine

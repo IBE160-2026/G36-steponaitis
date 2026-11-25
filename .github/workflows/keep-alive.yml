@@ -1,0 +1,19 @@
+name: Keep-alive
+
+# Wakes the public deployment and its free Supabase database once a day: GET /api/health runs
+# SELECT 1. A non-2xx answer fails the run, and GitHub emails the owner.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: GET /api/health on the public URL
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30 https://g36steponaitis.vercel.app/api/health
