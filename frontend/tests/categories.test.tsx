@@ -8,10 +8,14 @@ import { parseCategoriesTab, planCategoriesHref } from "@/lib/view-state/urls";
 import { AisleCategoriesView, AisleRow, CategoryChip, pickerOptions } from "@/modules/categories/aisle-categories-tab";
 import {
   categoriesApi,
+  changedFields,
   fieldErrors,
   type KeywordRule,
+  keywordRulesKey,
   movedIds,
   type PlanAisleCategories,
+  planCategoryCheckKey,
+  runCategoriesWrite,
 } from "@/modules/categories/api";
 import { CategoriesView } from "@/modules/categories/categories-page";
 import {
@@ -182,13 +186,49 @@ describe("fr43 fr45 categories api", () => {
     return fetch;
   }
 
-  it("fr43_reorder_sends_the_full_id_list", async () => {
+  it("fr43_reorder_sends_the_full_id_list_and_the_list_it_moved_from", async () => {
     const fetch = stubFetch(200, { rules: [] });
-    await categoriesApi.reorderRules(["r2", "r1", "r3"]);
+    await categoriesApi.reorderRules(["r2", "r1", "r3"], ["r1", "r2", "r3"]);
     expect(fetch).toHaveBeenCalledWith("/api/keyword-rules/order", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: ["r2", "r1", "r3"] }),
+      body: JSON.stringify({ ids: ["r2", "r1", "r3"], base_ids: ["r1", "r2", "r3"] }),
+    });
+  });
+
+  it("fr43_stale_reorder_rejects_with_409_refetches_and_is_a_toast", async () => {
+    const message = "The keyword rules were changed elsewhere. The list is reloaded. Try again.";
+    stubFetch(409, { error: { code: "command_rejected", message, details: [] } });
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(keywordRulesKey(), { rules: RULES });
+    queryClient.setQueryData(planCategoryCheckKey(PLAN), { rows: [] });
+    const error = await runCategoriesWrite(queryClient, () =>
+      categoriesApi.reorderRules(["r2", "r1"], ["r1", "r2"]),
+    ).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 409, code: "command_rejected", message });
+    // Not a field error, so the tab shows the message as a toast.
+    expect(ruleErrors(error as ApiError)).toBeNull();
+    // The failed write still marks the rules and every category check stale, so the list reloads.
+    expect(queryClient.getQueryState(keywordRulesKey())?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(planCategoryCheckKey(PLAN))?.isInvalidated).toBe(true);
+  });
+
+  it("fr43_edit_sends_only_the_changed_fields", async () => {
+    const stored = RULES[1];
+    expect(changedFields(stored, { keyword: "oil", category: "Engine oils" })).toEqual({ category: "Engine oils" });
+    expect(changedFields(stored, { keyword: "Oil", category: "Oils" })).toEqual({ keyword: "Oil" });
+    expect(changedFields(stored, { keyword: "Oil", category: "Engine oils" })).toEqual({
+      keyword: "Oil",
+      category: "Engine oils",
+    });
+    expect(changedFields(stored, { keyword: "oil", category: "Oils" })).toEqual({});
+    const fetch = stubFetch(200, stored);
+    await categoriesApi.editRule("r2", { category: "Engine oils" });
+    expect(fetch).toHaveBeenCalledWith("/api/keyword-rules/r2", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: "Engine oils" }),
     });
   });
 
@@ -206,7 +246,7 @@ describe("fr43 fr45 categories api", () => {
     stubFetch(204, undefined);
     await expect(categoriesApi.deleteRule("r1")).resolves.toBeUndefined();
     stubFetch(503, { error: { code: "unavailable", message: "The keyword rules are busy. Try again.", details: [] } });
-    await expect(categoriesApi.reorderRules(["r1"])).rejects.toMatchObject({
+    await expect(categoriesApi.reorderRules(["r1"], ["r1"])).rejects.toMatchObject({
       code: "unavailable",
       message: "The keyword rules are busy. Try again.",
     });

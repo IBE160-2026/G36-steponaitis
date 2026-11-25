@@ -292,3 +292,24 @@ def test_fr4_xlsx_formula_cells_read_as_cached_values() -> None:
     )
 
     assert _read("x.xlsx", data) == (("A",), (2,))
+
+
+def test_fr4_csv_many_blank_rows_do_not_count_against_row_limit() -> None:
+    data = b"A\n1\n" + b"\n" * 12_000 + b"2\n" + b",,\n" * 12_000
+
+    rows = _read("Inventory.csv", data, max_rows=3)
+
+    assert rows[:2] == (("A",), ("1",))
+    assert rows[-1] == ("2",)
+    assert len(rows) == 12_003
+
+
+def test_fr4_xlsx_many_trailing_blank_rows_do_not_count_against_row_limit() -> None:
+    data = _patch_sheet_xml(
+        _xlsx([["A"], ["x"], ["end"]]), b'<row r="3"><c r="A3"', b'<row r="20000"><c r="A20000"'
+    )
+
+    rows = _read("Inventory.xlsx", data, max_rows=3)
+
+    assert rows[:2] == (("A",), ("x",))
+    assert rows[-1] == ("end",)

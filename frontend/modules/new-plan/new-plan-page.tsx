@@ -19,6 +19,7 @@ import { showToast } from "@/components/common/toast";
 import { ApiError, internalError } from "@/lib/api/errors";
 import { PLANS_KEY, type SavedPlanRow, usePlans } from "@/lib/api/plans";
 import { useSession } from "@/lib/api/session";
+import { useSessionExpired } from "@/lib/commands";
 import { LOADING_SAVED_PLANS, SAVED_PLANS_TITLE } from "@/lib/copy";
 import { planStepHref } from "@/lib/view-state/urls";
 
@@ -124,6 +125,7 @@ export function NewPlanPage({ from }: { from?: string } = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const session = useSession();
+  const sessionExpired = useSessionExpired();
   const plans = usePlans();
   const nameId = useId();
   const nameErrorId = useId();
@@ -202,7 +204,11 @@ export function NewPlanPage({ from }: { from?: string } = {}) {
 
   function showError(error: ApiError) {
     const view = errorView(error);
-    if (view.kind === "import") {
+    if (view.kind === "session") {
+      // The session ended (Story 9.3, FR-40): open Log in as other commands do; the planner comes
+      // back to New Plan afterwards and sends again.
+      sessionExpired();
+    } else if (view.kind === "import") {
       setTileStates(view.tiles);
       setPanel({ kind: "import", groups: view.groups });
     } else if (view.kind === "name") {

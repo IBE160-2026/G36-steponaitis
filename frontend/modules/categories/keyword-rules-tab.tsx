@@ -39,7 +39,7 @@ import {
 } from "@/lib/copy";
 import { formatNumber } from "@/lib/format";
 
-import { categoriesApi, fieldErrors, type KeywordRule, movedIds, useCategoriesWrite } from "./api";
+import { categoriesApi, changedFields, fieldErrors, type KeywordRule, movedIds, useCategoriesWrite } from "./api";
 
 type RuleFields = { keyword: string; category: string };
 type RuleErrors = Partial<Record<keyof RuleFields, string>>;
@@ -397,12 +397,14 @@ export function KeywordRulesTab({ rules }: { rules: readonly KeywordRule[] }) {
         setDeleteOpen(true);
       },
       onMove: (rule, delta) => {
+        const baseIds = rules.map((r) => r.id);
         const ids = movedIds(
-          rules.map((r) => r.id),
+          baseIds,
           rules.findIndex((r) => r.id === rule.id),
           delta,
         );
-        void run(() => categoriesApi.reorderRules(ids)).then((result) => {
+        // A list changed elsewhere answers 409 with the server's message: the toast, and the refetch shows the new list.
+        void run(() => categoriesApi.reorderRules(ids, baseIds)).then((result) => {
           if (result !== null) return;
           // The moved rule keeps the focus: its button in the same direction, which may now be disabled.
           requestAnimationFrame(() => document.getElementById(moveButtonId(rule.id, delta))?.focus());
@@ -446,7 +448,12 @@ export function KeywordRulesTab({ rules }: { rules: readonly KeywordRule[] }) {
           open={editOpen}
           onOpenChange={setEditOpen}
           pendingReason={pendingReason}
-          onSave={(rule, fields) => run(() => categoriesApi.editRule(rule.id, fields.keyword, fields.category))}
+          onSave={(rule, fields) => {
+            const changes = changedFields(rule, fields);
+            // Nothing changed: close without a write.
+            if (Object.keys(changes).length === 0) return Promise.resolve(null);
+            return run(() => categoriesApi.editRule(rule.id, changes));
+          }}
         />
       )}
       {deleting && (

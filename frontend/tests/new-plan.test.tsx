@@ -361,6 +361,11 @@ describe("fr1 error view branches on the code", () => {
     expect(errorView(parseErrorBody(502, "<html></html>"))).toEqual({ kind: "message", message: INTERNAL_MESSAGE });
   });
 
+  it("fr40_an_ended_session_opens_log_in_instead_of_a_message", () => {
+    const body = JSON.stringify({ error: { code: "unauthenticated", message: "Log in to continue.", details: [] } });
+    expect(errorView(parseErrorBody(401, body))).toEqual({ kind: "session" });
+  });
+
   it("fr39 shows the full demo plan limit (409 limit_reached) as one message panel", () => {
     const full = "The demo holds at most 50 plans. Delete a plan to make room.";
     const body = JSON.stringify({ error: { code: "limit_reached", message: full, details: [{ limit: "max_plans" }] } });

@@ -147,4 +147,25 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await expect(page).toHaveURL(new RegExp(`/plans/${plan.id}/parts$`));
     await expect(main.getByRole("heading", { name: "Parts", level: 1 })).toBeVisible();
   });
+  test("uj3 fr40 delete plan after the session expired opens Log in", async ({ page, request }) => {
+    test.setTimeout(90_000);
+    const username = await signUp(request);
+    const plan = await createSamplePlan(request, `Keep ${randomUUID().slice(0, 8)}`);
+    await page.goto("/login");
+    await logIn(page, username);
+    await expect(page).toHaveURL(/\/plans$/);
+
+    await page.context().clearCookies();
+    await page.locator(`#plan-actions-${plan.id}`).click();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Delete…" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Delete plan" }).click();
+    // The shared ended-session flow: Log in opens, no "Log in to continue." message.
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByText("Log in to continue.")).toHaveCount(0);
+
+    // Back on the list after Log in; nothing was deleted.
+    await logIn(page, username);
+    await expect(page).toHaveURL(/\/plans$/);
+    await expect(page.locator(`#plan-actions-${plan.id}`)).toBeVisible();
+  });
 });

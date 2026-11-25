@@ -366,3 +366,37 @@ def test_fr45_busy_lock_is_unavailable(client: TestClient, monkeypatch: pytest.M
 
     assert response.status_code == 503
     assert _error(response) == BUSY
+
+
+def test_fr45_put_strips_aisle_and_normalizes_categories(client: TestClient) -> None:
+    _rule("oil", "Engine Oils")
+
+    response = _put(client, "%20A%20", ["  engine\u200b   oils ", "Cafe\u0301\u00a0Signs"])
+
+    assert response.status_code == 200, response.text
+    assert response.json() == {
+        "aisle": "A",
+        "categories": [
+            {"category": "Caf\u00e9 Signs", "has_rule": False},
+            {"category": "engine oils", "has_rule": True},
+        ],
+    }
+    assert _rows() == [("A", "Caf\u00e9 Signs"), ("A", "engine oils")]
+    assert client.get("/api/aisle-categories/%20A").json() == response.json()
+
+
+def test_fr43_rules_are_stored_normalized_and_match_aisles_by_category_key(
+    client: TestClient,
+) -> None:
+    rule_id = _rule("  air\u200b  filter ", " Air\u00a0 Filters\u200b ")
+    _put(client, "A", ["AIR FILTERS"])
+
+    stored = categories.list_rules()
+    assert [(str(r.id), r.keyword, r.category) for r in stored] == [
+        (rule_id, "air filter", "Air Filters")
+    ]
+    assert client.get("/api/aisle-categories/A").json()["categories"] == [
+        {"category": "AIR FILTERS", "has_rule": True}
+    ]
+    edited = categories.edit_rule(rule_id, None, "Cafe\u0301  Signs", now=NOW)
+    assert edited.category == "Caf\u00e9 Signs"

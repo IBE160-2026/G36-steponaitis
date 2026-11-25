@@ -28,6 +28,9 @@ class FakeStorage {
     if (this.failWrite) throw new Error("QuotaExceededError");
     this.items.set(key, value);
   }
+  removeItem(key: string) {
+    this.items.delete(key);
+  }
 }
 
 let style: FakeStyle;
@@ -253,12 +256,26 @@ describe("fr42 key colours store", () => {
   it("fr42 blocked storage on write keeps the change in memory", async () => {
     storage.failWrite = true;
     const store = await freshStore();
-    expect(store.isColourStorageAvailable()).toBe(true);
     store.setKeyColour("slow", "#378CBE");
     expect(style.getPropertyValue("--colour-slow")).toBe("#378CBE");
     expect(store.getKeyColours().slow).toBe("#378CBE");
     expect(storage.items.size).toBe(0);
     expect(store.isColourStorageAvailable()).toBe(false);
+  });
+
+  it("fr42_readable_but_not_writable_storage_is_known_before_the_first_change", async () => {
+    // Story 11.3: "Colours can't be kept" shows at once, not only after a save has failed.
+    storage.failWrite = true;
+    const store = await freshStore('{"slow":"#378CBE"}');
+    expect(store.isColourStorageAvailable()).toBe(false);
+    // The stored colours are still read and used.
+    expect(store.getKeyColours().slow).toBe("#378CBE");
+  });
+
+  it("fr42_the_write_probe_leaves_nothing_behind", async () => {
+    const store = await freshStore();
+    expect(store.isColourStorageAvailable()).toBe(true);
+    expect([...storage.items.keys()]).toEqual([]);
   });
 
   it("fr42 on the server the store gives the defaults and touches nothing", async () => {

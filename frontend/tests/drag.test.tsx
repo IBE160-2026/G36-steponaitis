@@ -24,8 +24,10 @@ import { DropDialogBody, dropMoveReason } from "@/modules/locations/drag/drop-di
 import { checkedInOrder } from "@/modules/locations/drag/drop-popover";
 import {
   chosenParts,
+  initialBackParts,
   keptInSwap,
   OccupiedDialogBody,
+  partBothWays,
   putTogetherReason,
   swapReason,
 } from "@/modules/locations/drag/occupied-dialog";
@@ -313,6 +315,19 @@ describe("uxdr50 occupied drop dialog rules", () => {
     expect(swapReason(1, 1, undefined)).toBeUndefined();
   });
 
+  it("fr51_swap_never_offers_a_part_both_ways_as_the_server_refuses_it", () => {
+    // The dragged part also lies on the target: it starts unchecked on the back side.
+    expect(initialBackParts([target("A"), target("C")], "A")).toEqual(["C"]);
+    expect(initialBackParts([target("C"), target("D")], "A")).toEqual(["C", "D"]);
+    // A part chosen on both sides disables Swap with the server's own sentence, after the others.
+    expect(partBothWays(["A", "B"], ["C", "B"])).toBe("B");
+    expect(partBothWays(["A"], ["C"])).toBeUndefined();
+    expect(swapReason(1, 1, undefined, "A")).toBe("A cannot move both ways.");
+    expect(swapReason(1, 1, SAVING_REASON, "A")).toBe(SAVING_REASON);
+    expect(swapReason(1, 0, undefined, undefined)).toBe(CHOOSE_PART_TO_MOVE_BACK);
+    expect(putTogetherReason(1, undefined)).toBeUndefined();
+  });
+
   it("fr32_kept_parts_in_the_swap_one_several_unchecked", () => {
     const from = [part("A"), { ...part("B"), kept_in_place: true }];
     const back = [target("C", { kept_in_place: true }), target("D", { kept_in_place: true })];
@@ -380,6 +395,17 @@ describe("fr51 occupied drop dialog", () => {
     expect(text(markup)).toMatch(/Swap .*Put together .*Cancel/);
     expect(markup).not.toContain("bg-ink text-surface");
     expect(markup).not.toContain('aria-disabled="true"');
+  });
+
+  it("fr51_target_holding_only_the_dragged_part_disables_swap_but_not_put_together", () => {
+    // One part on each side, and it is the same part: the back side has no checkbox, so it would
+    // always be chosen; Swap says why it cannot run, Put together stays enabled.
+    const markup = body({ parts: [part("4410281")], targetParts: [target("4410281")], checkedBack: [] });
+    const swap = button(markup, "Swap");
+    expect(swap).toContain('aria-disabled="true"');
+    expect(text(markup)).toContain("4410281 cannot move both ways.");
+    expect(button(markup, "Put together")).not.toContain('aria-disabled="true"');
+    expect(markup).not.toContain("data-kept-warning");
   });
 
   it("uxdr50_groups_only_when_several_with_all_back_parts_checked", () => {

@@ -37,29 +37,41 @@ export function followGuard(decision: GuardDecision, router: { replace: (href: s
  * The page Log out is opening, if any. Log out marks the cached session logged out before it opens
  * its page (Log in, or the demo front page with FEATURE_DEMO on, Story 9.6), so for a moment the
  * guard sees a visitor without a session on the page being left. While this is set the guard does
- * not race Log out's navigation with its own redirect to Log in; it is cleared once that page opens.
- * Session expiry never sets it, so a 401 still opens Log in.
+ * not race Log out's navigation with its own redirect to Log in; it is cleared once that page opens,
+ * or once `LEAVE_HOLD_MS` pass without it opening (an aborted navigation), after which the guard
+ * redirects as usual. Session expiry never sets it, so a 401 still opens Log in.
  */
-const leaving: { href: string | null } = { href: null };
+const leaving: { href: string | null; until: number } = { href: null, until: 0 };
+
+/** How long Log out's navigation may take before the guard stops waiting for it. */
+export const LEAVE_HOLD_MS = 5_000;
 
 /** Log out is about to open `href` (called just before it marks the session logged out). */
-export function leaveTo(href: string): void {
+export function leaveTo(href: string, now: number = Date.now()): void {
   leaving.href = href;
+  leaving.until = now + LEAVE_HOLD_MS;
+}
+
+/** The ms left of a Log out hold, or 0 when none is in place (it ends on arrival or expiry). */
+function holdLeft(pathname: string, now: number): number {
+  if (leaving.href !== null && (pathname === leaving.href || now >= leaving.until)) leaving.href = null;
+  return leaving.href === null ? 0 : leaving.until - now;
 }
 
 /**
- * Act on a decision unless Log out is on its way out: once its page is open the hold ends; until
- * then a redirect is left to Log out. Returns whether a Log out hold is still in place.
+ * Act on a decision unless Log out is on its way out: once its page is open, or the hold has run
+ * out, the hold ends; until then a redirect is left to Log out. Returns the ms left of a hold that
+ * is still in place (0 when none), so the caller can look again when it runs out.
  */
 export function followGuardAfterLogout(
   decision: GuardDecision,
   pathname: string,
   router: { replace: (href: string) => void },
-): boolean {
-  if (leaving.href !== null && pathname === leaving.href) leaving.href = null;
-  if (leaving.href !== null && decision === "redirect") return true;
+  now: number = Date.now(),
+): number {
+  if (holdLeft(pathname, now) > 0 && decision === "redirect") return holdLeft(pathname, now);
   followGuard(decision, router);
-  return leaving.href !== null;
+  return holdLeft(pathname, now);
 }
 
 export function AuthGuard({ children }: { children: ReactNode }) {
@@ -69,7 +81,11 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const decision = guardDecision(pathname, session);
 
   useEffect(() => {
-    followGuardAfterLogout(decision, pathname, router);
+    const left = followGuardAfterLogout(decision, pathname, router);
+    if (left === 0) return;
+    // Log out's navigation may never arrive (aborted): look again once the hold runs out.
+    const timer = setTimeout(() => followGuardAfterLogout(decision, pathname, router), left);
+    return () => clearTimeout(timer);
   }, [decision, pathname, router]);
 
   return decision === "render" ? children : null;

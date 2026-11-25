@@ -1,7 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { cappedLine, isSearchShortcut, noMatchText, SearchResults } from "@/components/common/search-field";
+import {
+  cappedLine,
+  debouncer,
+  isSearchShortcut,
+  noMatchText,
+  SEARCH_DEBOUNCE_MS,
+  SearchResults,
+} from "@/components/common/search-field";
 import type { LocationRef, SearchView } from "@/lib/api/plans";
 
 // Story 2.6: the search field (FR-15, UX-DR8, UX-DR11). Rendered to static markup; Vitest has no DOM.
@@ -71,5 +78,34 @@ describe("fr15 search results", () => {
     const plain = text(renderToStaticMarkup(<SearchResults planId="p1" view={view} onOpenPart={noop} />));
     expect(plain).toContain("Parts 20 of 1,545");
     expect(plain).toContain("Locations No locations");
+  });
+});
+
+describe("fr15 search debounce", () => {
+  it("fr15_a_burst_of_keystrokes_searches_once_for_the_last_query", () => {
+    vi.useFakeTimers();
+    try {
+      const searched: string[] = [];
+      const pending = debouncer(SEARCH_DEBOUNCE_MS, (query: string) => searched.push(query));
+      for (const query of ["o", "oi", "oil", "oil f"]) {
+        pending.push(query);
+        vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS - 50);
+      }
+      expect(searched).toEqual([]);
+      vi.advanceTimersByTime(50);
+      expect(searched).toEqual(["oil f"]);
+      // A cancelled (unmounted) debounce never searches.
+      pending.push("oil filter");
+      pending.cancel();
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      expect(searched).toEqual(["oil f"]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("fr15_debounce_is_between_200_and_300_ms", () => {
+    expect(SEARCH_DEBOUNCE_MS).toBeGreaterThanOrEqual(200);
+    expect(SEARCH_DEBOUNCE_MS).toBeLessThanOrEqual(300);
   });
 });

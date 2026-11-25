@@ -1006,9 +1006,13 @@ export interface components {
         };
         /**
          * KeywordRuleOrder
-         * @description Every rule id exactly once, in the new order.
+         * @description `ids`: every rule id exactly once, in the new order. `base_ids`: the order the client
+         *     reordered from (the list it last read); when the rules no longer are in that order, the
+         *     request is stale and answered 409 `command_rejected`.
          */
         KeywordRuleOrder: {
+            /** Base Ids */
+            base_ids: string[];
             /** Ids */
             ids: string[];
         };
@@ -2913,6 +2917,15 @@ export interface operations {
             };
             /** @description Error */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

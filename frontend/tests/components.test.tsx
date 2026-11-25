@@ -103,6 +103,29 @@ describe("nfr10 disabled button says why", () => {
   it("renders a normal button without aria-disabled", () => {
     expect(html(<Button>New Plan</Button>)).not.toContain("aria-disabled");
   });
+
+  it("nfr10_keeps_the_same_element_while_saving_so_focus_stays", () => {
+    // A button that becomes disabled while it saves (Keep in place, Apply, Manual move…) must keep
+    // its element: the same wrapper and the button at the same place, so React does not remount it.
+    function treeOf(props: Parameters<typeof Button>[0]): AnyElement {
+      let tree: ReactNode = null;
+      function Capture() {
+        tree = Button(props);
+        return tree;
+      }
+      html(<Capture />);
+      return tree as unknown as AnyElement;
+    }
+    const enabled = treeOf({ children: "Keep in place" });
+    const saving = treeOf({ disabledReason: "Saving…", children: "Keep in place" });
+    expect(enabled.type).toBe(saving.type);
+    const first = (tree: AnyElement) => (Array.isArray(tree.props.children) ? tree.props.children[0] : tree.props.children);
+    expect(first(enabled).type).toBe("button");
+    expect(first(saving).type).toBe("button");
+    // Without a tooltip the wrapper does not take part in layout.
+    expect(enabled.props.className).toBe("contents");
+    expect(html(<Button>New Plan</Button>)).not.toContain("tooltip");
+  });
 });
 
 describe("nfr10 input error is linked to its field", () => {

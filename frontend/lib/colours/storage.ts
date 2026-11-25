@@ -100,11 +100,31 @@ function inBrowser(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
+/** The key written and removed once to learn whether this browser lets the page store anything. */
+const PROBE_KEY = `${COLOURS_STORAGE_KEY}:probe`;
+
+/** Whether storage takes a write (a readable storage may still refuse writes, e.g. when full). */
+function canWrite(): boolean {
+  try {
+    globalThis.localStorage.setItem(PROBE_KEY, "1");
+  } catch {
+    return false;
+  }
+  try {
+    globalThis.localStorage.removeItem(PROBE_KEY);
+  } catch {
+    // The probe stays behind; it holds nothing.
+  }
+  return true;
+}
+
 function load(): ColourValues {
   if (values !== null) return values;
   let raw: string | null = null;
   try {
     raw = globalThis.localStorage.getItem(COLOURS_STORAGE_KEY);
+    // Probed up front (Story 11.3), so "Colours can't be kept" shows before the first change fails.
+    storageAvailable = canWrite();
   } catch {
     storageAvailable = false;
   }

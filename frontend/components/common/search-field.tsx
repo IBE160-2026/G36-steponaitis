@@ -5,6 +5,9 @@
 // field never filters them. Parts and locations are listed apart; a part opens the part panel, a
 // location opens the Locations table at its aisle with the row focused. `Ctrl+/` (`⌘/`) focuses the
 // field from anywhere on the page; a plain `/` never does. `Esc` clears the field, then blurs it.
+// Typing is debounced (SEARCH_DEBOUNCE_MS), so a burst of keystrokes sends one request. A late
+// response to an older query cannot replace a newer one: each query is its own React Query entry
+// (keyed on the trimmed query) and the field reads only the entry of its latest settled query.
 
 import Link from "next/link";
 import { type ChangeEvent, type FocusEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
@@ -19,6 +22,38 @@ import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const SEARCH_LABEL = "Search parts and locations";
+
+/** How long typing must pause before the field searches. */
+export const SEARCH_DEBOUNCE_MS = 250;
+
+/** Calls `apply` with the last pushed value once `wait` ms pass without another push. */
+export function debouncer<T>(wait: number, apply: (value: T) => void) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return {
+    push(value: T) {
+      if (timer !== undefined) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = undefined;
+        apply(value);
+      }, wait);
+    },
+    cancel() {
+      if (timer !== undefined) clearTimeout(timer);
+      timer = undefined;
+    },
+  };
+}
+
+/** `value` once it has stayed the same for `wait` ms. */
+function useDebouncedValue<T>(value: T, wait: number): T {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const pending = debouncer(wait, setSettled);
+    pending.push(value);
+    return () => pending.cancel();
+  }, [value, wait]);
+  return settled;
+}
 
 type ShortcutEvent = Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey">;
 
@@ -136,7 +171,8 @@ export function SearchField({
   const [open, setOpen] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const resultsId = useId();
-  const search = usePlanSearch(planId, query);
+  const settledQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const search = usePlanSearch(planId, settledQuery);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

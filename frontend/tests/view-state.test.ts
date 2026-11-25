@@ -6,6 +6,7 @@ import {
   planOpenHref,
   recommendationsTabHref,
   rememberPlanView,
+  relinksPinnedLocation,
   storedPlanViewHref,
 } from "@/lib/view-state/urls";
 
@@ -155,5 +156,25 @@ describe("fr32 kept in place tab url", () => {
   it("fr32_kept_tab_href_and_parse", () => {
     expect(recommendationsTabHref("p1", "kept")).toBe("/plans/p1/recommendations?tab=kept");
     expect(parseRecommendationsTab(new URLSearchParams("tab=kept"))).toBe("kept");
+  });
+});
+
+describe("fr42 a link to the pinned location pins it again", () => {
+  const HERE = `http://localhost:3000/plans/${PLAN}/locations?aisle=A&loc=A-01-01-01`;
+
+  it("fr42_same_location_link_after_the_dialog_closed_reopens_it", () => {
+    // The chip or search result for the same location: the URL does not change, the wall pins again.
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A&loc=A-01-01-01`, HERE)).toBe(true);
+    // The part panel's `?part=` on the page does not matter; only the page and `loc`.
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A&loc=A-01-01-01`, `${HERE}&part=1200`)).toBe(true);
+  });
+
+  it("fr42_other_links_are_left_to_the_url", () => {
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A&loc=A-01-01-02`, HERE)).toBe(false);
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A`, HERE)).toBe(false);
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A&loc=A-01-01-01&mode=list`, HERE)).toBe(false);
+    expect(relinksPinnedLocation(`/plans/${PLAN}/best-locations?aisle=A&loc=A-01-01-01`, HERE)).toBe(false);
+    expect(relinksPinnedLocation("https://example.com/plans/x/locations?loc=A-01-01-01", HERE)).toBe(false);
+    expect(relinksPinnedLocation(`/plans/${PLAN}/locations?aisle=A&loc=A-01-01-01`, "not a url")).toBe(false);
   });
 });

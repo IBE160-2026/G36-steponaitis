@@ -199,3 +199,77 @@ test("uj6 opens a pick-group part's panel", async ({ page, request }) => {
   await expect(panel.getByRole("heading", { name: part, level: 2 })).toBeVisible();
   await expect(panel.locator("[data-partner]")).toHaveCount(detail.pick_groups.length);
 });
+
+test("uj7 search waits for typing to pause and a late older answer never replaces a newer one", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Debounce ${randomUUID().slice(0, 8)}`)).id;
+  await page.goto(`/plans/${planId}/parts`);
+  const main = page.getByRole("main");
+  await expect(main.getByRole("table", { name: "Parts" }).locator("tbody tr").first()).toBeVisible();
+  const field = main.getByRole("searchbox", { name: "Search parts and locations" });
+
+  // The answer to "oil" is held back until a newer query has been answered.
+  const queries: string[] = [];
+  let releaseOil: () => void = () => {};
+  const oilHeld = new Promise<void>((resolve) => (releaseOil = resolve));
+  await page.route(`**/api/plans/${planId}/search?**`, async (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+    queries.push(q);
+    if (q === "oil") await oilHeld;
+    await route.continue();
+  });
+
+  // A burst of keystrokes sends one request, for the whole query.
+  await field.click();
+  await page.keyboard.type("oil", { delay: 30 });
+  await expect.poll(() => queries).toEqual(["oil"]);
+
+  // A newer query is answered while "oil" is still held back.
+  await field.fill("zzzz");
+  const results = main.getByRole("region", { name: "Search results" });
+  const noMatch = results.getByText("No part or location matches “zzzz”.", { exact: true });
+  await expect(noMatch).toBeVisible();
+  expect(queries).toEqual(["oil", "zzzz"]);
+
+  // The late "oil" answer arrives; the field still shows the answer to "zzzz".
+  const oilAnswered = page.waitForResponse((response) => response.url().includes("q=oil"));
+  releaseOil();
+  await oilAnswered;
+  await expect(noMatch).toBeVisible();
+  await expect(results.locator("[data-search-part]")).toHaveCount(0);
+});
+
+test("uj6 a link to the same location reopens its wall dialog after it was closed", async ({ page, request }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Relink ${randomUUID().slice(0, 8)}`)).id;
+  const found = (await (await request.get(`/api/plans/${planId}/search?q=a-01-01`)).json()) as Search;
+  const target = found.locations[0].location;
+
+  // A search result opens the wall at that location with its dialog pinned.
+  await page.goto(`/plans/${planId}/locations`);
+  const field = page.getByRole("main").getByRole("searchbox", { name: "Search parts and locations" });
+  await field.fill(target.code);
+  await page.locator(`[data-search-location="${target.code}"]`).click();
+  const href = new RegExp(`/plans/${planId}/locations\\?aisle=${target.aisle}&loc=${encodeURIComponent(target.code)}$`);
+  await expect(page).toHaveURL(href);
+  const dialog = page.getByRole("dialog", { name: target.code });
+  await expect(dialog).toBeVisible();
+
+  // Esc closes it; the URL keeps `loc`.
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(page).toHaveURL(href);
+
+  // The same link again: the URL does not change, the dialog opens again.
+  await field.fill("");
+  await field.fill(target.code);
+  await page.locator(`[data-search-location="${target.code}"]`).click();
+  await expect(page).toHaveURL(href);
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator("button, a[href]").first()).toBeFocused();
+});

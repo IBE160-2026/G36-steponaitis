@@ -6,7 +6,7 @@
 
 import type { CommandEvent, UndoPreview } from "@/lib/api/plans";
 import type { CommandBody, SendResult } from "@/lib/commands/client";
-import { NO_MOVES_TO_UNDO, UNDO_ACTION, undoneToast } from "@/lib/copy";
+import { LOADING_LAST_MOVE, NO_MOVES_TO_UNDO, UNDO_ACTION, undoneToast } from "@/lib/copy";
 
 export type UndoSend = (body: CommandBody) => Promise<SendResult>;
 export type UndoNotify = (message: string) => void;
@@ -63,6 +63,11 @@ export function moveUndoAction(
 }
 
 /** Why Undo last move cannot run now: no moves first, else the command flow's reason. */
-export function undoReason(preview: UndoPreview | null, savingReason: string | undefined): string | undefined {
+export function undoReason(
+  preview: UndoPreview | null,
+  savingReason: string | undefined,
+  loading = false,
+): string | undefined {
+  if (loading) return LOADING_LAST_MOVE;
   return preview === null ? NO_MOVES_TO_UNDO : savingReason;
 }

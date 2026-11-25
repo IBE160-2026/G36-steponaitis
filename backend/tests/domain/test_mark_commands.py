@@ -19,6 +19,7 @@ from swp.domain.commands import (
 )
 from swp.domain.import_data import ImportData
 from swp.domain.state import AisleMark, BestMark, LevelMark, LocationMark, PlanState
+from swp.domain.values import CODE_MAX_LENGTH
 from tests.domain.answer_key import empty_analysis
 from tests.domain.test_best_marks import _best, _small
 
@@ -160,3 +161,23 @@ def test_fr10_command_parses_from_json_by_type() -> None:
     assert parsed == RemoveBestMark(
         command_id=command_id, base_version=3, mark=LevelMark(level="1", aisle=None)
     )
+
+
+@pytest.mark.parametrize(
+    "mark",
+    [
+        {"kind": "aisle", "aisle": "A" * (CODE_MAX_LENGTH + 1)},
+        {"kind": "level", "level": "1" * (CODE_MAX_LENGTH + 1)},
+        {"kind": "level", "level": "1", "aisle": "A" * (CODE_MAX_LENGTH + 1)},
+        {"kind": "location", "location": "L" * (CODE_MAX_LENGTH + 1)},
+    ],
+)
+def test_fr21_set_best_mark_rejects_codes_longer_than_code_max_length(mark: dict) -> None:
+    body = {"type": "set_best_mark", "command_id": str(uuid.uuid4()), "base_version": 1}
+
+    with pytest.raises(ValidationError):
+        TypeAdapter(Command).validate_python({**body, "mark": mark})
+    longest = {k: (v[:CODE_MAX_LENGTH] if k != "kind" else v) for k, v in mark.items()}
+    assert TypeAdapter(Command).validate_python({**body, "mark": longest}).mark.kind == mark["kind"]
+    remove = {**body, "type": "remove_best_mark", "mark": mark}
+    assert TypeAdapter(Command).validate_python(remove).type == "remove_best_mark"

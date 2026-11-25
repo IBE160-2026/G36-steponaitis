@@ -59,6 +59,16 @@ describe("fr35 undo last move control", () => {
     expect(element.props.disabledReason).toBe("No moves to undo");
   });
 
+  it("fr35_while_the_summary_loads_it_waits_without_claiming_no_moves", () => {
+    const { send } = sender();
+    const props = { preview: null, round: 0, savingReason: undefined, send, notify: vi.fn(), loading: true };
+    const element = UndoLastMove(props) as ReactElement<ButtonProps>;
+    const markup = renderToStaticMarkup(<UndoLastMove {...props} />);
+    expect(element.props.disabledReason).toBe("Loading the last move…");
+    expect(markup).toContain('aria-disabled="true"');
+    expect(text(markup)).not.toContain("No moves to undo");
+  });
+
   it("uxdr38_disabled_while_saving", () => {
     const { element } = control(PREVIEW, SAVING_REASON);
     expect(element.props.disabledReason).toBe(SAVING_REASON);

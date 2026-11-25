@@ -22,6 +22,7 @@ import {
   type LocationParams,
   planStepHref,
   recommendationHref,
+  relinksPinnedLocation,
   wallMoveQuery,
 } from "@/lib/view-state/urls";
 
@@ -68,6 +69,20 @@ export function AisleMode({
   const loc = params.loc;
   const onPinHandled = useCallback(() => setHandledLoc(loc), [loc]);
   const pinCode = loc !== undefined && loc !== handledLoc && data?.view.aisle === aisle ? loc : undefined;
+  // A link to the location already pinned (e.g. its chip again, after its dialog was closed) pins it
+  // again, although the URL does not change.
+  useEffect(() => {
+    if (loc === undefined) return;
+    function onClick(event: MouseEvent) {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (link instanceof HTMLAnchorElement && relinksPinnedLocation(link.href, window.location.href)) {
+        setHandledLoc(undefined);
+      }
+    }
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [loc]);
 
   // A part opened from the search field: once its detail is here, the wall shows its aisle.
   const followPart = useRef<string | undefined>(undefined);

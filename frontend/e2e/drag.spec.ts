@@ -576,3 +576,51 @@ test("uj1 swaps by drag, undoes once and prints the move list", async ({ page, r
   await expect(main.locator("[data-swap-locations]")).toHaveCount(0);
   await expect(main.locator('[data-footnote="swap"]')).toHaveCount(0);
 });
+
+test("uj1 a drop on a location that also holds the dragged part offers no swap", async ({ page, request }) => {
+  // Epic 12 retro R1: the server refuses a part on both sides ("cannot move both ways"), so the
+  // occupied dialog disables Swap with that reason; Put together stays.
+  test.setTimeout(150_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const planId = (await createSamplePlan(request, `Drag both ways ${randomUUID().slice(0, 8)}`)).id;
+  const initial = await wallOf(page, planId);
+  // A part alone in two locations of the aisle (FR-33: one part may lie in several locations).
+  const homes = new Map<string, string[]>();
+  for (const entry of onePartLocations(initial)) {
+    const part = entry.parts[0].part;
+    homes.set(part, [...(homes.get(part) ?? []), entry.location.code]);
+  }
+  const [part, [from, other]] = [...homes].find(([, codes]) => codes.length >= 2)!;
+
+  await page.goto(`/plans/${planId}/locations?aisle=${AISLE}`);
+  await expect(grid(page)).toBeVisible();
+  await cellOf(page, from).scrollIntoViewIfNeeded();
+  // Bring its second location next to the first: move it by API to an empty location in view.
+  const empties = initial.locations.filter((entry) => !entry.occupied).map((entry) => entry.location.code);
+  const to = (await nearestInView(page, from, empties))[0];
+  await postCommand(request, planId, { type: "move_parts", from: other, to, parts: [part] });
+  await page.reload();
+  await expect(grid(page)).toBeVisible();
+  await cellOf(page, from).scrollIntoViewIfNeeded();
+  expect(partsAt(await wallOf(page, planId), to)).toEqual([part]);
+  const before = await planVersion(request, planId);
+
+  const toCell = cellOf(page, to);
+  await dropOnOccupied(page, cellOf(page, from), toCell);
+  const dialog = page.getByRole("dialog", { name: `${to} is occupied` });
+  await expect(dialog).toBeVisible();
+  const swap = dialog.getByRole("button", { name: "Swap", exact: true });
+  await expect(swap).toHaveAttribute("aria-disabled", "true");
+  await expect(swap).toHaveAccessibleDescription(`${part} cannot move both ways.`);
+  await expect(dialog.getByRole("button", { name: "Put together", exact: true })).not.toHaveAttribute(
+    "aria-disabled",
+    /.*/,
+  );
+  // Pressing Swap sends nothing (aria-disabled, so force past Playwright's enabled check).
+  await swap.click({ force: true });
+  await expect(dialog).toBeVisible();
+  expect(await planVersion(request, planId)).toBe(before);
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(await planVersion(request, planId)).toBe(before);
+});

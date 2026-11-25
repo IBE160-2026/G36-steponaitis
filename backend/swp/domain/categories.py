@@ -5,8 +5,12 @@ boundary. A rule matches when the casefolded words of its keyword appear as a co
 the casefolded words of the description. Rules are tried in the planner's order and the first
 match wins; no match gives no category. The part number is never read: part numbers change.
 
-Aisle categories (FR-45) are global and keyed by the exact Aisle text; categories compare by
-`category_key` (stripped, casefolded).
+Aisle categories (FR-45) are global and keyed by the exact Aisle text (stripped, as the import
+strips it); categories compare by `category_key`.
+
+Text normalization (epic-13 retro A5): every keyword and category is stored as
+`normalize_text(value)` and compared by `category_key` / `keyword_key`, so text that looks the
+same is the same.
 
 The category check (FR-46) lists every part whose category is not among the categories of the
 aisle of its current location in the planning copy (one `replay`).
@@ -14,6 +18,7 @@ aisle of its current location in the planning copy (one `replay`).
 Pure: no storage, ids or clock here. `swp.app.categories` stores the rules and aisle categories.
 """
 
+import unicodedata
 from collections.abc import Collection, Iterable, Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict
@@ -52,12 +57,29 @@ class KeywordRule(BaseModel):
     category: str
 
 
+def normalize_text(text: str) -> str:
+    """The one text rule for keywords and categories (FR-43, FR-45; epic-13 retro A5).
+
+    In order: drop every format character (Unicode category Cf: zero-width space and joiners,
+    soft hyphen, BOM, bidi marks), normalize to NFC, then split on whitespace (`str.isspace`)
+    and join the pieces with one ASCII space, which also trims both ends.
+    """
+    visible = "".join(char for char in text if unicodedata.category(char) != "Cf")
+    return " ".join(unicodedata.normalize("NFC", visible).split())
+
+
+def _continues_word(char: str, current: list[str]) -> bool:
+    """A combining mark (category M*) left after NFC stays in the word it follows."""
+    return bool(current) and unicodedata.category(char).startswith("M")
+
+
 def words(text: str) -> tuple[str, ...]:
-    """The casefolded words of `text`: maximal runs of `isalnum` characters."""
+    """The casefolded words of `normalize_text(text)`: maximal runs of `isalnum` characters
+    (a combining mark continues the word it follows)."""
     found: list[str] = []
     current: list[str] = []
-    for char in text:
-        if char.isalnum():
+    for char in normalize_text(text):
+        if char.isalnum() or _continues_word(char, current):
             current.append(char)
         elif current:
             found.append("".join(current).casefold())
@@ -122,12 +144,12 @@ def _storable(text: str) -> bool:
 def rule_errors(keyword: str, category: str, taken_keys: Collection[str]) -> list[FieldError]:
     """The failing fields of a keyword rule, in form order (keyword, category).
 
-    Both values are stripped of surrounding whitespace first. `taken_keys` are the
+    Both values are normalized with `normalize_text` first. `taken_keys` are the
     `keyword_key`s of the other rules; the duplicate check runs only when the keyword's own
     format is valid.
     """
-    keyword = keyword.strip()
-    category = category.strip()
+    keyword = normalize_text(keyword)
+    category = normalize_text(category)
     errors: list[FieldError] = []
     keyword_message: str | None = None
     if not keyword:
@@ -152,8 +174,9 @@ def rule_errors(keyword: str, category: str, taken_keys: Collection[str]) -> lis
 
 
 def category_key(category: str) -> str:
-    """The key categories compare by (FR-45): stripped and casefolded ("Oils", " oils ")."""
-    return category.strip().casefold()
+    """The key categories compare by (FR-45): `normalize_text`, casefolded, then NFC again
+    ("Oils", " oils ", "OILS\u200b" are one)."""
+    return unicodedata.normalize("NFC", normalize_text(category).casefold())
 
 
 def rule_categories(rules: Iterable[KeywordRule]) -> list[str]:
@@ -234,18 +257,19 @@ def _text_error(text: str, empty_message: str) -> str | None:
 def aisle_category_errors(aisle: str, categories: Sequence[str]) -> list[FieldError]:
     """The failing fields of an aisle's category list (FR-45): `aisle`, then `categories[i]`.
 
-    The aisle is kept exactly (it is matched by its text in each import) and fails only when it
-    is empty after stripping, too long or unstorable. Every category is stripped first. A
+    The aisle is only stripped (the import strips Aisle text and matches it exactly) and fails
+    when it is then empty, too long or unstorable. Every category is normalized with
+    `normalize_text` first. A
     category whose `category_key` repeats an earlier one on the list fails with CATEGORY_TAKEN.
     Any valid category text is accepted, whether or not a keyword rule gives it.
     """
     errors: list[FieldError] = []
-    aisle_message = _text_error(aisle, AISLE_EMPTY)
+    aisle_message = _text_error(aisle.strip(), AISLE_EMPTY)
     if aisle_message is not None:
         errors.append({"field": "aisle", "message": aisle_message})
     seen: set[str] = set()
     for index, raw in enumerate(categories):
-        category = raw.strip()
+        category = normalize_text(raw)
         message = _text_error(category, CATEGORY_EMPTY)
         if message is None:
             key = category_key(category)

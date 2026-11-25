@@ -12,9 +12,11 @@ import {
   LOADING_SAVED_PLANS,
   NEW_PLAN_FROM_IMPORT,
 } from "@/lib/copy";
+import { ApiError } from "@/lib/api/errors";
 import { NEW_PLAN_HREF, planOpenHref, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 import {
   actionsLabel,
+  deleteFailure,
   DEMO_FILES_TEXT,
   EMPTY_TEXT,
   focusAfterDelete,
@@ -198,6 +200,15 @@ describe("fr12 delete a plan", () => {
     );
     expect(DELETE_PLAN_TITLE).toBe("Delete plan");
     expect(DELETE_PLAN_CONFIRM).toBe("Delete plan");
+  });
+
+  it("fr40_fr12_delete_with_an_ended_session_opens_log_in_not_a_toast", () => {
+    expect(deleteFailure(new ApiError(401, "unauthenticated", "Log in to continue."))).toEqual({ kind: "session" });
+    expect(deleteFailure(new ApiError(404, "plan_not_found", "Gone."))).toEqual({ kind: "gone" });
+    expect(deleteFailure(new ApiError(500, "internal", "Something went wrong."))).toEqual({
+      kind: "toast",
+      message: "Something went wrong.",
+    });
   });
 
   it("fr12_menu_button_has_a_stable_id", () => {

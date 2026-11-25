@@ -23,6 +23,8 @@ import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "@/components/common/menu-st
 import { showToast } from "@/components/common/toast";
 import { ApiError, internalError } from "@/lib/api/errors";
 import { deletePlan, type SavedPlanRow, usePlans } from "@/lib/api/plans";
+import { isSessionExpired } from "@/lib/api/query-errors";
+import { useSessionExpired } from "@/lib/commands";
 import {
   DELETE_PLAN_CONFIRM,
   DELETE_PLAN_ITEM,
@@ -240,8 +242,22 @@ function focusActions(planId: string) {
   document.getElementById(planActionsId(planId))?.focus();
 }
 
+/**
+ * What a failed delete does: an ended session opens Log in (the shared flow), a plan already gone
+ * counts as deleted, anything else is a toast with the server's message.
+ */
+export function deleteFailure(
+  error: unknown,
+): { kind: "session" } | { kind: "gone" } | { kind: "toast"; message: string } {
+  if (isSessionExpired(error)) return { kind: "session" };
+  const apiError = error instanceof ApiError ? error : internalError();
+  if (apiError.code === "plan_not_found") return { kind: "gone" };
+  return { kind: "toast", message: apiError.message };
+}
+
 export function SavedPlansPage() {
   const router = useRouter();
+  const sessionExpired = useSessionExpired();
   const plans = usePlans();
   const { refetch } = plans;
   // The plan in the confirm; it stays set while the dialog fades out so its text does not change.
@@ -284,10 +300,16 @@ export function SavedPlansPage() {
       try {
         await deletePlan(plan.id);
       } catch (error) {
-        const apiError = error instanceof ApiError ? error : internalError();
+        const failure = deleteFailure(error);
+        if (failure.kind === "session") {
+          // The session ended (Story 9.3, FR-40): Log in opens as for other commands; the plan
+          // is not deleted and the planner comes back to this list afterwards.
+          sessionExpired();
+          return;
+        }
         // Someone deleted it already: the same refetch and focus, no toast.
-        if (apiError.code !== "plan_not_found") {
-          showToast(apiError.message);
+        if (failure.kind === "toast") {
+          showToast(failure.message);
           await closed;
           focusActions(plan.id);
           return;

@@ -137,9 +137,12 @@ export function importErrorGroups(details: ApiErrorDetail[]): ImportErrorGroup[]
 export type ErrorView =
   | { kind: "import"; tiles: Partial<Record<FileRole, TileState>>; groups: ImportErrorGroup[] }
   | { kind: "name"; message: string }
-  | { kind: "message"; message: string };
+  | { kind: "message"; message: string }
+  /** The session ended (401): Log in opens through the shared flow; nothing is shown here. */
+  | { kind: "session" };
 
 export function errorView(error: ApiError): ErrorView {
+  if (error.code === "unauthenticated") return { kind: "session" };
   if (error.code === "import_invalid") {
     return { kind: "import", tiles: tileStatesFrom(error.details), groups: importErrorGroups(error.details) };
   }

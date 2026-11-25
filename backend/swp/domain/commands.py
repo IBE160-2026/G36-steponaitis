@@ -7,10 +7,17 @@ slices add their command and event types here and their handlers in their own mo
 import uuid
 from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field
 
 from swp.domain.planning import UndoPreview
-from swp.domain.state import BestMark, OutdatedCause, PlanState, Rule
+from swp.domain.state import (
+    AisleMark,
+    BestMark,
+    LevelMark,
+    OutdatedCause,
+    PlanState,
+    Rule,
+)
 from swp.domain.values import CODE_MAX_LENGTH
 
 
@@ -23,11 +30,27 @@ class CommandContext(BaseModel):
     user: str
 
 
+def _short_mark(mark: BestMark) -> BestMark:
+    """Reject a mark whose aisle, level or location code is longer than CODE_MAX_LENGTH."""
+    if isinstance(mark, AisleMark):
+        codes = [mark.aisle]
+    elif isinstance(mark, LevelMark):
+        codes = [mark.level, mark.aisle or ""]
+    else:
+        codes = [mark.location]
+    if any(len(code) > CODE_MAX_LENGTH for code in codes):
+        raise ValueError(f"A mark code can be at most {CODE_MAX_LENGTH} characters.")
+    return mark
+
+
 class SetBestMark(BaseModel):
+    """Set a best-location mark (FR-21); its codes are limited like part and location codes.
+    `RemoveBestMark` has no limit, so a mark stored before the limit can still be removed."""
+
     type: Literal["set_best_mark"] = "set_best_mark"
     command_id: uuid.UUID
     base_version: int
-    mark: BestMark
+    mark: Annotated[BestMark, AfterValidator(_short_mark)]
 
 
 class RemoveBestMark(BaseModel):

@@ -23,6 +23,7 @@ from swp.domain.categories import (
     category_of,
     check,
     keyword_key,
+    normalize_text,
     part_categories,
     plan_aisle_categories_view,
     rule_categories,
@@ -315,3 +316,54 @@ def test_fr46_category_check_order_by_location_then_part() -> None:
     current = {"P2": "B-01", "P9": "A-01", "P1": "A-01", "P3": "A-02", "P0": "X-99"}
 
     assert category_check_order(current, CHECK_LOCATIONS) == ["P1", "P9", "P3", "P2", "P0"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "normalized"),
+    [
+        ("  Oils  ", "Oils"),
+        ("Engine \t\n  Oils", "Engine Oils"),
+        ("Engine\u00a0Oils", "Engine Oils"),
+        ("Oi\u200bls\u200d", "Oils"),
+        ("\ufeffOils\u00ad", "Oils"),
+        ("Cafe\u0301", "Caf\u00e9"),
+        ("\u200b \u200b", ""),
+    ],
+)
+def test_fr45_normalize_text_trims_collapses_nfc_and_drops_format_characters(
+    raw: str, normalized: str
+) -> None:
+    assert normalize_text(raw) == normalized
+
+
+def test_fr45_category_key_treats_lookalike_categories_as_one() -> None:
+    lookalikes = ["Engine Oils", " engine  oils ", "ENGINE\tOILS", "Engine\u00a0Oils\u200b"]
+    keys = {category_key(c) for c in lookalikes}
+    assert keys == {"engine oils"}
+    assert category_key("Caf\u00e9") == category_key("CAFE\u0301")
+    assert category_key("Stra\u00dfe") == category_key("STRASSE")
+
+
+def test_fr43_words_keep_combining_marks_and_ignore_format_characters() -> None:
+    assert words("Cafe\u0301 fil\u200bter") == ("caf\u00e9", "filter")
+    assert words("a\u0360b") == ("a\u0360b",)
+    assert keyword_key("CAFE\u0301") == keyword_key("caf\u00e9")
+    rules = [KeywordRule(keyword="caf\u00e9", category="Cafe")]
+    assert category_of("Grand Cafe\u0301 sign", rules) == "Cafe"
+
+
+def test_fr43_rule_errors_check_normalized_text() -> None:
+    assert rule_errors("\u200b", "\u200b ", set()) == [
+        {"field": "keyword", "message": KEYWORD_EMPTY},
+        {"field": "category", "message": CATEGORY_EMPTY},
+    ]
+    assert rule_errors("oil", "O" + "\u200b" * 100 + "ils", set()) == []
+    assert rule_errors("CAFE\u0301", "Cafe", {keyword_key("caf\u00e9")}) == [
+        {"field": "keyword", "message": KEYWORD_TAKEN}
+    ]
+
+
+def test_fr45_aisle_category_errors_find_duplicates_after_normalization() -> None:
+    assert aisle_category_errors(" A ", ["Engine Oils", "engine\u200b  oils"]) == [
+        {"field": "categories[1]", "message": CATEGORY_TAKEN}
+    ]

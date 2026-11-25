@@ -206,6 +206,30 @@ export function parseLocationParams(searchParams: SearchParamsInput): LocationPa
   return params;
 }
 
+/**
+ * Whether a click on a link to `href` asks again for the location already pinned from `?loc=` on
+ * `current` (the same page and `loc`, on the wall). Its URL may not change, so `?loc=` alone cannot
+ * tell; the Locations wall pins that location again (Story 10.3).
+ */
+export function relinksPinnedLocation(href: string, current: string): boolean {
+  let link: URL;
+  let here: URL;
+  try {
+    here = new URL(current);
+    link = new URL(href, here);
+  } catch {
+    return false;
+  }
+  const loc = link.searchParams.get("loc");
+  return (
+    link.origin === here.origin &&
+    link.pathname === here.pathname &&
+    loc !== null &&
+    loc === here.searchParams.get("loc") &&
+    link.searchParams.get("mode") !== "list"
+  );
+}
+
 /** Settings is not a flow step, so it has its own link. */
 export function planSettingsHref(planId: string): string {
   return `/plans/${encodeURIComponent(planId)}/settings`;

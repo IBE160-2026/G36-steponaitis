@@ -396,6 +396,19 @@ def test_fr10_unknown_plan_not_found(empty_tables: str) -> None:
         pytest.param(
             {**_body("set_best_mark", AISLE_A), "base_version": "latest"}, id="bad version"
         ),
+        pytest.param(
+            _body("set_best_mark", {"kind": "aisle", "aisle": "A" * 201}), id="long aisle"
+        ),
+        pytest.param(
+            _body("set_best_mark", {"kind": "level", "level": "1", "aisle": "A" * 201}),
+            id="long level aisle",
+        ),
+        pytest.param(
+            _body("set_best_mark", {"kind": "level", "level": "1" * 201}), id="long level"
+        ),
+        pytest.param(
+            _body("set_best_mark", {"kind": "location", "location": "L" * 201}), id="long location"
+        ),
     ],
 )
 def test_fr10_invalid_command_validation_failed(empty_tables: str, body: dict) -> None:

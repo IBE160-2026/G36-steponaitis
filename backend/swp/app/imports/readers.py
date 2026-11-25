@@ -16,9 +16,10 @@ from swp.domain.import_ import Cell, RawSheet, row_limit_reached
 MAX_UNPACKED_XLSX_BYTES = 50_000_000
 MAX_COLUMNS = 100
 MAX_CELL_CHARS = 1_000
-# Blank rows tolerated beyond header + max_rows: openpyxl pads every missing row index, so a
-# tiny hostile .xlsx with one row at r="2000000000" would otherwise spin for billions of rows.
-MAX_BLANK_ROWS = 10_000
+# Rows scanned in total (blank or not), the most an Excel sheet can hold: openpyxl pads every
+# missing row index, so a tiny hostile .xlsx with one row at r="2000000000" would otherwise spin
+# for billions of rows. Only non-blank rows count against `max_rows`.
+MAX_SCANNED_ROWS = 1_048_576
 
 
 class UnreadableFile(Exception):
@@ -64,16 +65,21 @@ def _is_blank(row: tuple[Cell, ...]) -> bool:
 
 
 def _collect(file_name: str, rows: Iterable[Iterable[object]], max_rows: int) -> RawSheet:
-    """Keep sheet row positions; stop once non-blank rows exceed header + max_rows."""
+    """Keep sheet row positions; stop once non-blank rows exceed header + max_rows.
+
+    Blank rows never count against `max_rows`; only the total scan is capped at
+    `MAX_SCANNED_ROWS` (Story 1.5)."""
     kept: list[tuple[Cell, ...]] = []
     pending_blank = 0
     non_blank = 0
     scanned = 0
     for values in rows:
         scanned += 1
-        if scanned > max_rows + 1 + MAX_BLANK_ROWS:
+        if scanned > MAX_SCANNED_ROWS:
             raise row_limit_reached(file_name, max_rows)
-        row = _row(values)
+        cells = values if isinstance(values, tuple | list) else tuple(values)
+        # Fast path for padded rows: all None, checked at C speed before any cell conversion.
+        row = () if cells.count(None) == len(cells) else _row(cells)
         if _is_blank(row):
             pending_blank += 1  # only kept when a non-blank row follows
             continue

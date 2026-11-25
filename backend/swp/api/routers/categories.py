@@ -48,9 +48,9 @@ def create_keyword_rule(body: KeywordRuleCreate) -> KeywordRule:
 
 
 # Declared before /{rule_id} routes: "order" is a fixed path, not a rule id.
-@router.put("/keyword-rules/order", responses=error_responses(401, 403, 422, 503))
+@router.put("/keyword-rules/order", responses=error_responses(401, 403, 409, 422, 503))
 def reorder_keyword_rules(body: KeywordRuleOrder) -> KeywordRules:
-    return _rules(categories.reorder_rules(body.ids, now=datetime.now(UTC)))
+    return _rules(categories.reorder_rules(body.ids, body.base_ids, now=datetime.now(UTC)))
 
 
 @router.patch("/keyword-rules/{rule_id}", responses=error_responses(401, 403, 404, 422, 503))

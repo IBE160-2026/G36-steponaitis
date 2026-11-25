@@ -80,23 +80,6 @@ export function Button({
 
   const classes = buttonClassName(variant, size, isDisabled, className);
 
-  if (tip === undefined) {
-    return (
-      <button
-        type={type}
-        className={classes}
-        onClick={onClick}
-        onKeyDown={onKeyDown}
-        onBlur={onBlur}
-        disabled={disabled}
-        aria-describedby={describedBy}
-        {...rest}
-      >
-        {children}
-      </button>
-    );
-  }
-
   function suppress(event: MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
@@ -107,14 +90,20 @@ export function Button({
     onKeyDown?.(event);
   }
 
+  // The same element tree with or without a tooltip: a button that becomes disabled while it saves
+  // (Keep in place, Apply, Manual move…) stays mounted, so keyboard focus stays on it. Without a
+  // tooltip the wrapper is `display: contents` and the button lays out as if it had none.
   return (
-    <span className="group relative inline-flex" onMouseLeave={() => setTipDismissed(false)}>
+    <span
+      className={tip === undefined ? "contents" : "group relative inline-flex"}
+      onMouseLeave={tip === undefined ? undefined : () => setTipDismissed(false)}
+    >
       <button
         type={type}
         className={classes}
         aria-disabled={isDisabled ? "true" : undefined}
         disabled={isDisabled ? undefined : disabled}
-        aria-describedby={[describedBy, tipId].filter(Boolean).join(" ")}
+        aria-describedby={[describedBy, tip === undefined ? undefined : tipId].filter(Boolean).join(" ") || undefined}
         {...rest}
         onClick={isDisabled ? suppress : onClick}
         onKeyDown={handleKeyDown}
@@ -125,16 +114,18 @@ export function Button({
       >
         {children}
       </button>
-      <span
-        id={tipId}
-        role="tooltip"
-        className={cn(
-          "hidden absolute top-full left-0 z-40 mt-1 w-max max-w-64 rounded-lg border border-border bg-surface px-2 py-1 text-ink shadow-overlay type-caption",
-          !tipDismissed && "group-hover:block group-has-[:focus-visible]:block",
-        )}
-      >
-        {tip}
-      </span>
+      {tip !== undefined && (
+        <span
+          id={tipId}
+          role="tooltip"
+          className={cn(
+            "hidden absolute top-full left-0 z-40 mt-1 w-max max-w-64 rounded-lg border border-border bg-surface px-2 py-1 text-ink shadow-overlay type-caption",
+            !tipDismissed && "group-hover:block group-has-[:focus-visible]:block",
+          )}
+        >
+          {tip}
+        </span>
+      )}
     </span>
   );
 }

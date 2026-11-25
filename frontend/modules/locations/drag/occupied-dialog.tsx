@@ -5,13 +5,16 @@
 // "<to> is occupied", with:
 //
 // - "Parts to move from <from>" only when the from-location holds several parts (the dragged part
-//   checked), and "Parts to move back to <from>" only when the target holds several (all checked;
-//   the list is the server preview's `target_parts`). A side with one part moves that part, without
-//   a checkbox.
+//   checked), and "Parts to move back to <from>" only when the target holds several (all checked
+//   but the dragged part; the list is the server preview's `target_parts`). A side with one part
+//   moves that part, without a checkbox.
 // - A kept-in-place warning when a part the swap would move is kept (Swap stays enabled; the server
 //   keeps the mark).
 // - **Swap** and **Put together** (both secondary, neither the default) and **Cancel**. Their
-//   disabled reasons: saving first, then no part to move, then (Swap only) no part to move back.
+//   disabled reasons: saving first, then no part to move, then (Swap only) no part to move back,
+//   then (Swap only) a part chosen on both sides, which the server refuses ("cannot move both
+//   ways", drag.py). The dragged part also stored at the target starts unchecked on the back side;
+//   a target whose only part is the dragged part offers Swap disabled with that reason.
 //
 // On open, focus goes to the first checkbox, else the popover; `Esc`, Cancel or a press outside
 // closes it with nothing sent and focus returns to the cell.
@@ -22,6 +25,7 @@ import { Button } from "@/components/common/button";
 import { Icon } from "@/components/common/icons";
 import type { TargetPart, WallPart } from "@/lib/api/plans";
 import {
+  cannotMoveBothWays,
   CHOOSE_PART_TO_MOVE,
   CHOOSE_PART_TO_MOVE_BACK,
   keptSwapWarning,
@@ -45,15 +49,30 @@ export function putTogetherReason(chosenCount: number, savingReason: string | un
   return chosenCount === 0 ? CHOOSE_PART_TO_MOVE : undefined;
 }
 
-/** Why Swap cannot be pressed (saving, no part to move, no part to move back), or undefined. */
+/** The first chosen part that is also chosen to move back, or undefined (the server refuses it). */
+export function partBothWays(chosen: readonly string[], chosenBack: readonly string[]): string | undefined {
+  return chosen.find((part) => chosenBack.includes(part));
+}
+
+/**
+ * Why Swap cannot be pressed (saving, no part to move, no part to move back, `bothWays`: a part
+ * chosen on both sides), or undefined.
+ */
 export function swapReason(
   chosenCount: number,
   chosenBackCount: number,
   savingReason: string | undefined,
+  bothWays?: string,
 ): string | undefined {
   const reason = putTogetherReason(chosenCount, savingReason);
   if (reason !== undefined) return reason;
-  return chosenBackCount === 0 ? CHOOSE_PART_TO_MOVE_BACK : undefined;
+  if (chosenBackCount === 0) return CHOOSE_PART_TO_MOVE_BACK;
+  return bothWays === undefined ? undefined : cannotMoveBothWays(bothWays);
+}
+
+/** The back-parts checked when the dialog opens: every target part but the dragged one. */
+export function initialBackParts(targetParts: readonly Pick<TargetPart, "part">[], dragged: string): string[] {
+  return targetParts.map((entry) => entry.part).filter((part) => part !== dragged);
 }
 
 /** The kept-in-place parts a swap of the chosen parts and back-parts would move, in that order. */
@@ -104,8 +123,12 @@ export function OccupiedDialogBody({
 }: OccupiedDialogBodyProps) {
   const chosen = chosenParts(parts, checked);
   const chosenBack = chosenParts(targetParts, checkedBack);
-  // Warn only when a swap is possible: something to move and something to move back.
-  const kept = chosen.length > 0 && chosenBack.length > 0 ? keptInSwap(parts, chosen, targetParts, chosenBack) : [];
+  const bothWays = partBothWays(chosen, chosenBack);
+  // Warn only when a swap is possible: something to move, something else to move back.
+  const kept =
+    chosen.length > 0 && chosenBack.length > 0 && bothWays === undefined
+      ? keptInSwap(parts, chosen, targetParts, chosenBack)
+      : [];
   const warningId = useId();
   return (
     <div className="flex flex-col gap-3" data-occupied-dialog={to}>
@@ -140,7 +163,7 @@ export function OccupiedDialogBody({
         <Button
           variant="secondary"
           size="md"
-          disabledReason={swapReason(chosen.length, chosenBack.length, savingReason)}
+          disabledReason={swapReason(chosen.length, chosenBack.length, savingReason, bothWays)}
           aria-describedby={kept.length > 0 ? warningId : undefined}
           onClick={() => onSwap(chosen, chosenBack)}
         >
@@ -192,7 +215,7 @@ export function OccupiedDialog({
 }: OccupiedDialogProps) {
   const titleId = useId();
   const [checked, toggle] = useCheckedParts([dragged]);
-  const [checkedBack, toggleBack] = useCheckedParts(targetParts.map((entry) => entry.part));
+  const [checkedBack, toggleBack] = useCheckedParts(initialBackParts(targetParts, dragged));
 
   return (
     <DropPopover anchor={anchor} titleId={titleId} onClose={onClose}>

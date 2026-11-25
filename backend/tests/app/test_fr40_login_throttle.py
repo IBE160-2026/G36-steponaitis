@@ -203,3 +203,21 @@ def test_fr40_sixth_http_login_is_429_without_cookie(client: TestClient, account
     }
     assert "set-cookie" not in response.headers
     assert client.get("/api/session").json()["user"] is None
+
+
+def test_fr40_recording_a_failure_prunes_rows_whose_lock_passed(
+    empty_tables: str, auth_on: None
+) -> None:
+    _fail("ghost", 5)  # locked until T + 60 s
+    _fail("probe", 3)  # never locked: the count has no time window, so it is kept
+    _fail("recent", 5, T + timedelta(seconds=30))  # locked until T + 90 s
+
+    _fail("other", 1, T + timedelta(seconds=60))
+
+    assert _rows() == {
+        "probe": (3, None),
+        "recent": (5, T + timedelta(seconds=90)),
+        "other": (1, None),
+    }
+    assert _code("ghost", "wrong", T + timedelta(seconds=61)) == "unauthenticated"
+    assert _rows()["ghost"] == (1, None)

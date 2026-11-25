@@ -30,6 +30,7 @@ import {
 } from "@/lib/commands/client";
 
 const CommandsContext = createContext<CommandClient | null>(null);
+const EffectsContext = createContext<QueryErrorEffects | null>(null);
 
 export type CommandsProviderProps = {
   effects: QueryErrorEffects;
@@ -43,7 +44,22 @@ export function CommandsProvider({ effects, children, client: given }: CommandsP
   // The client is built once; it always calls the latest effects passed in.
   const [client] = useState(() => given ?? new CommandClient(queryClient, effects));
   useEffect(() => client.setEffects(effects), [client, effects]);
-  return <CommandsContext.Provider value={client}>{children}</CommandsContext.Provider>;
+  return (
+    <CommandsContext.Provider value={client}>
+      <EffectsContext.Provider value={effects}>{children}</EffectsContext.Provider>
+    </CommandsContext.Provider>
+  );
+}
+
+/**
+ * The shared ended-session flow (Story 9.3, FR-40) for a write outside the command flow (New Plan's
+ * upload, Delete plan): remember this page, mark the session logged out and open Log in, as a 401
+ * GET or command does. The write is not held or sent again; the planner returns to this page.
+ */
+export function useSessionExpired(): () => void {
+  const effects = useContext(EffectsContext);
+  if (!effects) throw new Error("useSessionExpired must be used inside <CommandsProvider>");
+  return useCallback(() => void effects.sessionExpired(), [effects]);
 }
 
 export function useCommandClient(): CommandClient {

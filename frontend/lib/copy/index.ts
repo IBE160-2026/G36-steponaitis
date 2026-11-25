@@ -294,6 +294,8 @@ export function otherLocationOptionName(location: LocationRef): string {
 export const UNDO_LAST_MOVE = "Undo last move";
 /** Why Undo last move is disabled when the plan has no steps. */
 export const NO_MOVES_TO_UNDO = "No moves to undo";
+/** Why Undo last move waits while the plan summary loads: neutral, it does not claim there are no moves. */
+export const LOADING_LAST_MOVE = "Loading the last move…";
 /** The toast action that undoes the move the toast is about. */
 export const UNDO_ACTION = "Undo";
 
@@ -1048,6 +1050,11 @@ export function movedPartsToast(count: number, from: string, to: string, round: 
 
 /** Why the occupied drop dialog's Swap waits: no part to move back is checked. */
 export const CHOOSE_PART_TO_MOVE_BACK = "Choose at least one part to move back.";
+
+/** Why the occupied drop dialog's Swap waits: a part is chosen on both sides (the server's own words). */
+export function cannotMoveBothWays(part: string): string {
+  return `${part} cannot move both ways.`;
+}
 
 /** The occupied drop dialog's buttons. */
 export const SWAP = "Swap";

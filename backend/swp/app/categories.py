@@ -1,6 +1,6 @@
 """Keyword rules (FR-43) and aisle categories (FR-45) service: the global category tables.
 
-Rules: list, create, edit, delete and reorder. Values are stripped, checked by
+Rules: list, create, edit, delete and reorder. Values are normalized (`normalize_text`), checked by
 `swp.domain.categories` inside the store's write lock, and stored. The caller passes `now`; new
 ids come from uuid4 here. Aisle categories: read one aisle, replace its whole list, or read every
 aisle of a plan's import (read-only, it never writes the plan). The category check (FR-46) reads
@@ -28,6 +28,7 @@ from swp.domain.categories import (
     aisle_category_errors,
     check,
     keyword_key,
+    normalize_text,
     plan_aisle_categories_view,
     rule_errors,
 )
@@ -45,6 +46,7 @@ logger = logging.getLogger("swp.categories")
 STARTER_CATEGORIES_PATH = BACKEND_DIR / "settings" / "starter_categories.toml"
 RULE_NOT_FOUND = "That keyword rule no longer exists."
 ORDER_INVALID = "List every keyword rule exactly once."
+RULES_CHANGED = "The keyword rules were changed elsewhere. The list is reloaded. Try again."
 RULES_BUSY = "The keyword rules are busy. Try again."
 AISLES_BUSY = "The aisle categories are busy. Try again."
 
@@ -62,6 +64,17 @@ def _order_invalid() -> DomainError:
     return _validation_failed([{"field": "ids", "message": ORDER_INVALID}])
 
 
+def _rules_changed() -> DomainError:
+    return DomainError("command_rejected", RULES_CHANGED)
+
+
+def _parse_ids(raw_ids: list[str]) -> list[uuid.UUID]:
+    try:
+        return [uuid.UUID(raw) for raw in raw_ids]
+    except ValueError:
+        raise _order_invalid() from None
+
+
 def _parse_id(raw: str) -> uuid.UUID:
     """The rule id from the path; `not_found` when it is not a UUID (no rule has it)."""
     try:
@@ -75,9 +88,10 @@ def _draft(rule: StoredKeywordRule) -> RuleDraft:
 
 
 def _checked(keyword: str, category: str, others: list[StoredKeywordRule]) -> tuple[str, str]:
-    """The stripped pair; raise `validation_failed` when it is not a valid rule beside `others`."""
-    keyword = keyword.strip()
-    category = category.strip()
+    """The normalized pair; raise `validation_failed` when it is not a valid rule beside
+    `others`."""
+    keyword = normalize_text(keyword)
+    category = normalize_text(category)
     taken = {keyword_key(rule.keyword) for rule in others}
     errors = rule_errors(keyword, category, taken)
     if errors:
@@ -150,14 +164,21 @@ def delete_rule(raw_id: str, *, now: datetime) -> None:
     _write(change, now=now)
 
 
-def reorder_rules(raw_ids: list[str], *, now: datetime) -> list[StoredKeywordRule]:
-    """Put the rules in the order of `raw_ids`, which must list every rule exactly once."""
-    try:
-        ids = [uuid.UUID(raw) for raw in raw_ids]
-    except ValueError:
-        raise _order_invalid() from None
+def reorder_rules(
+    raw_ids: list[str], raw_base_ids: list[str], *, now: datetime
+) -> list[StoredKeywordRule]:
+    """Put the rules in the order of `raw_ids`, which must list every rule exactly once.
+
+    `raw_base_ids` is the order the client reordered from: when the stored rules are no longer in
+    exactly that order (another tab or user added, deleted or moved a rule), raise
+    `command_rejected` (409) with nothing written, so a stale list never overwrites a newer one.
+    """
+    ids = _parse_ids(raw_ids)
+    base_ids = _parse_ids(raw_base_ids)
 
     def change(current: list[StoredKeywordRule]) -> list[RuleDraft]:
+        if base_ids != [rule.id for rule in current]:
+            raise _rules_changed()
         by_id = {rule.id: rule for rule in current}
         if len(ids) != len(current) or set(ids) != set(by_id):
             raise _order_invalid()
@@ -171,7 +192,9 @@ def _domain_rules() -> list[KeywordRule]:
 
 
 def aisle_categories(aisle: str) -> AisleCategories:
-    """The categories of `aisle` (exact text); an aisle with none has an empty list."""
+    """The categories of `aisle` (stripped, then exact text); an aisle with none has an empty
+    list."""
+    aisle = aisle.strip()
     errors = aisle_category_errors(aisle, [])
     if errors:
         raise _validation_failed(errors)
@@ -179,12 +202,14 @@ def aisle_categories(aisle: str) -> AisleCategories:
 
 
 def set_aisle_categories(aisle: str, categories: list[str]) -> AisleCategories:
-    """Replace the whole category list of `aisle`; an empty list clears it."""
+    """Replace the whole category list of `aisle` (stripped, as the import strips Aisle text);
+    the categories are stored normalized. An empty list clears it."""
+    aisle = aisle.strip()
     errors = aisle_category_errors(aisle, categories)
     if errors:
         raise _validation_failed(errors)
     try:
-        aisle_store.replace(aisle, [category.strip() for category in categories])
+        aisle_store.replace(aisle, [normalize_text(category) for category in categories])
     except AisleCategoriesBusy as error:
         raise DomainError("unavailable", AISLES_BUSY) from error
     return aisle_categories(aisle)
@@ -229,7 +254,8 @@ class StarterCategories(BaseModel):
 
 
 def load_starter_categories(path: Path = STARTER_CATEGORIES_PATH) -> StarterCategories:
-    """The checked starter list from `path`, values stripped; raise ValueError naming the first
+    """The checked starter list from `path`, aisles stripped and keywords and categories
+    normalized (`normalize_text`); raise ValueError naming the first
     invalid entry (a bug in the shipped file, never skipped)."""
     with path.open("rb") as file:
         raw = StarterCategories.model_validate(tomllib.load(file))
@@ -243,14 +269,21 @@ def load_starter_categories(path: Path = STARTER_CATEGORIES_PATH) -> StarterCate
                 f"{errors[0]['field']}: {errors[0]['message']}"
             )
         taken.add(keyword_key(rule.keyword))
-        rules.append(StarterRule(keyword=rule.keyword.strip(), category=rule.category.strip()))
+        rules.append(
+            StarterRule(
+                keyword=normalize_text(rule.keyword), category=normalize_text(rule.category)
+            )
+        )
     for aisle, categories in raw.aisles.items():
         errors = aisle_category_errors(aisle, categories)
         if errors:
             raise ValueError(
                 f"{path.name}: aisles.{aisle!r}: {errors[0]['field']}: {errors[0]['message']}"
             )
-    aisles = {aisle: [c.strip() for c in categories] for aisle, categories in raw.aisles.items()}
+    aisles = {
+        aisle.strip(): [normalize_text(c) for c in categories]
+        for aisle, categories in raw.aisles.items()
+    }
     return StarterCategories(rules=rules, aisles=aisles)
 
 

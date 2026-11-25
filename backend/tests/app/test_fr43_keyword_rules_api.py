@@ -36,6 +36,11 @@ ORDER_INVALID = {
     "message": "List every keyword rule exactly once.",
     "details": [{"field": "ids", "message": "List every keyword rule exactly once."}],
 }
+RULES_CHANGED = {
+    "code": "command_rejected",
+    "message": "The keyword rules were changed elsewhere. The list is reloaded. Try again.",
+    "details": [],
+}
 
 
 @pytest.fixture
@@ -254,10 +259,18 @@ def test_fr43_unknown_rule_is_not_found(client: TestClient, rule_id: str) -> Non
     assert _pairs(client) == [(0, "oil", "Oils")]
 
 
+def _reorder(client: TestClient, ids: list[str], base_ids: list[str]):
+    return client.put(
+        "/api/keyword-rules/order",
+        json={"ids": ids, "base_ids": base_ids},
+        headers=SAME_ORIGIN,
+    )
+
+
 def test_fr43_reorder(client: TestClient) -> None:
     ids = _seed(client, "oil", "filter", "belt")
 
-    response = client.put("/api/keyword-rules/order", json={"ids": ids[::-1]}, headers=SAME_ORIGIN)
+    response = _reorder(client, ids[::-1], ids)
 
     assert response.status_code == 200
     rules = response.json()["rules"]
@@ -279,11 +292,42 @@ def test_fr43_reorder(client: TestClient) -> None:
 def test_fr43_reorder_must_list_every_rule_once(client: TestClient, order) -> None:
     ids = _seed(client, "oil", "filter", "belt")
 
-    response = client.put("/api/keyword-rules/order", json={"ids": order(ids)}, headers=SAME_ORIGIN)
+    response = _reorder(client, order(ids), ids)
 
     assert response.status_code == 422
     assert _error(response) == ORDER_INVALID
     assert [r["id"] for r in _rules(client)] == ids
+
+
+def test_fr43_reorder_without_base_is_invalid(client: TestClient) -> None:
+    ids = _seed(client, "oil", "filter")
+
+    response = client.put("/api/keyword-rules/order", json={"ids": ids[::-1]}, headers=SAME_ORIGIN)
+
+    assert response.status_code == 422
+    assert _error(response)["code"] == "validation_failed"
+    assert [r["id"] for r in _rules(client)] == ids
+
+
+@pytest.mark.parametrize("elsewhere", ["moved", "added", "deleted"])
+def test_fr43_reorder_from_stale_list_is_rejected(client: TestClient, elsewhere: str) -> None:
+    """Another tab changed the list after this one read it: the same Move up is refused (409)
+    with nothing written, also when the submitted ids are still every rule exactly once."""
+    seen = _seed(client, "oil", "filter", "belt")
+    if elsewhere == "moved":
+        assert _reorder(client, [seen[1], seen[0], seen[2]], seen).status_code == 200
+    elif elsewhere == "added":
+        _seed(client, "chain")
+    else:
+        assert client.delete(f"/api/keyword-rules/{seen[2]}", headers=SAME_ORIGIN).is_success
+    current = [r["id"] for r in _rules(client)]
+
+    # Move "filter" up in the list this tab still shows.
+    response = _reorder(client, [seen[1], seen[0], seen[2]], seen)
+
+    assert response.status_code == 409
+    assert _error(response) == RULES_CHANGED
+    assert [r["id"] for r in _rules(client)] == current
 
 
 WRITES = ["POST", "PATCH", "DELETE", "PUT"]
@@ -301,7 +345,9 @@ def _request(client: TestClient, method: str, rule_id: str, headers: dict[str, s
         return client.patch(f"/api/keyword-rules/{rule_id}", json={"keyword": "x"}, headers=headers)
     if method == "DELETE":
         return client.delete(f"/api/keyword-rules/{rule_id}", headers=headers)
-    return client.put("/api/keyword-rules/order", json={"ids": [rule_id]}, headers=headers)
+    return client.put(
+        "/api/keyword-rules/order", json={"ids": [rule_id], "base_ids": [rule_id]}, headers=headers
+    )
 
 
 @pytest.mark.parametrize("method", WRITES)
@@ -366,7 +412,7 @@ def test_fr43_delete_touches_only_moved_rules(empty_tables: str) -> None:
 def test_fr43_reorder_touches_only_moved_rules(empty_tables: str) -> None:
     oil, filter_, belt = _seed_with_service("oil", "filter", "belt")
 
-    rules = categories.reorder_rules([oil, belt, filter_], now=T1)
+    rules = categories.reorder_rules([oil, belt, filter_], [oil, filter_, belt], now=T1)
 
     expected = [(oil, 0, T0), (belt, 1, T1), (filter_, 2, T1)]
     assert [(str(r.id), r.position, r.updated_at) for r in rules] == expected

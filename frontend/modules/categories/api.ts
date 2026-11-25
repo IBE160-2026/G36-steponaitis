@@ -6,12 +6,12 @@
 // AD-11 `ApiError` (a network failure throws `internal`). The category check (FR-46) is a plan view:
 // its query sits under `planRootKey`, so every confirmed move, undo or reset refetches it (AD-3).
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
-import { internalError, parseErrorBody } from "@/lib/api/errors";
 import { getJson, planRootKey } from "@/lib/api/plans";
 import type { components } from "@/lib/api/schema";
+import { sendJson } from "@/lib/api/send-json";
 
 export type KeywordRule = components["schemas"]["KeywordRule"];
 export type KeywordRules = components["schemas"]["KeywordRules"];
@@ -64,57 +64,53 @@ export function usePlanAisleCategories(planId: string) {
   });
 }
 
-/** One write: resolves with the parsed body (undefined for 204), else throws its `ApiError`. */
-export async function sendJson<T>(method: "POST" | "PATCH" | "PUT" | "DELETE", url: string, body?: unknown): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method,
-      headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-  } catch {
-    throw internalError();
-  }
-  if (!response.ok) throw parseErrorBody(response.status, await response.text());
-  return (response.status === 204 ? undefined : await response.json()) as T;
-}
-
 function ruleUrl(id: string): string {
   return `/api/keyword-rules/${encodeURIComponent(id)}`;
+}
+
+/** The fields of a rule the Edit dialog can change; an omitted field keeps its stored value. */
+export type RuleChanges = Partial<Pick<KeywordRule, "keyword" | "category">>;
+
+/** Only the fields whose value differs from the stored rule, so Edit never writes back a stale value. */
+export function changedFields(rule: Pick<KeywordRule, "keyword" | "category">, values: Required<RuleChanges>): RuleChanges {
+  const changes: RuleChanges = {};
+  if (values.keyword !== rule.keyword) changes.keyword = values.keyword;
+  if (values.category !== rule.category) changes.category = values.category;
+  return changes;
 }
 
 export const categoriesApi = {
   createRule: (keyword: string, category: string) =>
     sendJson<KeywordRule>("POST", "/api/keyword-rules", { keyword, category }),
-  editRule: (id: string, keyword: string, category: string) =>
-    sendJson<KeywordRule>("PATCH", ruleUrl(id), { keyword, category }),
+  editRule: (id: string, changes: RuleChanges) => sendJson<KeywordRule>("PATCH", ruleUrl(id), changes),
   deleteRule: (id: string) => sendJson<void>("DELETE", ruleUrl(id)),
-  reorderRules: (ids: readonly string[]) => sendJson<KeywordRules>("PUT", "/api/keyword-rules/order", { ids }),
+  /** `baseIds` is the order the list had when the planner moved a rule; a changed list answers 409. */
+  reorderRules: (ids: readonly string[], baseIds: readonly string[]) =>
+    sendJson<KeywordRules>("PUT", "/api/keyword-rules/order", { ids, base_ids: baseIds }),
   setAisleCategories: (aisle: string, categories: readonly string[]) =>
     sendJson<AisleCategories>("PUT", `/api/aisle-categories/${encodeURIComponent(aisle)}`, { categories }),
 };
 
 /**
  * Runs a write, then waits for the categories queries (and every category check) to refetch; rethrows a failed write. A failed
- * write refetches too, so a rule someone else deleted or moved shows as the server has it.
+ * write refetches too, so a rule someone else deleted or moved (a stale reorder answers 409) shows as the server has it.
  */
+export async function runCategoriesWrite<T>(queryClient: QueryClient, write: () => Promise<T>): Promise<T> {
+  try {
+    return await write();
+  } finally {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+      // Every plan's check reads the rules and aisle categories: a write makes it stale.
+      queryClient.invalidateQueries({ predicate: (query) => isCategoryCheckKey(query.queryKey) }),
+    ]);
+  }
+}
+
+/** `runCategoriesWrite` with the app's query client. */
 export function useCategoriesWrite() {
   const queryClient = useQueryClient();
-  return useCallback(
-    async <T>(write: () => Promise<T>): Promise<T> => {
-      try {
-        return await write();
-      } finally {
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY }),
-          // Every plan's check reads the rules and aisle categories: a write makes it stale.
-          queryClient.invalidateQueries({ predicate: (query) => isCategoryCheckKey(query.queryKey) }),
-        ]);
-      }
-    },
-    [queryClient],
-  );
+  return useCallback(<T>(write: () => Promise<T>): Promise<T> => runCategoriesWrite(queryClient, write), [queryClient]);
 }
 
 /** The `{field, message}` details of a `validation_failed` error, by field. */

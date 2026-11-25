@@ -23,12 +23,17 @@ export type QueryErrorEffects = {
   planChanged?: () => Promise<"reload" | "keep">;
 };
 
+/** A 401: the session has ended (expiry, deleted user, Log out in another tab). */
+export function isSessionExpired(error: unknown): boolean {
+  return error instanceof ApiError && error.code === "unauthenticated";
+}
+
 export function handleQueryError(error: unknown, effects: QueryErrorEffects): void {
   if (!(error instanceof ApiError)) return;
   if (error.code === "plan_not_found") {
     effects.notify(PLAN_DELETED);
     effects.navigate(SAVED_PLANS_HREF);
-  } else if (error.code === "unauthenticated") {
+  } else if (isSessionExpired(error)) {
     void effects.sessionExpired();
   }
 }

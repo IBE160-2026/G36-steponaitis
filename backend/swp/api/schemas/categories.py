@@ -18,9 +18,12 @@ class KeywordRuleEdit(BaseModel):
 
 
 class KeywordRuleOrder(BaseModel):
-    """Every rule id exactly once, in the new order."""
+    """`ids`: every rule id exactly once, in the new order. `base_ids`: the order the client
+    reordered from (the list it last read); when the rules no longer are in that order, the
+    request is stale and answered 409 `command_rejected`."""
 
     ids: list[str]
+    base_ids: list[str]
 
 
 class KeywordRule(BaseModel):

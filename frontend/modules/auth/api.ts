@@ -6,8 +6,9 @@
 // data and opens Log in, or the demo front page when FEATURE_DEMO is on (Story 9.6). Demo version
 // (Story 9.5, FR-50) logs in as `demo` with no password.
 
-import { ApiError, internalError, parseErrorBody } from "@/lib/api/errors";
+import { ApiError, internalError } from "@/lib/api/errors";
 import type { components } from "@/lib/api/schema";
+import { type FetchLike, sendJson } from "@/lib/api/send-json";
 import type { Session } from "@/lib/api/session";
 import { sessionExpiry } from "@/lib/api/session-expiry";
 import { FRONT_PAGE_HREF, LOGIN_HREF, SAVED_PLANS_HREF } from "@/lib/view-state/urls";
@@ -31,51 +32,24 @@ export const LOGIN_LEAD = "Plans are shared by everyone who logs in.";
 export const LOGOUT_LABEL = "Log out";
 export const DEMO_VERSION_LABEL = "Demo version";
 
-type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
-
-/**
- * POST `body` as JSON to `url` once (never retried). Resolves with the parsed answer, or
- * `undefined` for an empty body (204); rejects with an `ApiError`.
- */
-export async function postJson<T>(url: string, body: unknown, fetchImpl: FetchLike = fetch): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetchImpl(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  } catch {
-    throw internalError();
-  }
-  const text = await response.text();
-  if (!response.ok) throw parseErrorBody(response.status, text);
-  if (text === "") return undefined as T;
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    throw internalError(response.status);
-  }
-}
-
 /** POST the form; resolves with the new username, rejects with an `ApiError`. Never retried. */
 export function postSignup(form: SignupForm, fetchImpl: FetchLike = fetch): Promise<SignupResponse> {
-  return postJson<SignupResponse>("/api/auth/signup", form, fetchImpl);
+  return sendJson<SignupResponse>("POST", "/api/auth/signup", form, fetchImpl);
 }
 
 /** POST the credentials; resolves with the stored username, rejects with an `ApiError`. */
 export function postLogin(form: LoginForm, fetchImpl: FetchLike = fetch): Promise<LoginResponse> {
-  return postJson<LoginResponse>("/api/auth/login", form, fetchImpl);
+  return sendJson<LoginResponse>("POST", "/api/auth/login", form, fetchImpl);
 }
 
 /** POST /api/auth/demo (FR-50): log in as `demo` with no password; rejects with an `ApiError`. */
 export function postDemo(fetchImpl: FetchLike = fetch): Promise<LoginResponse> {
-  return postJson<LoginResponse>("/api/auth/demo", {}, fetchImpl);
+  return sendJson<LoginResponse>("POST", "/api/auth/demo", {}, fetchImpl);
 }
 
 /** POST /api/auth/logout: the server clears the session cookie (204). */
 export async function postLogout(fetchImpl: FetchLike = fetch): Promise<void> {
-  await postJson<undefined>("/api/auth/logout", {}, fetchImpl);
+  await sendJson<undefined>("POST", "/api/auth/logout", {}, fetchImpl);
 }
 
 function isSignupField(value: unknown): value is SignupField {

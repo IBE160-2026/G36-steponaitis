@@ -27,7 +27,14 @@ import {
   type SignupForm,
   USERNAME_HINT,
 } from "@/modules/auth/api";
-import { AuthGuard, followGuard, followGuardAfterLogout, guardDecision, leaveTo } from "@/modules/auth/auth-guard";
+import {
+  AuthGuard,
+  followGuard,
+  followGuardAfterLogout,
+  guardDecision,
+  LEAVE_HOLD_MS,
+  leaveTo,
+} from "@/modules/auth/auth-guard";
 import {
   DEMO_VERSION_BUSY_REASON,
   DemoVersionButton,
@@ -665,15 +672,31 @@ describe("fr50 front page guard and Log out (Story 9.6)", () => {
     const router = { replace: vi.fn() };
     leaveTo("/");
     // The page being left sees a logged-out session: Log out navigates, not the guard.
-    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router)).toBe(true);
+    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router)).toBeGreaterThan(0);
     expect(router.replace).not.toHaveBeenCalled();
     // The front page opens: the hold ends and the guard works as before.
-    expect(followGuardAfterLogout("render", "/", router)).toBe(false);
+    expect(followGuardAfterLogout("render", "/", router)).toBe(0);
     followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router);
     expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
     // Session expiry never sets the hold, so a 401 still opens Log in.
     router.replace.mockReset();
     followGuardAfterLogout("redirect", "/plans/p1/overview", router);
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+  });
+
+  it("fr40_an_aborted_log_out_navigation_does_not_leave_the_hold_set", () => {
+    const router = { replace: vi.fn() };
+    leaveTo("/", 1_000);
+    // Log out's navigation never arrives: the page being left waits for it, but not for ever.
+    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router, 1_000)).toBe(LEAVE_HOLD_MS);
+    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router, 1_000 + LEAVE_HOLD_MS - 1)).toBe(1);
+    expect(router.replace).not.toHaveBeenCalled();
+    // Once the hold runs out, the guard redirects to Log in and the hold is gone.
+    expect(followGuardAfterLogout("redirect", SAVED_PLANS_HREF, router, 1_000 + LEAVE_HOLD_MS)).toBe(0);
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
+    router.replace.mockReset();
+    // A later session loss on any page opens Log in at once.
+    followGuardAfterLogout("redirect", "/plans/p1/overview", router, 1_000 + LEAVE_HOLD_MS + 1);
     expect(router.replace).toHaveBeenCalledExactlyOnceWith(LOGIN_HREF);
   });
 
