@@ -7,7 +7,7 @@ paradigm: 'functional core, imperative shell (pure domain, thin service/API shel
 scope: 'The whole app for the core (milestones 1–2: FR-1–FR-40, FR-42, FR-50, FR-51) and the hooks stage 2 builds on'
 status: final
 created: '2026-11-16'
-updated: '2026-11-19'
+updated: '2026-11-25'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, FR-38, FR-39, FR-40, FR-42, FR-50, FR-51, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12]
 sources:
   - .docs/planning-artifacts/prds/prd-Project-2026-11-01/prd.md
@@ -99,7 +99,7 @@ flowchart LR
     - `transactions` reduced to the fields the analysis needs.
 
     The import is frozen after insert (FR-36). Plan views never load `transactions`. Uploaded file bytes are never stored.
-  - **Creation.** `app.plans.create(import, settings)` is the only creation path for both New Plan from files (FR-1) and New Plan from an existing import (FR-2). It always computes `analysis` from the stored import with the current `analysis.toml`, and never copies another plan's `analysis` or `state`. After creation, everything derived from settings (thresholds in reasons, the period, class limits) reads `plan.analysis`.
+  - **Creation.** `app/plans` has the only two creation paths: `create` for New Plan from files (FR-1) and `create_from_import` for New Plan from an existing import (FR-2). Both build the plan through the same helpers, always compute `analysis` from the import with the current `analysis.toml`, and never copy another plan's `analysis` or `state`. `create_from_import` computes the analysis from a plain read of the frozen import and takes the import row lock only for the insert, which re-checks that the import still exists. After creation, everything derived from settings (thresholds in reasons, the period, class limits) reads `plan.analysis`.
   - **Schema evolution.** `state`, `analysis` and `data` each carry `schema_version`. `domain/state_migrations.py` holds one append-only chain of pure upcasters per document. A change to a stored shape adds the next upcaster and a fixture `tests/domain/fixtures/<doc>_v<n>.json` in the same change. The store upcasts on read. A GET never saves (FR-9); the next command writes the current version. Alembic never rewrites JSON contents. Milestone 1 already declares every field above, with defaults.
   - **Deleting.** Delete and the FR-2 create lock the import row. The import is deleted in the same transaction as the last plan that uses it (FR-12).
 
@@ -108,11 +108,11 @@ flowchart LR
 - **Binds:** FR-29, FR-31, FR-33, FR-34, FR-35, FR-37, FR-38, FR-51, Move number
 - **Prevents:** a stored planning copy that disagrees with the moves; undo that names one move and reverts another; a run-time state that two stories rebuild differently.
 - **Rule:**
-  - **Steps.** A step is one move as it was made: its move number (from `next_move_number`, never reused), part, from-location, to-location, rule, round, recommendation id (or none) and `swap_id` (or none).
+  - **Steps.** A step is one move as it was made: its move number (from `next_move_number`, never reused), part, from-location, to-location, rule, round, recommendation id (or none), `swap_id` (or none) and `swap_size` (the swap's step count on every step of a drag swap; none otherwise and on steps stored before Story 12.4).
   - **Replay.** The planning copy, the effective moves (FR-34 combination and removal) and the current locations always come from `domain.planning.replay(import, steps)`, which implements FR-34 from its first story. None of them are stored. A combined move shows the number of its first step.
   - **Round invariant.** Every step made after run *k* and before the next run or reset has round *k*, and no step with round *k* comes before run *k*. `domain.apply` asserts this.
   - **Run baseline.** `run_baseline(import, steps, k) = replay(import, steps with round < k)` is the planning copy when run *k* was made. It is valid while run *k* has an open recommendation, because any undo outdates them all (AD-7). FR-31's "empty when the run was made" means empty in `run_baseline`.
-  - **Undo and reset.** Undo deletes the last step. Its command carries `expected_move_number`; if the last step has a different number, the command is rejected with `command_rejected`. The plan summary's `undo_preview` is built from the last step: `{move_number, part, from, to, effect: reverts_move(n) | splits_combined_move(n) | restores_removed_move(n)}`. Every Undo surface renders it and nothing else. Reset deletes all steps and runs, sets `next_move_number` to 1 and keeps the marks. Marks and runs are not steps, so undo never reverses them.
+  - **Undo and reset.** Undo deletes the last step. Its command carries `expected_move_number`; if the last step has a different number, the command is rejected with `command_rejected`. The plan summary's `undo_preview` is built from the last step: `{move_number, part, from_location, to_location, effect: {kind: reverts_move | splits_combined_move | restores_removed_move, move_number}}`. Every Undo surface renders it and nothing else. Reset deletes all steps and runs, sets `next_move_number` to 1 and keeps the marks. Marks and runs are not steps, so undo never reverses them.
 
 ### AD-6: Every change is one idempotent, serialized command
 
@@ -127,9 +127,9 @@ flowchart LR
 
     Commands refer to marks by value and to recommendations by `id`, never by index, number or part.
   - **Result.** The response is `{version, events[]}`. `events` is a closed union built by the domain: `move_made`, `moves_combined`, `move_removed`, `swap_made`, `step_undone`, `recommendations_outdated{count, cause}`, `run_done{round, recommendations, no_space}`, `plan_reset{moves_removed}`, `mark_set`, `mark_removed`, `keep_set`, `keep_removed`, `apply_all_done{applied[], skipped[{number, cause}]}`. A repeated `command_id` returns the stored result. A no-op (setting a mark that already exists, removing one that doesn't) returns 200 with no events and does not bump `version` or `last_edited_*`.
-  - **Service.** `swp.app` reads the plan, runs `domain.apply(state, command, ctx)` and then `domain.recommendations.revalidate`, and saves with `UPDATE … SET state=…, version=version+1 … WHERE id=:id AND version=:read_version`. When 0 rows change, it re-reads under the lock, up to 3 times: a concurrent duplicate of the same `command_id` returns its stored result, a version moved past `base_version` is refused with `plan_changed` (below), and only a save that failed without a new version is applied again. SQLite transactions start with `BEGIN IMMEDIATE`; Postgres may also use `SELECT … FOR UPDATE`. `base_version` is recorded and checked (FR-41, Story 15.1): after the stored result of a repeated `command_id` is looked up and before the command is applied, a `base_version` below the `version` read under the write lock is refused with `plan_changed`, and nothing is saved. A lost race to another save re-reads the version and is refused the same way. The client then reloads, or resends the same command with the new `base_version` so it applies on top of the current state.
+  - **Service.** `swp.app` reads the plan, runs `domain.apply(state, command, ctx)` and then `domain.recommendations.revalidate`, and saves with `UPDATE … SET state=…, version=version+1 … WHERE id=:id AND version=:read_version`. When 0 rows change, it re-reads under the lock, up to 3 times: a concurrent duplicate of the same `command_id` returns its stored result, a version moved past `base_version` is refused with `plan_changed` (below), and only a save that failed without a new version is applied again. SQLite transactions start with `BEGIN IMMEDIATE`; Postgres may also use `SELECT … FOR UPDATE`. Every Postgres transaction opened by `store.db.write_transaction` (commands, New Plan from an existing import, Delete, the category and login-throttle writes), not only Delete, sets `SET LOCAL lock_timeout = '3s'`, so a writer that waits longer for a lock fails with 55P03 instead of waiting; commands, New Plan from an import, Delete and the category writes answer that with `unavailable` (503, AD-11). `base_version` is recorded and checked (FR-41, Story 15.1): after the stored result of a repeated `command_id` is looked up and before the command is applied, a `base_version` below the `version` read under the write lock is refused with `plan_changed`, and nothing is saved. A lost race to another save re-reads the version and is refused the same way. The client then reloads, or resends the same command with the new `base_version` so it applies on top of the current state.
   - **Apply all.** It folds over the latest run's recommendations in `number` order. Each one is applied if it is open, its part is not kept in place, and it passes `revalidate` on the intermediate state, with `revalidate` run again after each apply. The whole fold is one transaction and one version bump.
-  - **Other writes.** The only other writes are New Plan (`POST /api/plans`, multipart, not idempotent: the client disables submit while it is in flight and never retries it) and Delete (`DELETE /api/plans/{id}`). GET requests never write (FR-9).
+  - **Other writes.** The only other writes are New Plan (`POST /api/plans`, multipart, not idempotent: the client disables submit while it is in flight and never retries it) and Delete (`DELETE /api/plans/{id}`). The global category lists, which are not plan state, are written through their own JSON endpoints (`/api/keyword-rules…`, `PUT /api/aisle-categories/{aisle}`, Epic 13). `PUT /api/keyword-rules/order` carries `base_ids`, the order the client reordered from; if the stored order differs it is refused with `command_rejected` (409) and nothing is written. Category and keyword text is stored through one `normalize_text` (drop Cf characters, NFC, collapse whitespace) and compared by `category_key` (casefold); aisle names are only trimmed. GET requests never write (FR-9).
 
 ### AD-7: Recommendation identity, status and outdated rules
 
@@ -144,9 +144,9 @@ flowchart LR
     3. `marks`: a mark condition of the rule fails. Rule 1: the suggested location is best and the from-location is not. Rule 2: the from-location is best and the suggested location is not. Rule 3: the from-location is not best, and for a slow-moving or dead-stock part the suggested location is not best.
     4. `partner_aisle` (rule 3): the partner's current aisle is not the suggested location's aisle.
 
-    Nothing else outdates a recommendation. Undo sets `outdated(undo)` on every open recommendation and on the recommendation the undone step referenced.
+    Nothing else outdates a recommendation. The `undo` command itself (not `revalidate`, which never produces `undo`) stores `outdated(undo)` on every open recommendation of the latest run that no step references, kept parts included, and on the recommendation the undone step referenced.
   - **Runs.** A run deletes every earlier recommendation and "no space" entry that no step references, and keeps the earlier runs' metadata. Only the latest run's recommendations appear in the recommendation tabs. Open recommendations whose part is kept in place show under Kept in place, not under Open or No space, and cannot be applied.
-  - `domain.recommendations.other_locations(state, rec_id)` is the only implementation of FR-31's allowed set. The "Other location" list and `apply_other_location` both use it.
+  - `domain.recommendations.other_locations(data, analysis, state, recommendation_id, replayed=None)` is the only implementation of FR-31's allowed set. It returns `[]` when the recommendation cannot be applied. The "Other location" list and `apply_other_location` both use it.
 
 ### AD-8: Import is read in the shell, validated in the domain, saved whole
 
@@ -179,7 +179,7 @@ flowchart LR
     - Local: `DATABASE_URL` defaults to `<backend>/var/swp.db`, resolved from `config.py`'s location, with `var/` created if missing.
     - Demo: Supabase Postgres through the transaction pooler (port 6543, `NullPool`, psycopg `prepare_threshold=None`). A `postgresql://` URL is rewritten to `postgresql+psycopg://`.
     - Migrations use `MIGRATION_DATABASE_URL` (the session pooler, 5432) when it is set.
-  - **Migrate and seed.** `swp.app.bootstrap(upgrade, seed)` is the only path that does either. The CLI `swp db upgrade` calls it. The FastAPI lifespan calls it only when `APP_ENV=local`. Migrations are expand-only. The seed writes the `demo` account (FR-50) and then the starter categories from `backend/settings/starter_categories.toml` (FR-47), loaded only when both `keyword_rules` and `aisle_categories` are empty, so it never overwrites the planner's lists.
+  - **Migrate and seed.** `swp.app.bootstrap(upgrade, seed)` is the only path that does either. The CLI `swp db upgrade` calls it. The FastAPI lifespan calls it only when `APP_ENV=local`. Migrations are expand-only. The seed writes the `demo` account (FR-50) and then the starter categories from `backend/settings/starter_categories.toml` (FR-47), loaded only when both `keyword_rules` and `aisle_categories` are empty, so it never overwrites the planner's lists. There is no "seeded" marker: when the planner empties both tables, the next bootstrap loads the starter list again.
   - **Tests.** Persistence tests run on SQLite. CI also runs `tests/app` against Postgres 17.
 
 ### AD-10: Identity, sessions and feature flags [ADOPTED]
@@ -260,7 +260,7 @@ flowchart LR
 - **Binds:** FR-14, FR-42, FR-51, EXPERIENCE.md Warehouse wall
 - **Prevents:** the frontend parsing location codes; the wall disagreeing with the Locations data.
 - **Rule:**
-  - **Layout.** `domain/layout.py` builds each aisle's logical cells (run, row, column, gap), including the two-run section split and the end cap's Walk Path. It takes the layout from the Section and Position columns when the Locations file has them; else from the code pattern `<aisle>-<section>-<level>-<position>`; else as one run per level in Walk Path order. Virtual locations are never on the wall.
+  - **Layout.** `domain/layout.py` builds each aisle's logical cells (run, row, column, gap), including the two-run section split and the end cap's Walk Path. It takes the layout from the Section and Position columns when the Locations file has them; else from the code pattern `<aisle>-<section>-<level>-<position>`; else as one run per level in Walk Path order. A Section/Position or code-pattern grid that would hold more than twice as many cells as the aisle has locations (`MAX_GRID_PER_LOCATION`) counts as unusable and falls to the next source. Virtual locations are never on the wall.
   - **Location references.** Every view refers to a location as `LocationRef {code, aisle, level, section?, position?, is_best}`.
   - **Frontend.** Pixel sizes, crops (a window of N sections, or N positions in the fallback layout) and route lines between logical cells are the frontend's. Deriving cells is not.
 
@@ -270,7 +270,7 @@ flowchart LR
 - **Prevents:** a swap saved as half its moves; a different step order per caller.
 - **Rule:**
   - A drop sends one command: `move_parts`, `put_together` or `swap`.
-  - The backend expands it into Manual steps in the current round: first each chosen part from → to, then each back-part to → from. The steps of a swap share one `swap_id`.
+  - The backend expands it into Manual steps in the current round: first each chosen part from → to, then each back-part to → from. The steps of a swap share one `swap_id` and carry the swap's step count as `swap_size`.
   - Everything is one transaction with one version bump. Undo removes one step at a time.
   - A part chosen on both sides of a swap is rejected with `command_rejected`.
 
@@ -280,9 +280,9 @@ flowchart LR
 - **Prevents:** print order or swap marks computed in two places; a stale printout.
 - **Rule:** `domain/move_list.py` builds the lines, their order and the swap marks.
   - **Rounds.** The header's "rounds" counts the distinct rounds that have a move. Round numbers are printed as stored, gaps kept, and round 0 is labelled as before the first run.
-  - **Swap marks.** A swap group is marked only when it is intact: every step with that `swap_id` exists and is its own effective move. A cycle made with manual moves prints as ordinary Manual lines in Walk Path cycle order.
-  - **Print route.** The print route refetches its view on mount and before printing, renders only after the response arrives, and never reorders. The header and column heads sit in a repeating `<thead>`. "Page X of Y" is best effort. Black and white, A4 portrait.
-  - **Generated at.** `generated_at` is the server instant of the request, formatted by the frontend in the viewer's zone.
+  - **Swap marks.** A swap group is marked only when it is intact: every step with that `swap_id` is still logged (exactly its `swap_size`; at least two for an older step without it), each is its own effective move, all are in one round, and the moves go both ways between one pair of locations. A cycle made with manual moves, including a swap made with two keyboard Manual moves (no `swap_id`), prints as ordinary Manual lines in Walk Path cycle order.
+  - **Print route.** `/plans/{id}/print`; the flow-bar step key stays `move-list`, and `/plans/{id}/move-list` redirects to it. The route fetches its view on mount, renders only after the response arrives, and never reorders. Only the Print button refetches before printing; a browser menu print (Ctrl/⌘+P) prints the view last fetched. The header and column heads sit in a repeating `<thead>`. A round band is kept with at least two lines through CSS `break-after`/`break-inside: avoid`, which is best effort, as is "Page X of Y". Black and white, A4 portrait.
+  - **Generated at.** `generated_at` is the server instant of the request, formatted by the frontend in the viewer's zone as `YYYY-MM-DD HH:MM`. The minute is the finest unit and the plan `version` is not printed, so two printouts made within one minute have identical headers.
 
 ### AD-18: Limits on uploads, accounts and the public demo
 
@@ -329,13 +329,13 @@ flowchart LR
 | IDs and values | Plan, import, run and user IDs are UUIDs. Recommendation IDs are `<run_id>:<n>`. Part numbers and location codes are text, exactly as normalized at import. Quantities and Walk Path are `Dec`, sent as normalized decimal strings. |
 | Dates and times | Every instant is stored in UTC and sent as ISO 8601 with `Z`. Only the frontend formats instants, in the viewer's zone; the upload date shown is the local date of `uploaded_at`. `data_as_of`, `period_start` and `period_end` are plain `YYYY-MM-DD` dates. |
 | Errors | AD-11 shape. Domain functions raise `DomainError(code, message, details)`, which only `swp/api` turns into HTTP. |
-| Config | Settings in `swp/config.py` (pydantic-settings). The backend starts with zero env vars locally. Analysis settings are in `backend/settings/analysis.toml`, read only by `app.plans.create`. Secrets are never committed, and `.env.example` files hold no real values (NFR-6). |
+| Config | Settings in `swp/config.py` (pydantic-settings). The backend starts with zero env vars locally. Analysis settings are in `backend/settings/analysis.toml`, read only by plan creation in `app/plans` (`create` and `create_from_import`). Secrets are never committed, and `.env.example` files hold no real values (NFR-6). |
 | Logging | The stdlib `logging` to stdout: one line per request (method, path, status, ms), and the full traceback for `internal`. No external log service. |
 | Fonts and network | Fonts are self-hosted through `@fontsource` packages, never `next/font/google` or a CDN. The dev scripts set `NEXT_TELEMETRY_DISABLED=1`. The local app makes no runtime network calls (NFR-2). |
 | Git-ignored | `backend/var/` (with the SQLite `-wal`/`-shm`/`-journal` files), `data/private/*`, `.env*` except the examples, and the test and Playwright outputs (NFR-4). The scaffold story checks `.gitignore` against this list. |
-| Tests | Every test names its FR or NFR (SM-7), e.g. `test_fr26_partner_with_recommendation_waits`. Test locations: domain in `backend/tests/domain`; services and persistence in `backend/tests/app` (SQLite, plus Postgres in CI); HTTP in `backend/tests/api` (TestClient with httpx2); frontend in Vitest; end-to-end in Playwright `frontend/e2e`, with projects `chromium`, `firefox` and `msedge`, each with a move-list print check (NFR-9), on `data/sample/` (SM-2). One timing test, `tests/app/test_nfr8_timing.py`, covers import, run, and a command plus the plan views on `data/sample/`. |
+| Tests | Every test names its FR or NFR (SM-7), e.g. `test_fr26_partner_with_recommendation_waits`. A frontend test of a UX-only behaviour with no FR may carry only its UX-DR (`uxdr47_preview_texts`); SM-7 does not count those. Test locations: domain in `backend/tests/domain`; services and persistence in `backend/tests/app` (SQLite, plus Postgres in CI); HTTP in `backend/tests/api` (TestClient with httpx2); frontend in Vitest; end-to-end in Playwright `frontend/e2e`, with projects `chromium`, `firefox` and `msedge`, each with a move-list print check (NFR-9), on `data/sample/` (SM-2). One timing test, `tests/app/test_nfr8_timing.py`, covers import, run, and a command plus the plan views on `data/sample/`. |
 | Data | Only synthetic data in tests, fixtures and seeds (NFR-4). There are two seeds: the demo account and the starter categories (keyword rules and aisle categories drafted from `data/sample/`, loaded only when both category tables are empty). No plan is preloaded (FR-50). |
-| Accessibility | UX-owned (DESIGN.md, EXPERIENCE.md, NFR-10). The architecture guarantees that every drag command (AD-16) has a keyboard path through `manual_move`, one part at a time. |
+| Accessibility | UX-owned (DESIGN.md, EXPERIENCE.md, NFR-10). The architecture guarantees that every drag command (AD-16) has a keyboard path through `manual_move`, one part at a time. Those moves carry no `swap_id`, so a swap made from the keyboard prints as plain Manual lines without the swap mark (AD-17). |
 | UI copy | English (NFR-11). Wording follows EXPERIENCE.md. Ownership is set in AD-11. |
 
 ## Stack
@@ -400,7 +400,8 @@ frontend/
   app/                           # routes: front page (demo), login, signup, plans,
                                  #   plans/new, plans/[id]/[step], plans/[id]/print
   modules/<step>/                # parts, locations (wall), pick-groups, best-locations,
-                                 #   recommendations, before-after, move-list, plans, auth
+                                 #   recommendations, before-after, move-list, plans, auth,
+                                 #   launcher, categories, labels
   lib/api/schema.ts              # generated (AD-13)
   lib/commands/  lib/copy/  lib/view-state/
   e2e/                           # Playwright
@@ -470,7 +471,7 @@ The walking skeleton runs `GET /api/health` and one page locally. Deployment to 
 | Accounts, login, Demo version (FR-39, FR-40, FR-50) | `app/auth`, `modules/auth` | AD-10, AD-18, AD-19 |
 | Warehouse wall (FR-42) | `domain/layout`, `modules/locations` | AD-15, AD-3, AD-20 |
 | Drag to move or swap (FR-51) | `modules/locations`, `domain/drag` (handlers for `move_parts`, `put_together`, `swap`, dispatched by `domain.apply`) | AD-16, AD-5, AD-3 (preview) |
-| Stage 2: category check (FR-43–FR-47) | new `domain` modules plus global tables | Deferred |
+| Stage 2: category check (FR-43–FR-47) | `domain/categories`, `app/categories`, `store` (global `keyword_rules` and `aisle_categories` tables, starter seed), `api/routers/categories`, `modules/categories` | AD-9, AD-3, AD-14 |
 | Stage 2: location labels (FR-48) | `domain/labels`, `modules/labels` (QR drawn as inline SVG by the bundled `uqr`) | AD-3, AD-14 |
 
 ## Deferred

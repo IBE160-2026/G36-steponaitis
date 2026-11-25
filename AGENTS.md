@@ -34,5 +34,14 @@ Run every command from the repo root. Required: Node 24.x, Python 3.12, uv.
 
 - `swp.domain` imports only stdlib and pydantic; only `swp.store` imports SQLAlchemy/Alembic; `swp.api` never imports `swp.store` directly. When adding a dependency, add its top-level module to the `domain-pure` contract in `backend/.importlinter`.
 - Build features as isolated vertical slices; put shared code in common folders rather than duplicating it.
+- Launcher (flow map drawer) actions are data: add one by appending to `LAUNCHER_ACTIONS` in `frontend/lib/launcher/index.ts`; it gets only `LauncherContext` (plan id, `PlanSummary`, `send`, `navigate`, `notify`), so widen that type rather than editing the drawer.
+
+## Story workflow rules
+
+- A story with an acceptance criterion only a human can check (phone scan, eye check of print, someone else running the README) stays in `review` until the author confirms it in a session log; never set it to `done` before.
+- A spec with `followup_review_recommended: true` blocks the next story until that follow-up review has run or the author waives it.
+- Build sub-agents never start dev servers on ports 3000 or 8000 while an e2e gate is pending; the orchestrating session runs the gate.
+- Before building a story, read deferred findings addressed to it in earlier specs and the open points in `.logs/<user>/issues.md` that name it.
+- Run each epic's retrospective before the first story of the next epic.
 
 <!-- /bmad:context -->

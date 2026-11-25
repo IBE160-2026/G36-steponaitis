@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-24-2026 23:14
+last_updated: 11-25-2026 22:30
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -227,14 +227,14 @@ action_items:
     action: "Add a runbook step that acts on followup_review_recommended: true before
       the next story"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-11-make-each-story-build-read-earlier-specs"
     epic: 1
     action: "Make each story build read earlier specs deferred items and open issues.md
       items naming it, and close or re-defer them"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-2-retro-item-12-stop-the-locations-aisle-change-from-cle"
     epic: 2
@@ -495,7 +495,7 @@ action_items:
     action: "Update AGENTS.md for the three-browser local gate, e2e:reset-db and ruff
       format --check, and tick closed items in .logs/justas/issues.md (A6, P4)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-48-run-the-five-outstanding-follow-up-revie"
     epic: 5
@@ -560,7 +560,7 @@ action_items:
       lock timeout, Not done yet state, four-entry Keyboard box, launcher only on
       plan paths (A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-56-before-epic-7-decide-whether-launchercon"
     epic: 6
@@ -568,7 +568,7 @@ action_items:
       and Reset, and document LAUNCHER_ACTIONS as the extension point in AGENTS.md
       (A1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-57-confirm-the-seven-landed-retro-items-epi"
     epic: 6
@@ -639,7 +639,7 @@ action_items:
       counts, kept_parts band and tab order, tooltip pin to Epic 10, 7.5 HTTP test
       in tests/app (A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-66-decide-whether-to-enforce-base_version-o"
     epic: 7
@@ -686,7 +686,7 @@ action_items:
       view: same-minute printouts (seconds or version in header), menu print uses
       last fetch, band rule hard vs best effort, /print route for the move-list step"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-72-in-story-12-4-store-swap-size-or-members"
     epic: 8
@@ -849,7 +849,7 @@ action_items:
       arrow, sparse-grid fallback, marks in the wall view, Unmark preview, warehouse
       4 MB test, Manual move top part only, UX-DR-only test names (A4, A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-10-retro-item-92-run-the-10-3-10-6-follow-up-reviews-and"
     epic: 10
@@ -891,7 +891,7 @@ action_items:
       alias --colour-*, Selection recolours accent and selected-tint chrome; confirm
       the best-on-light jump (issues.md:191) (A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
   - id: "epic-11-retro-item-97-decide-whether-every-key-shows-all-six-c"
     epic: 11
@@ -916,7 +916,7 @@ action_items:
       (leave chosen parts out of the back list or give swapReason a reason); add a
       Vitest case and an e2e drop onto a target that also holds the dragged part (R1)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-12-retro-item-100-extend-test_nfr8_timing-py-to-time-wall"
     epic: 12
@@ -948,7 +948,7 @@ action_items:
       rule in AD-17/spine:111, m1-flow to sm2-flow at epics.md:1418, the Moved N parts
       toast, stale spec-12-1:186 note; decide keyboard swap marks (NFR-10) (A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-12-retro-item-104-before-epic-13-run-the-12-5-follow-up-re"
     epic: 12
@@ -972,7 +972,7 @@ action_items:
     action: "Add a stale-list precondition (409) to PUT /api/keyword-rules/order and
       make Edit send only changed fields (R2, R8)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-107-close-epic-13-test-gaps-unmocked-concurr"
     epic: 13
@@ -1028,7 +1028,7 @@ action_items:
       and domain/layout.py) into the domain kernel and the IMMUTABLE Cache-Control
       constant into a shared API module (D1, D2)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
   - id: "epic-14-retro-item-114-withdraw-the-mark-epics-14-15-dropped-pa"
     epic: 14
@@ -1043,26 +1043,26 @@ action_items:
       human-only AC stays in review until confirmed, and build sub-agents start no
       dev servers on 3000/8000 while an e2e gate is pending (V1, P2)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
   - id: "epic-15-retro-item-116-write-the-session-log-for-story-15-1-wit"
     epic: 15
     action: "Write the session log for Story 15.1 with sesjonslogg, with its residual
       risks as open points in issues.md (P1, R1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
   - id: "epic-15-retro-item-117-reconcile-the-lost-race-path-with-fr-41"
     epic: 15
     action: "Reconcile the lost-race path with FR-41: drop the re-apply retry in app/commands.py
       _run or reword AD-6 and the docstring (A2)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
   - id: "epic-15-retro-item-118-run-each-epic-retrospective-before-the-n"
     epic: 15
     action: "Run each epic retrospective before the next epic first story so before-the-next-story
       items can land (P2)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"

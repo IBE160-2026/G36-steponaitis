@@ -222,9 +222,9 @@ From `DESIGN.md` (visual tokens and components) and `EXPERIENCE.md` (behaviour, 
 **Shell and navigation**
 
 - UX-DR4 `[M1]`: App toolbar (64px louvre-pattern graphite, sticky except below ~500px viewport height): product mark (medium bin in fixed brand yellow), name, plan plate, flow bar, launcher button; from M2 the avatar (two initials on a 34px ink disc) opening the user menu ("Logged in as", username, Log out).
-- UX-DR5 `[M1]`: Plan plate (≥214×42, 6px ink bar): plan name, "Data as of YYYY-MM-DD · round N" (round 0 before the first run), chevron; upload date in its tooltip; click/`Enter` opens the plan menu (M1: only New Plan; M2: recent plans, All saved plans, New Plan from this import).
+- UX-DR5 `[M1]`: Plan plate (≥214×42, 6px ink bar): plan name, "Data as of YYYY-MM-DD · round N" (round 0 before the first run), chevron; upload date in its tooltip; click/`Enter` opens the plan menu (M1: only New Plan; M2: up to five other recent plans, All saved plans, New Plan from this import; the plain New Plan item is gone from M2, Story 6.3).
 - UX-DR6 `[M1]`: Flow bar with eight steps (Overview, Parts, Locations, Pick groups, Best locations, Recommendations, Before/after, Move list) as navigation, not a wizard; current step `aria-current="step"` as a white pill; check rules: steps 1–4 done once the plan exists, Best locations when ≥1 mark exists, Recommendations when the latest run has no open recommendation, Before/after and Move list never; the check is also visually hidden text ("Overview, step 1, done"). Below 1024px it collapses to "Step 6 of 8 · Recommendations ▾".
-- UX-DR7 `[M2]`: Launcher (flow map drawer) on the grid button and `Ctrl+K`/`⌘K`: modal, page `inert`, focus in a search field; eight step columns (code OVR/PRT/LOC/GRP/BST/REC/B/A/MOV, state Done / You are here / Output, live counts, step actions); a band with the open plan, other saved plans, SAV/NEW/SET, inert stage-2 plates (CAT, LBL, "Coming in stage 2", `aria-disabled`) and the Keyboard box. Typing replaces columns with one result list grouped Steps / Actions / Saved plans; `Enter` opens; no-match copy; `Esc` returns focus to the grid button. `Tab` between columns, `↑/↓` within.
+- UX-DR7 `[M2]`: Launcher (flow map drawer) on the grid button and `Ctrl+K`/`⌘K`: modal, page `inert`, focus in a search field; eight step columns (code OVR/PRT/LOC/GRP/BST/REC/B/A/MOV, state Done / You are here / Output / Not done yet, live counts, step actions); a band with the open plan, up to five other saved plans, SAV/NEW/SET, stage-2 plates (CAT, LBL: inert with "Coming in stage 2" and `aria-disabled` until Epics 13 and 14 made them links to Categories and Location labels) and the Keyboard box (Ctrl K, Ctrl /, Alt A, Esc, with "⌘ and ⌥ on a Mac."). The grid button and the launcher show only on plan paths. Typing replaces columns with one result list grouped Steps / Actions / Saved plans; `Enter` opens; no-match copy; `Esc` returns focus to the grid button. `Tab` between columns, `↑/↓` within.
 - UX-DR8 `[M1]`: Keyboard shortcuts with modifiers only (no single-character shortcuts): `Ctrl/⌘+K` launcher (M2), `Ctrl/⌘+/` focuses the page search, `Alt/⌥+A` apply, `Alt/⌥+O` other location (M2), `Alt/⌥+K` keep in place (M2), `Esc` closes the topmost layer (tooltip → popover → dialog → panel → launcher). `Alt` shortcuts never fire in text fields.
 - UX-DR9 `[M1]`: URL-driven view state (`/plans/{id}/{step}?aisle=&loc=&rec=&move=&part=`) through one `lib/view-state` helper; Back button behaves the same on every step; last view per plan restored from localStorage for bare URLs.
 
@@ -238,7 +238,7 @@ From `DESIGN.md` (visual tokens and components) and `EXPERIENCE.md` (behaviour, 
 - UX-DR15 `[M1]`: Global notice strip under the toolbar (save failed, storage unavailable) with warning triangle and body-strong text.
 - UX-DR16 `[M1]`: Dialog and confirm popover (Reset…, Delete…, Apply all): Cancel first and default-focused, modal stack at most one deep, focus returns to the opener.
 - UX-DR17 `[M1]`: Listbox and menu pattern (Other location ▾, plan plate menu, row menu, manual-move autocomplete): rows 28px, highlighted row selected-tint plus ink left bar, codes in Barlow.
-- UX-DR18 `[M1]`: Data table pattern (saved plans, pick groups, before/after, Open as list, Moves touching aisle): column heads in ink-secondary, hairline dividers, numbers right-aligned and tabular; each table a single tab stop with `↑/↓` between rows, `Enter` to open, `Tab` into the row's actions. Before/after cells read "Before → After" with the change in body-strong.
+- UX-DR18 `[M1]`: Data table pattern (saved plans, pick groups, before/after, Open as list, Moves touching aisle): column heads in ink-secondary, hairline dividers, numbers right-aligned and tabular; each table a single tab stop with `↑/↓` between rows, `Enter` to open, `Tab` into the row's actions. Before/after cells read "Before → After" with the after value in body-strong when it differs.
 
 **Import, plans, parts**
 
@@ -249,7 +249,7 @@ From `DESIGN.md` (visual tokens and components) and `EXPERIENCE.md` (behaviour, 
 - UX-DR23 `[M1]`: Parts ranked roster: rank, miniature bin swatch, part number + description, why-line (class, picks, most relevant fact), right-hand columns for total stock, other locations, pick-group count, kept in place; ties in part-number order; class filter glyph chips; user-picked sorts follow AD-14.
 - UX-DR24 `[M1]`: Part panel (400px side panel): number, description, class with glyph, picks and threshold, total stock, current and other locations (as chips), pick groups (partner, shared jobs, aisle), keep-in-place toggle (M2), Manual move…, Undo last move; focus moves to its heading on open, `Esc` returns focus to the opener. A part with no stock shows "No current location (no stock above zero)" and Manual move… disabled with that reason.
 - UX-DR25 `[M1]`: Search field (Parts, Locations and wall headers; not the launcher): one field over part numbers, descriptions and location codes, results listed separately for parts and locations; a part result opens the part panel (M2: and selects its location on the wall); a location result opens the Locations table filtered to its aisle with the row focused (M2: opens the wall at that bin); no-match copy.
-- UX-DR26 `[M1]`: Manual move dialog: from-location preselected when the part has one, to-location autocomplete over the Locations file; inline refusals for the from-location and virtual locations ("This is the from-location. Choose another." / "FLSKRS is a virtual location, not a shelf."); "to an occupied location: stock is added together"; driven by the server preview (AD-3). From M2: the move-back case says "This undoes move 4: … and the move is removed." with confirm **Remove move**, and an FR-34 merge toast "Combined into one move: … (Manual)."
+- UX-DR26 `[M1]`: Manual move dialog: from-location preselected when the part has one, to-location autocomplete over the Locations file; inline refusals for the from-location and virtual locations ("This is the from-location. Choose another." / "FLSKRS is a virtual location, not a shelf."); "to an occupied location: stock is added together"; driven by the server preview (AD-3). Shipped in M1 with Story 4.3 (not only from M2): the move-back case says "This undoes move 4: … and the move is removed." with confirm **Remove move**, and an FR-34 merge toast "Combined into one move: … (Manual)."
 - UX-DR27 `[M1]`: Locations table (M1 page, later Open as list): FR-14 columns, aisle / occupied-empty / best filters, per-aisle and whole-warehouse occupancy line.
 - UX-DR28 `[M1]`: Best-location marking on the table (M1): Whole aisle | Level | Single location mode, Level picker with "in this aisle | in all aisles", Mark/Unmark per row in Single mode, list of marks with remove buttons (≥24px, "Remove mark Level 1 in aisle A"), live "best · empty" counts; mark change toast "Best-location marks changed · N recommendations are now outdated" with View.
 - UX-DR29 `[M1]`: Pick groups data table: part A, part B, shared jobs, each part's aisle, "Same aisle" (ink with link glyph) / "Different aisles"; server order; empty-state copy.
@@ -263,7 +263,7 @@ From `DESIGN.md` (visual tokens and components) and `EXPERIENCE.md` (behaviour, 
 - UX-DR34 `[M1]`: Recommendation detail panel: eyebrow "SELECTED · #1 · RULE 1", part, reason as plain sentences with numbers in bold (copy from `lib/copy`), move line from → to as codes with BEST (M1); M2 adds the From/To wall crops (`role="img"`, text name), "Show on the Locations wall" and "Moves in the planning copy" (last 3). Action bar: Apply (primary), Other location ▾ (M2), Keep in place (M2), Manual move…; outdated → Apply disabled with reason.
 - UX-DR35 `[M1]`: Empty and edge states: no best locations ("Rule 1 and rule 2 need best locations. Rule 3 runs without them.", run still enabled); no run yet (Round 0 copy); run failed (all-or-nothing copy, button refocused); no moves found; empty Kept/Outdated/No space tabs.
 - UX-DR36 `[M2]`: Other location ▾ listbox: the FR-31 allowed set from the server in location-code order with aisle, level, best; arrows only move the highlight, `Enter`/click applies; empty copy "No other location fits rule 1 right now."; no free text.
-- UX-DR37 `[M2]`: Keep in place link (detail action bar, part panel, roster row): sets the mark at once, row moves to Kept in place, toast "<part> is kept in place. Remove the mark from the part or the Kept in place tab."; reads "Remove keep in place" when set; pin glyph + "kept in place" in roster and tooltip; count on the overview.
+- UX-DR37 `[M2]`: Keep in place link (detail action bar, part panel, roster row): sets the mark at once, row moves to Kept in place, toast "<part> is kept in place. Remove the mark from the part or the Kept in place tab."; reads "Remove keep in place" when set; pin glyph + "kept in place" in roster and the wall tooltip (Epic 10); count on the overview.
 - UX-DR38 `[M2]`: Undo last move whose tooltip, launcher action and toast all render the server `undo_preview` wording ("Undo move 3: …", "Undo splits move 3: …", "Undo restores move 4: …"); undo toast "Undid move 3. Unapplied recommendations of round 1 are now outdated. Run recommendations to continue."; disabled "No moves to undo". Reset… confirm dialog with exact copy, **Reset plan** / **Cancel** (default), and reset toast.
 - UX-DR39 `[M1]`: All outdated-cause copy in `lib/copy`: "A-11-02-02 was filled by a manual move." / "4410281 has been moved." / "The best-location marks changed." / "Partner 2007060 is no longer in aisle D." / "4410281 was moved back, so move 16 was removed." / "Outdated after undo."
 
@@ -272,19 +272,19 @@ From `DESIGN.md` (visual tokens and components) and `EXPERIENCE.md` (behaviour, 
 - UX-DR40 `[M2]`: Bin-wall rendering from the server layout (AD-15): graphite wall panel (louvre pattern, beams, uprights), levels top-down (L1 at bottom), two runs (first ⌈n/2⌉ sections on top), end cap "End of aisle A · Walk Path N →"; bin (class colour, lip shading, white label window with glyph; split label for two parts; three-plus shows the top part's glyph and a "+" tick; FST/MED/SLW/DED only at ≥56px); open slot (dark recess with rim, the occupancy cue); hatched no-location cell; bins ≥27px wide, scaling up to ~35px at 1440; wall panel scrolls in 2D inside itself.
 - UX-DR41 `[M2]`: Best-location drawing on the wall by mark kind: level/whole-aisle marks → 4px green rail + BEST tag on level labels (aisle marks also tag the aisle tab and card); single marks → 2px green frame + "BEST n" on the level label; `#3DAE6B` on graphite, `#267A4B` on paper.
 - UX-DR42 `[M2]`: Wall as `role="grid"` with exactly one tab stop: arrow keys across positions and levels (crossing runs), Page Up/Down between runs, Home/End and Ctrl+Home/End; no-location cells non-focusable and skipped; each cell's accessible name (code, level, best, occupied/empty with class, move state) and part lines as `aria-describedby`; focused cell scrolled into view clear of toolbar, notices and toasts.
-- UX-DR43 `[M2]`: Location tooltip (WCAG 1.4.13): on focus or 150 ms hover; dismissible (`Esc`), hoverable, persistent; content = code, "Level N", BEST tag, Occupied · N parts / Empty, mark source(s), Walk Path, one line per part (swatch, number, description, class · picks · stock), partner strip; visual tooltip `aria-hidden`. `Enter`/click pins it as a non-modal dialog with actions (open part panel, Manual move…, Show recommendation #n).
+- UX-DR43 `[M2]`: Location tooltip (WCAG 1.4.13): on focus or 150 ms hover; dismissible (`Esc`), hoverable, persistent; content = code, "Level N", BEST tag, Occupied · N parts / Empty, mark source(s), Walk Path, one line per part (swatch, number, description, class · picks · stock), partner strip; visual tooltip `aria-hidden`. `Enter`/click pins it as a non-modal dialog with actions (open part panel, Manual move… for the location's top part (most picks), Show recommendation #n).
 - UX-DR44 `[M2]`: Moves on the wall: lifted bin (33×34, the only content shadow) with numbered marker for every latest-run recommendation whose from-location is on the wall; dashed targets with plus glyph; incoming-from-other-aisle target tooltip; markers for applied (ink disc + check), manual ("M"), outdated (grey dashed, no lift); only the selected move draws the cased violet arrow and hover note; selection linked both ways between list row, marker, lifted bin and drawer row; bin lift ≤200 ms, instant under reduced motion.
 - UX-DR45 `[M2]`: Locations view chrome: One aisle | Whole warehouse switch (per plan); aisle tabs A–I (letter plate, %, moves) as a tab list plus the whole-warehouse figure; open-aisle header line ("86.8% occupied · 198 of 228 locations · 30 empty · 117 best locations (3 empty) · Walk Path 0–2,270"), Open as list, Edit best-location marks; Whole warehouse view = four figures and nine aisle cards (3×3) with decorative mini-walls and the selected move as one route; selecting a card opens that aisle; opens on the last aisle or A.
 - UX-DR46 `[M2]`: "Moves touching aisle A · Round 1 · N moves · N to decide" drawer under the Key: collapsed shows the selected move with Apply · Other location · Keep in place; "Show all N" opens the full table (Rule, Part, Class · picks, From, To, Status, Action) and "Open round 1".
-- UX-DR47 `[M2]`: Best-location marking on the wall: Whole aisle | Level (with "in this aisle | in all aisles") | Single location modes; hover/focus previews ("Mark level 1 in aisle A"); level labels are buttons and the rail hit area is the whole level row (≥24px); marks list with remove buttons; live counts; same outdated toast as UX-DR28.
+- UX-DR47 `[M2]`: Best-location marking on the wall: Whole aisle | Level (with "in this aisle | in all aisles") | Single location modes; hover/focus previews ("Mark level 1 in aisle A", or "Unmark …" when that exact mark exists); level labels are buttons and the rail hit area is the whole level row (≥24px); marks list with remove buttons; live counts; same outdated toast as UX-DR28.
 - UX-DR48 `[M2]`: Key under every wall, always visible, in fixed order with miniature graphics in current colours and glossary names (never colour words); six colour entries are buttons ("Fast-moving, change colour", `aria-haspopup="dialog"`, hover tint + palette icon); Empty and 2 parts are plain text.
 - UX-DR49 `[M2]`: Colour popover (non-modal dialog, 264px): title with glyph, 8 preset shades as a radiogroup (from DESIGN.md `colour-presets`, default marked), Default chip with hex, hex field (`#RRGGBB` validation) plus native picker button, live preview while arrowing, contrast warnings per pair (classes vs wall and open slot; best vs wall, slot and ink text 4.5:1; selection vs casing and white) and "too alike" warning at CIELAB ΔE76 < 20, announced via `role="status"`; Reset this colour; Done / click outside keeps, `Esc` restores; focus returns to the entry; flips to stay in viewport at 200% zoom. Best's paper shade derived by darkening; selected tint derived from selection. Stored in localStorage `swp:colours`, applied before first paint; storage-blocked note "Colours can't be kept in this browser; changes last until you reload or close this page."
-- UX-DR50 `[M2]`: Drag on the wall (One aisle only, mouse-only, @dnd-kit): drag starts after >4px; dragged bin drawn lifted, vacated slot dashed; split label → the half under the pointer, three-plus → most picks; target feedback ("Move here" plus glyph / "Swap or put together" ⇄), no target on virtual, hatched or own slot; `Esc` or drop outside cancels; stays inside the open aisle. Drop on empty with one part → immediate move + toast "Moved 4410281: G-14-04-02 → G-14-01-04 (Manual, round 1)." Otherwise the drop dialog popover: "Parts to move from …" checkboxes (when several), "Parts to move back to …" (Swap only, when several, all checked), Move / Swap / Put together / Cancel with disabled reasons, keep-in-place warning "4410297 is kept in place. Swap anyway?"; keyboard-operable; swap toast "Swapped A ↔ B · 2 manual moves, round 1."; previews and targets come from the server preview.
+- UX-DR50 `[M2]`: Drag on the wall (One aisle only, mouse-only, @dnd-kit): drag starts after >4px; dragged bin drawn lifted, vacated slot dashed; split label → the half under the pointer, three-plus → most picks; target feedback ("Move here" plus glyph / "Swap or put together" ⇄), no target on virtual, hatched or own slot; `Esc` or drop outside cancels; stays inside the open aisle. Drop on empty with one part → immediate move + toast "Moved 4410281: G-14-04-02 → G-14-01-04 (Manual, round 1)." (several parts moved: "Moved 2 parts: G-14-04-02 → G-14-01-04 (Manual, round 1)."). Otherwise the drop dialog popover: "Parts to move from …" checkboxes (when several), "Parts to move back to …" (Swap only, when several, all checked), Move / Swap / Put together / Cancel with disabled reasons, keep-in-place warning "4410297 is kept in place. Swap anyway?"; keyboard-operable; swap toast "Swapped A ↔ B · 2 manual moves, round 1."; previews and targets come from the server preview.
 
 **Before/after, move list, auth, demo**
 
 - UX-DR51 `[M1]`: Before/after page: per-aisle and total rows, moves in/out lists, fast-moving in best locations and pick groups in the same aisle as "Before → After"; "No moves yet: before and after are the same." note.
-- UX-DR52 `[M2]`: Move list print view: screen preview with Print (primary) and "Back to Recommendations", app shell hidden in `@media print`; A4 portrait, pure black on white, no reliance on printed backgrounds; repeating header "Move list · <plan>", "Data as of … · uploaded … · N rounds", "Generated YYYY-MM-DD HH:MM · Smart Warehouse Planner"; boxed ROUND N bands with "one walk · from-location before to-location" (ROUND 0 "before the first run"), never orphaned (≥2 lines kept with it); line = tick box · Round · Part · Description · From · To · Rule · Note (blank); swap lines "Manual · Swap 1/2" with "A ↔ B" under it and the swap footnote; order footnote; codes Barlow bold 12pt, text ~10pt; "There are no moves to print." with Print disabled and a link to Recommendations; "Page X of Y" best effort.
+- UX-DR52 `[M2]`: Move list print view at `/plans/{id}/print` (the flow-bar step key stays `move-list`; `/plans/{id}/move-list` redirects there): screen preview with Print (primary) and "Back to Recommendations", app shell hidden in `@media print`; only the Print button refetches before printing, so a browser menu print (Ctrl/⌘+P) prints the view last fetched; A4 portrait, pure black on white, no reliance on printed backgrounds; repeating header "Move list · <plan>", "Data as of … · uploaded … · N rounds", "Generated YYYY-MM-DD HH:MM · Smart Warehouse Planner" (to the minute, so two printouts made within the same minute have the same header; the plan `version` is not printed); boxed ROUND N bands with "one walk · from-location before to-location" (ROUND 0 "before the first run"), kept with at least two lines through `break-after: avoid` (best effort: the browser decides, unchecked in Firefox); line = tick box · Round · Part · Description · From · To · Rule · Note (blank); swap lines "Manual · Swap 1/2" with "A ↔ B" under it and the swap footnote; order footnote; codes Barlow bold 12pt, text ~10pt; "There are no moves to print." with Print disabled and a link to Recommendations; "Page X of Y" best effort.
 - UX-DR53 `[M2]`: Log in page (380px card): username, password with Show, submit, link to Create account, Demo version under an "or" rule (public deployment); one alert for wrong details (keeps username, clears and focuses password); lockout copy. Create account: username with hint "Letters and numbers. Must not be taken.", password with Show, Repeat password; errors checked on submit with focus to the first ("That username is taken. Try another." / "The passwords don’t match."); demo account-limit copy.
 - UX-DR54 `[M2]`: Demo front page (public deployment only): graphite header (logo, name, "How it works", Log in), hero headline "Every move comes with a reason." with Log in (primary), Create account (secondary), Demo version (tertiary, play glyph), a large-scale bin wall with one lifted bin, arrow and reason card; "One part, start to finish" with four numbered panels following one demo part from export row to printed line; no synthetic-data notice, no README links, no footer text, no claims.
 - UX-DR55 `[M1]`: Save and error states: plan-changing controls `aria-disabled` "Saving the last change…" while a command is unconfirmed; "Saved automatically" in the plate tooltip; retry notice then failure notice (AD-12); "Opening <plan>…" as text while loading (no spinner); "This plan was deleted." toast + redirect; (M2) session expired → Log in then resend; (M2) demo limits copy.
@@ -414,7 +414,7 @@ The planner applies a recommendation with another allowed location, declines one
 **Slice:** commands `apply_other_location`, `set_keep`/`remove_keep`, `undo`, `reset` in `domain/recommendations` and `domain/planning`; extends `modules/recommendations` · **UX-DRs:** 36–38
 
 ### Epic 8: Print the move list for colleagues `[M2]`
-The planner prints a black-and-white move list in round order, with moves out of a location before moves into it, swap lines marked, and a header that tells printouts apart. Colleagues can follow it without the app.
+The planner prints a black-and-white move list in round order, with moves out of a location before moves into it, swap lines marked, and a header with the plan, its data and the generated time. Colleagues can follow it without the app.
 **FRs covered:** FR-38
 **Slice:** `domain/move_list`, `app/plans/[id]/print`, `modules/move-list` · **UX-DRs:** 52
 
@@ -431,7 +431,7 @@ The planner sees each aisle as a shelf wall, and the whole warehouse at overview
 ### Epic 11: Change the Key colours `[M2]`
 The planner changes any of the six Key colours from the wall's Key, gets contrast and likeness warnings, and keeps the choice in this browser.
 **FRs covered:** FR-42 (Key colours)
-**Slice:** frontend-only `modules/key-colours` plus `lib/colours` (contrast and ΔE checks, storage) · **UX-DRs:** 48, 49
+**Slice:** frontend-only: `lib/colours` (contrast and ΔE checks, storage) plus the Key buttons and colour popover in `components/common/wall` (four modules draw the Key, and modules may not import each other) · **UX-DRs:** 48, 49
 
 ### Epic 12: Drag parts to move or swap them on the wall `[M2]`
 The planner drags a part on the wall to an empty location, or onto an occupied one to swap or put together, and chooses which parts move. It ends with the M2 gate: SM-1 and SM-2 in full.
@@ -1109,7 +1109,7 @@ So that I can make a move with the keyboard and without surprises.
 **Then** it shows "No current location (no stock above zero)" and Manual move… is disabled with that reason (UX-DR24).
 
 **Given** search results and the locations table rows
-**When** a part or location is opened there
+**When** a part is opened there (a part search result, or a part-number button in a Locations row; opening a location itself opens no part panel)
 **Then** Manual move… is reachable from the part panel, so search → move works with the keyboard alone (FR-15, NFR-10).
 
 ### Story 4.4: Views follow the planning copy
@@ -1181,8 +1181,8 @@ So that I can see, at a glance, what my moves change.
 
 **Given** the Before/after step (`/plans/{id}/before-after`, `modules/before-after`)
 **When** it renders
-**Then** a data table shows a row per aisle in AD-14 order plus a total row, with fast-moving in best locations, pick groups in the same aisle and occupied/empty, each written "Before → After" with the change in body-strong, and the parts moving in and out of each aisle (UX-DR18, UX-DR51)
-**And** best locations are marked with the word "best" in ink, never by colour alone (NFR-10, FR-22).
+**Then** a data table shows a row per aisle in AD-14 order plus a total row, with fast-moving in best locations, pick groups in the same aisle and occupied/empty, each written "Before → After" with the after value in body-strong when it differs, and the parts moving in and out of each aisle (UX-DR18, UX-DR51)
+**And** "best" appears as a word in the column head "Fast-moving in best locations", never as a colour; the table does not list which locations are best (NFR-10, FR-22).
 
 **Given** a plan with no moves
 **When** the page renders
@@ -1415,7 +1415,7 @@ So that the core works and is finished before anything in milestone 2 starts (SM
 **When** it runs on `data/sample/`
 **Then** import with classes and pick groups takes under 10 s, a run under 5 s, and one command plus the plan views under 1 s on a typical laptop (NFR-8).
 
-**Given** a Playwright test in `frontend/e2e/m1-flow.spec.ts` (Chromium, Firefox, Edge)
+**Given** a Playwright test in `frontend/e2e/sm2-flow.spec.ts` (built as `m1-flow.spec.ts`; Story 12.5 renamed it and extended it to the milestone 2 flow) (Chromium, Firefox, Edge)
 **When** it runs locally
 **Then** it goes New Plan with `data/sample/` → overview → parts → pick groups → mark aisle A and level 1 → run → apply one recommendation → one manual move → before/after, without errors.
 
@@ -1506,7 +1506,7 @@ So that I can try a different set of best locations without losing the first pla
 
 **Given** `POST /api/plans` with `name` and `import_id` instead of three files (still multipart, AD-6)
 **When** the import exists
-**Then** `app.plans.create` locks the import row, creates the plan on that import and computes `analysis` again from the stored import with the current `analysis.toml`; it never copies the chosen plan's `analysis` or `state` (FR-2, AD-4)
+**Then** `app.plans.create_from_import` reads the stored import, computes `analysis` again from it with the current `analysis.toml`, and inserts the plan on that import while it holds the import row lock (only the insert runs under the lock; the import never changes, so the analysis is computed before it); it never copies the chosen plan's `analysis` or `state` (FR-2, AD-4)
 **And** the new plan has no best-location marks, no keep-in-place marks, no moves, no runs and round 0.
 
 **Given** unchanged settings
@@ -1521,11 +1521,11 @@ So that I can try a different set of best locations without losing the first pla
 **Given** the New Plan page
 **When** the planner picks "Or reuse the import of a saved plan"
 **Then** a listbox (the shared Listbox pattern, UX-DR17) lists saved plans with name and data-as-of date, the three file tiles are replaced by the chosen import, and New Plan creates the plan and opens its overview with the toast "<name> created. Data as of <date>." (UX-DR19)
-**And** the saved-plans row menu has "New Plan from this import", which opens New Plan with that import chosen.
+**And** the saved-plans row menu has "New Plan from this import", which opens New Plan with that import chosen (`/plans/new?from=<planId>`: the URL carries the saved plan's id, not the import id).
 
 **Given** an open plan
 **When** the plan plate menu opens (click or `Enter`)
-**Then** it lists up to five recent plans (switching opens that plan), "All saved plans" (opens `/plans`) and "New Plan from this import" (UX-DR5)
+**Then** it lists up to five other recent plans (switching opens that plan), "All saved plans" (opens `/plans`) and "New Plan from this import"; the milestone 1 "New Plan" item is removed (UX-DR5)
 **And** `Esc` closes the menu and returns focus to the plate.
 
 ### Story 6.4: Delete a plan
@@ -1544,7 +1544,8 @@ So that the list holds only plans that still matter, without touching anyone els
 **Given** two plans share one import (FR-2)
 **When** one of them is deleted
 **Then** the other plan, its marks, moves, runs and recommendations, and the shared import are unchanged (`test_fr12_delete_keeps_other_plans`)
-**And** when the last plan that uses an import is deleted, the import row is deleted in the same transaction, with the import row locked against a concurrent FR-2 create (AD-4).
+**And** when the last plan that uses an import is deleted, the import row is deleted in the same transaction, with the import row locked against a concurrent FR-2 create (AD-4)
+**And** on Postgres every locking write transaction (not only delete) sets `lock_timeout = '3s'`, so a delete, command or reuse-create that waits longer for a row lock fails with `unavailable` (503) instead of waiting (AD-6).
 
 **Given** the saved-plans row menu
 **When** the planner chooses Delete…
@@ -1568,19 +1569,19 @@ So that I can get anywhere in the plan with `Ctrl+K` and a few letters.
 **Acceptance Criteria:**
 
 **Given** an open plan
-**When** the planner presses the toolbar grid button, or `Ctrl+K` / `⌘K` (also inside text fields)
+**When** the planner presses the toolbar grid button, or `Ctrl+K` / `⌘K` (also inside text fields); the button and the launcher exist only on plan paths
 **Then** the flow map drawer opens as a modal over the page, the page behind is `inert`, and focus moves to the search field "Search features, actions and plans" (UX-DR7, UX-DR8)
 **And** `Esc` closes it and returns focus to the grid button.
 
 **Given** the open drawer
 **When** it renders
-**Then** it shows eight step columns (OVR, PRT, LOC, GRP, BST, REC, B/A, MOV) with name, state (Done / You are here / Output), live counts from the plan summary (AD-3) and the step's actions, the current step tinted with the "You are here" tag
-**And** a band below holds the open plan, other saved plans, SAV, NEW and SET, the stage-2 plates CAT and LBL (dashed, lock icon, "Coming in stage 2", `aria-disabled="true"`, not activatable) and the Keyboard box listing every shortcut.
+**Then** it shows eight step columns (OVR, PRT, LOC, GRP, BST, REC, B/A, MOV) with name, state (Done / You are here / Output / Not done yet), live counts from the plan summary (AD-3) and the step's actions, the current step tinted with the "You are here" tag
+**And** a band below holds the open plan, up to five other saved plans, SAV, NEW and SET, the stage-2 plates CAT and LBL (dashed, lock icon, "Coming in stage 2", `aria-disabled="true"`, not activatable; Epics 13 and 14 later made them links) and the Keyboard box with four fixed entries (Ctrl K, Ctrl /, Alt A, Esc) and "⌘ and ⌥ on a Mac."
 
 **Given** the drawer has focus
 **When** the planner uses the keyboard
 **Then** `Tab` moves between columns, `↑`/`↓` move within one, and `Enter` opens the focused step, runs the focused action or opens the focused plan
-**And** actions only call existing slice entry points (navigation, Run recommendations, Apply all); the launcher module imports no other module, only `components/*` and `lib/*` (Epic Design isolation rules).
+**And** actions only navigate or send commands through `lib/commands`; Run recommendations and Apply all are defined again in `lib/launcher` (sending the same `run` and `apply_all` commands), because the launcher module imports no other module, only `components/*` and `lib/*` (Epic Design isolation rules).
 
 **Given** the planner types in the search field
 **When** the text matches
@@ -1625,7 +1626,8 @@ So that a part I know will not fit is left alone by later runs and Apply all.
 
 **Given** kept parts exist
 **When** the roster, the part panel and the overview render
-**Then** the roster row and the tooltip show the pin glyph with "kept in place" text, the overview shows the count of kept parts, and the Kept in place tab shows its count, or "Nothing kept in place." when empty (FR-32, UX-DR35).
+**Then** the roster row shows the pin glyph with "kept in place" text (the wall tooltip shows it from Story 10.3), the overview shows the count of kept parts, and the Kept in place tab shows its count, or "Nothing kept in place." when empty (FR-32, UX-DR35)
+**And** the Kept in place tab sits between Applied and Outdated and shows also before the first run: it lists the kept recommendations, the kept "no space" rows and, in a trailing Kept band, each kept part with neither (the view's `kept_parts`), so every keep mark appears once; the No space tab and its count leave kept rows out.
 
 ### Story 7.2: Apply a recommendation with another location
 
@@ -1636,8 +1638,9 @@ So that I can follow the rule's idea when I know a better spot than the first on
 **Acceptance Criteria:**
 
 **Given** an open recommendation of the latest run
-**When** `domain.recommendations.other_locations(state, rec_id)` is called
+**When** `domain.recommendations.other_locations(data, analysis, state, recommendation_id, replayed=None)` is called
 **Then** it returns, in location-code order, the locations that are empty in the planning copy now, were empty in `run_baseline` for that run, and fit the rule: best for rule 1; not best for rule 2; in the partner's aisle for rule 3 and not best for a slow-moving or dead-stock part; never a virtual location or the suggested location itself (FR-31, AD-5, AD-7)
+**And** it returns `[]` (it does not reject) when the recommendation cannot be applied (not in the latest run, applied, outdated or kept)
 **And** it is the only implementation of that set; tests `test_fr31_*` use small fixtures, including a location emptied by a manual move in the same round, which is not offered.
 
 **Given** the command `apply_other_location` with the recommendation `id` and a location
@@ -1672,8 +1675,8 @@ So that I can step back safely, one move at a time, without guessing what change
 **Then** undo restores the state before that step: the combined move is split back into its first move, or the removed move is restored and its recommendation shows as applied again instead of `moved_back` (FR-29, FR-34, FR-35).
 
 **Given** any undo
-**When** `revalidate` runs
-**Then** every open recommendation of the latest run and the recommendation the undone step referenced become `outdated(undo)`, sticky until the next run, and an undone recommendation does not come back until the next run (FR-29, FR-35, AD-7)
+**When** the `undo` command is applied
+**Then** the command itself stores `outdated(undo)` on every open recommendation of the latest run that no step references (kept parts included) and on the recommendation the undone step referenced (`revalidate` never produces `undo`), sticky until the next run, and an undone recommendation does not come back until the next run (FR-29, FR-35, AD-7)
 **And** the answer-key step "apply 1200, undo it, then undo 0100's round 1 move" makes every run 2 recommendation outdated, and the following manual moves of 0100 combine into one Manual move A-01-01-01 → B-01-03-02 in round 2 (`test_fr35_undo_after_later_run`).
 
 **Given** steps that share a `swap_id` (fixture state)
@@ -1682,7 +1685,7 @@ So that I can step back safely, one move at a time, without guessing what change
 
 **Given** the plan summary
 **When** it is built
-**Then** `undo_preview` is `{move_number, part, from, to, effect: reverts_move(n) | splits_combined_move(n) | restores_removed_move(n)}` from the last step, or null with no steps (AD-5)
+**Then** `undo_preview` is `{move_number, part, from_location, to_location, effect: {kind: reverts_move | splits_combined_move | restores_removed_move, move_number}}` from the last step, or null with no steps (AD-5)
 **And** `lib/copy` words it once as "Undo move 3: 9723950 A-03-04-02 → A-05-01-03", "Undo splits move 3: 9723950 returns to A-05-01-03" or "Undo restores move 4: 4410281 G-14-04-02 → A-02-01-01".
 
 **Given** **Undo last move** (tertiary) in the Recommendations header and the part panel, and the launcher action registered through the Epic 6 action list
@@ -1704,7 +1707,8 @@ So that I can start the rounds again from the import without rebuilding my best 
 
 **Given** the command `reset`
 **When** it is applied
-**Then** every step and every run (with their recommendations and "no space" entries) is deleted, `next_move_number` is set to 1, the current round becomes 0, and best-location marks and keep-in-place marks are kept; the event is `plan_reset{moves_removed}` (FR-35, AD-5)
+**Then** every step and every run (with their recommendations and "no space" entries) is deleted, `next_move_number` is set to 1, the current round becomes 0, and best-location marks and keep-in-place marks are kept; the event is `plan_reset{moves_removed}`, where `moves_removed` (like the summary's `move_count` in the dialog) counts effective moves, not raw steps (FR-35, AD-5)
+**And** a reset with nothing to reset (no steps, no runs) is a no-op: no event and no version bump; the client still toasts "Plan reset. 0 moves removed; marks kept. The next run is round 1."
 **And** the next run is round 1 and the next move is move 1, and the import is unchanged (FR-36, `test_fr35_reset_keeps_marks`).
 
 **Given** the Recommendations header
@@ -1735,17 +1739,18 @@ So that milestone 2's refinements are proven against the hand-worked answer key,
 **Then** they are exactly the 14 moves in the answer key (part, from, to, rule, round), with 0100's undone round 1 move absent and its two round 2 moves combined into one; the printed order is checked in Epic 8
 **And** the before/after counts equal the answer key (fast-moving in best locations 1 → 5; pick groups in one aisle 1 → 6; occupied/empty per aisle A–D) and the import is identical to what was uploaded (FR-36, FR-37).
 
-**Given** the same scenario through `POST /api/plans/{id}/commands` in `tests/api`
-**When** it is run on SQLite
-**Then** every response's events and `version` bumps match the domain run, and a repeated `command_id` returns the stored result without applying twice (AD-6).
+**Given** the same scenario through `POST /api/plans/{id}/commands` in `tests/app/test_answer_key_api.py` (`test_ad6_answer_key_scenario_over_http`, next to the other command API tests)
+**When** it is run on SQLite, and on Postgres 17 in CI
+**Then** every response's events and `version` bumps match the domain run, and repeating the final command (Apply all) with the same `command_id` returns the stored result without applying twice (AD-6).
 
 **Given** an extra run on the final state
-**When** it is made
-**Then** it gives no recommendations and only 6600 as "no space": the plan has settled.
+**When** it is made in the domain test (`test_fr23_answer_key_settled_check`)
+**Then** it gives no recommendations and only 6600 as "no space": the plan has settled
+**And** the expected move numbers and the `undo` outdated cause are written in the test (`MOVE_NUMBERS`, `UNDONE`), because `expected.json` gives steps 15–16 only as prose, and `data/answer-key/` is never edited by hand.
 
 ## Epic 8: Print the move list for colleagues
 
-The planner prints the plan's moves as a black-and-white list in round order. Within a round, moves out of a location come before moves into it, swap lines are marked, and the header tells two printouts apart. A colleague who has never seen the app can follow it top to bottom.
+The planner prints the plan's moves as a black-and-white list in round order. Within a round, moves out of a location come before moves into it, swap lines are marked, and the header names the plan, its data and the generated time. A colleague who has never seen the app can follow it top to bottom.
 
 ### Story 8.1: Move-list order and header in the domain
 
@@ -1804,14 +1809,16 @@ So that I can check the list and hand a fresh printout to a colleague.
 
 **Acceptance Criteria:**
 
-**Given** the Move list step and the print route `/plans/{id}/print` (`modules/move-list`)
+**Given** the Move list step and the print route `/plans/{id}/print` (`modules/move-list`; the step key stays `move-list`, a last view on `/print` is stored as `move-list`, and `/plans/{id}/move-list` redirects to `/print`)
 **When** the page opens
 **Then** it fetches the move-list view on mount, renders only after the response arrives, never re-sorts the lines, and shows a paper preview with **Print** (primary) and "Back to Recommendations" (AD-17, UX-DR52)
-**And** pressing Print fetches the view again, re-renders it, and then calls `window.print()`, so the printout always carries a fresh generated time and the latest moves.
+**And** pressing Print fetches the view again, re-renders it, and then calls `window.print()`, so a printout made with the Print button carries a fresh generated time and the latest moves
+**And** a print from the browser menu (Ctrl/⌘+P) does not refetch: it prints the view last fetched, whose generated time can be older (AD-17).
 
 **Given** the header data
 **When** it renders
-**Then** it shows "Move list · <plan name>", "Data as of YYYY-MM-DD · uploaded YYYY-MM-DD · N rounds" and "Generated YYYY-MM-DD HH:MM · Smart Warehouse Planner", with `generated_at` formatted in the viewer's zone (FR-7, FR-38, UX-DR56).
+**Then** it shows "Move list · <plan name>", "Data as of YYYY-MM-DD · uploaded YYYY-MM-DD · N rounds" and "Generated YYYY-MM-DD HH:MM · Smart Warehouse Planner", with `generated_at` formatted in the viewer's zone (FR-7, FR-38, UX-DR56)
+**And** the time is printed to the minute and the plan `version` is not printed, so two printouts made within the same minute have identical headers.
 
 **Given** the lines
 **When** they render
@@ -1841,7 +1848,7 @@ So that I can carry it into the aisles and tick off each line.
 
 **Given** a list longer than one page
 **When** it is printed
-**Then** the header and column heads repeat on every page from a repeating `<thead>`, a round band never ends a page alone (it keeps at least two lines with it, `break-after: avoid` / `break-inside: avoid`), and "Page X of Y" shows in the footer where the browser supports it (best effort) (AD-17).
+**Then** the header and column heads repeat on every page from a repeating `<thead>`, a round band is kept with at least two lines (`break-inside: avoid` and `break-after: avoid` on the band, and `break-after: avoid` on the first line of a round with two or more lines; best effort, since the browser decides, and not checked in Firefox, whose Playwright build cannot save a PDF), and "Page X of Y" shows in the footer where the browser supports it (best effort) (AD-17).
 
 **Given** Playwright projects `chromium`, `firefox` and `msedge`
 **When** the e2e test imports `data/sample/`, marks best locations, runs, applies all and opens the print route
@@ -2058,11 +2065,12 @@ So that the wall I see matches the warehouse floor.
 **Given** a stored import
 **When** `domain/layout.py` builds the layout
 **Then** each aisle gets logical cells (run, row, column, gap) from the Section and Position columns when the Locations file has them; else from the code pattern `<aisle>-<section>-<level>-<position>`; else as one run per level in Walk Path order without section labels (AD-15, FR-42)
+**And** a Section/Position or code-pattern source whose grid would hold more than twice as many cells as the aisle has locations (`MAX_GRID_PER_LOCATION`) is treated as unusable, and the aisle falls to the next source, so gap cells stay bounded
 **And** levels sort with the highest on top and L1 at the bottom, all-digit Level, Section and Position values sort numerically, and other orders come from `domain/ordering.py` (AD-14).
 
 **Given** an aisle with n sections
 **When** it is laid out
-**Then** the first ⌈n/2⌉ sections form the top run and the rest the bottom run, positions with no location become gap cells, and the end cap carries the aisle's last Walk Path ("End of aisle A · Walk Path 2,270")
+**Then** the first ⌈n/2⌉ sections form the top run and the rest the bottom run, positions with no location become gap cells, and the end cap carries the aisle's last Walk Path ("End of aisle A · Walk Path 2,270 →")
 **And** virtual locations are never on the wall, and every cell refers to its location as `LocationRef {code, aisle, level, section?, position?, is_best}`.
 
 **Given** `GET /api/imports/{import_id}/layout`
@@ -2084,7 +2092,7 @@ So that I can read occupancy, movement class and best locations at a glance.
 
 **Given** `GET /api/plans/{id}/wall?aisle=A` (a plan view carrying `version`)
 **When** it is built from one `replay` of the planning copy
-**Then** it returns, per location, occupied or empty, the parts stored there (number, description, class, picks, stock, kept in place), the part with the most picks, best or not with the covering marks, and the aisle's counts (occupied, empty, %, best, empty best) (FR-42, FR-14, FR-22, AD-3).
+**Then** it returns, per location, occupied or empty, the parts stored there (number, description, class, picks, stock, kept in place), the part with the most picks, best or not with the covering marks, and the aisle's counts (occupied, empty, %, best, empty best), plus the plan's best-location marks (`marks`, in the same order as the locations view) (FR-42, FR-14, FR-22, AD-3).
 
 **Given** the Locations step (`/plans/{id}/locations`)
 **When** it opens in milestone 2
@@ -2137,7 +2145,7 @@ So that the wall works without a mouse and nothing is hover-only.
 
 **Given** `Enter` or a click on a cell
 **When** the tooltip is pinned
-**Then** it becomes a non-modal `role="dialog"` labelled by the code, with actions: each part line opens the PartPanel, **Manual move…** opens the shared ManualMoveDialog, and **Show recommendation #n** when one exists; focus moves to its first action and `Esc` returns it to the cell (`aria-haspopup="dialog"`, `aria-expanded`).
+**Then** it becomes a non-modal `role="dialog"` labelled by the code, with actions: each part line opens the PartPanel, **Manual move…** opens the shared ManualMoveDialog for the location's top part (the part with the most picks) from that location (other parts of a multi-part location are moved from their PartPanel), and **Show recommendation #n** when one exists; focus moves to its first action and `Esc` returns it to the cell (`aria-haspopup="dialog"`, `aria-expanded`).
 
 **Given** search in milestone 2
 **When** a location result is chosen
@@ -2218,7 +2226,8 @@ So that I can judge the whole warehouse and cross-aisle moves at a glance.
 
 **Given** a selected move
 **When** Whole warehouse is shown
-**Then** the move is drawn as one route from its from-bin to its target, also across aisles; route lines between logical cells are drawn by the frontend from the layout (AD-15).
+**Then** the move is drawn as one route from its from-bin to its target, also across aisles; route lines between logical cells are drawn by the frontend from the layout (AD-15)
+**And** `test_fr42_warehouse_endpoint_max_size_under_4_mb` keeps `GET /api/plans/{id}/warehouse` under 4 MB on a generated max-size import (AD-18).
 
 **Given** narrower viewports
 **When** the width is 1024–1279px
@@ -2239,7 +2248,7 @@ So that I can mark aisles, levels and single locations where I can see them.
 
 **Given** a mode
 **When** I hover or focus a cell
-**Then** it previews the mark for that mode ("Mark level 1 in aisle A", "Mark aisle A", "Mark A-07-01-02"), and `Enter` or a click sends `set_best_mark` (or `remove_best_mark` for an existing exact mark) through `lib/commands`
+**Then** it previews the mark for that mode ("Mark level 1 in aisle A", "Mark aisle A", "Mark A-07-01-02", or "Unmark …" when that exact mark exists), and `Enter` or a click sends `set_best_mark` (or `remove_best_mark` for an existing exact mark) through `lib/commands`
 **And** in Level mode the level labels are buttons and the rail's hit area is the whole level row (at least 24px tall).
 
 **Given** a confirmed mark change
@@ -2253,7 +2262,7 @@ So that I can mark aisles, levels and single locations where I can see them.
 
 ## Epic 11: Change the Key colours
 
-The planner changes any of the six Key colours from the wall's Key, gets contrast and likeness warnings, and keeps the choice in this browser. The slice is frontend-only: `lib/colours` (colour maths and storage) and `modules/key-colours` (Key buttons and popover). It changes no plan, import or analysis, and never touches focus or print.
+The planner changes any of the six Key colours from the wall's Key, gets contrast and likeness warnings, and keeps the choice in this browser. The slice is frontend-only: `lib/colours` (colour maths and storage) and the Key buttons and colour popover in `components/common/wall` (`key.tsx`, `colour-popover.tsx`), not a `modules/key-colours` module, because four modules draw the Key and modules may not import each other. It changes no plan, import or analysis, and never touches focus or print.
 
 ### Story 11.1: Colour maths and presets
 
@@ -2293,7 +2302,8 @@ So that the wall stays readable for me without changing anyone's plan.
 
 **Given** the six Key colours
 **When** the app renders
-**Then** every wall, mini-wall, wall crop, class swatch, best rail, frame and tag, and every selection frame, arrow, marker ring and selected-row bar reads its colour from CSS variables (`--colour-fast`, `--colour-medium`, `--colour-slow`, `--colour-dead`, `--colour-best`, `--colour-best-on-light`, `--colour-selection`, `--colour-selected-tint`), so one change updates them all at once (FR-42)
+**Then** every wall, mini-wall, wall crop, class swatch, best rail, frame and tag, and every selection frame, arrow, marker ring and selected-row bar reads its colour from CSS variables (`--colour-fast`, `--colour-medium`, `--colour-slow`, `--colour-dead`, `--colour-best`, `--colour-best-on-light`, `--colour-selection`, `--colour-selected-tint`), so one change updates them all at once (FR-42); as built, the theme tokens in `globals.css` alias these variables, so components keep using the theme tokens unchanged
+**And** because the accent and selected-tint tokens alias the selection variables, a changed Selected colour also recolours that UI chrome: menu and listbox highlights, the flow bar's current step on paper (not on the graphite toolbar), the launcher's current column and selected result, and the Manual move dialog's highlighted row (DESIGN.md: a changed colour replaces the token everywhere it is drawn)
 **And** the focus ring, inputs, the plan plate edge, the round chip, the "You are here" tag and the product mark never read these variables, and the print stylesheet stays black and white.
 
 **Given** stored colours in localStorage `swp:colours`
@@ -2324,7 +2334,7 @@ So that I can fix a hard-to-see colour in a few seconds (UJ-4).
 
 **Given** a click, `Enter` or `Space` on an entry
 **When** the colour popover opens above it
-**Then** it is a 264px non-modal `role="dialog"` labelled by its title ("Fast-moving ▲ colour"), with the eight presets as a `radiogroup` of named radios ("Fast-moving shade 3 of 8", the default named "Default") with the current one ringed and checked, a Default chip with the swatch and hex, a hex field with a swatch button that opens the native colour picker, **Reset this colour** (tertiary) and **Done** (primary) (UX-DR49)
+**Then** it is a 264px non-modal `role="dialog"` labelled by its title ("Fast-moving ▲ colour", where ▲ is the entry's miniature drawn as a decorative SVG, so the accessible name is "Fast-moving colour"), with the eight presets as a `radiogroup` of named radios ("Fast-moving shade 3 of 8", the default named "Default") with the current one ringed and checked, a Default chip with the swatch and hex, a hex field with a swatch button that opens the native colour picker, **Reset this colour** (tertiary) and **Done** (primary) (UX-DR49)
 **And** focus starts on the current preset, and the popover flips or shifts to stay inside the viewport, also at 200% zoom.
 
 **Given** the presets
@@ -2372,7 +2382,7 @@ So that a swap is never saved as half its moves and every move it makes behaves 
 
 **Given** a valid `swap` command
 **When** `domain.apply` runs it
-**Then** it appends first one Manual step per chosen part (from → to), then one per back-part (to → from), all in the current round and all with one new `swap_id` derived as `uuid5(command_id, "swap:1")` (AD-1, AD-16)
+**Then** it appends first one Manual step per chosen part (from → to), then one per back-part (to → from), all in the current round and all with one new `swap_id` derived as `uuid5(command_id, "swap:1")` and the swap's step count as `swap_size` (AD-1, AD-5, AD-16)
 **And** the whole command is one transaction and one version bump, and the response events are `swap_made` with the move numbers plus `move_made`, `moves_combined` or `move_removed` per step as `replay` reports them (FR-34 applies to each step).
 
 **Given** an invalid drag command
@@ -2419,7 +2429,7 @@ So that I can try a placement in one gesture instead of typing a location code.
 **Given** the from-location holds several parts
 **When** I drop on an empty location
 **Then** the drop dialog popover opens anchored to that location, titled "Move to G-14-01-04", with a checkbox per part of the from-location (glyph, part number, description, class · stock), the dragged part checked, and **Move** (primary) and **Cancel**
-**And** with no part checked Move is disabled with "Choose at least one part to move."; Move sends `move_parts` with the checked parts.
+**And** with no part checked Move is disabled with "Choose at least one part to move."; Move sends `move_parts` with the checked parts, and a move of several parts toasts "Moved 2 parts: G-14-04-02 → G-14-01-04 (Manual, round 1)."
 
 **Given** the places drag is not allowed
 **When** I press and move on the Whole warehouse view, the Best locations step, or a recommendation crop
@@ -2475,7 +2485,8 @@ So that the colleague knows to set one bin aside and the plan stays easy to reve
 **Given** an intact swap
 **When** the move list print view opens
 **Then** its lines follow each other where FR-38's order allows, each reads "Manual · Swap 1/2" with "G-14-01-03 ↔ G-14-04-02" under it, and the footnote "Swap: set one bin aside, move the other into its place, then put the first one in." appears (FR-38, UX-DR52)
-**And** after one of its moves is undone or combined (FR-34), the remaining line prints as an ordinary Manual line.
+**And** after one of its moves is undone or combined (FR-34), the remaining lines print as ordinary Manual lines: a swap is intact only while all of its `swap_size` steps are logged and each is its own effective move, all in one round and going both ways between one pair of locations, so a partly undone swap with several back-parts also loses its mark (AD-17)
+**And** two Manual moves made with the keyboard (Manual move…) carry no `swap_id`, so a swap made that way prints as two ordinary Manual lines without the swap mark.
 
 **Given** the answer-key swap case (PRD §7.3)
 **When** the app-level test `tests/app/test_fr51_swap_move_list.py` runs through the command endpoint
@@ -2532,7 +2543,7 @@ So that parts get a category from their description, never from their part numbe
 
 **Given** the keyword-rule API (`api/routers/categories.py`, JSON, behind the same-origin guard and login)
 **When** I create, edit, delete or reorder rules
-**Then** `GET/POST /api/keyword-rules`, `PATCH/DELETE /api/keyword-rules/{id}` and `PUT /api/keyword-rules/order` (the full ordered id list) change the one global list shared by every plan, an empty keyword or category is `validation_failed`, and a duplicate keyword is `validation_failed` with "That keyword already has a rule." (FR-43, AD-11)
+**Then** `GET/POST /api/keyword-rules`, `PATCH/DELETE /api/keyword-rules/{id}` and `PUT /api/keyword-rules/order` (the full ordered id list plus `base_ids`, the order the client saw; a stored order that differs from `base_ids` is `command_rejected` 409 and the client reloads the list) change the one global list shared by every plan, an empty keyword or category is `validation_failed`, and a duplicate keyword is `validation_failed` with "That keyword already has a rule." (FR-43, AD-11)
 **And** `schema.ts` is regenerated and `tests/app` cover the endpoints on SQLite and Postgres.
 
 ### Story 13.2: Manage keyword rules and aisle categories
@@ -2549,12 +2560,12 @@ So that the check follows how my warehouse is actually laid out.
 
 **Given** the Keyword rules tab
 **When** I add, edit, delete or reorder a rule
-**Then** the rules show as a data table in their order (position, keyword, category), each row has Edit, Delete… (confirm dialog with Cancel focused) and Move up / Move down buttons as the keyboard path for reordering, and every change is saved through the 13.1 API and shown only after the server confirms it (FR-43, NFR-10, UX-DR16, UX-DR18).
+**Then** the rules show as a data table in their order (position, keyword, category), each row has Edit, Delete… (confirm dialog with Cancel focused) and Move up / Move down buttons as the keyboard path for reordering, and every change is saved through the 13.1 API and shown only after the server confirms it; Edit sends only the changed fields (FR-43, NFR-10, UX-DR16, UX-DR18).
 
 **Given** aisle categories
 **When** this story adds them
 **Then** an expand-only migration creates `aisle_categories` (`aisle`, `category`, unique together), `GET/PUT /api/aisle-categories/{aisle}` sets the full category list of one aisle, and aisles are matched by their Aisle text, so the assignment applies to every plan with that aisle (FR-45)
-**And** the Aisle categories tab lists the aisles of the open plan's import, each with its categories as removable chips and a picker of the categories that exist in the keyword rules.
+**And** the Aisle categories tab lists the aisles of the open plan's import, each with its categories as removable chips and a picker of the categories that exist in the keyword rules; it reads them from `GET /api/plans/{plan_id}/aisle-categories` (every aisle of the plan's import with its categories, plus the rule categories to pick from), which writes nothing.
 
 **Given** a category used by an aisle but no longer by any rule
 **When** the tab renders
@@ -2597,7 +2608,8 @@ So that the category check runs on the demo data with no manual setup.
 
 **Given** `swp.app.bootstrap(seed)`
 **When** it runs and both category tables are empty
-**Then** it loads the starter list idempotently (an existing list is never overwritten); this updates the "the demo account is the only seed" convention in the spine (FR-47, AD-9).
+**Then** it loads the starter list idempotently (an existing list is never overwritten); this updates the "the demo account is the only seed" convention in the spine (FR-47, AD-9)
+**And** there is no "already seeded" marker: when both tables are emptied again, the next bootstrap (local start or `swp db upgrade`) loads the starter list again, as the README states.
 
 **Given** a clean checkout following the README
 **When** the README's category step is followed after importing `data/sample/`
