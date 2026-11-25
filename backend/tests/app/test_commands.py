@@ -298,6 +298,32 @@ def test_fr41_lost_race_to_another_save_warns(
     assert plans.require(plan_id).state.best_marks == [AisleMark(aisle="B")]
 
 
+def test_fr10_fr41_lost_race_to_the_same_command_returns_its_stored_result(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan_id = _create("Duplicate race", CREATED)
+    original = store_plans.PlanWriter.save_state
+    calls: list[int] = []
+
+    def duplicate_saves_first(self: store_plans.PlanWriter, *args: Any, **kwargs: Any) -> bool:
+        calls.append(1)
+        if len(calls) == 1:
+            # A concurrent retry of this same command saves it between this read and this save.
+            assert original(self, *args, **kwargs)
+            return False
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(store_plans.PlanWriter, "save_state", duplicate_saves_first)
+
+    result = run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
+
+    assert len(calls) == 1
+    assert result == CommandResult(version=2, events=[MarkSet(mark=AisleMark(aisle="A"))])
+    assert _row(plan_id)[0] == 2
+    assert plans.require(plan_id).state.best_marks == [AisleMark(aisle="A")]
+    assert len(plans.require(plan_id).state.recent_commands) == 1
+
+
 def test_fr10_conditional_update_on_changed_version_writes_nothing(empty_tables: str) -> None:
     plan_id = _create("Changed version", CREATED)
     before = _row(plan_id)

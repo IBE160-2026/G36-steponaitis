@@ -10,9 +10,9 @@ from collections import defaultdict
 
 from pydantic import BaseModel
 
-from swp.domain.import_data import ImportData, LocationData
+from swp.domain.import_data import ImportData
 from swp.domain.ordering import aisle_order, walk_path_order
-from swp.domain.planning import LocationRef
+from swp.domain.planning import LocationRef, location_ref_of
 
 
 class AisleLabels(BaseModel):
@@ -22,18 +22,6 @@ class AisleLabels(BaseModel):
 
 class LabelsView(BaseModel):
     aisles: list[AisleLabels]
-
-
-def _ref(code: str, location: LocationData) -> LocationRef:
-    # An import has no marks: a label never shows best.
-    return LocationRef(
-        code=code,
-        aisle=location.aisle,
-        level=location.level,
-        section=location.section,
-        position=location.position,
-        is_best=False,
-    )
 
 
 def build_labels(data: ImportData) -> LabelsView:
@@ -47,7 +35,7 @@ def build_labels(data: ImportData) -> LabelsView:
             AisleLabels(
                 aisle=aisle,
                 locations=[
-                    _ref(code, locations[code])
+                    location_ref_of(code, locations[code])
                     for code in walk_path_order(codes_by_aisle[aisle], locations)
                 ],
             )

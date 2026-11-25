@@ -5,8 +5,8 @@ An import never changes, so the response is cached immutably by the browser.
 
 from fastapi import APIRouter, Response
 
+from swp.api.caching import IMMUTABLE
 from swp.api.errors import error_responses
-from swp.api.routers.layout import IMMUTABLE
 from swp.app import labels as service
 from swp.app.plans import parse_import_id
 from swp.domain.labels import LabelsView

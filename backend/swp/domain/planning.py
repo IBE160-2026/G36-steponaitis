@@ -558,17 +558,22 @@ class LocationRef(BaseModel):
     is_best: bool
 
 
-def location_ref(copy: PlanningCopy, code: str, marks: Sequence[BestMark]) -> LocationRef:
-    """The wire reference of a location, best when any of `marks` covers it."""
-    location = copy.locations[code]
+def location_ref_of(code: str, location: LocationData, *, is_best: bool = False) -> LocationRef:
+    """The wire reference of `location`. Import-scoped views (wall layout, labels) have no
+    marks, so their locations are never best."""
     return LocationRef(
         code=code,
         aisle=location.aisle,
         level=location.level,
         section=location.section,
         position=location.position,
-        is_best=is_best(copy, code, marks),
+        is_best=is_best,
     )
+
+
+def location_ref(copy: PlanningCopy, code: str, marks: Sequence[BestMark]) -> LocationRef:
+    """The wire reference of a location, best when any of `marks` covers it."""
+    return location_ref_of(code, copy.locations[code], is_best=is_best(copy, code, marks))
 
 
 class NewMove(BaseModel):

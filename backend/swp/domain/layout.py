@@ -31,7 +31,7 @@ from pydantic import BaseModel
 
 from swp.domain.import_data import ImportData, LocationData
 from swp.domain.ordering import SortKey, aisle_order, identifier_key, level_key
-from swp.domain.planning import LocationRef
+from swp.domain.planning import LocationRef, location_ref_of
 from swp.domain.values import Dec
 
 LayoutSource = Literal["columns", "code", "walk_path"]
@@ -120,18 +120,6 @@ def _from_code(
     return places if _usable(places, locations) else None
 
 
-def _ref(code: str, location: LocationData) -> LocationRef:
-    # An import has no marks: best comes with the plan wall (Story 10.2).
-    return LocationRef(
-        code=code,
-        aisle=location.aisle,
-        level=location.level,
-        section=location.section,
-        position=location.position,
-        is_best=False,
-    )
-
-
 def _sectioned(
     codes: list[str],
     places: Places,
@@ -165,7 +153,9 @@ def _sectioned(
                             row=row,
                             column=column + offset,
                             gap=code is None,
-                            location=None if code is None else _ref(code, locations[code]),
+                            location=None
+                            if code is None
+                            else location_ref_of(code, locations[code]),
                         )
                     )
             column += len(ordered)
@@ -186,7 +176,11 @@ def _by_walk_path(
         width = max(width, len(in_level))
         cells.extend(
             LayoutCell(
-                run=0, row=row, column=column, gap=False, location=_ref(code, locations[code])
+                run=0,
+                row=row,
+                column=column,
+                gap=False,
+                location=location_ref_of(code, locations[code]),
             )
             for column, code in enumerate(in_level)
         )

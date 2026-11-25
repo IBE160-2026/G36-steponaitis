@@ -3,8 +3,11 @@
 Reads the plan in a write transaction, applies the command in the domain and saves it with
 a conditional update on the version read. A repeated `command_id` returns its stored result;
 a command built on an older version than the plan's is then refused with `plan_changed`
-before it is applied (FR-41); a no-op writes nothing; and a lost race is re-read (and warned
-if the other save moved the version past `base_version`) up to 3 times. The import and the
+before it is applied (FR-41); and a no-op writes nothing. A lost race (the conditional update
+changed no row) is re-read under the lock, up to 3 times: when the other save was this same
+`command_id` (a concurrent duplicate), its stored result is returned; when it moved the version
+past `base_version`, the command is refused with `plan_changed`; only a save that failed without
+a new version is applied again. The import and the
 analysis are read once before the lock (neither ever changes); a busy database answers
 `unavailable` at once and the client retries (AD-12).
 """
@@ -72,7 +75,7 @@ def _run(
             stored = _stored_result(plan.state, command.command_id)
             if stored is not None:
                 return stored
-            # Checked on the version read under the lock, so a lost race's re-read warns too.
+            # Checked on the version read under the lock, so a lost race to another save warns.
             if command.base_version < plan.version:
                 raise _plan_changed(plan)
             applied = apply(plan.state, command, ctx, inputs.data, inputs.analysis)

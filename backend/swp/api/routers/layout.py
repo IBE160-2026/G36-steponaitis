@@ -5,14 +5,13 @@ An import never changes, so the response is cached immutably by the browser.
 
 from fastapi import APIRouter, Response
 
+from swp.api.caching import IMMUTABLE
 from swp.api.errors import error_responses
 from swp.app import layout as service
 from swp.app.plans import parse_import_id
 from swp.domain.layout import LayoutView
 
 router = APIRouter()
-
-IMMUTABLE = "private, max-age=31536000, immutable"
 
 
 @router.get("/imports/{import_id}/layout", responses=error_responses(404, 422))
