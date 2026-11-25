@@ -11,7 +11,7 @@ Bygge Story 16.0 med `bmad-build`: herde appen før den går på en offentlig UR
 - Implementering i subagent, review med tre lag (blind, edge case, verification gap), patcher, deretter full verifisering og e2e-porten.
 
 ### Resultat
-- **Commit `33e5e0f`** (lokal, ikke pushet).
+- **Commit `33e5e0f`**, pushet til `origin/main` sammen med loggcommiten `aa9e697`.
 - **Oppstart:** backend og `swp db upgrade` nekter å starte når `VERCEL` er satt og `APP_ENV` ikke er `production`. En ugyldig innstilling gir én `Refusing to start: <SETTING>: <grunn>`-linje uten verdi og uten pydantic-traceback. CLI-en skriver én linje per problem til stdout gjennom `swp`-loggeren.
 - **Struping:** forsøket telles (`login_attempts.reserve`) før passordsjekken. Samtidige forespørsler gir derfor høyst 5 bcrypt-sjekker; testen kjører på SQLite og Postgres 17. Riktig passord nullstiller telleren.
 - **Seed:** startkategoriene leser TOML først etter at begge tabellene er funnet tomme. En opptatt lås prøves 3 ganger og logges deretter med årsak. Demo-seedet hopper over en opptatt database. Docstringen i bootstrap er rettet.
