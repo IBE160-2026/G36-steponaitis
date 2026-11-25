@@ -1,7 +1,8 @@
 # Starter keyword rules and aisle categories for the demo data (FR-47, AD-9).
 #
 # Synthetic data only (NFR-4): drafted by AI (Claude Code) only from the synthetic part
-# descriptions and aisles in data/sample/; awaiting the author's check (Story 13.4 AC 1).
+# descriptions and aisles in data/sample/; checked and approved by the author on 2026-11-25
+# (Story 13.4 AC 1): all 87 sample part types get a category, every keyword is used.
 #
 # `swp db upgrade` (and the local lifespan) loads this file once, only when both the
 # keyword_rules and aisle_categories tables are empty; it never overwrites the planner's lists.

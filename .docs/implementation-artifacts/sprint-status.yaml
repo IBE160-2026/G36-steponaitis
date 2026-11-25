@@ -155,6 +155,7 @@ development_status:
   epic-15-retrospective: done
 
   epic-16: backlog
+  16-0-production-hardening-before-going-public: backlog
   16-1-live-on-the-public-vercel-url: backlog
   16-2-production-with-login-and-the-demo-on: backlog
   epic-16-retrospective: optional
@@ -1004,7 +1005,7 @@ action_items:
       the session log and file header, and decide the 90% outside demo result, renamed/invisible
       aisle categories (V1, R9, R15, R19)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-111-run-the-13-1-follow-up-review-with-the-o"
     epic: 13

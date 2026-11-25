@@ -83,6 +83,8 @@ Every setting is a backend environment variable; `backend/.env.example` lists th
 | `MAX_PLANS` | Most saved plans while `FEATURE_DEMO` is on. | `50` |
 | `MAX_ACCOUNTS` | Most accounts while `FEATURE_DEMO` is on. | `200` |
 
+Known limit: **Apply all** runs as one request. On an import near the row limit, with thousands of recommendations, it can take minutes and time out on the public deployment. Apply recommendations a group at a time there. The files in `data/sample/` are well within the limit.
+
 The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to start: …` line per problem, when:
 
 1. `VERCEL` is set but `APP_ENV` is not (the platform sets `VERCEL`);
@@ -112,7 +114,7 @@ A step-by-step walk through milestone 2 (Epics 1–12) on the synthetic files in
 9. **Drag on the wall:** open **Locations**, keep **One aisle**, and drag a bin with the mouse onto an empty location to move it, or onto an occupied one and choose **Swap** (or **Put together**). A swap is two manual moves; undo takes them back one at a time. Every drag move can also be made with the keyboard through **Manual move…**.
 10. **Before/after:** open **Before/after** to see, per aisle, which parts moved in and out, fast-moving parts in best locations, pick groups kept together and occupancy, before → after.
 11. **Move list and print:** open **Move list**. It lists every move by round in walking order, with the rule (or Manual, and "Swap 1/2" for a swap). Press **Print** for the black-and-white A4 list.
-12. **Category check:** press `Ctrl`+`K`, type `CAT` and open **Categories**. **Keyword rules** already holds the starter rules (for example `filter` → Filters) and **Aisle categories** gives each aisle A–I its categories, so there is nothing to set up. Press **Category check**: it lists the parts whose category is not among their aisle's categories, with a count line "… parts outside their aisle's categories · 0 aisles without categories". Open a part to move it, as in step 8.
+12. **Category check:** press `Ctrl`+`K`, type `CAT` and open **Categories**. **Keyword rules** already holds the starter rules (for example `filter` → Filters) and **Aisle categories** gives each aisle A–I its categories, so there is nothing to set up. Press **Category check**: it lists the parts whose category is not among their aisle's categories, with a count line "… parts outside their aisle's categories · 0 aisles without categories". Most parts show up there, because the synthetic data places parts in random locations; on real data the list is short. Open a part to move it, as in step 8.
 13. **Run every check:**
 
     ```sh

@@ -2666,7 +2666,35 @@ So that I don't build on a picture of the plan that is no longer true.
 
 ## Epic 16: Go live on the public URL
 
-Deployment was deferred on 2026-11-19: the app is built and checked locally first, and this epic starts only after the user has approved the website. It needs the user's Vercel and Supabase accounts, so it is not part of the autonomous run. The checks that used to sit in Story 1.3 and the production parts of Stories 9.7 and 12.5 are collected here.
+Deployment was deferred on 2026-11-19: the app is built and checked locally first, and this epic starts only after the user has approved the website. It needs the user's Vercel and Supabase accounts, so it is not part of the autonomous run. The checks that used to sit in Story 1.3 and the production parts of Stories 9.7 and 12.5 are collected here. Story 16.0 (added 2026-11-25 when the open issues were triaged) closes the security and integrity gaps found by the Epic 9 and Epic 13 retrospectives before anything goes public.
+
+### Story 16.0: Production hardening before going public
+
+As the author,
+I want the startup checks, the login throttle, the starter seed and the session-expiry handoff to hold up on a public URL,
+So that the deployment can't start with unsafe settings or be guessed against, and nobody's change is saved under someone else's name.
+
+**Acceptance Criteria:**
+
+**Given** the startup checks (AD-10)
+**When** the backend starts with `VERCEL` set and `APP_ENV` anything other than `production` (unset or `local`)
+**Then** it refuses to start with one `Refusing to start: …` line, and a test covers both cases (Epic 9 retro, item 3).
+
+**Given** an invalid setting such as a `DEMO_PASSWORD` the validator rejects
+**When** the backend or `swp db upgrade` starts
+**Then** it logs one `Refusing to start: …` line naming the setting and why, never its value, and prints no pydantic traceback (Story 9.7).
+
+**Given** one username and the login throttle (FR-40, AD-18)
+**When** many failed logins for that name arrive at the same time
+**Then** at most 5 password checks run before the 60 s lock, because the attempt is counted before the password is verified, and a test sends the requests concurrently on SQLite and Postgres (Epic 9 retro, item 1).
+
+**Given** the starter categories seed (FR-47)
+**When** it runs at startup or in `swp db upgrade`
+**Then** it reads `starter_categories.toml` only after checking that both the keyword rules and aisle categories are empty, a locked SQLite database doesn't crash startup, and the bootstrap docstring says what it does (Epic 13 retro, item 1).
+
+**Given** a change held back because the session expired (Story 9.3)
+**When** a different user logs in to continue
+**Then** the held change is dropped with a message instead of being saved under the new user's name, and the same user logging in still saves it.
 
 ### Story 16.1: Live on the public Vercel URL
 
@@ -2681,9 +2709,13 @@ So that it runs on the same origin it will be judged on.
 **Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
 **And** `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `APP_ENV=production` are set for Production only (`JWT_SECRET` and the auth flags follow in Story 16.2).
 
-**Given** the startup checks (AD-10)
+**Given** the startup checks (AD-10, hardened in Story 16.0)
 **When** the backend starts with `VERCEL` set and `APP_ENV` unset
 **Then** it refuses to start, and a test covers it.
+
+**Given** the deployed app and a maximum-size import (`MAX_ROWS_PER_FILE` = 25,000 locations, about 3.66 MB of wall layout uncompressed)
+**When** the planner opens its Locations wall on the public URL
+**Then** the wall loads, and the session log records whether Vercel's 4.5 MB response limit counts the gzipped or the uncompressed body; if it fails, the limit is lowered and AD-18 is updated (Story 12.5).
 
 **Given** the deployed `/api/health`
 **When** `keep-alive.yml` runs
