@@ -3,6 +3,7 @@
 The only module that uses bcrypt and PyJWT. The caller passes `now`; ids come from uuid4 here.
 """
 
+import logging
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -18,7 +19,6 @@ from swp.domain.accounts import (
     LOGIN_LOCKED,
     PASSWORD_MAX_BYTES,
     TAKEN,
-    is_locked,
     signup_errors,
     username_error,
     username_key,
@@ -27,6 +27,7 @@ from swp.domain.errors import DomainError, FieldError
 from swp.store import login_attempts
 from swp.store import users as store
 
+logger = logging.getLogger("swp.auth")
 SESSION_COOKIE = "swp_session"
 SESSION_DAYS = 30
 SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60  # seconds, the cookie's Max-Age
@@ -123,23 +124,23 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
     """The stored username and a session token; `unauthenticated` for any failed login.
 
     The message never says which part was wrong. An unknown username still runs one bcrypt
-    check against a dummy hash. Failures count per casefolded username whether or not the
-    account exists; a locked username gets `login_locked` without a password check (AD-18).
+    check against a dummy hash. Each attempt is counted per casefolded username, whether or
+    not the account exists, before the password check, so concurrent requests run at most
+    `LOGIN_MAX_FAILURES` checks; a success clears the count. 5 counted attempts block the name
+    for 60 s: a locked username gets `login_locked` without a password check (AD-18).
     """
     encoded = _password_bytes(password)
     # A malformed username (lone surrogate, NUL, ...) never reaches the database.
     if username_error(username) is not None or encoded is None or not encoded:
         raise DomainError("unauthenticated", WRONG_LOGIN)
     key = username_key(username)
-    if is_locked(login_attempts.get(key), now):
+    if not login_attempts.reserve(key, now):
         raise DomainError("login_locked", LOGIN_LOCKED)
     user = store.get_user_by_key(key)
     if user is None:
         bcrypt.checkpw(encoded, _dummy_hash())
-        login_attempts.record_failure(key, now)
         raise DomainError("unauthenticated", WRONG_LOGIN)
     if not bcrypt.checkpw(encoded, user.password_hash.encode("ascii")):
-        login_attempts.record_failure(key, now)
         raise DomainError("unauthenticated", WRONG_LOGIN)
     login_attempts.clear(key)
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
@@ -149,19 +150,27 @@ def seed_demo_account(*, now: datetime) -> None:
     """Create the `demo` account with `DEMO_PASSWORD` once (FR-50, AD-10); seeded by `bootstrap`.
 
     An existing `demo` row is never changed. A concurrent seed that wins the unique
-    constraint counts as success.
+    constraint counts as success. A busy database lock is logged and skipped: the account is
+    created on the next start, `swp db upgrade` or Demo version (`demo_login`).
     """
     if store.username_key_taken(DEMO_USERNAME):
         return
-    store.insert_user(
-        store.StoredUser(
-            id=uuid.uuid4(),
-            username=DEMO_USERNAME,
-            username_key=DEMO_USERNAME,
-            password_hash=hash_password(get_settings().demo_password),
-            created_at=now,
+    try:
+        store.insert_seed_user(
+            store.StoredUser(
+                id=uuid.uuid4(),
+                username=DEMO_USERNAME,
+                username_key=DEMO_USERNAME,
+                password_hash=hash_password(get_settings().demo_password),
+                created_at=now,
+            )
         )
-    )
+    except store.UsersBusy as busy:
+        logger.warning(
+            "Demo account skipped: the database was busy (%s). It is added on the next start, "
+            "swp db upgrade or Demo version.",
+            busy,
+        )
 
 
 def demo_login(*, now: datetime) -> SignedUp:

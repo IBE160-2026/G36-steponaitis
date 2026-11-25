@@ -87,11 +87,12 @@ Known limit: **Apply all** runs as one request. On an import near the row limit,
 
 The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to start: …` line per problem, when:
 
-1. `VERCEL` is set but `APP_ENV` is not (the platform sets `VERCEL`);
+1. `VERCEL` is set and `APP_ENV` is not `production` (the platform sets `VERCEL`);
 2. `APP_ENV` is anything other than `local` or `production`;
 3. in production, `JWT_SECRET` is empty, the local default, the `.env.example` placeholder or shorter than 32 bytes;
 4. in production, `DEMO_PASSWORD` is not set;
-5. in production, `DATABASE_URL` is not set.
+5. in production, `DATABASE_URL` is not set;
+6. any setting has an invalid value (for example a `DEMO_PASSWORD` shorter than the Log in form allows, or a `MAX_PLANS` that is not a positive number). The line names the setting and the reason, never the value.
 
 Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` and the starter categories through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
 

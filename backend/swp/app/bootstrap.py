@@ -1,5 +1,11 @@
-"""The only path that migrates or seeds the database (AD-9): the `demo` account (FR-50) and
-the starter categories (FR-47), each written only once."""
+"""The only path that migrates or seeds the database (AD-9).
+
+The seed writes the `demo` account (FR-50) only when it is missing, and the starter categories
+(FR-47) only when both `keyword_rules` and `aisle_categories` are empty: the planner's lists
+are never overwritten, and after the planner empties both tables the starter list comes back on
+the next start or `swp db upgrade`. A busy database skips a seed step with a logged cause
+instead of failing the start.
+"""
 
 from datetime import UTC, datetime
 

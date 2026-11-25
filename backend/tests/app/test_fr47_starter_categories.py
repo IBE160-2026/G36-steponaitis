@@ -4,6 +4,7 @@
 keyword_rules and aisle_categories tables are empty; it never overwrites the planner's lists.
 """
 
+import logging
 import sqlite3
 import threading
 from datetime import UTC, datetime
@@ -167,9 +168,90 @@ def test_fr47_busy_lock_skips_without_crashing(
 
     monkeypatch.setattr(category_seed, "_seed_if_empty", locked)
 
-    assert categories.seed_starter_categories(now=T0) is False
+    assert categories.seed_starter_categories(now=T0, sleep=lambda _s: None) is False
     assert _rules() == []
     assert _aisles() == {}
+
+
+def test_fr47_seed_skips_toml_when_tables_not_empty(empty_tables: str, tmp_path: Path) -> None:
+    # The planner's list exists: the (missing) file is never opened, and startup still works.
+    categories.create_rule("bolt", "Fasteners", now=T0)
+    missing = tmp_path / "missing.toml"
+
+    assert categories.seed_starter_categories(now=T1, path=missing) is False
+    bootstrap(upgrade=False, seed=True)
+
+    assert [keyword for _, _, keyword, _, _ in _rules()] == ["bolt"]
+
+
+def test_fr47_seed_retries_busy_then_logs_cause(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    tries: list[None] = []
+    waits: list[float] = []
+
+    def locked(*_args: object, **_kwargs: object) -> bool:
+        tries.append(None)
+        raise OperationalError("LOCK", {}, Exception("database is locked"))
+
+    monkeypatch.setattr(category_seed, "_seed_if_empty", locked)
+    caplog.set_level(logging.INFO, logger="swp.categories")
+
+    assert categories.seed_starter_categories(now=T0, sleep=waits.append) is False
+
+    assert len(tries) == categories.SEED_TRIES == 3
+    assert waits == [categories.SEED_RETRY_SECONDS] * 2
+    messages = [r.getMessage() for r in caplog.records if r.name == "swp.categories"]
+    assert messages == [
+        "Starter categories skipped: the database was busy (database is locked). "
+        "They are added on the next start or swp db upgrade."
+    ]
+    assert _rules() == []
+
+
+def test_fr47_seed_busy_on_empty_check_retries_then_skips(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    # The plain emptiness read meets the busy database itself; `tables_empty` maps it to
+    # CategorySeedBusy, so the seed retries and skips instead of crashing.
+    class BusySession:
+        def __enter__(self) -> "BusySession":
+            raise OperationalError("SELECT", {}, Exception("database is locked"))
+
+        def __exit__(self, *_exc: object) -> None:
+            return None
+
+    monkeypatch.setattr(category_seed, "transaction", BusySession)
+    waits: list[float] = []
+    caplog.set_level(logging.INFO, logger="swp.categories")
+
+    assert categories.seed_starter_categories(now=T0, sleep=waits.append) is False
+
+    assert waits == [categories.SEED_RETRY_SECONDS] * 2
+    messages = [r.getMessage() for r in caplog.records if r.name == "swp.categories"]
+    assert messages == [
+        "Starter categories skipped: the database was busy (database is locked). "
+        "They are added on the next start or swp db upgrade."
+    ]
+
+
+def test_fr47_seed_busy_once_then_succeeds(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    real = category_seed._seed_if_empty
+    tries: list[None] = []
+
+    def busy_once(*args: Any, **kwargs: Any) -> bool:
+        tries.append(None)
+        if len(tries) == 1:
+            raise OperationalError("LOCK", {}, Exception("database is locked"))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(category_seed, "_seed_if_empty", busy_once)
+
+    assert categories.seed_starter_categories(now=T0, sleep=lambda _s: None) is True
+    assert len(tries) == 2
+    assert _aisles() == _starter_aisles()
 
 
 def test_fr47_real_lock_held_skips_the_seed(empty_tables: str) -> None:
@@ -189,7 +271,7 @@ def test_fr47_real_lock_held_skips_the_seed(empty_tables: str) -> None:
         holder = sqlite3.connect(database, isolation_level=None)
         try:
             holder.execute("BEGIN IMMEDIATE")
-            wrote = categories.seed_starter_categories(now=T0)
+            wrote = categories.seed_starter_categories(now=T0, sleep=lambda _s: None)
         finally:
             holder.execute("ROLLBACK")
             holder.close()
@@ -200,7 +282,7 @@ def test_fr47_real_lock_held_skips_the_seed(empty_tables: str) -> None:
             holder.begin()
             holder.execute(text("LOCK TABLE aisle_categories IN EXCLUSIVE MODE"))
             try:
-                wrote = categories.seed_starter_categories(now=T0)
+                wrote = categories.seed_starter_categories(now=T0, sleep=lambda _s: None)
             finally:
                 holder.rollback()
 

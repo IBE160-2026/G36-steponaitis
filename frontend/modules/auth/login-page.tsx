@@ -188,7 +188,7 @@ export function LoginPage() {
 
   const effects = {
     invalidateSession: () => queryClient.invalidateQueries({ queryKey: SESSION_KEY }),
-    navigate: () => router.push(afterLoginHref()),
+    navigate: (user: string) => router.push(afterLoginHref(user)),
   };
 
   /** Log in or Demo version: one request at a time, both buttons disabled while it runs. */

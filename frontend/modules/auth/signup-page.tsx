@@ -178,7 +178,8 @@ export function SignupPage() {
     setFormError(null);
     const outcome = await runSignup(values, {
       invalidateSession: () => queryClient.invalidateQueries({ queryKey: SESSION_KEY }),
-      navigate: () => router.push(afterLoginHref()),
+      // A new account is never the user whose change was held: that change is dropped (Story 16.0).
+      navigate: () => router.push(afterLoginHref(null)),
     });
     if (outcome.kind === "signed-up") return; // Stays busy while the next page opens.
     inFlight.current = false;

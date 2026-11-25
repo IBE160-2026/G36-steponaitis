@@ -1,6 +1,8 @@
-"""Login attempt persistence (FR-40, AD-18): failed logins per casefolded `username_key`.
+"""Login attempt persistence (FR-40, AD-18): login attempts per casefolded `username_key`.
 
-Rows whose lock has passed are pruned whenever a failure is recorded: `after_failure` and
+An attempt is counted (`reserve`) before the password is checked, so concurrent requests can
+never run more than `LOGIN_MAX_FAILURES` password checks; a success clears the row. Rows whose
+lock has passed are pruned whenever an attempt is counted: `after_failure` and
 `is_locked` already treat such a row as missing, so deleting it changes no throttle decision.
 """
 
@@ -10,21 +12,12 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from swp.domain.accounts import LoginAttempts, after_failure
+from swp.domain.accounts import LoginAttempts, after_failure, is_locked
 from swp.store.db import transaction, write_transaction
 from swp.store.models import LoginAttemptRow
 
 
-def get(key: str) -> LoginAttempts | None:
-    """The attempts recorded for `key`, or None."""
-    with transaction() as session:
-        row = session.get(LoginAttemptRow, key)
-        if row is None:
-            return None
-        return LoginAttempts(failures=row.failures, locked_until=row.locked_until)
-
-
-def _record_failure(key: str, now: datetime) -> LoginAttempts:
+def _reserve(key: str, now: datetime) -> bool:
     with write_transaction() as session:
         row = session.scalars(
             select(LoginAttemptRow).where(LoginAttemptRow.username_key == key).with_for_update()
@@ -34,6 +27,8 @@ def _record_failure(key: str, now: datetime) -> LoginAttempts:
             if row is None
             else LoginAttempts(failures=row.failures, locked_until=row.locked_until)
         )
+        if is_locked(current, now):
+            return False
         attempts = after_failure(current, now)
         if row is None:
             session.add(
@@ -47,7 +42,7 @@ def _record_failure(key: str, now: datetime) -> LoginAttempts:
             row.failures = attempts.failures
             row.locked_until = attempts.locked_until
         _prune_lock_passed(session, keep=key, now=now)
-    return attempts
+    return True
 
 
 def _prune_lock_passed(session: Session, *, keep: str, now: datetime) -> None:
@@ -70,19 +65,22 @@ def _prune_lock_passed(session: Session, *, keep: str, now: datetime) -> None:
     )
 
 
-def record_failure(key: str, now: datetime) -> LoginAttempts:
-    """Count one more failed login for `key` at `now` in one transaction; the new attempts.
+def reserve(key: str, now: datetime) -> bool:
+    """Count one login attempt for `key` at `now` before its password is checked; False (and
+    nothing written) when `key` is locked.
 
-    The row is read under a row lock; a concurrent first insert for the same key loses the
-    primary key race with an IntegrityError, and is retried once (it then finds the row).
+    The read-modify-write runs in one transaction under a row lock, so the
+    `LOGIN_MAX_FAILURES`th concurrent reservation sets the lock and later ones see it. A
+    concurrent first insert for the same key loses the primary key race with an
+    IntegrityError, and is retried once (it then finds the row).
     """
     try:
-        return _record_failure(key, now)
+        return _reserve(key, now)
     except IntegrityError:
-        return _record_failure(key, now)
+        return _reserve(key, now)
 
 
 def clear(key: str) -> None:
-    """Forget the failed logins for `key` (after a successful login)."""
+    """Forget the attempts counted for `key` (after a successful login)."""
     with transaction() as session:
         session.execute(delete(LoginAttemptRow).where(LoginAttemptRow.username_key == key))

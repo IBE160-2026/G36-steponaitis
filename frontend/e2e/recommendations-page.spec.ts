@@ -131,6 +131,10 @@ test("uj1 runs, reads and applies recommendations", async ({ page, request }) =>
   const openBeforeKey = beforeKey.recommendations.filter((row) => row.status === "open").length;
   const keyed = visibleOpen(beforeKey)[0];
   await expect(eyebrow).toHaveText(eyebrowOf(keyed));
+  // Alt+A is ignored while the Keep going command above is still saving; wait for Apply to be enabled.
+  await expect(
+    main.getByRole("region", { name: "Selected recommendation" }).getByRole("button", { name: "Apply", exact: true }),
+  ).toBeEnabled();
   await options.first().focus();
   await page.keyboard.press("Alt+KeyA");
   await expect(

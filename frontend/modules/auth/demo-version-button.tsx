@@ -75,7 +75,7 @@ export function DemoVersionButton({ className }: { className?: string }) {
     const outcome = await pressDemoVersion({
       invalidateSession: () => queryClient.invalidateQueries({ queryKey: SESSION_KEY }),
       // Replace: `/` also replaces itself with the saved-plans list once the session has a user.
-      navigate: () => router.replace(afterLoginHref()),
+      navigate: (user) => router.replace(afterLoginHref(user)),
       setBusy,
       notify: (message) => showToast(message),
     });

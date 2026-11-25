@@ -6,8 +6,10 @@ import { expect, test, toasts } from "./support/test";
 
 // UJ-3 "continues a saved plan" as a logged-in user (Story 9.3; FR-11, FR-40, UX-DR4, AD-12):
 // the avatar user menu names who is logged in, and when the session ends while the app is open,
-// Log in opens and the page (and a change made meanwhile) comes back after logging in. The e2e
-// server runs with FEATURE_AUTH=true. Each test starts logged out with its own account.
+// Log in opens and the page (and a change made meanwhile) comes back after logging in. The held
+// change is sent only when the same user logs back in; another user (Log in or Create account)
+// gets a toast and the change is dropped (Story 16.0). The e2e server runs with FEATURE_AUTH=true.
+// Each test starts logged out with its own account.
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -87,7 +89,53 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     expect(summary.version).toBe(2);
   });
 
-  test("uj3 fr40 a change held after the session expired is sent after Create account", async ({ page, request }) => {
+  test("uj3 fr40 a change held after the session expired is dropped when another user logs in", async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(120_000);
+    const username = await signUp(request);
+    const plan = await createSamplePlan(request, `Other ${randomUUID().slice(0, 8)}`);
+    const otherUser = await signUp(request);
+    await page.goto("/login");
+    await logIn(page, username);
+    await expect(page).toHaveURL(/\/plans$/);
+
+    await page.goto(`/plans/${plan.id}/best-locations?mode=list`);
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
+    await main.getByRole("combobox", { name: "Aisle" }).selectOption("A");
+    const markAisle = main.getByRole("button", { name: "Mark aisle A", exact: true });
+    await expect(markAisle).toBeVisible();
+    const planUrl = page.url();
+
+    await page.context().clearCookies();
+    await markAisle.click();
+    await expect(page).toHaveURL(/\/login$/);
+
+    // Someone else logs in on this browser: the change is never saved under their name.
+    await logIn(page, otherUser);
+    await expect(
+      toasts(page).getByText("The last change was not saved: a different user logged in.", { exact: true }),
+    ).toBeVisible();
+    await expect(page).toHaveURL(planUrl);
+    await expect(main.getByRole("heading", { name: "Best locations", level: 1 })).toBeVisible();
+    await expect(toasts(page).getByText("Best-location marks changed.", { exact: true })).toHaveCount(0);
+
+    const view = (await (await request.get(`/api/plans/${plan.id}/locations`)).json()) as { marks: unknown[] };
+    expect(view.marks).toHaveLength(0);
+    const summary = (await (await request.get(`/api/plans/${plan.id}`)).json()) as {
+      last_edited_by: string;
+      version: number;
+    };
+    expect(summary.version).toBe(1);
+    expect(summary.last_edited_by).not.toBe(otherUser);
+  });
+
+  test("uj3 fr40 a change held after the session expired is dropped after Create account", async ({
+    page,
+    request,
+  }) => {
     test.setTimeout(120_000);
     const username = await signUp(request);
     const plan = await createSamplePlan(request, `Signup ${randomUUID().slice(0, 8)}`);
@@ -107,7 +155,8 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await markAisle.click();
     await expect(page).toHaveURL(/\/login$/);
 
-    // A new account instead of the old one: Create account returns to the plan too.
+    // A new account instead of the old one: Create account returns to the plan, but a new account
+    // is never the user whose change was held, so the change is dropped with a toast.
     await page.getByRole("region", { name: "Log in" }).getByRole("link", { name: "Create account" }).click();
     await expect(page).toHaveURL(/\/signup$/);
     const newUser = uniqueUsername();
@@ -117,13 +166,19 @@ test.describe("uj3 fr40 the logged-in user and session expiry", () => {
     await page.getByLabel("Repeat password").fill("secret");
     await card.getByRole("button", { name: "Create account" }).click();
 
+    await expect(
+      toasts(page).getByText("The last change was not saved: a different user logged in.", { exact: true }),
+    ).toBeVisible();
     await expect(page).toHaveURL(planUrl);
-    await expect(main.getByRole("list", { name: "Best-location marks" }).getByText("Aisle A", { exact: true })).toBeVisible();
 
     const view = (await (await request.get(`/api/plans/${plan.id}/locations`)).json()) as { marks: unknown[] };
-    expect(view.marks).toHaveLength(1);
-    const summary = (await (await request.get(`/api/plans/${plan.id}`)).json()) as { last_edited_by: string };
-    expect(summary.last_edited_by).toBe(newUser);
+    expect(view.marks).toHaveLength(0);
+    const summary = (await (await request.get(`/api/plans/${plan.id}`)).json()) as {
+      last_edited_by: string;
+      version: number;
+    };
+    expect(summary.version).toBe(1);
+    expect(summary.last_edited_by).not.toBe(newUser);
   });
 
   test("uj3 fr40 a page opened after the session expired returns after Log in", async ({ page, request }) => {

@@ -124,21 +124,28 @@ export const E2E_USER = { username: "e2eplanner", password: "e2e-secret" } as co
 const SAME_SITE = { "Sec-Fetch-Site": "same-origin" };
 
 /**
- * Log the e2e account in through the API and return its cookie as a storage state. Signs up when
- * the login is 401 (a fresh database) and logs in again when the sign-up says taken (another
- * worker won the race). Undefined when /api/auth/login is 404: a reused server with auth off.
+ * Log the e2e account in through the API and return its cookie as a storage state. Signs up first
+ * and logs in only when the sign-up is refused (the account exists, or another worker won the
+ * race): a login for a missing account would count as a failed login, and many workers starting
+ * on a fresh database at once would lock the username (FR-40, Story 16.0). Undefined when
+ * /api/auth/signup is 404: a reused server with auth off.
  */
 async function logInE2eUser(playwright: PlaywrightWorkerArgs["playwright"], baseURL: string | undefined) {
   const api = await playwright.request.newContext({ baseURL, extraHTTPHeaders: SAME_SITE });
   try {
-    const logIn = () => api.post("/api/auth/login", { data: E2E_USER });
-    let response = await logIn();
-    if (response.status() === 404) return undefined;
-    if (response.status() === 401) {
-      const signup = await api.post("/api/auth/signup", {
-        data: { ...E2E_USER, password_repeat: E2E_USER.password },
-      });
-      response = signup.status() === 201 ? signup : await logIn();
+    const signup = await api.post("/api/auth/signup", {
+      data: { ...E2E_USER, password_repeat: E2E_USER.password },
+    });
+    if (signup.status() === 404) return undefined;
+    let response = signup;
+    if (signup.status() !== 201) {
+      // Every worker logs in at once on a reused server; attempts are counted before the password
+      // check (Story 16.0), so a burst can meet 429 `login_locked` until the first success clears it.
+      for (let attempt = 0; ; attempt++) {
+        response = await api.post("/api/auth/login", { data: E2E_USER });
+        if (response.status() !== 429 || attempt >= 5) break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
     }
     if (!response.ok()) throw new Error(`e2e login failed: ${response.status()} ${await response.text()}`);
     return (await api.storageState()) as StorageState;

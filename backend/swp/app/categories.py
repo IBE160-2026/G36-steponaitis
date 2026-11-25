@@ -9,6 +9,7 @@ the plan and both tables and writes nothing. The starter categories (FR-47) come
 """
 
 import logging
+import time
 import tomllib
 import uuid
 from collections.abc import Callable
@@ -42,6 +43,10 @@ from swp.store.category_seed import CategorySeedBusy
 from swp.store.keyword_rules import RuleDraft, RulesBusy, StoredKeywordRule
 
 logger = logging.getLogger("swp.categories")
+
+# FR-47: tries of the starter seed when the database is busy, and the wait between them.
+SEED_TRIES = 3
+SEED_RETRY_SECONDS = 0.5
 
 STARTER_CATEGORIES_PATH = BACKEND_DIR / "settings" / "starter_categories.toml"
 RULE_NOT_FOUND = "That keyword rule no longer exists."
@@ -287,14 +292,37 @@ def load_starter_categories(path: Path = STARTER_CATEGORIES_PATH) -> StarterCate
     return StarterCategories(rules=rules, aisles=aisles)
 
 
-def seed_starter_categories(*, now: datetime, path: Path | None = None) -> bool:
+def seed_starter_categories(
+    *, now: datetime, path: Path | None = None, sleep: Callable[[float], None] = time.sleep
+) -> bool:
     """Store the starter list once, only when both category tables are empty (FR-47, AD-9);
-    True when it wrote. A busy lock means another writer holds the category tables (e.g. another
-    worker seeding): logged and skipped."""
-    starter = load_starter_categories(path or STARTER_CATEGORIES_PATH)
-    drafts = [RuleDraft(uuid.uuid4(), rule.keyword, rule.category) for rule in starter.rules]
-    try:
-        return category_seed.seed_if_empty(drafts, starter.aisles, now=now)
-    except CategorySeedBusy:
-        logger.info("Starter categories skipped: another writer holds the category tables.")
-        return False
+    True when it wrote.
+
+    The file is read only after both tables are found empty, so a database with the planner's
+    lists never reads it. A busy lock (another writer, e.g. a worker seeding) is retried
+    `SEED_TRIES` times, then logged with its cause and skipped; the next start or
+    `swp db upgrade` seeds instead.
+    """
+    drafts: list[RuleDraft] | None = None
+    aisles: dict[str, list[str]] = {}
+    for attempt in range(1, SEED_TRIES + 1):
+        try:
+            if not category_seed.tables_empty():
+                return False
+            if drafts is None:
+                starter = load_starter_categories(path or STARTER_CATEGORIES_PATH)
+                drafts = [
+                    RuleDraft(uuid.uuid4(), rule.keyword, rule.category) for rule in starter.rules
+                ]
+                aisles = starter.aisles
+            return category_seed.seed_if_empty(drafts, aisles, now=now)
+        except CategorySeedBusy as busy:
+            if attempt == SEED_TRIES:
+                logger.warning(
+                    "Starter categories skipped: the database was busy (%s). They are added on "
+                    "the next start or swp db upgrade.",
+                    busy,
+                )
+                return False
+            sleep(SEED_RETRY_SECONDS)
+    return False  # not reached: the last try returns or logs

@@ -4,6 +4,7 @@
 `POST /api/auth/demo` logs in as `demo` with no password and no throttle.
 """
 
+import logging
 from collections.abc import Iterator
 from datetime import UTC, datetime
 
@@ -11,6 +12,7 @@ import bcrypt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import OperationalError
 
 from swp.api.app import create_app
 from swp.app import auth
@@ -133,6 +135,38 @@ def test_fr50_concurrent_seed_integrity_error_is_success(
     auth.seed_demo_account(now=NOW)
 
     assert _count(UserRow) == 0
+
+
+def test_fr50_demo_seed_skips_busy_database_without_crashing(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    # Story 16.0: a locked SQLite database during the startup seed is logged, not raised.
+    def busy(_user: object) -> bool:
+        raise OperationalError("INSERT", {}, Exception("database is locked"))
+
+    monkeypatch.setattr(user_store, "insert_user", busy)
+    caplog.set_level(logging.WARNING, logger="swp.auth")
+
+    auth.seed_demo_account(now=NOW)
+    bootstrap(upgrade=False, seed=True)
+
+    assert _count(UserRow) == 0
+    assert any(
+        "Demo account skipped: the database was busy (database is locked)" in r.getMessage()
+        for r in caplog.records
+    )
+
+
+def test_fr50_demo_seed_other_operational_error_still_raises(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def broken(_user: object) -> bool:
+        raise OperationalError("INSERT", {}, Exception("no such table: users"))
+
+    monkeypatch.setattr(user_store, "insert_user", broken)
+
+    with pytest.raises(OperationalError):
+        auth.seed_demo_account(now=NOW)
 
 
 def test_fr50_lifespan_with_local_app_env_seeds_demo(

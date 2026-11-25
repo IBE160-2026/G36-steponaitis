@@ -12,13 +12,28 @@ from datetime import datetime
 from sqlalchemy import exists, select, text
 from sqlalchemy.exc import OperationalError
 
-from swp.store.db import is_busy, write_transaction
+from swp.store.db import is_busy, transaction, write_transaction
 from swp.store.keyword_rules import RuleDraft
 from swp.store.models import AisleCategoryRow, KeywordRuleRow
 
 
 class CategorySeedBusy(Exception):
-    """Another writer holds a category table lock (SQLite busy/locked, pg 55P03)."""
+    """Another writer holds a category table lock (SQLite busy/locked, pg 55P03); the message
+    is the driver's cause."""
+
+
+def tables_empty() -> bool:
+    """True when neither keyword_rules nor aisle_categories has a row (a plain read; the seed
+    re-checks under its lock). Raise CategorySeedBusy when the database is busy."""
+    try:
+        with transaction() as session:
+            has_rules = session.scalar(select(exists().select_from(KeywordRuleRow)))
+            has_aisles = session.scalar(select(exists().select_from(AisleCategoryRow)))
+    except OperationalError as error:
+        if is_busy(error):
+            raise CategorySeedBusy(str(error.orig)) from error
+        raise
+    return not has_rules and not has_aisles
 
 
 def seed_if_empty(
@@ -31,7 +46,7 @@ def seed_if_empty(
         return _seed_if_empty(rules, aisles, now=now)
     except OperationalError as error:
         if is_busy(error):
-            raise CategorySeedBusy from error
+            raise CategorySeedBusy(str(error.orig)) from error
         raise
 
 

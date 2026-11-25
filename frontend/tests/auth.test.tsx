@@ -739,9 +739,48 @@ describe("fr50 front page guard and Log out (Story 9.6)", () => {
 describe("fr40 return after Log in", () => {
   it("fr40_login_success_opens_the_restored_page_else_saved_plans", () => {
     const expiry = new SessionExpiry();
-    expect(afterLoginHref(expiry)).toBe(SAVED_PLANS_HREF);
-    void expiry.expire("/plans/p1/locations?aisle=A");
-    expect(afterLoginHref(expiry)).toBe("/plans/p1/locations?aisle=A");
-    expect(afterLoginHref(expiry)).toBe(SAVED_PLANS_HREF);
+    expect(afterLoginHref("Kari7", expiry)).toBe(SAVED_PLANS_HREF);
+    void expiry.expire("/plans/p1/locations?aisle=A", "Kari7");
+    expect(afterLoginHref("Kari7", expiry)).toBe("/plans/p1/locations?aisle=A");
+    expect(afterLoginHref("Kari7", expiry)).toBe(SAVED_PLANS_HREF);
+  });
+
+  it("fr40_held_change_is_dropped_when_another_user_logs_in", async () => {
+    const expiry = new SessionExpiry();
+    const held = expiry.expire("/plans/p1/parts", "Kari7");
+    // Another user still returns to the same page; only the held change is dropped.
+    expect(afterLoginHref("Ola", expiry)).toBe("/plans/p1/parts");
+    expect(await held).toBe("other-user");
+  });
+
+  it("fr40_same_user_still_saves_held_change", async () => {
+    const expiry = new SessionExpiry();
+    const held = expiry.expire("/plans/p1/parts", "Kari7");
+    expect(afterLoginHref("Kari7", expiry)).toBe("/plans/p1/parts");
+    expect(await held).toBe("same-user");
+  });
+
+  it("fr40_create_account_and_unknown_user_drop_the_held_change", async () => {
+    const expiry = new SessionExpiry();
+    const afterSignup = expiry.expire("/plans/p1/parts", "Kari7");
+    expect(afterLoginHref(null, expiry)).toBe("/plans/p1/parts");
+    expect(await afterSignup).toBe("other-user");
+    const unknown = expiry.expire("/plans/p1/parts", null);
+    afterLoginHref("Kari7", expiry);
+    expect(await unknown).toBe("other-user");
+  });
+
+  it("fr40_login_signup_and_demo_navigate_as_the_user_who_logged_in", async () => {
+    const users: string[] = [];
+    await runLogin(
+      { username: "kari7", password: "secret" },
+      { post: async () => ({ user: "Kari7" }), invalidateSession: async () => {}, navigate: (u) => users.push(u) },
+    );
+    await runDemo({ post: async () => ({ user: "demo" }), invalidateSession: async () => {}, navigate: (u) => users.push(u) });
+    await runSignup(
+      { username: "Ola", password: "secret", password_repeat: "secret" },
+      { post: async () => ({ user: "Ola" }), invalidateSession: async () => {}, navigate: (u) => users.push(u) },
+    );
+    expect(users).toEqual(["Kari7", "demo", "Ola"]);
   });
 });

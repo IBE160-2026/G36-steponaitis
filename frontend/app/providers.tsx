@@ -34,10 +34,12 @@ export function Providers({ children }: { children: ReactNode }) {
     const shared: QueryErrorEffects = {
       notify: (m) => showToast(m),
       navigate: (h) => router.replace(h),
-      // A 401 (Story 9.3, FR-40): remember this page, set the cached session to logged out (as Log
-      // out does, so the guard hides plan data at once) and open Log in. Resolves after Log in.
+      // A 401 (Story 9.3, FR-40): remember this page and the user who was logged in (read before
+      // it is cleared; Story 16.0), set the cached session to logged out (as Log out does, so the
+      // guard hides plan data at once) and open Log in. Resolves after Log in.
       sessionExpired: () => {
-        const restored = sessionExpiry.expire(window.location.pathname + window.location.search);
+        const user = client.getQueryData<Session>(SESSION_KEY)?.user ?? null;
+        const restored = sessionExpiry.expire(window.location.pathname + window.location.search, user);
         client.setQueryData<Session>(SESSION_KEY, (current) => (current ? { ...current, user: null } : current));
         router.replace(LOGIN_HREF);
         return restored;

@@ -4,6 +4,7 @@
 // for the data.
 
 import { ApiError } from "@/lib/api/errors";
+import type { ResumeVerdict } from "@/lib/api/session-expiry";
 import { SAVED_PLANS_HREF } from "@/lib/view-state/urls";
 
 export const PLAN_DELETED = "This plan was deleted.";
@@ -12,10 +13,11 @@ export type QueryErrorEffects = {
   notify: (message: string) => void;
   navigate: (href: string) => void;
   /**
-   * The session has ended: remember the open page, mark the session logged out and open Log in.
-   * Resolves after the next successful Log in.
+   * The session has ended: remember the open page and user, mark the session logged out and open
+   * Log in. Resolves after the next successful Log in, with whether the same user logged back in
+   * (Story 16.0). `void` (no verdict, e.g. a test double) counts as the same user.
    */
-  sessionExpired: () => Promise<void>;
+  sessionExpired: () => Promise<ResumeVerdict | void>;
   /**
    * Someone else saved the plan since this planner's command was built (FR-41): ask whether to
    * reload the plan (drop the command) or keep going (send it again on top). Absent: reload.

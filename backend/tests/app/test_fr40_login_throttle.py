@@ -1,5 +1,6 @@
 """FR-40/AD-18 login throttle on SQLite and (CI) Postgres, with an injected clock (no sleep)."""
 
+import threading
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 
@@ -104,27 +105,80 @@ def test_fr40_locked_login_skips_bcrypt(account: None, monkeypatch: pytest.Monke
     assert _rows() == {"kari7": (5, T + timedelta(seconds=60))}
 
 
-def test_fr40_record_failure_retries_once_after_integrity_error(
+def test_fr40_reserve_retries_once_after_integrity_error(
     empty_tables: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # A concurrent first insert: the other request's row lands, then this insert conflicts.
-    real = login_attempts._record_failure
+    real = login_attempts._reserve
     raised: list[bool] = []
 
-    def racing(key: str, now: datetime):
+    def racing(key: str, now: datetime) -> bool:
         if not raised:
             raised.append(True)
-            real(key, now)  # the concurrent request's failure
+            real(key, now)  # the concurrent request's attempt
             raise IntegrityError("INSERT", {}, Exception("duplicate key"))
         return real(key, now)
 
-    monkeypatch.setattr(login_attempts, "_record_failure", racing)
+    monkeypatch.setattr(login_attempts, "_reserve", racing)
 
-    attempts = login_attempts.record_failure("kari7", T)
+    assert login_attempts.reserve("kari7", T) is True
 
     assert raised == [True]
-    assert (attempts.failures, attempts.locked_until) == (2, None)
     assert _rows() == {"kari7": (2, None)}
+
+
+def test_fr40_reserve_on_locked_key_writes_nothing(empty_tables: str) -> None:
+    for _ in range(5):
+        assert login_attempts.reserve("kari7", T) is True
+
+    assert login_attempts.reserve("kari7", T + timedelta(seconds=59)) is False
+    assert _rows() == {"kari7": (5, T + timedelta(seconds=60))}
+
+
+def test_fr40_right_password_on_fifth_try_logs_in_and_clears_row(account: None) -> None:
+    _fail("kari7", 4)
+
+    assert _code("kari7", "secret", T) == "ok"
+
+    assert _rows() == {}
+
+
+def test_fr40_concurrent_failed_logins_check_at_most_five_passwords(
+    account: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The attempt is counted before bcrypt runs, so 10 requests racing on one username run
+    # at most 5 password checks; the rest are refused as locked (AD-18).
+    real_checkpw = auth.bcrypt.checkpw
+    calls: list[None] = []
+    calls_lock = threading.Lock()
+
+    def spy(password: bytes, hashed: bytes) -> bool:
+        with calls_lock:
+            calls.append(None)
+        return real_checkpw(password, hashed)
+
+    monkeypatch.setattr(auth.bcrypt, "checkpw", spy)
+    barrier = threading.Barrier(10)
+    codes: list[str] = []
+    errors: list[BaseException] = []
+
+    def attempt() -> None:
+        try:
+            barrier.wait()
+            codes.append(_code("kari7", "wrong", T))
+        except BaseException as error:  # noqa: BLE001 - reported below
+            errors.append(error)
+
+    threads = [threading.Thread(target=attempt) for _ in range(10)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert errors == []
+    assert len(calls) <= 5
+    assert sorted(codes) == ["login_locked"] * 5 + ["unauthenticated"] * 5
+    assert _rows() == {"kari7": (5, T + timedelta(seconds=60))}
 
 
 def test_fr40_lock_passed_allows_login_and_clears_row(account: None) -> None:

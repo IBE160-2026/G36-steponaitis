@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from swp.domain.accounts import DEMO_USERNAME
-from swp.store.db import transaction
+from swp.store.db import is_busy, transaction
 from swp.store.models import UserRow
 
 
@@ -37,6 +37,22 @@ def insert_user(user: StoredUser) -> bool:
     except IntegrityError:
         return False
     return True
+
+
+class UsersBusy(Exception):
+    """Another writer holds the database lock (SQLite busy/locked, pg 55P03); the message is
+    the driver's cause."""
+
+
+def insert_seed_user(user: StoredUser) -> bool:
+    """`insert_user` for the startup seed: a busy lock raises `UsersBusy` instead of
+    `OperationalError`, so the caller can log it and skip."""
+    try:
+        return insert_user(user)
+    except OperationalError as error:
+        if is_busy(error):
+            raise UsersBusy(str(error.orig)) from error
+        raise
 
 
 def _stored(row: UserRow) -> StoredUser:

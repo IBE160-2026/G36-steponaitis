@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 
+from swp.api.request_log import configure_logging
 from swp.app.bootstrap import bootstrap
 from swp.app.startup import StartupRefused, check_startup
 
@@ -19,11 +20,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "db" and args.db_command == "upgrade":
         # AD-10/NFR-6: never migrate or seed on settings production would refuse.
+        # check_startup logs one `Refusing to start: …` line per problem through the `swp`
+        # handler (without it, logging's lastResort would print them to stderr as well).
+        configure_logging()
         try:
             check_startup()
-        except StartupRefused as refused:
-            for problem in refused.problems:
-                print(f"swp: refusing to start: {problem}", file=sys.stderr)
+        except StartupRefused:
             return 2
         bootstrap(upgrade=True, seed=True)
     elif args.command == "openapi":

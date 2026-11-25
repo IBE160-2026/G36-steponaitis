@@ -116,8 +116,11 @@ def test_fr50_demo_password_that_could_not_log_in_fails(
 ) -> None:
     monkeypatch.setenv("DEMO_PASSWORD", password)
 
-    with pytest.raises(ValidationError, match="DEMO_PASSWORD"):
+    with pytest.raises(ValidationError) as invalid:
         config.Settings()
+
+    # swp.app.startup turns the field name into the `DEMO_PASSWORD: …` refusal line.
+    assert [error["loc"] for error in invalid.value.errors()] == [("demo_password",)]
 
 
 ENV_EXAMPLE = Path(__file__).resolve().parent.parent / ".env.example"

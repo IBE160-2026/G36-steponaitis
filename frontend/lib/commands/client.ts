@@ -31,6 +31,8 @@ export const SAVING_REASON = "Saving the last change…";
 export const SAVED_TEXT = "Saved automatically";
 export const RETRYING_TEXT = "The last change was not saved yet. Trying again.";
 export const FAILED_TEXT = "The change was not saved. Try again.";
+/** Story 16.0: a change held after the session ended is never saved under another user's name. */
+export const HELD_CHANGE_DROPPED = "The last change was not saved: a different user logged in.";
 
 const TRANSIENT_STATUSES = new Set([502, 503, 504]);
 
@@ -165,9 +167,13 @@ export class CommandClient {
         outcome = await this.post(planId, command);
         if (outcome instanceof ApiError && outcome.code === "unauthenticated") {
           // The session ended (Story 9.3, FR-40): hold the command, still pending, until Log in
-          // succeeds, then post the identical body again. Not a transient attempt.
+          // succeeds, then post the identical body again. Not a transient attempt. When a different
+          // user logged in (Story 16.0), drop it with a toast and refetch the plan instead.
           this.update(planId, { notice: null });
-          await this.effects.sessionExpired();
+          if ((await this.effects.sessionExpired()) === "other-user") {
+            this.effects.notify(HELD_CHANGE_DROPPED);
+            return { outcome: await this.dropForReload(planId), events: [] };
+          }
           continue;
         }
         if (outcome instanceof ApiError && outcome.code === "plan_changed") {

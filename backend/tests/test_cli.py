@@ -1,4 +1,5 @@
 import json
+import logging
 import secrets
 import sqlite3
 from pathlib import Path
@@ -62,7 +63,10 @@ def test_nfr1_openapi_lists_plans_and_session(capsys) -> None:
 
 
 def test_fr50_cli_db_upgrade_refuses_production_without_demo_password(
-    database_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    database_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     # NFR-6 (Story 9.7): production must choose the demo password; nothing is migrated or seeded.
     monkeypatch.setenv("APP_ENV", "production")
@@ -70,11 +74,62 @@ def test_fr50_cli_db_upgrade_refuses_production_without_demo_password(
     monkeypatch.delenv("DEMO_PASSWORD", raising=False)
     monkeypatch.delenv("VERCEL", raising=False)
     get_settings.cache_clear()
+    caplog.set_level(logging.ERROR, logger="swp.startup")
 
     assert main(["db", "upgrade"]) == 2
 
-    err = capsys.readouterr().err
-    assert f"swp: refusing to start: {DEMO_PASSWORD_UNSET}" in err.splitlines()
+    assert _refusal_lines(caplog) == [f"Refusing to start: {DEMO_PASSWORD_UNSET}"]
+    _assert_no_second_line(capsys)
+    assert not database_path.exists() or "users" not in _tables(database_path)
+
+
+def _assert_no_second_line(capsys: pytest.CaptureFixture[str]) -> str:
+    """No `swp: refusing` print and no logging lastResort copy on stderr; the `swp` handler
+    (stdout) may carry the one logged line."""
+    out, err = capsys.readouterr()
+    assert "refusing to start" not in err.lower()
+    assert "swp: refusing" not in out
+    assert out.count("Refusing to start") <= 1
+    return out + err
+
+
+def _refusal_lines(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "swp.startup" and record.levelno == logging.ERROR
+    ]
+
+
+def test_nfr6_cli_db_upgrade_invalid_setting_prints_one_line_without_value(
+    database_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # One `Refusing to start:` line through the `swp` handler, no print, no traceback.
+    caplog.set_level(logging.ERROR, logger="swp.startup")
+    # Start without a `swp` handler, so the one stdout line proves `swp db upgrade` sets it up.
+    monkeypatch.setattr(logging.getLogger("swp"), "handlers", [])
+    # Scoped: the fixture's teardown reads the settings again and must see valid ones.
+    with monkeypatch.context() as bad:
+        bad.setenv("DEMO_PASSWORD", "x")
+        get_settings.cache_clear()
+        assert main(["db", "upgrade"]) == 2
+    get_settings.cache_clear()
+
+    lines = _refusal_lines(caplog)
+    assert len(lines) == 1
+    assert lines[0].startswith("Refusing to start: DEMO_PASSWORD: ")
+    assert "DEMO_PASSWORD: DEMO_PASSWORD" not in lines[0]
+    out, err = capsys.readouterr()
+    assert out.count("Refusing to start: DEMO_PASSWORD: ") == 1
+    assert "refusing to start" not in err.lower()
+    assert "swp: refusing" not in out
+    printed = out + err
+    assert "Traceback" not in printed
+    assert "x" not in lines[0].removeprefix("Refusing to start: DEMO_PASSWORD: ").split()
+    assert logging.getLogger("swp").handlers, "configure_logging() gives swp a handler"
     assert not database_path.exists() or "users" not in _tables(database_path)
 
 

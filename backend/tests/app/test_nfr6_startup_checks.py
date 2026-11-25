@@ -148,6 +148,56 @@ def test_nfr6_vercel_without_app_env_refuses(
     assert lines == [f"Refusing to start: {VERCEL_WITHOUT_APP_ENV}"]
 
 
+@pytest.mark.parametrize("app_env", [None, "local"], ids=["unset", "local"])
+def test_nfr6_vercel_with_local_app_env_refuses(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, app_env: str | None
+) -> None:
+    _env(monkeypatch, VERCEL="1", APP_ENV=app_env)
+
+    refused, lines = _refused(caplog)
+
+    assert lines == [f"Refusing to start: {VERCEL_WITHOUT_APP_ENV}"]
+    assert refused.problems == [VERCEL_WITHOUT_APP_ENV]
+    assert VERCEL_WITHOUT_APP_ENV == (
+        "VERCEL is set but APP_ENV is not production. Set APP_ENV=production."
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "value", "reason"),
+    [
+        ("DEMO_PASSWORD", "x", "DEMO_PASSWORD: "),
+        ("MAX_PLANS", "zz-not-a-number", "MAX_PLANS: "),
+    ],
+    ids=["short-demo-password", "max-plans-not-a-number"],
+)
+def test_nfr6_invalid_setting_refuses_without_value(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    capsys: pytest.CaptureFixture[str],
+    name: str,
+    value: str,
+    reason: str,
+) -> None:
+    # Scoped: the fixtures' teardown reads the settings again and must see valid ones.
+    with monkeypatch.context() as bad:
+        _env(bad, **{name: value})
+        refused, lines = _refused(caplog)
+    get_settings.cache_clear()
+
+    assert len(lines) == 1
+    assert lines[0].startswith(f"Refusing to start: {reason}")
+    assert lines[0].count(f"{name}:") == 1  # no double prefix
+    assert "Value error" not in lines[0]
+    assert refused.__cause__ is None
+    assert refused.__suppress_context__
+    shown = caplog.text + str(refused) + "".join(capsys.readouterr())
+    assert f"={value}" not in shown and f"'{value}'" not in shown
+    assert "input_value" not in shown
+    assert "ValidationError" not in shown
+    assert "validation error" not in shown.lower()
+
+
 def test_nfr6_vercel_with_production_app_env_starts(monkeypatch: pytest.MonkeyPatch) -> None:
     _production(monkeypatch, VERCEL="1")
 

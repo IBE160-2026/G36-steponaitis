@@ -298,7 +298,7 @@ flowchart LR
     | `MAX_PLANS` | 50 | only when `FEATURE_DEMO` is on |
     | `MAX_ACCOUNTS` | 200 | only when `FEATURE_DEMO` is on |
 
-  - **Login throttle.** Failed logins are counted per casefolded submitted username, whether or not the account exists. After 5 failures, logins for that name are blocked for 60 s with `login_locked`. `POST /api/auth/demo` bypasses the throttle.
+  - **Login throttle.** Each login attempt is counted per casefolded submitted username, whether or not the account exists, before the password is checked, so concurrent requests run at most 5 password checks. A successful login clears the count. After 5 counted attempts, logins for that name are blocked for 60 s with `login_locked`. `POST /api/auth/demo` bypasses the throttle.
   - **Accepted risks on the demo.** Any visitor can delete any plan, and drive-by sign-ups can fill `MAX_ACCOUNTS`; Demo version still works.
   - **Known limit: Apply all on very large imports.** Apply all is one request. On a maximum-size import (9,160 recommendations) it did not finish in 3 minutes (Story 12.5), so on Vercel it can hit the function's time limit and fail. The sample data and imports of realistic size finish in seconds. Decided 2026-11-25: documented, not optimized.
 

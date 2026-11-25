@@ -76,10 +76,15 @@ export function firstFailingField(errors: SignupFieldErrors): SignupField | null
 
 /**
  * Where a successful Log in or Create account goes: the page that was open when the session ended,
- * else the saved-plans list. Restoring also lets every command held for the login go (Story 9.3).
+ * else the saved-plans list. Restoring also lets every command held for the login go (Story 9.3):
+ * it is sent again only when `user` (who just logged in) is the user whose session ended, and
+ * dropped otherwise (Story 16.0). Null (unknown, or a new account) always drops.
  */
-export function afterLoginHref(expiry: { restore: () => string | null } = sessionExpiry): string {
-  return expiry.restore() ?? SAVED_PLANS_HREF;
+export function afterLoginHref(
+  user: string | null,
+  expiry: { restore: (user: string | null) => string | null } = sessionExpiry,
+): string {
+  return expiry.restore(user) ?? SAVED_PLANS_HREF;
 }
 
 export type SignupOutcome =
@@ -91,8 +96,8 @@ export type SignupEffects = {
   post?: (form: SignupForm) => Promise<SignupResponse>;
   /** Refetch GET /api/session so the app knows the new user. */
   invalidateSession: () => Promise<unknown>;
-  /** Open the saved-plans list. */
-  navigate: () => void;
+  /** Open the next page (`afterLoginHref`) as `user`, who just logged in or signed up. */
+  navigate: (user: string) => void;
 };
 
 /**
@@ -113,7 +118,7 @@ export async function runSignup(form: SignupForm, effects: SignupEffects): Promi
     return { kind: "failed", message: apiError.message };
   }
   await effects.invalidateSession();
-  effects.navigate();
+  effects.navigate(created.user);
   return { kind: "signed-up", user: created.user };
 }
 
@@ -127,8 +132,8 @@ export type LoginEffects = {
   post?: (form: LoginForm) => Promise<LoginResponse>;
   /** Refetch GET /api/session (awaited) so the guard knows the user before the list opens. */
   invalidateSession: () => Promise<unknown>;
-  /** Open the saved-plans list. */
-  navigate: () => void;
+  /** Open the next page (`afterLoginHref`) as `user`, who just logged in or signed up. */
+  navigate: (user: string) => void;
 };
 
 /** Send the credentials once; on success refresh the session, then open the saved-plans list. */
@@ -143,7 +148,7 @@ export async function runLogin(form: LoginForm, effects: LoginEffects): Promise<
     return { kind: "failed", message: apiError.message };
   }
   await effects.invalidateSession();
-  effects.navigate();
+  effects.navigate(loggedIn.user);
   return { kind: "logged-in", user: loggedIn.user };
 }
 
@@ -162,7 +167,7 @@ export async function runDemo(effects: DemoEffects): Promise<LoginOutcome> {
     return { kind: "failed", message: (error instanceof ApiError ? error : internalError()).message };
   }
   await effects.invalidateSession();
-  effects.navigate();
+  effects.navigate(loggedIn.user);
   return { kind: "logged-in", user: loggedIn.user };
 }
 

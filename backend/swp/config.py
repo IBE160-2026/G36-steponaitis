@@ -66,10 +66,11 @@ class Settings(BaseSettings):
     @field_validator("demo_password")
     @classmethod
     def _demo_password_can_log_in(cls, password: str) -> str:
-        # A password the Log in form would refuse fails at startup instead.
+        # A password the Log in form would refuse fails at startup instead; swp.app.startup
+        # names the setting (DEMO_PASSWORD) in its refusal line.
         error = password_error(password)
         if error is not None:
-            raise ValueError(f"DEMO_PASSWORD: {error}")
+            raise ValueError(error)
         return password
 
 
