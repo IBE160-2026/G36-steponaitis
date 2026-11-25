@@ -7,7 +7,7 @@ Bygge Story 16.0 med `bmad-build`: herde appen før den går på en offentlig UR
 
 ### Plan
 - Epic 16-kontekst kompilert til `.docs/implementation-artifacts/epic-16-context.md`.
-- Spec: [spec-16-0-production-hardening-before-going-public.md](../../.docs/implementation-artifacts/spec-16-0-production-hardening-before-going-public.md). Justas valgte å holde de fire delene i én story og én spec (~2 800 tokens). Han besluttet også at Create account etter utløpt økt dropper den tilbakeholdte endringen.
+- Spec: [spec-16-0-production-hardening-before-going-public.md](../../.docs/implementation-artifacts/spec-16-0-production-hardening-before-going-public.md). Justas valgte å holde de fire delene i én story og én spec (~2 800 tokens), og besluttet at Create account etter utløpt økt dropper den tilbakeholdte endringen.
 - Implementering i subagent, review med tre lag (blind, edge case, verification gap), patcher, deretter full verifisering og e2e-porten.
 
 ### Resultat
