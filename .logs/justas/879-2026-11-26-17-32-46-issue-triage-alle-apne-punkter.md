@@ -30,7 +30,7 @@ Justas spurte om hver story bør gås gjennom én og én for å rette alle åpne
   - `npm test`, alle lint-kommandoer, typecheck og trace er grønne.
   - `npm run e2e`: 453 passed, 0 failed og 0 flaky i chromium, firefox og msedge. De 3 hoppede testene er plassholderen for uj5 deploy.
 - `issues.md`: 100 punkter er lukket (utdaterte, beslutninger, rettede feil, kjente begrensninger, frafalte testhull og polish, to duplikater). De oppfølgingsreviewene som ikke ble kjørt, er eksplisitt frafalt av Justas. De 9 som står åpne, er manuelle sjekker.
-- Utviklingsserveren ble stoppet før e2e-porten. Ingenting er pushet.
+- Utviklingsserveren ble stoppet før e2e-porten. `main` er pushet til origin (`163fa95..7e8c0c2`).
 
 ### Åpne punkter
 Ingen nye. De gjenværende manuelle sjekkene (deploy av 16.1, QR-skanning, README-kjøring av en annen person, utskrift i Firefox og overvåking av låser på Postgres) står fortsatt i `issues.md`.
