@@ -15,7 +15,7 @@ Sette Story 16.0 til `done` og bygge Story 16.1 med `bmad-build`: gjøre repoet 
 - Implementering i subagent, review i tre lag (blind, edge case, verification gap), patcher i samme subagent, deretter full verifisering.
 
 ### Resultat
-- **Commit `82c0279`** (lokalt, ikke pushet).
+- **Commit `82c0279`**, pushet til `origin/main` sammen med `51cbac2` og loggcommiten (`88c8237..384f85e`).
 - **Funn under implementeringen:** startsjekken fra Story 16.0 krever sterk `JWT_SECRET` og `DEMO_PASSWORD` når `APP_ENV=production`. Specen fulgte epicen og satte dem først i 16.2, så backend ville nektet å starte. Justas valgte å sette begge i Vercel nå (kun Production). `FEATURE_AUTH` og `FEATURE_DEMO` er fortsatt av, og startsjekken er ikke svekket.
 - **`vercel.json`:** Vercel Services med `web` (`frontend/`, nextjs) og `api` (`backend/`, fastapi, `swp.main:app`). `/api/(.*)` går til backend, alt annet til Next.js, og bare `main` deployes.
 - **Postgres-motor:** `get_engine()` bruker `NullPool` og `prepare_threshold=None` på Postgres, så den virker gjennom transaction-pooleren til Supabase. SQLite er uendret.
