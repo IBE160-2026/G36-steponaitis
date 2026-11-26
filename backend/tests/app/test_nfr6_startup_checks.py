@@ -1,5 +1,6 @@
 """NFR-6 / AD-10 (Story 9.7): production refuses to start on unsafe or missing settings."""
 
+import errno
 import logging
 import secrets
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from swp import config
 from swp.api.app import create_app
 from swp.app.startup import (
     DATABASE_URL_UNSET,
@@ -228,6 +230,24 @@ def test_nfr6_production_refuses_unset_database_url(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     _production(monkeypatch, DATABASE_URL=None)
+
+    _refused_error, lines = _refused(caplog)
+
+    assert lines == [f"Refusing to start: {DATABASE_URL_UNSET}"]
+
+
+class _ReadOnlyDir:
+    """Stands in for VAR_DIR on Vercel, where /var/task is a read-only filesystem."""
+
+    def mkdir(self, *args: object, **kwargs: object) -> None:
+        raise OSError(errno.EROFS, "Read-only file system")
+
+
+def test_nfr6_read_only_filesystem_still_refuses_unset_database_url(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setattr(config, "VAR_DIR", _ReadOnlyDir())
+    _production(monkeypatch, VERCEL="1", DATABASE_URL=None)
 
     _refused_error, lines = _refused(caplog)
 

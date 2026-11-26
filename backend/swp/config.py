@@ -1,5 +1,6 @@
 """Settings from the environment (pydantic-settings). Zero env vars needed locally."""
 
+from contextlib import suppress
 from functools import lru_cache
 from pathlib import Path
 
@@ -78,7 +79,10 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     settings = Settings()
     if settings.database_url == DEFAULT_DATABASE_URL:
-        VAR_DIR.mkdir(parents=True, exist_ok=True)
+        # Read-only filesystem (Vercel) without DATABASE_URL: skip, so swp.app.startup can
+        # refuse with "DATABASE_URL is not set" instead of an OSError traceback.
+        with suppress(OSError):
+            VAR_DIR.mkdir(parents=True, exist_ok=True)
     elif settings.database_url.startswith("sqlite:///"):
         # A custom SQLite file (tests, e2e) also gets its directory created.
         Path(settings.database_url.removeprefix("sqlite:///")).parent.mkdir(
