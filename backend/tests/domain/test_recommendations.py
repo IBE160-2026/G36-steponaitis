@@ -419,6 +419,25 @@ def test_fr29_applied_never_revalidated(
     assert row.outdated is None
 
 
+def test_fr29_issue121_applied_then_moved_on_stays_applied_with_effective_move(
+    run_1: PlanState, data: ImportData, analysis: Analysis
+) -> None:
+    # 1100's rec #1 (C-01-01-01 -> A-01-01-03) is applied as move 1; a manual move in the same
+    # round takes 1100 on to B-01-03-03, which combines into move 1 (C-01-01-01 -> B-01-03-03).
+    state, _ = _do(run_1, _apply(_rec(run_1, 1).id), data, analysis)
+    state, _ = _do(state, _manual("1100", "A-01-01-03", "B-01-03-03"), data, analysis)
+
+    row = _view(state, data, analysis).recommendations[0]
+    assert (row.part, row.status, row.outdated) == ("1100", "applied", None)
+    assert row.applied is not None
+    assert row.applied.model_dump() == {
+        "move_number": 1,
+        "round": 1,
+        "to_location": "B-01-03-03",
+        "to_best": False,
+    }
+
+
 def test_fr29_moved_back(run_1: PlanState, data: ImportData, analysis: Analysis) -> None:
     state, _ = _do(run_1, _apply(_rec(run_1, 1).id), data, analysis)
     state, events = _do(state, _manual("1100", "A-01-01-03", "C-01-01-01"), data, analysis)

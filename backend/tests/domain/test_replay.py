@@ -401,7 +401,9 @@ def test_ad5_round_invariant_violations_raise(before: PlanState, after: PlanStat
 
 
 def test_ad5_apply_checks_step_invariants(monkeypatch: pytest.MonkeyPatch) -> None:
-    def bad_handler(state: PlanState, _command: SetBestMark, _ctx: CommandContext) -> Applied:
+    def bad_handler(
+        state: PlanState, _command: SetBestMark, _ctx: CommandContext, _data: ImportData
+    ) -> Applied:
         # Round 1 while the plan has no runs (current round 0).
         return Applied(
             state=state.model_copy(

@@ -91,7 +91,7 @@ def _dispatch(
 ) -> Applied:
     match command:
         case SetBestMark():
-            return marks.set_best_mark(state, command, ctx)
+            return marks.set_best_mark(state, command, ctx, data)
         case RemoveBestMark():
             return marks.remove_best_mark(state, command, ctx)
         case ManualMove():

@@ -160,7 +160,7 @@ def revalidate(
     new_run = latest.model_copy(update={"recommendations": recommendations})
     runs = [new_run if run.id == latest.id else run for run in state.runs]
     events: list[Event] = [
-        RecommendationsOutdated(count=counts[cause], cause=cause)
+        RecommendationsOutdated(count=counts[cause], cause=cause, round=latest.round)
         for cause in CAUSE_ORDER
         if counts[cause]
     ]
@@ -377,7 +377,7 @@ def apply_all(
     events: list[Event] = [
         ApplyAllDone(applied=applied, skipped=skipped),
         *(
-            RecommendationsOutdated(count=counts[cause], cause=cause)
+            RecommendationsOutdated(count=counts[cause], cause=cause, round=latest.round)
             for cause in CAUSE_ORDER
             if counts[cause]
         ),

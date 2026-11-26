@@ -82,7 +82,9 @@ def undo(
     runs, count = _outdate_runs(after, last.recommendation_id)
     events: list[Event] = [StepUndone(undone=preview)]
     if count:
-        events.append(RecommendationsOutdated(count=count, cause="undo"))
+        latest = latest_run(after)
+        assert latest is not None  # only the latest run's recommendations count
+        events.append(RecommendationsOutdated(count=count, cause="undo", round=latest.round))
     return Applied(state=after.model_copy(update={"runs": runs}), events=events)
 
 

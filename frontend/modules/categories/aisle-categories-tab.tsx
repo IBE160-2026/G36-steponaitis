@@ -29,11 +29,21 @@ import {
 
 import { type AisleCategories, categoriesApi, type PlanAisleCategories, useCategoriesWrite } from "./api";
 
-/** The rule categories the picker offers for an aisle: those whose casefolded text is not on it yet. */
+/**
+ * The key categories compare by, mirroring the server's `category_key` (FR-45): drop format
+ * characters (Cf), NFC, collapse whitespace to one space and trim, casefold, NFC again.
+ */
+export function categoryKey(category: string): string {
+  const visible = category.replace(/\p{Cf}/gu, "").normalize("NFC");
+  const collapsed = visible.split(/\s+/u).filter(Boolean).join(" ");
+  return collapsed.toUpperCase().toLowerCase().normalize("NFC");
+}
+
+/** The rule categories the picker offers for an aisle: those whose `categoryKey` is not on it yet. */
 export function pickerOptions(ruleCategories: readonly string[], aisle: AisleCategories): string[] {
   // The server says which categories exist; this only hides the ones the aisle already shows.
-  const shown = new Set(aisle.categories.map((entry) => entry.category.trim().toLocaleLowerCase()));
-  return ruleCategories.filter((category) => !shown.has(category.trim().toLocaleLowerCase()));
+  const shown = new Set(aisle.categories.map((entry) => categoryKey(entry.category)));
+  return ruleCategories.filter((category) => !shown.has(categoryKey(category)));
 }
 
 export function CategoryChip({

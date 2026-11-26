@@ -87,6 +87,59 @@ def test_fr21_remove_mark_over_http(empty_tables: str) -> None:
     assert plans.require(plan_id).state.best_marks == []
 
 
+@pytest.mark.parametrize(
+    ("mark", "message"),
+    [
+        ({"kind": "aisle", "aisle": "ZZ"}, "Aisle ZZ has no locations."),
+        ({"kind": "level", "level": "9", "aisle": "A"}, "Aisle A has no level 9."),
+        ({"kind": "location", "location": "ZZ-99-99-99"}, "Location ZZ-99-99-99 does not exist."),
+    ],
+)
+def test_fr21_issue102_mark_covering_nothing_is_422_and_changes_nothing(
+    empty_tables: str, mark: dict[str, Any], message: str
+) -> None:
+    plan_id = _create("Marks", CREATED)
+    run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            f"/api/plans/{plan_id}/commands",
+            json=_body("set_best_mark", mark, base_version=2),
+            headers=SAME_ORIGIN,
+        )
+
+    assert response.status_code == 422, response.text
+    assert response.json()["error"]["code"] == "validation_failed"
+    assert response.json()["error"]["message"] == message
+    assert _version(plan_id) == 2
+    assert plans.require(plan_id).state.best_marks == [AisleMark(aisle="A")]
+
+
+def test_fr10_issue138_stored_result_without_round_is_returned_on_retry(
+    empty_tables: str,
+) -> None:
+    # A result stored before `recommendations_outdated` carried `round` still parses on retry.
+    plan_id = _create("Old result", CREATED)
+    retried = _set(LocationMark(location="A-01"), base_version=1)
+    stored = {
+        "version": 2,
+        "events": [{"type": "recommendations_outdated", "count": 3, "cause": "marks"}],
+    }
+    entry = {"command_id": str(retried.command_id), "base_version": 1, "result": stored}
+    with plan_for_update(plan_id) as writer:
+        assert writer is not None
+        state = writer.plan.state.model_copy(update={"recent_commands": [entry]})
+        assert writer.save_state(state, last_edited_by="planner", last_edited_at=NOW)
+
+    result = run_command(plan_id, retried, now=NOW)
+
+    assert result.model_dump(mode="json") == {
+        "version": 2,
+        "events": [{"type": "recommendations_outdated", "count": 3, "cause": "marks", "round": 0}],
+    }
+    assert plans.require(plan_id).state.best_marks == []
+
+
 def test_fr11_last_edited_by_planner(empty_tables: str) -> None:
     plan_id = _create("Edited", CREATED)
 
@@ -162,7 +215,7 @@ def test_fr10_fr41_stale_base_version_is_refused_then_current_is_recorded(
 ) -> None:
     plan_id = _create("Stale", CREATED)
     run_command(plan_id, _set(AisleMark(aisle="A")), now=NOW)
-    run_command(plan_id, _set(AisleMark(aisle="B"), 2), now=NOW)
+    run_command(plan_id, _set(LevelMark(level="1"), 2), now=NOW)
     before = (_row(plan_id), plans.require(plan_id).state)
     stale = _set(LocationMark(location="A-01"), base_version=1)
 
@@ -189,7 +242,9 @@ def test_fr10_fr41_stale_base_version_is_refused_then_current_is_recorded(
 
 def test_fr10_recent_commands_keep_last_50(empty_tables: str) -> None:
     plan_id = _create("Fifty", CREATED)
-    commands = [_set(LocationMark(location=f"L-{n:02d}"), n + 1) for n in range(51)]
+    # The small import has one location (A-01), so the 51 commands set and remove one mark.
+    mark = LocationMark(location="A-01")
+    commands = [(_remove if n % 2 else _set)(mark, n + 1) for n in range(51)]
     for command in commands:
         run_command(plan_id, command, now=NOW)
 
@@ -202,7 +257,7 @@ def test_fr10_fr41_concurrent_commands_one_applies_other_is_warned(
     empty_tables: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     plan_id = _create("Concurrent", CREATED)
-    commands = [_set(AisleMark(aisle="A")), _set(LocationMark(location="B-01"))]
+    commands = [_set(AisleMark(aisle="A")), _set(LocationMark(location="A-01"))]
     start = threading.Barrier(len(commands))
     # Both writers inside a read-modify-write at once would meet here; the write lock
     # (BEGIN IMMEDIATE / FOR UPDATE) must keep the second out until the first commits.

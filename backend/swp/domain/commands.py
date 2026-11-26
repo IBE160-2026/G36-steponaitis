@@ -305,11 +305,13 @@ class RunDone(BaseModel):
 
 
 class RecommendationsOutdated(BaseModel):
-    """`count` open recommendations of the latest run became outdated by `cause` (AD-7)."""
+    """`count` open recommendations of the latest run, round `round`, became outdated by
+    `cause` (AD-7)."""
 
     type: Literal["recommendations_outdated"] = "recommendations_outdated"
     count: int
     cause: OutdatedCause
+    round: int = 0  # 0 in results stored before the field existed (recent_commands)
 
 
 class ApplyAllSkipped(BaseModel):

@@ -68,7 +68,7 @@ export type ClassReason = components["schemas"]["ClassReason"];
 export type PickGroupReason = components["schemas"]["PickGroupReason"];
 /** A recommendation's reason: its class and picks (rules 1, 2) or its pick group (rule 3). */
 export type RecommendationReason = ClassReason | PickGroupReason;
-/** `recommendations_outdated{count, cause}`: a command outdated this many recommendations. */
+/** `recommendations_outdated{count, cause, round}`: a command outdated this many recommendations of round `round`. */
 export type RecommendationsOutdatedEvent = components["schemas"]["RecommendationsOutdated"];
 /** `apply_all_done{applied, skipped}`: the numbers apply all applied and those it skipped, with the cause. */
 export type ApplyAllDoneEvent = components["schemas"]["ApplyAllDone"];

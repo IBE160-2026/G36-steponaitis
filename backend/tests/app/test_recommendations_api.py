@@ -42,7 +42,7 @@ def test_fr29_mark_removal_outdates_over_http(empty_tables: str) -> None:
         "version": 4,
         "events": [
             {"type": "mark_removed", "mark": {"kind": "aisle", "aisle": "A"}},
-            {"type": "recommendations_outdated", "count": 5, "cause": "marks"},
+            {"type": "recommendations_outdated", "count": 5, "cause": "marks", "round": 1},
         ],
     }
     body = after.json()
@@ -67,6 +67,7 @@ def test_fr29_filling_manual_move_over_http(empty_tables: str) -> None:
         "type": "recommendations_outdated",
         "count": 1,
         "cause": "filled",
+        "round": 1,
     }
     assert row["status"] == "outdated"
     assert row["outdated"] == {

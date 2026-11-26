@@ -98,15 +98,21 @@ def apply_all_count(state: PlanState) -> int:
 
 
 def steps(
-    analysis: Analysis, state: PlanState, *, location_count: int, part_count: int
+    analysis: Analysis,
+    state: PlanState,
+    *,
+    location_count: int,
+    part_count: int,
+    best_count: int,
 ) -> list[StepSummary]:
-    """The eight flow steps in order with their check state and count (M1 rules)."""
+    """The eight flow steps in order with their check state and count (M1 rules). Best
+    locations is checked when the marks cover at least one location (`best_count`, FR-21)."""
     checked: dict[StepKey, bool] = {
         "overview": True,
         "parts": True,
         "locations": True,
         "pick-groups": True,
-        "best-locations": bool(state.best_marks),
+        "best-locations": best_count > 0,
         "recommendations": latest_run(state) is not None and not open_recommendations(state),
     }
     counts: dict[StepKey, int] = {
@@ -165,5 +171,11 @@ def build_summary(
         kept_in_place=len(state.keep_marks),
         move_count=move_count,
         undo_preview=undo_preview(last_step),
-        steps=steps(analysis, state, location_count=location_count, part_count=part_count),
+        steps=steps(
+            analysis,
+            state,
+            location_count=location_count,
+            part_count=part_count,
+            best_count=best.best,
+        ),
     )

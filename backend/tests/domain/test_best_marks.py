@@ -32,8 +32,8 @@ NOW = datetime(2026, 11, 22, 12, 0, tzinfo=UTC)
 CODES = [f"{a}-{lvl}-{p}" for a in "AB" for lvl in "12" for p in "12"]
 
 
-def _small() -> PlanningCopy:
-    data = ImportData(
+def _small_data() -> ImportData:
+    return ImportData(
         locations={
             code: LocationData(
                 walk_path=Decimal(i),
@@ -52,7 +52,10 @@ def _small() -> PlanningCopy:
         parts={"P": "Part P", "Q": "Part Q"},
         transactions=[],
     )
-    return planning_copy(data, PlanState.new())
+
+
+def _small() -> PlanningCopy:
+    return planning_copy(_small_data(), PlanState.new())
 
 
 def _best(copy: PlanningCopy, marks: list[BestMark]) -> set[str]:

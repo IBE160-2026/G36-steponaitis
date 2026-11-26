@@ -511,6 +511,6 @@ def test_fr51_drag_outdates_recommendations_like_a_manual_move(
 
     revalidated = revalidate(data, analysis, dragged.state)
 
-    assert RecommendationsOutdated(count=1, cause="moved") in revalidated.events
+    assert RecommendationsOutdated(count=1, cause="moved", round=1) in revalidated.events
     [rec] = [r for r in revalidated.state.runs[-1].recommendations if r.part == "1100"]
     assert rec.status == "outdated"

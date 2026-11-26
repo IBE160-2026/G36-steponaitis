@@ -23,7 +23,7 @@ const LABEL = "Undo move 11: 1200 B-01-01-02 → A-01-01-01";
 
 const UNDONE: CommandEvent[] = [
   { type: "step_undone", undone: PREVIEW },
-  { type: "recommendations_outdated", count: 4, cause: "undo" },
+  { type: "recommendations_outdated", count: 4, cause: "undo", round: 2 },
 ];
 const TOAST = "Undid move 11. Unapplied recommendations of round 2 are now outdated. Run recommendations to continue.";
 
@@ -45,7 +45,7 @@ type ButtonProps = { onClick: () => void; disabledReason?: string; description?:
 function control(preview: UndoPreview | null, savingReason?: string) {
   const { send, sent } = sender();
   const notify = vi.fn();
-  const props = { preview, round: 2, savingReason, send, notify };
+  const props = { preview, savingReason, send, notify };
   const element = UndoLastMove(props) as ReactElement<ButtonProps>;
   return { element, markup: renderToStaticMarkup(<UndoLastMove {...props} />), sent, notify };
 }
@@ -61,7 +61,7 @@ describe("fr35 undo last move control", () => {
 
   it("fr35_while_the_summary_loads_it_waits_without_claiming_no_moves", () => {
     const { send } = sender();
-    const props = { preview: null, round: 0, savingReason: undefined, send, notify: vi.fn(), loading: true };
+    const props = { preview: null, savingReason: undefined, send, notify: vi.fn(), loading: true };
     const element = UndoLastMove(props) as ReactElement<ButtonProps>;
     const markup = renderToStaticMarkup(<UndoLastMove {...props} />);
     expect(element.props.disabledReason).toBe("Loading the last move…");
@@ -92,14 +92,14 @@ describe("fr35 undo last move control", () => {
   });
 
   it("uxdr38_toast_without_outdated", () => {
-    expect(undoToastText([UNDONE[0]], 2)).toBe("Undid move 11.");
-    expect(undoToastText([], 2)).toBeUndefined();
+    expect(undoToastText([UNDONE[0]])).toBe("Undid move 11.");
+    expect(undoToastText([])).toBeUndefined();
   });
 
   it("fr35_send_undo_does_not_toast_when_rejected", async () => {
     const send = vi.fn(async (): Promise<SendResult> => ({ outcome: "dropped", events: [] }));
     const notify = vi.fn();
-    await sendUndo(send, 3, 1, notify);
+    await sendUndo(send, 3, notify);
     expect(notify).not.toHaveBeenCalled();
   });
 });
@@ -145,6 +145,30 @@ describe("uxdr14 move toast undo", () => {
       await vi.waitFor(() => expect(notify).toHaveBeenCalled());
       expect(sent).toEqual([{ type: "undo", expected_move_number: number }]);
     }
+  });
+
+  it("fr35_issue138_toast_undo_names_the_outdated_round_not_the_move_round", async () => {
+    // Move 2 was made in round 1; recommendations ran again (round 2) before its toast's Undo.
+    const moved: CommandEvent = {
+      type: "move_made",
+      move_number: 2,
+      part: "1100",
+      from_location: "C-01-01-01",
+      to_location: "A-01-01-03",
+      rule: "manual",
+      round: 1,
+    };
+    const undone: CommandEvent[] = [
+      { type: "step_undone", undone: { ...PREVIEW, move_number: 2, effect: { kind: "reverts_move", move_number: 2 } } },
+      { type: "recommendations_outdated", count: 3, cause: "undo", round: 2 },
+    ];
+    const { send } = sender(undone);
+    const notify = vi.fn();
+    moveUndoAction(moved, send, notify)?.onClick();
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled());
+    expect(notify).toHaveBeenCalledWith(
+      "Undid move 2. Unapplied recommendations of round 2 are now outdated. Run recommendations to continue.",
+    );
   });
 
   it("uxdr14_no_undo_for_mark_keep_run_or_apply_all", () => {

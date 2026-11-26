@@ -47,6 +47,7 @@ def test_fr35_undo_over_http_outdates_and_moves_preview(empty_tables: str) -> No
     [outdated] = body["events"][1:]
     assert outdated["type"] == "recommendations_outdated"
     assert outdated["cause"] == "undo"
+    assert outdated["round"] == 1
     rows = {r["id"]: r for r in view["recommendations"]}
     assert rows.pop(rec_id)["status"] == "applied"
     assert outdated["count"] == len(rows)

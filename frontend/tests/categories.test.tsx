@@ -5,7 +5,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/lib/api/errors";
 import { parseCategoriesTab, planCategoriesHref } from "@/lib/view-state/urls";
-import { AisleCategoriesView, AisleRow, CategoryChip, pickerOptions } from "@/modules/categories/aisle-categories-tab";
+import {
+  AisleCategoriesView,
+  AisleRow,
+  CategoryChip,
+  categoryKey,
+  pickerOptions,
+} from "@/modules/categories/aisle-categories-tab";
 import {
   categoriesApi,
   changedFields,
@@ -305,6 +311,14 @@ describe("fr45 aisle categories tab", () => {
     expect(a).not.toContain('<option value="Oils"');
     expect(a).toContain('aria-label="Add the category to aisle A"');
     expect(aisleRow(markup, "B")).toContain('<option value="Oils"');
+  });
+
+  it("fr45_issue220_picker_compares_like_the_server_category_key", () => {
+    const aisle = { aisle: "C", categories: [{ category: "Olje", has_rule: true }] };
+    expect(pickerOptions(["OLJE\u200b", "olje  ", " O\u00adlje", "Filter"], aisle)).toEqual(["Filter"]);
+    expect(categoryKey("  Motor\t\u00a0 OLJE\u200b ")).toBe("motor olje");
+    expect(categoryKey("Cafe\u0301")).toBe(categoryKey("CAF\u00c9"));
+    expect(categoryKey("STRASSE")).toBe("strasse");
   });
 
   it("fr45_add_and_remove_send_the_aisle_whole_list", () => {

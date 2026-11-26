@@ -24,6 +24,7 @@ from tests.domain.answer_key import (
     keep_step,
     manual_step,
     play_steps,
+    run_command,
     undo_command,
     undo_step,
 )
@@ -55,7 +56,7 @@ def test_fr35_undo_plain_answer_key_step_15(data: ImportData, analysis: Analysis
                 effect=UndoEffect(kind="reverts_move", move_number=11),
             )
         ),
-        RecommendationsOutdated(count=4, cause="undo"),
+        RecommendationsOutdated(count=4, cause="undo", round=2),
     ]
     assert replay(data, applied.state.steps).current_locations["1200"] == "B-01-01-02"
     assert {(r.status, r.outdated) for r in applied.state.runs[-1].recommendations} == {
@@ -73,6 +74,21 @@ def test_fr35_undo_older_round_step(data: ImportData, analysis: Analysis) -> Non
     assert (rec.status, rec.outdated) == ("outdated", UNDONE)
     assert [e.type for e in applied.events] == ["step_undone"]  # run 1 is not counted
     assert current_round(applied.state) == 2
+
+
+def test_fr35_issue138_undo_outdates_the_latest_run_round(
+    data: ImportData, analysis: Analysis
+) -> None:
+    state, _ = after_run_1(data, analysis)
+    state = apply_recommendation(state, "1100", data, analysis)  # move 1 in round 1
+    state = run_command(data, analysis, state).state  # round 2; move 1 is still the last step
+    assert (state.steps[-1].round, current_round(state)) == (1, 2)
+
+    applied = undo_step(state, data, analysis)
+
+    [outdated] = [e for e in applied.events if isinstance(e, RecommendationsOutdated)]
+    assert (outdated.cause, outdated.round) == ("undo", 2)
+    assert outdated.count > 0
 
 
 def test_fr35_undo_splits_combined_move(data: ImportData, analysis: Analysis) -> None:

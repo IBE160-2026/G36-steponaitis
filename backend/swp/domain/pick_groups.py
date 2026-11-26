@@ -5,6 +5,7 @@ the plan's `Analysis` snapshot, never from `analysis.toml`.
 """
 
 import itertools
+import re
 from collections import Counter
 from collections.abc import Iterable, Mapping, Set
 from datetime import date
@@ -13,20 +14,25 @@ from swp.domain.analysis import Analysis, PickGroup
 from swp.domain.import_data import ImportData, TransactionLine
 from swp.domain.ordering import pick_group_order
 
-NO_JOB_CODE = "0"
+NO_JOB_CODE = re.compile(r"[+-]?0+([.,]0+)?")
+"""A transaction code that is zero ("0", "00", "0.0", "0,0", "-0", ...) after strip never
+forms a job."""
+MAX_JOB_PARTS = 100
+"""A job with more distinct parts adds no pairs: it keeps pair counting from going quadratic
+on one huge job (issue 86; the sample data's largest job has 4 parts)."""
 
 
 def build_jobs(
     transactions: Iterable[TransactionLine], parts: Set[str], start: date, end: date
 ) -> dict[str, frozenset[str]]:
     """Jobs by transaction code: the distinct considered parts on the Issue Part lines dated
-    `start..end` (inclusive) that share the code. Code `"0"` never forms a job; parts not in
-    `parts` are dropped."""
+    `start..end` (inclusive) that share the code. A zero code (`"0"`, `"00"`, `"0.0"`,
+    `"0,0"`, `"-0"`, ... after strip) never forms a job; parts not in `parts` are dropped."""
     jobs: dict[str, set[str]] = {}
     for line in transactions:
         if (
             line.type == "issue_part"
-            and line.transaction_code != NO_JOB_CODE
+            and not NO_JOB_CODE.fullmatch(line.transaction_code.strip())
             and start <= line.date <= end
             and line.part in parts
         ):
@@ -35,10 +41,13 @@ def build_jobs(
 
 
 def count_shared_jobs(jobs: Mapping[str, Iterable[str]]) -> dict[tuple[str, str], int]:
-    """Shared jobs per part pair, keyed `(a, b)` with `a < b` in `str` order."""
+    """Shared jobs per part pair, keyed `(a, b)` with `a < b` in `str` order. A job with more
+    than `MAX_JOB_PARTS` distinct parts adds no pairs."""
     counts: Counter[tuple[str, str]] = Counter()
     for members in jobs.values():
-        counts.update(itertools.combinations(sorted(set(members)), 2))
+        distinct = set(members)
+        if len(distinct) <= MAX_JOB_PARTS:
+            counts.update(itertools.combinations(sorted(distinct), 2))
     return dict(counts)
 
 

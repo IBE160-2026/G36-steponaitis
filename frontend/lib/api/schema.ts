@@ -1798,7 +1798,8 @@ export interface components {
         };
         /**
          * RecommendationsOutdated
-         * @description `count` open recommendations of the latest run became outdated by `cause` (AD-7).
+         * @description `count` open recommendations of the latest run, round `round`, became outdated by
+         *     `cause` (AD-7).
          */
         RecommendationsOutdated: {
             /**
@@ -1808,6 +1809,11 @@ export interface components {
             cause: "moved" | "filled" | "marks" | "partner_aisle" | "undo";
             /** Count */
             count: number;
+            /**
+             * Round
+             * @default 0
+             */
+            round: number;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -2028,7 +2034,11 @@ export interface components {
             /** User */
             user: string | null;
         };
-        /** SetBestMark */
+        /**
+         * SetBestMark
+         * @description Set a best-location mark (FR-21); its codes are limited like part and location codes.
+         *     `RemoveBestMark` has no limit, so a mark stored before the limit can still be removed.
+         */
         SetBestMark: {
             /** Base Version */
             base_version: number;

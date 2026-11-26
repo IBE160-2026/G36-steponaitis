@@ -504,13 +504,18 @@ def covering_marks(copy: PlanningCopy, location: str, marks: Sequence[BestMark])
     loc = copy.locations.get(location)
     if loc is None:
         return []
-    return [
-        mark
-        for mark in marks
-        if (mark.kind == "aisle" and mark.aisle == loc.aisle)
+    return [mark for mark in marks if mark_covers(mark, location, loc)]
+
+
+def mark_covers(mark: BestMark, code: str, loc: LocationData) -> bool:
+    """Whether `mark` covers the location `code` with data `loc` (exact string equality):
+    an aisle mark its aisle, a level mark its level in one aisle or in all aisles, a
+    location mark its one code."""
+    return (
+        (mark.kind == "aisle" and mark.aisle == loc.aisle)
         or (mark.kind == "level" and mark.level == loc.level and mark.aisle in (None, loc.aisle))
-        or (mark.kind == "location" and mark.location == location)
-    ]
+        or (mark.kind == "location" and mark.location == code)
+    )
 
 
 def is_best(copy: PlanningCopy, location: str, marks: Sequence[BestMark]) -> bool:

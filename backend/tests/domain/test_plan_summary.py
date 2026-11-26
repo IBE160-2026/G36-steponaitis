@@ -10,7 +10,7 @@ from swp.domain.analysis import (
     build_analysis,
 )
 from swp.domain.planning import replay
-from swp.domain.state import AisleMark, Outdated, PlanState, Recommendation, Run, Step
+from swp.domain.state import AisleMark, LevelMark, Outdated, PlanState, Recommendation, Run, Step
 from swp.domain.views.summary import STEP_KEYS, PlanSummary, build_summary
 from tests.domain.answer_key import answer_key_import
 
@@ -118,6 +118,15 @@ def test_fr7_best_locations_checked_once_marked() -> None:
 
     assert checked["best-locations"] is True
     assert checked["recommendations"] is False
+
+
+def test_fr21_issue102_best_locations_unchecked_when_marks_cover_nothing() -> None:
+    state = PlanState(best_marks=[AisleMark(aisle="ZZ"), LevelMark(level="9", aisle="A")])
+    summary = _summary(state)
+    checked = {s.key: s.checked for s in summary.steps}
+
+    assert summary.best_locations == 0
+    assert checked["best-locations"] is False
 
 
 def test_fr7_class_counts_and_pick_groups_from_analysis() -> None:

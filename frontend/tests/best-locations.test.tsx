@@ -282,8 +282,8 @@ describe("uxdr best locations step", () => {
   it("fr29_toast_counts_outdated_recommendations_with_view", async () => {
     const body = { type: "remove_best_mark", mark: AISLE_A } as const;
     const removed: CommandEvent = { type: "mark_removed", mark: AISLE_A };
-    const marks: CommandEvent = { type: "recommendations_outdated", count: 2, cause: "marks" };
-    const filled: CommandEvent = { type: "recommendations_outdated", count: 1, cause: "filled" };
+    const marks: CommandEvent = { type: "recommendations_outdated", count: 2, cause: "marks", round: 1 };
+    const filled: CommandEvent = { type: "recommendations_outdated", count: 1, cause: "filled", round: 1 };
     expect(outdatedCount([removed, marks, filled])).toBe(3);
     expect(outdatedCount([removed])).toBe(0);
 

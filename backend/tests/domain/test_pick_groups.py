@@ -12,7 +12,12 @@ from swp.domain.import_data import (
     TransactionType,
 )
 from swp.domain.ordering import pick_group_order
-from swp.domain.pick_groups import build_jobs, count_shared_jobs, find_pick_groups
+from swp.domain.pick_groups import (
+    MAX_JOB_PARTS,
+    build_jobs,
+    count_shared_jobs,
+    find_pick_groups,
+)
 from tests.domain.answer_key import answer_key_import, expected
 
 DATA_AS_OF = date(2026, 9, 30)
@@ -116,6 +121,35 @@ def test_fr19_code_zero_is_not_a_job() -> None:
 
     assert _shared(data) == {("P", "Q"): 4}
     assert _groups(data) == []
+
+
+def test_fr19_issue85_zero_codes_written_as_text_are_not_jobs() -> None:
+    zeros = ("0", "00", "000", "0.0", " 0 ", "0,0", "-0", "+0")
+    lines = [line for code in zeros for line in _job(code, "P", "Q")]
+
+    assert build_jobs(lines, {"P", "Q"}, IN_PERIOD, IN_PERIOD) == {}
+
+
+def test_fr19_issue85_non_zero_codes_still_form_jobs() -> None:
+    lines = [line for code in ("10", "0.5", "A0") for line in _job(code, "P", "Q")]
+
+    assert build_jobs(lines, {"P", "Q"}, IN_PERIOD, IN_PERIOD) == {
+        code: frozenset({"P", "Q"}) for code in ("10", "0.5", "A0")
+    }
+
+
+def test_fr19_issue86_huge_job_adds_no_pairs() -> None:
+    huge = [f"H{n:03}" for n in range(MAX_JOB_PARTS + 1)]
+    largest = [f"L{n:03}" for n in range(MAX_JOB_PARTS)]
+    jobs = {"HUGE": huge + ["P", "Q"], "BIG": largest, "J1": ["P", "Q"], "J2": ["P", "Q"]}
+
+    counts = count_shared_jobs(jobs)
+
+    assert counts[("P", "Q")] == 2
+    assert not any(a.startswith("H") or b.startswith("H") for a, b in counts)
+    assert len([pair for pair in counts if pair[0].startswith("L")]) == (
+        MAX_JOB_PARTS * (MAX_JOB_PARTS - 1) // 2
+    )
 
 
 def test_fr19_period_boundaries() -> None:

@@ -2,15 +2,17 @@
 only)."""
 
 import uuid
+from datetime import date
+from decimal import Decimal
 
-from swp.domain.analysis import Analysis
+from swp.domain.analysis import Analysis, AnalysisSettings, PartAnalysis, PickGroup
 from swp.domain.apply import apply
 from swp.domain.commands import (
     ManualMove,
     MoveMade,
     RunDone,
 )
-from swp.domain.import_data import ImportData
+from swp.domain.import_data import ImportData, InventoryLine, LocationData
 from swp.domain.ordering import fewest_picks_order, location_code_order
 from swp.domain.planning import current_round, import_copy, replay, run_baseline
 from swp.domain.rules import RuleMove, rule_1, rule_2, rule_3
@@ -646,3 +648,48 @@ def test_fr27_rule_3_never_virtual_and_location_once(data: ImportData, analysis:
     )
     moves, _ = _rule_3(data, analysis, PlanState(best_marks=MARKS), [earlier])
     assert ("8100", "B-01-02-01", "C-01-03-02") in _rule_3_moves(moves)
+
+
+def test_fr26_issue115_weaker_group_never_moves_a_partner_just_joined() -> None:
+    # M-P (10 jobs): M (fewer picks) moves to P's aisle A. P-X (6 jobs): P has fewer picks
+    # than X, but it now shares aisle A with M, its stronger partner, so it stays put.
+    codes = ["A-1", "A-2", "B-1", "C-1", "C-2"]
+    data = ImportData(
+        locations={
+            code: LocationData(
+                walk_path=Decimal(i), aisle=code[0], level="1", section=None, position=code[2]
+            )
+            for i, code in enumerate(codes)
+        },
+        inventory=[
+            InventoryLine(part=part, location=location, quantity=Decimal(1))
+            for part, location in [("P", "A-1"), ("M", "B-1"), ("X", "C-1")]
+        ],
+        parts={"M": "Part M", "P": "Part P", "X": "Part X"},
+        transactions=[],
+    )
+    analysis = Analysis(
+        settings=AnalysisSettings(
+            period_months=12,
+            fast_min_picks=24,
+            medium_min_picks=6,
+            slow_min_picks=1,
+            pick_group_min_shared_jobs=5,
+        ),
+        period_start=date(2025, 10, 1),
+        period_end=date(2026, 9, 30),
+        parts={
+            "M": PartAnalysis(picks=10, movement_class="medium"),
+            "P": PartAnalysis(picks=20, movement_class="medium"),
+            "X": PartAnalysis(picks=30, movement_class="fast"),
+        },
+        pick_groups=[
+            PickGroup(part_a="M", part_b="P", shared_jobs=10),
+            PickGroup(part_a="P", part_b="X", shared_jobs=6),
+        ],
+    )
+
+    moves, no_space = _rule_3(data, analysis, PlanState())
+
+    assert _rule_3_moves(moves) == [("M", "B-1", "A-2")]
+    assert no_space == []

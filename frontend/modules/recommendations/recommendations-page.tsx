@@ -611,7 +611,6 @@ export function RecommendationsView({
         <div className="flex flex-wrap gap-2">
           <UndoLastMove
             preview={summary.undo_preview}
-            round={summary.current_round}
             savingReason={savingReason}
             send={onSend}
             notify={notify}

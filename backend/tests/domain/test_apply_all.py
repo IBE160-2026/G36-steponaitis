@@ -143,7 +143,7 @@ def test_fr30_apply_all_revalidates_first(data: ImportData, analysis: Analysis) 
         ApplyAllDone(
             applied=[2, 3, 4, 5, 6, 7, 8], skipped=[ApplyAllSkipped(number=1, cause="filled")]
         ),
-        RecommendationsOutdated(count=1, cause="filled"),
+        RecommendationsOutdated(count=1, cause="filled", round=1),
     ]
 
 
@@ -166,7 +166,7 @@ def test_fr30_apply_all_outdated_during_fold(data: ImportData, analysis: Analysi
         ApplyAllDone(
             applied=[1, 2, 4, 5, 6, 7, 8], skipped=[ApplyAllSkipped(number=3, cause="filled")]
         ),
-        RecommendationsOutdated(count=1, cause="filled"),
+        RecommendationsOutdated(count=1, cause="filled", round=1),
     ]
     move_of_2 = applied_step(applied.state, recs[1].id)
     assert move_of_2 is not None

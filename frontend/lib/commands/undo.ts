@@ -11,15 +11,22 @@ import { LOADING_LAST_MOVE, NO_MOVES_TO_UNDO, UNDO_ACTION, undoneToast } from "@
 export type UndoSend = (body: CommandBody) => Promise<SendResult>;
 export type UndoNotify = (message: string) => void;
 
-/** The toast of a confirmed undo's events; undefined when there is no `step_undone`. */
-export function undoToastText(events: readonly CommandEvent[], round: number): string | undefined {
+/**
+ * The toast of a confirmed undo's events; undefined when there is no `step_undone`. The outdated
+ * round is the one the server's `recommendations_outdated{cause: "undo"}` names (the latest run),
+ * not the round of the undone move.
+ */
+export function undoToastText(events: readonly CommandEvent[]): string | undefined {
   const undone = events.find((event) => event.type === "step_undone");
   if (undone?.type !== "step_undone") return undefined;
-  const outdated = events.reduce(
-    (count, event) =>
-      event.type === "recommendations_outdated" && event.cause === "undo" ? count + event.count : count,
-    0,
-  );
+  let outdated = 0;
+  let round = 0;
+  for (const event of events) {
+    if (event.type === "recommendations_outdated" && event.cause === "undo") {
+      outdated += event.count;
+      round = event.round;
+    }
+  }
   return undoneToast(undone, outdated, round);
 }
 
@@ -27,12 +34,11 @@ export function undoToastText(events: readonly CommandEvent[], round: number): s
 export async function sendUndo(
   send: UndoSend,
   moveNumber: number,
-  round: number,
   notify: UndoNotify,
 ): Promise<SendResult> {
   const result = await send({ type: "undo", expected_move_number: moveNumber });
   if (result.outcome === "confirmed") {
-    const message = undoToastText(result.events, round);
+    const message = undoToastText(result.events);
     if (message) notify(message);
   }
   return result;
@@ -59,7 +65,7 @@ export function moveUndoAction(
 ): { label: string; onClick: () => void } | undefined {
   const step = moveEventStep(event);
   if (step === undefined) return undefined;
-  return { label: UNDO_ACTION, onClick: () => void sendUndo(send, step.moveNumber, step.round, notify) };
+  return { label: UNDO_ACTION, onClick: () => void sendUndo(send, step.moveNumber, notify) };
 }
 
 /** Why Undo last move cannot run now: no moves first, else the command flow's reason. */

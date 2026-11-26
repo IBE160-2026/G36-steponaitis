@@ -331,7 +331,7 @@ The system finds every pick group in the import.
 **Consequences (testable):**
 - Two parts that appear together on 5 or more jobs in the period form a pick group; two parts with 4 shared jobs do not.
 - A part that appears several times on the same job counts once for that job.
-- Transaction code `0` never forms a job.
+- A zero transaction code (`0`, or text such as `00`, `0.0`, `0,0` or `-0`, after trimming) never forms a job, and a job with more than 100 distinct parts adds no pairs.
 - Only parts in the Inventory file are considered.
 - The answer-key test dataset gets exactly its expected pick groups, including a part in several pick groups.
 
@@ -356,6 +356,7 @@ The planner can set and remove best-location marks in a plan.
 - A location in a marked aisle, in a marked level, or marked on its own is a best location; all other locations are not.
 - Removing one mark leaves a location best if another mark still covers it.
 - Marks are stored in the plan and never change the import.
+- A mark that covers no location of the import is refused with `validation_failed` (422) and changes nothing; the Best locations step is ticked only when the marks cover at least one location.
 - Marks can be set and removed from the locations list (FR-14), which is the marking surface in milestone 1, and from milestone 2 also in the warehouse view (FR-42) (decision 2026-11-16).
 
 #### FR-22: Show best locations
@@ -408,7 +409,7 @@ When the two parts of a pick group have current locations in different aisles, t
 - A slow-moving or dead-stock part is never offered a best location, so rule 3 and rule 2 cannot undo each other's moves round after round (decision 2026-11-02). If every empty location in the partner's aisle is a best location, the part is listed as "no space" under rule 3 (decision 2026-11-11).
 - The pick group gets no recommendation, and is not listed as "no space", when:
   - the part that would move sits in a best location (rule 3 never moves a part out of a best location);
-  - the part that would move is already in the aisle of another partner it shares at least as many jobs with, so a part in several pick groups is not moved back and forth between rounds (decision 2026-11-02);
+  - the part that would move is already in the aisle of another partner it shares at least as many jobs with, so a part in several pick groups is not moved back and forth between rounds (decision 2026-11-02); that partner's aisle is the one after this run's earlier rule-3 moves, so a weaker pick group never pulls a part away from a stronger partner just moved to it (decision 2026-11-26, issue 115);
   - the partner already has a recommendation in this run, because it may leave its aisle; a later round handles the pick group (decision 2026-11-02);
   - either part has no current location, or the part that would move is kept in place.
 - The partner is never moved instead.

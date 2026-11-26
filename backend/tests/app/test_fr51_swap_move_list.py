@@ -121,11 +121,17 @@ def test_fr51_fr29_drag_outdates_moved_and_filled_recommendations(empty_tables: 
         )
         rows = _recommendations(client, plan_id)
 
-    assert moved["events"][-1] == {"type": "recommendations_outdated", "count": 1, "cause": "moved"}
+    assert moved["events"][-1] == {
+        "type": "recommendations_outdated",
+        "count": 1,
+        "cause": "moved",
+        "round": 1,
+    }
     assert filled["events"][-1] == {
         "type": "recommendations_outdated",
         "count": 1,
         "cause": "filled",
+        "round": 1,
     }
     assert (rows["1100"]["status"], rows["1100"]["outdated"]["cause"]) == ("outdated", "moved")
     assert rows["4400"]["status"] == "outdated"

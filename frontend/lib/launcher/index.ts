@@ -139,7 +139,7 @@ export const UNDO_LAST_MOVE_ACTION: LauncherAction = {
   async run(ctx) {
     const preview = ctx.summary.undo_preview;
     if (preview === null) return;
-    await sendUndo(ctx.send, preview.move_number, ctx.summary.current_round, ctx.notify);
+    await sendUndo(ctx.send, preview.move_number, ctx.notify);
   },
 };
 

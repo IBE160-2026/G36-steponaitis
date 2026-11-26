@@ -15,14 +15,12 @@ import { UNDO_LAST_MOVE, undoLabel } from "@/lib/copy";
 /** The tertiary control; its tooltip and accessible description say what the undo would do. */
 export function UndoLastMove({
   preview,
-  round,
   savingReason,
   send,
   notify = showToast,
   loading = false,
 }: {
   preview: UndoPreview | null;
-  round: number;
   savingReason: string | undefined;
   send: UndoSend;
   notify?: UndoNotify;
@@ -36,7 +34,7 @@ export function UndoLastMove({
       disabledReason={undoReason(preview, savingReason, loading)}
       description={preview === null ? undefined : undoLabel(preview)}
       onClick={() => {
-        if (preview !== null) void sendUndo(send, preview.move_number, round, notify);
+        if (preview !== null) void sendUndo(send, preview.move_number, notify);
       }}
     >
       {UNDO_LAST_MOVE}
@@ -51,7 +49,6 @@ export function UndoLastMoveButton({ planId }: { planId: string }) {
   return (
     <UndoLastMove
       preview={summary.data?.undo_preview ?? null}
-      round={summary.data?.current_round ?? 0}
       savingReason={disabledReason}
       send={sendWithEvents}
       loading={summary.isPending}

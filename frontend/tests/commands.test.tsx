@@ -433,6 +433,15 @@ describe("ad12 retries and failures", () => {
     expect(h.client.getState(PLAN).notice).toBeNull();
   });
 
+  it("fr21_issue102_mark_covering_nothing_toasts_the_server_message", async () => {
+    const h = setup();
+    mockFetch(envelope(422, "validation_failed", "Aisle ZZ has no locations."));
+    const mark = { type: "set_best_mark", mark: { kind: "aisle", aisle: "ZZ" } } as const;
+    expect(await h.client.send(PLAN, mark)).toBe("dropped");
+    expect(h.effects.notify).toHaveBeenCalledWith("Aisle ZZ has no locations.");
+    expect(h.client.getState(PLAN)).toEqual({ pending: false, notice: null, saved: false });
+  });
+
   it("ad12_non_envelope_4xx_toasts_the_internal_message", async () => {
     const h = setup();
     mockFetch(new Response("<html>Bad request</html>", { status: 400 }));

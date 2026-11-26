@@ -7,7 +7,7 @@ come from the command and its context; nothing reads a clock, a file or `uuid4`.
 """
 
 import uuid
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
@@ -145,11 +145,15 @@ def _blocked(
     mover: str,
     source: str,
     partner: str,
+    moved_to: Mapping[str, str],
 ) -> bool:
     """Whether rule 3 is blocked for `group` (FR-26), given the mover's current location
     `source`: the partner has no current location, the mover is kept or in a best
     location, both parts already share an aisle, or the mover already shares an aisle with
-    another partner it has at least as many shared jobs with (the loop limit)."""
+    another partner it has at least as many shared jobs with (the loop limit). The loop
+    limit reads each other partner's aisle after this run's earlier rule-3 moves
+    (`moved_to`: part -> aisle), so a weaker group never pulls a part away from a stronger
+    partner just moved to it (issue 115)."""
     if current_location(copy, partner) is None:
         return True
     if mover in state.keep_marks or is_best(copy, source, state.best_marks):
@@ -161,10 +165,15 @@ def _blocked(
         mover in (other.part_a, other.part_b)
         and other.shared_jobs >= group.shared_jobs
         and other != group
-        and current_aisle(copy, other.part_b if other.part_a == mover else other.part_a)
+        and _aisle_after(copy, moved_to, other.part_b if other.part_a == mover else other.part_a)
         == mover_aisle
         for other in analysis.pick_groups
     )
+
+
+def _aisle_after(copy: PlanningCopy, moved_to: Mapping[str, str], part: str) -> str | None:
+    """The part's aisle after this run's earlier rule-3 moves, else its current aisle."""
+    return moved_to.get(part) or current_aisle(copy, part)
 
 
 def rule_3(
@@ -187,6 +196,7 @@ def rule_3(
     taken = {move.to_location for move in earlier_moves}
     moves: list[RuleMove] = []
     no_space: list[NoSpace] = []
+    moved_to: dict[str, str] = {}  # part -> aisle of this run's earlier rule-3 moves
     for group in pick_group_order(analysis.pick_groups):
         pair = (group.part_a, group.part_b)
         if any(part in handled for part in pair):
@@ -195,7 +205,9 @@ def rule_3(
             continue
         partner, mover = part_order({part: parts[part] for part in pair})
         source = current_location(copy, mover)
-        if source is None or _blocked(copy, analysis, state, group, mover, source, partner):
+        if source is None or _blocked(
+            copy, analysis, state, group, mover, source, partner, moved_to
+        ):
             continue
         best = False if parts[mover].movement_class in SLOW_MOVING_CLASSES else None
         aisle = current_aisle(copy, partner)
@@ -206,6 +218,7 @@ def rule_3(
             no_space.append(NoSpace(part=mover, rule="rule_3", partner=partner, aisle=aisle))
             continue
         taken.add(target)
+        moved_to[mover] = aisle_of(copy, target)
         moves.append(
             RuleMove(
                 rule="rule_3",

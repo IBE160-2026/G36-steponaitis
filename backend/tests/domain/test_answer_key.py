@@ -233,7 +233,7 @@ def _expected_events(step: dict[str, Any]) -> list[Event]:
         case "undo" if number == 15:
             return [
                 _undone(11, "1200", "B-01-01-02", "A-01-01-01"),
-                RecommendationsOutdated(count=4, cause="undo"),
+                RecommendationsOutdated(count=4, cause="undo", round=2),
             ]
         case "undo":
             assert number == 16
@@ -316,7 +316,7 @@ def _step_15(played: list[ScenarioStep], data: ImportData) -> None:
     ]
     assert isinstance(events[0], StepUndone)
     assert events[0].undone.move_number == 11
-    assert events[1:] == [RecommendationsOutdated(count=4, cause="undo")]
+    assert events[1:] == [RecommendationsOutdated(count=4, cause="undo", round=2)]
 
 
 def _step_16(played: list[ScenarioStep], data: ImportData) -> None:

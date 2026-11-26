@@ -17,14 +17,14 @@ from swp.domain.commands import (
     RemoveBestMark,
     SetBestMark,
 )
-from swp.domain.import_data import ImportData
+from swp.domain.errors import DomainError
 from swp.domain.state import AisleMark, BestMark, LevelMark, LocationMark, PlanState
 from swp.domain.values import CODE_MAX_LENGTH
 from tests.domain.answer_key import empty_analysis
-from tests.domain.test_best_marks import _best, _small
+from tests.domain.test_best_marks import _best, _small, _small_data
 
 CTX = CommandContext(now=datetime(2026, 11, 22, 12, 0, tzinfo=UTC), user="planner")
-DATA = ImportData(locations={}, inventory=[], parts={}, transactions=[])
+DATA = _small_data()  # aisles A and B, levels 1 and 2
 ANALYSIS = empty_analysis()
 
 
@@ -70,6 +70,43 @@ def test_fr21_set_existing_mark_is_noop() -> None:
 
     assert applied.events == []
     assert applied.state == state
+
+
+@pytest.mark.parametrize(
+    ("mark", "message"),
+    [
+        (AisleMark(aisle="ZZ"), "Aisle ZZ has no locations."),
+        (LevelMark(level="9", aisle="A"), "Aisle A has no level 9."),
+        (LevelMark(level="1", aisle="ZZ"), "Aisle ZZ has no level 1."),
+        (LevelMark(level="9"), "No aisle has level 9."),
+        (LocationMark(location="X-9-9"), "Location X-9-9 does not exist."),
+    ],
+)
+def test_fr21_issue102_set_mark_covering_no_location_is_rejected(
+    mark: BestMark, message: str
+) -> None:
+    state = _state(AisleMark(aisle="A"))
+
+    with pytest.raises(DomainError) as raised:
+        apply(state, _set(mark), CTX, DATA, ANALYSIS)
+
+    assert (raised.value.code, raised.value.message) == ("validation_failed", message)
+    assert state.best_marks == [AisleMark(aisle="A")]
+
+
+@pytest.mark.parametrize(
+    "mark",
+    [
+        AisleMark(aisle="B"),
+        LevelMark(level="2", aisle="B"),
+        LevelMark(level="2"),
+        LocationMark(location="B-2-2"),
+    ],
+)
+def test_fr21_issue102_set_mark_covering_a_location_is_accepted(mark: BestMark) -> None:
+    applied = apply(_state(), _set(mark), CTX, DATA, ANALYSIS)
+
+    assert applied.events == [MarkSet(mark=mark)]
 
 
 def test_fr21_remove_missing_mark_is_noop() -> None:
