@@ -79,6 +79,7 @@ context:
 - Verification (2026-11-28): ESLint, tsc clean; `npm run trace` OK (FR-40, FR-50, NFR-5, NFR-6 listed, `demo-front-page` tests included); secret grep on the diff empty; `npm run e2e` (chromium, firefox, msedge) 453 passed, 0 failed, 0 flaky, 0 skipped; `npm run e2e:production` 3 passed. No backend change, so pytest/ruff were not rerun.
 - Author-checked ACs remain (Vercel flags and `DEMO_PASSWORD=demo`, `demo` row reset, «Testing» deleted, `npm run e2e:public`, SM-2 on the public URL): the story stays `review` until the author confirms them in a session log.
 
+- First live `npm run e2e:public` (2026-11-28): the Log in test failed on the 5 s default while the page still showed "Logging in." (a cold function plus bcrypt against Supabase). Both `/plans` URL waits now use `LOGIN_TIMEOUT_MS` (30 s); rerun: 3 passed, Log in 5.0 s. `e2e:production` 3 passed.
 
 ## Spec Change Log
 

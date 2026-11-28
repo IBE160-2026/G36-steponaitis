@@ -12,6 +12,10 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 const HEADLINE = "Every move comes with a reason.";
 
+// A login on the public deployment can take several seconds (a cold Vercel function plus the bcrypt
+// check against Supabase), longer than the default 5 s; locally it takes well under one.
+const LOGIN_TIMEOUT_MS = 30_000;
+
 function hero(page: Page) {
   return page.getByRole("main");
 }
@@ -24,7 +28,7 @@ async function openDemoVersion(page: Page) {
   await page.goto("/");
   await expect(hero(page).getByRole("heading", { level: 1, name: HEADLINE })).toBeVisible();
   await hero(page).getByRole("button", { name: "Demo version" }).click();
-  await expect(page).toHaveURL(/\/plans$/);
+  await expect(page).toHaveURL(/\/plans$/, { timeout: LOGIN_TIMEOUT_MS });
 }
 
 test.describe("uj5 the production deployment", () => {
@@ -61,7 +65,7 @@ test.describe("uj5 the production deployment", () => {
     await page.getByLabel("Password", { exact: true }).fill(demoPassword ?? "");
     await section.getByRole("button", { name: "Log in" }).click();
 
-    await expect(page).toHaveURL(/\/plans$/);
+    await expect(page).toHaveURL(/\/plans$/, { timeout: LOGIN_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "Saved plans", level: 1 })).toBeVisible();
     await expect(avatar(page)).toHaveText("DE");
   });
