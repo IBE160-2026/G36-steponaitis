@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from swp.domain.accounts import DEMO_USERNAME
-from swp.store.db import is_busy, transaction
+from swp.store.db import is_busy, transaction, write_transaction
 from swp.store.models import UserRow
 
 
@@ -21,10 +21,16 @@ class StoredUser:
     created_at: datetime
 
 
-def insert_user(user: StoredUser) -> bool:
-    """Insert `user`; False when another account already holds its `username_key`."""
+class UsersBusy(Exception):
+    """Another writer holds the database lock (SQLite busy/locked, pg 55P03); the message is
+    the driver's cause."""
+
+
+def _insert(user: StoredUser) -> bool:
+    # A write transaction, so Postgres applies the 3 s `lock_timeout` and SQLite takes the
+    # write lock first: a held lock fails as busy instead of waiting.
     try:
-        with transaction() as session:
+        with write_transaction() as session:
             session.add(
                 UserRow(
                     id=user.id,
@@ -39,16 +45,13 @@ def insert_user(user: StoredUser) -> bool:
     return True
 
 
-class UsersBusy(Exception):
-    """Another writer holds the database lock (SQLite busy/locked, pg 55P03); the message is
-    the driver's cause."""
+def insert_user(user: StoredUser) -> bool:
+    """Insert `user`; False when another account already holds its `username_key`.
 
-
-def insert_seed_user(user: StoredUser) -> bool:
-    """`insert_user` for the startup seed: a busy lock raises `UsersBusy` instead of
-    `OperationalError`, so the caller can log it and skip."""
+    Raise `UsersBusy` when the lock cannot be taken; any other database error raises unchanged.
+    """
     try:
-        return insert_user(user)
+        return _insert(user)
     except OperationalError as error:
         if is_busy(error):
             raise UsersBusy(str(error.orig)) from error

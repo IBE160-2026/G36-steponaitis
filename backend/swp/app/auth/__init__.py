@@ -36,6 +36,7 @@ JWT_ALGORITHM = "HS256"
 WRONG_LOGIN = "Wrong username or password. Check both and try again."
 LOGIN_BUSY = "Log in is busy. Try again."
 DEMO_BUSY = "The demo account is busy. Try again."
+SIGNUP_BUSY = "Create account is busy. Try again."
 
 
 @dataclass(frozen=True)
@@ -85,7 +86,8 @@ def signup(username: str, password: str, password_repeat: str, *, now: datetime)
 
     Whether the username is taken is checked only when its format is valid; a concurrent
     sign-up that wins the unique constraint gives the same taken message. With the demo flag
-    on, a full demo is refused with `limit_reached` before any field check (AD-18).
+    on, a full demo is refused with `limit_reached` before any field check (AD-18). A busy
+    database lock while the account is stored is `unavailable` (503, the user tries again).
     """
     ensure_account_room()
     errors = signup_errors(username, password, password_repeat)
@@ -102,7 +104,11 @@ def signup(username: str, password: str, password_repeat: str, *, now: datetime)
         password_hash=hash_password(password),
         created_at=now,
     )
-    if not store.insert_user(user):
+    try:
+        inserted = store.insert_user(user)
+    except store.UsersBusy as busy:
+        raise DomainError("unavailable", SIGNUP_BUSY) from busy
+    if not inserted:
         raise _taken()
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
@@ -182,7 +188,7 @@ def seed_demo_account(*, now: datetime) -> None:
     if store.username_key_taken(DEMO_USERNAME):
         return
     try:
-        store.insert_seed_user(
+        store.insert_user(
             store.StoredUser(
                 id=uuid.uuid4(),
                 username=DEMO_USERNAME,

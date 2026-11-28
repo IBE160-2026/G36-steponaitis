@@ -9,6 +9,7 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, inspect, select
+from sqlalchemy.exc import OperationalError
 
 from swp.api.app import create_app
 from swp.app import auth
@@ -16,7 +17,7 @@ from swp.config import get_settings
 from swp.store import users as user_store
 from swp.store.db import get_engine
 from swp.store.models import UserRow
-from tests.conftest import production_env
+from tests.conftest import BUSY_CAUSES, production_env, table_write_locked
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 TAKEN = "That username is taken. Try another."
@@ -369,3 +370,86 @@ def test_fr39_username_stored_as_typed(empty_tables: str, auth_on: None) -> None
     assert row.created_at == NOW
     assert user_store.username_key_taken("åsab2")
     assert not user_store.username_key_taken("asab2")
+
+
+# --- Busy database lock (AD-11) -----------------------------------------------------------
+
+
+SIGNUP_BUSY = {
+    "code": "unavailable",
+    "message": "Create account is busy. Try again.",
+    "details": [],
+}
+
+
+@pytest.mark.parametrize("cause", BUSY_CAUSES)
+def test_fr39_busy_insert_answers_unavailable_without_cookie(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, cause: Exception
+) -> None:
+    def busy(_user: object) -> bool:
+        raise OperationalError("INSERT", {}, cause)
+
+    monkeypatch.setattr(user_store, "_insert", busy)
+
+    response = _signup(client)
+
+    assert response.status_code == 503, response.text
+    assert _error(response) == SIGNUP_BUSY
+    assert "set-cookie" not in response.headers
+    assert client.get("/api/session").json()["user"] is None
+    assert _user_count() == 0
+
+
+def test_fr39_other_operational_error_still_raises(
+    empty_tables: str, auth_on: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def broken(_user: object) -> bool:
+        raise OperationalError("INSERT", {}, Exception("no such table: users"))
+
+    monkeypatch.setattr(user_store, "_insert", broken)
+
+    with pytest.raises(OperationalError):
+        auth.signup("Kari7", "secret", "secret", now=NOW)
+
+
+def test_fr39_user_insert_runs_in_a_write_transaction(
+    empty_tables: str, auth_on: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # `write_transaction` is what sets Postgres' 3 s lock_timeout (and BEGIN IMMEDIATE on
+    # SQLite), so a held lock fails as busy instead of waiting.
+    opened: list[None] = []
+    real = user_store.write_transaction
+
+    def spy():
+        opened.append(None)
+        return real()
+
+    monkeypatch.setattr(user_store, "write_transaction", spy)
+
+    auth.signup("Kari7", "secret", "secret", now=NOW)
+
+    assert opened == [None]
+    assert _user_count() == 1
+
+
+def test_fr39_real_write_lock_is_unavailable(client: TestClient) -> None:
+    with table_write_locked("users"):
+        response = _signup(client)
+
+    assert response.status_code == 503, response.text
+    assert _error(response) == SIGNUP_BUSY
+    assert "set-cookie" not in response.headers
+    assert _user_count() == 0
+
+    # The lock is gone: the same sign-up now creates the account.
+    assert _signup(client).status_code == 201
+    assert _user_count() == 1
+
+
+def test_fr39_signup_route_declares_503() -> None:
+    document = create_app().openapi()
+
+    responses = document["paths"]["/api/auth/signup"]["post"]["responses"]
+    assert "503" in responses
+    schema = responses["503"]["content"]["application/json"]["schema"]
+    assert schema == {"$ref": "#/components/schemas/ErrorEnvelope"}

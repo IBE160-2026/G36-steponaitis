@@ -31,6 +31,7 @@
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: Create account answers 500, not 503, when the database lock is busy.
   evidence: `backend/swp/store/users.py:24-39` (`insert_user`) catches only `IntegrityError` and runs in `transaction()`, so a SQLite "database is locked" `OperationalError` is not mapped to `unavailable` the way Log in, Demo version and the seed are. Pre-existing; found by the review of the Log in follow-ups.
+  resolved: 2026-11-28 — `spec-create-account-busy-lock-answers-503.md`: `insert_user` runs in `write_transaction` and raises `UsersBusy` on a busy lock, `auth.signup` answers `unavailable` (503), the route declares 503, and `test_fr39_real_write_lock_is_unavailable` holds a real lock.
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: `epics.md:1995` (Story 9.7) still says "Demo version still works while `demo` is locked by the throttle", but since 2026-11-28 Log in as `demo` is not throttled while Demo version is on.
   evidence: The spec's boundary kept `epics.md` out of the build; the wording is corrected in the bookkeeping pass that follows the two builds (with `epics.md:2722`).

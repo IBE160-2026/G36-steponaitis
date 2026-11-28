@@ -54,7 +54,7 @@ def clear_session_cookie(response: Response) -> None:
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
-    responses=error_responses(403, 404, 409, 422),
+    responses=error_responses(403, 404, 409, 422, 503),
 )
 def signup(body: SignupRequest, response: Response) -> SignupResponse:
     signed_up = auth.signup(

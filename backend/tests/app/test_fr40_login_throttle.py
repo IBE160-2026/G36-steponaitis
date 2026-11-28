@@ -1,16 +1,13 @@
 """FR-40/AD-18 login throttle on SQLite and (CI) Postgres, with an injected clock (no sleep)."""
 
 import logging
-import sqlite3
 import threading
 from collections.abc import Iterator
-from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
-from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import event, inspect, select, text
+from sqlalchemy import inspect, select
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from swp.api.app import create_app
@@ -21,6 +18,7 @@ from swp.domain.errors import DomainError
 from swp.store import login_attempts
 from swp.store.db import get_engine
 from swp.store.models import LoginAttemptRow
+from tests.conftest import BUSY_CAUSES, table_write_locked
 
 SAME_ORIGIN = {"Origin": "http://testserver"}
 T = datetime(2026, 11, 23, 12, 0, tzinfo=UTC)
@@ -284,16 +282,6 @@ def test_fr40_recording_a_failure_prunes_rows_whose_lock_passed(
 # --- A busy database lock on the throttle writes (Epic 16 retro, F1) ---------------------
 
 
-class _LockNotAvailable(Exception):
-    """Stands in for psycopg's LockNotAvailable: Postgres `lock_timeout` passed (55P03)."""
-
-    sqlstate = "55P03"
-
-
-_BUSY_CAUSES = [
-    pytest.param(Exception("database is locked"), id="sqlite-locked"),
-    pytest.param(_LockNotAvailable("canceling statement due to lock timeout"), id="pg-55P03"),
-]
 LOGIN_BUSY = {"code": "unavailable", "message": "Log in is busy. Try again.", "details": []}
 
 
@@ -305,7 +293,7 @@ def _post_login(client: TestClient, password: str):
     )
 
 
-@pytest.mark.parametrize("cause", _BUSY_CAUSES)
+@pytest.mark.parametrize("cause", BUSY_CAUSES)
 def test_fr40_busy_attempt_count_answers_unavailable_without_cookie(
     client: TestClient, account: None, monkeypatch: pytest.MonkeyPatch, cause: Exception
 ) -> None:
@@ -327,7 +315,7 @@ def test_fr40_busy_attempt_count_answers_unavailable_without_cookie(
     assert _rows() == {}
 
 
-@pytest.mark.parametrize("cause", _BUSY_CAUSES)
+@pytest.mark.parametrize("cause", BUSY_CAUSES)
 def test_fr40_busy_clear_after_right_password_logs_in_and_warns_once(
     client: TestClient,
     account: None,
@@ -417,42 +405,8 @@ def test_fr40_busy_retry_after_integrity_error_answers_unavailable(
     assert client.get("/api/session").json()["user"] is None
 
 
-@contextmanager
-def _login_attempts_locked() -> Iterator[None]:
-    """Another writer really holds the lock: SQLite BEGIN IMMEDIATE, Postgres LOCK TABLE."""
-    engine = get_engine()
-    if engine.dialect.name == "sqlite":
-        database = engine.url.database
-        assert database is not None
-        engine.dispose()
-
-        def short_busy_timeout(dbapi_connection: Any, _record: Any) -> None:
-            cursor = dbapi_connection.cursor()
-            cursor.execute("PRAGMA busy_timeout=50")
-            cursor.close()
-
-        event.listen(engine, "connect", short_busy_timeout)
-        holder = sqlite3.connect(database, isolation_level=None)
-        try:
-            holder.execute("BEGIN IMMEDIATE")
-            yield
-        finally:
-            holder.execute("ROLLBACK")
-            holder.close()
-            event.remove(engine, "connect", short_busy_timeout)
-    else:
-        # Each write transaction waits `PG_LOCK_TIMEOUT` (3 s), then gets 55P03.
-        with engine.connect() as holder:
-            holder.begin()
-            holder.execute(text("LOCK TABLE login_attempts IN EXCLUSIVE MODE"))
-            try:
-                yield
-            finally:
-                holder.rollback()
-
-
 def test_fr40_real_write_lock_is_unavailable(client: TestClient, account: None) -> None:
-    with _login_attempts_locked():
+    with table_write_locked("login_attempts"):
         response = _post_login(client, "secret")
         # The clearing write runs in a write transaction too, so it fails as busy, not waits.
         with pytest.raises(login_attempts.LoginAttemptsBusy):

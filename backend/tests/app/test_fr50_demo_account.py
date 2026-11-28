@@ -24,9 +24,8 @@ from swp.store import users as user_store
 from swp.store.db import get_engine
 from swp.store.models import ImportRow, LoginAttemptRow, PlanRow, UserRow
 from tests.app.test_create_plan import _multipart, _small_files
-from tests.app.test_fr40_login_throttle import _login_attempts_locked
 from tests.app.test_login import SAME_ORIGIN, _error, _login
-from tests.conftest import _clear_caches, production_env
+from tests.conftest import _clear_caches, production_env, table_write_locked
 
 NOW = datetime(2026, 11, 23, 12, 0, tzinfo=UTC)
 NOT_FOUND = {"code": "not_found", "message": "Not found.", "details": []}
@@ -146,7 +145,7 @@ def test_fr50_demo_seed_skips_busy_database_without_crashing(
     def busy(_user: object) -> bool:
         raise OperationalError("INSERT", {}, Exception("database is locked"))
 
-    monkeypatch.setattr(user_store, "insert_user", busy)
+    monkeypatch.setattr(user_store, "_insert", busy)
     caplog.set_level(logging.WARNING, logger="swp.auth")
 
     auth.seed_demo_account(now=NOW)
@@ -171,7 +170,7 @@ def test_fr50_demo_seed_other_operational_error_still_raises(
     def broken(_user: object) -> bool:
         raise OperationalError("INSERT", {}, Exception("no such table: users"))
 
-    monkeypatch.setattr(user_store, "insert_user", broken)
+    monkeypatch.setattr(user_store, "_insert", broken)
 
     with pytest.raises(OperationalError):
         auth.seed_demo_account(now=NOW)
@@ -308,7 +307,7 @@ def test_fr50_log_in_as_demo_never_calls_the_throttle_store(
 def test_fr50_log_in_as_demo_works_while_login_attempts_is_write_locked(
     client: TestClient,
 ) -> None:
-    with _login_attempts_locked():
+    with table_write_locked("login_attempts"):
         response = _login(client, "demo", "demo")
         # The lock is real: a throttle write fails as busy.
         with pytest.raises(login_attempts.LoginAttemptsBusy):
@@ -372,7 +371,7 @@ def test_fr50_demo_with_busy_seed_answers_unavailable_without_cookie(
         raise OperationalError("INSERT", {}, Exception("database is locked"))
 
     with monkeypatch.context() as locked:
-        locked.setattr(user_store, "insert_user", busy)
+        locked.setattr(user_store, "_insert", busy)
         response = _demo(client)
 
     assert response.status_code == 503, response.text
@@ -387,6 +386,23 @@ def test_fr50_demo_with_busy_seed_answers_unavailable_without_cookie(
     # The lock is gone: the next press seeds the account and logs in.
     assert _demo(client).status_code == 200
     assert [row[1] for row in _demo_rows()] == ["demo"]
+
+
+def test_fr50_demo_with_real_write_lock_on_users_answers_unavailable(
+    client: TestClient,
+) -> None:
+    # The seed insert runs in a write transaction, so a held lock fails as busy, not waits.
+    _delete_users()
+
+    with table_write_locked("users"):
+        response = _demo(client)
+
+    assert response.status_code == 503, response.text
+    assert _error(response)["code"] == "unavailable"
+    assert "set-cookie" not in response.headers
+    assert _demo_rows() == []
+
+    assert _demo(client).status_code == 200
 
 
 def test_fr50_demo_off_is_not_found(empty_tables: str, monkeypatch: pytest.MonkeyPatch) -> None:
