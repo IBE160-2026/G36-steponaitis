@@ -31,6 +31,13 @@ Gjennomgangen ga ni funn: fire rettet (delte testhjelpere, opprydding av motoren
 - Frafall (bare tester), 8: epic 4 `has_moves`; epic 6 sterkere tester; epic 8 print-verifisering (håndsjekken i Firefox står alt som eget punkt); epic 9 lav-alvorlige tester; epic 10 lave veggfunn; epic 11 `KEY_COLOUR_OF`; epic 12 tidsmåling og antall preview-kall.
 - Frafall (bare refaktorering og duplisering), 9: epic 5 delte predikater og fildeling; epic 6 `now` etter parsing og copy til `lib/copy`; epic 7, 8 og 9 opprydding av duplisering; epic 11 ett `#RRGGBB`-predikat; epic 12 én hjelper for dra-årsaker.
 
+**Push og CI (kl. 19:05):** Justas ba meg pushe `main` og sjekke CI. `f7f4470..6da6cf8` er pushet. CI-kjøring 46173037112 er grønn i alle fire jobber: Python på SQLite, `tests/app` på Postgres 17 (465 bestått, 3 hoppet over; `test_signup.py` og `test_fr50_demo_account.py` kjørte uten hopp, så testene med ekte lås er bekreftet på Postgres), frontend og Playwright i Chromium.
+
+**Beslutning om de 35 retro-punktene (kl. 19:05):** Justas ba meg avgjøre («fix a decision»). Avgjort etter anbefalingen over:
+- 17 frafalt: i `sprint-status.yaml` står de som `status: done` med `resolution: "waived 2026-11-28, not built: …"`, fordi filen bare har statusene open, in-progress og done. Arbeidet er ikke gjort. Punktene er 31, 52, 70, 82, 88, 94, 100, 101 (bare tester) og 45, 46, 53, 54, 64, 75, 81, 95, 102 (bare refaktorering og duplisering).
+- 18 står `open` og skal bygges: 2, 49, 39, 59 først (kan gi 500 eller feil resultat), deretter 1, 3, 27, 30, 32, 42, 50, 51, 60, 80, 85, 86, 87, 93 hvis det er tid.
+- To av de frafalte har også en liten atferdsdel som dermed ikke bygges: punkt 100 (debounce av forhåndsvisning under dra) og punkt 53 (`now` etter parsing, egen busy-melding for gjenbruk av import). Håndsjekken i Firefox fra punkt 70 lever videre som eget punkt i `issues.md`.
+- `sprint_plan.py validate` er gyldig, og `status` viser 18 åpne punkter uten advarsler.
+
 ### Åpne punkter
-- Postgres-grenene av testene med ekte lås (`test_fr39_real_write_lock_is_unavailable`, `test_fr50_demo_with_real_write_lock_on_users_answers_unavailable`) kjøres bare i CI; sjekk CI-kjøringen etter push av `2dc3273`.
-- De 35 retro-punktene venter fortsatt på beslutning (står alt i `issues.md` fra 2026-11-28; anbefalingen står over).
+- 18 retro-punkter står `open` i `sprint-status.yaml` og skal bygges med `bmad-build`, ett per økt: først punkt 2 (datoer utenfor område), 49 (`get_plan` mot sletting), 39 (rule 3 uten best location) og 59 (flow bar etter undo); resten hvis det er tid.
