@@ -1,7 +1,10 @@
 name: Keep-alive
 
-# Wakes the public deployment and its free Supabase database once a day: GET /api/health runs
-# SELECT 1. A non-2xx answer fails the run, and GitHub emails the owner.
+# Wakes the public deployment and its free Supabase database once a day, and checks that the
+# deployment is still the public demo: GET /api/health runs SELECT 1, GET /api/session must show
+# FEATURE_AUTH and FEATURE_DEMO on, and POST /api/auth/demo (Demo version) must log in as `demo`.
+# Demo version writes nothing while the `demo` row exists. A failed step fails the run, and
+# GitHub emails the owner.
 on:
   schedule:
     - cron: "17 6 * * *"
@@ -10,10 +13,34 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    # Named explicitly, so GitHub runs it with `-eo pipefail`: a failed curl fails the step even
+    # though jq is the last command of the pipe. Each jq filter prints the checked fields first,
+    # so the log shows what was off; its last output, the boolean, decides `--exit-status`.
+    shell: bash
+
+env:
+  PUBLIC_URL: https://g36steponaitis.vercel.app
+
 jobs:
   health:
-    name: GET /api/health on the public URL
+    name: Health, flags and Demo version on the public URL
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Three steps, each at most 4 tries of 30 s with 10 s between them (150 s).
+    timeout-minutes: 10
     steps:
-      - run: curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30 https://g36steponaitis.vercel.app/api/health
+      - name: GET /api/health answers 2xx
+        run: curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30 "$PUBLIC_URL/api/health"
+      - name: GET /api/session shows FEATURE_AUTH and FEATURE_DEMO on and no user
+        run: >-
+          curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30
+          "$PUBLIC_URL/api/session"
+          | jq --exit-status --compact-output
+          '{feature_auth, feature_demo, user}, (.feature_auth == true and .feature_demo == true and .user == null)'
+      - name: POST /api/auth/demo logs in as demo
+        run: >-
+          curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30
+          --request POST --header "Origin: $PUBLIC_URL"
+          "$PUBLIC_URL/api/auth/demo"
+          | jq --exit-status --compact-output '{user}, (.user == "demo")'

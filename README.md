@@ -92,8 +92,9 @@ The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to st
 2. `APP_ENV` is anything other than `local` or `production`;
 3. in production, `JWT_SECRET` is empty, the local default, the `.env.example` placeholder or shorter than 32 bytes;
 4. in production, `DEMO_PASSWORD` is not set;
-5. in production, `DATABASE_URL` is not set;
-6. any setting has an invalid value (for example a `DEMO_PASSWORD` shorter than the Log in form allows, or a `MAX_PLANS` that is not a positive number). The line names the setting and the reason, never the value.
+5. in production, `DATABASE_URL` is not set, empty or only blanks;
+6. in production on Vercel (`VERCEL` set), `DATABASE_URL` is a SQLite database: Vercel's disk is read-only and temporary. Off Vercel, production on SQLite still starts (`npm run e2e:production` runs that way);
+7. any setting has an invalid value (for example a `DEMO_PASSWORD` shorter than the Log in form allows, or a `MAX_PLANS` that is not a positive number). The line names the setting and the reason, never the value.
 
 Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` and the starter categories through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
 
@@ -140,7 +141,7 @@ The public URL https://g36steponaitis.vercel.app is one Vercel project with two 
    - `npm run e2e:public` passes with 0 failed and 0 flaky. A Log in failure with "Too many failed logins" means someone locked `demo` for a minute: wait a minute and rerun.
 
    **Upgrade note:** the seed never changes an existing `demo` row, so a `demo` account created with an older `DEMO_PASSWORD` keeps that password. Delete its row in Supabase (*Table Editor → `users`*; nothing references it by foreign key, and plans keep their creator name); the next **Demo version** click recreates it with the current `DEMO_PASSWORD`. Click **Demo version** once before running `npm run e2e:public`, so its Log in test does not run before the row exists. Existing `demo` sessions end, because the new row has a new id.
-6. **Keep-alive:** a free Supabase project pauses after a week without traffic. `.github/workflows/keep-alive.yml` calls `/api/health` (which runs `SELECT 1`) once a day; run it by hand under *Actions → Keep-alive → Run workflow* after the first deploy. A failed run means the site or the database is down, and GitHub emails the repository owner. GitHub disables scheduled workflows after 60 days without repository activity: re-enable it under *Actions → Keep-alive*. A project that has already paused does not wake from an HTTP request; restore it in the Supabase dashboard.
+6. **Keep-alive:** a free Supabase project pauses after a week without traffic. `.github/workflows/keep-alive.yml` runs three checks once a day: `GET /api/health` (which runs `SELECT 1`), `GET /api/session` (both `feature_auth` and `feature_demo` must be `true`) and `POST /api/auth/demo` (Demo version must log in as `demo`; it writes nothing while the `demo` row exists). Run it by hand under *Actions → Keep-alive → Run workflow* after the first deploy. A failed run means the site or the database is down, `FEATURE_AUTH` or `FEATURE_DEMO` was dropped from the Vercel settings, or Demo version is broken; GitHub emails the repository owner. GitHub disables scheduled workflows after 60 days without repository activity: re-enable it under *Actions → Keep-alive*. A project that has already paused does not wake from an HTTP request; restore it in the Supabase dashboard.
 
 ## Milestone 2 demo
 

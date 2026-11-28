@@ -13,10 +13,12 @@ from swp.api.app import create_app
 from swp.app.startup import (
     DATABASE_URL_UNSET,
     DEMO_PASSWORD_UNSET,
+    SQLITE_ON_VERCEL,
     UNKNOWN_APP_ENV,
     VERCEL_WITHOUT_APP_ENV,
     WEAK_JWT_SECRET,
     StartupRefused,
+    check_startup,
     startup_problems,
 )
 from swp.config import DEFAULT_JWT_SECRET, JWT_SECRET_PLACEHOLDER, Settings, get_settings
@@ -200,10 +202,16 @@ def test_nfr6_invalid_setting_refuses_without_value(
     assert "validation error" not in shown.lower()
 
 
-def test_nfr6_vercel_with_production_app_env_starts(monkeypatch: pytest.MonkeyPatch) -> None:
-    _production(monkeypatch, VERCEL="1")
+def test_nfr6_vercel_with_production_app_env_and_postgres_passes_the_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `check_startup()` reads the real environment and opens no database, so no Postgres
+    # server is needed and the app is not started.
+    with monkeypatch.context() as vercel:
+        _production(vercel, VERCEL="1", DATABASE_URL="postgresql://app@db.invalid:6543/postgres")
 
-    _starts()
+        check_startup()  # does not raise StartupRefused
+    get_settings.cache_clear()
 
 
 def test_nfr6_unknown_app_env_refuses(
@@ -234,6 +242,83 @@ def test_nfr6_production_refuses_unset_database_url(
     _refused_error, lines = _refused(caplog)
 
     assert lines == [f"Refusing to start: {DATABASE_URL_UNSET}"]
+
+
+@pytest.mark.parametrize("blank", ["", "   "], ids=["empty", "blanks"])
+def test_nfr6_production_refuses_blank_database_url(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, blank: str
+) -> None:
+    # Scoped: the fixtures' teardown opens the engine again and needs a real URL.
+    with monkeypatch.context() as bad:
+        _production(bad, DATABASE_URL=blank)
+        refused, lines = _refused(caplog)
+    get_settings.cache_clear()
+
+    assert lines == [f"Refusing to start: {DATABASE_URL_UNSET}"]
+    assert refused.problems == [DATABASE_URL_UNSET]
+    assert refused.__cause__ is None and refused.__suppress_context__  # no traceback
+
+
+def test_nfr6_blank_database_url_on_vercel_gets_only_the_unset_line() -> None:
+    settings = Settings(
+        app_env="production", jwt_secret="x" * 32, demo_password="s3cret", database_url="  "
+    )
+
+    assert startup_problems(settings, {"VERCEL": "1"}) == [DATABASE_URL_UNSET]
+
+
+def test_nfr6_vercel_refuses_sqlite_database_url(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    capsys: pytest.CaptureFixture[str],
+    clean_env: Path,
+) -> None:
+    _production(monkeypatch, VERCEL="1")  # DATABASE_URL is the fixture's SQLite file
+
+    refused, lines = _refused(caplog)
+
+    assert lines == [f"Refusing to start: {SQLITE_ON_VERCEL}"]
+    assert refused.problems == [SQLITE_ON_VERCEL]
+    assert "SQLite" in SQLITE_ON_VERCEL and "VERCEL" in SQLITE_ON_VERCEL
+    # The line never shows the setting's value (NFR-6).
+    shown = caplog.text + str(refused) + "".join(capsys.readouterr())
+    assert str(clean_env) not in shown and "sqlite://" not in shown
+
+
+def test_nfr6_sqlite_database_url_is_refused_only_on_vercel() -> None:
+    settings = Settings(
+        app_env="production",
+        jwt_secret="x" * 32,
+        demo_password="s3cret",
+        database_url="sqlite:///x.db",
+    )
+
+    assert startup_problems(settings, {}) == []  # `e2e:production`: production on SQLite
+    assert startup_problems(settings, {"VERCEL": ""}) == []
+    assert startup_problems(settings, {"VERCEL": "1"}) == [SQLITE_ON_VERCEL]
+    upper = settings.model_copy(update={"database_url": " SQLite+pysqlite:///x.db"})
+    assert startup_problems(upper, {"VERCEL": "1"}) == [SQLITE_ON_VERCEL]
+
+
+def test_nfr6_vercel_sqlite_in_an_unwritable_directory_refuses_without_traceback(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
+    # The custom SQLite file's directory cannot be created (on Vercel: a read-only disk; here:
+    # its parent is a file). The refusal is the one SQLite line, not an OSError.
+    blocker = tmp_path / "read-only"
+    blocker.write_text("", encoding="utf-8")
+    database = blocker / "data" / "swp.db"
+    with pytest.raises(OSError):
+        database.parent.mkdir(parents=True, exist_ok=True)
+
+    with monkeypatch.context() as bad:
+        _production(bad, VERCEL="1", DATABASE_URL=f"sqlite:///{database}")
+        refused, lines = _refused(caplog)
+    get_settings.cache_clear()
+
+    assert lines == [f"Refusing to start: {SQLITE_ON_VERCEL}"]
+    assert refused.problems == [SQLITE_ON_VERCEL]
+    assert refused.__cause__ is None and refused.__suppress_context__
 
 
 class _ReadOnlyDir:

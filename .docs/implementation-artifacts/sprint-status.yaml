@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 12:36
+last_updated: 11-28-2026 13:56
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -1072,7 +1072,7 @@ action_items:
       around login_attempts.reserve/clear, raise unavailable in demo_login when a
       busy seed leaves no row, fix its false comment, one test per path (F1, F2)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
   - id: "epic-16-retro-item-120-decide-how-the-throttle-treats-the-publi"
     epic: 16
@@ -1087,14 +1087,14 @@ action_items:
     action: "Refuse an empty or SQLite DATABASE_URL under VERCEL and suppress OSError
       on the custom-SQLite mkdir, with a test_nfr6 test per case (F5)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
   - id: "epic-16-retro-item-122-extend-keep-alive-yml-to-assert-api-sess"
     epic: 16
     action: "Extend keep-alive.yml to assert /api/session has feature_auth and feature_demo
       true and user null, optionally POST /api/auth/demo 200 (F6)"
     owner: "dev"
-    status: open
+    status: in-progress
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
   - id: "epic-16-retro-item-123-decide-the-vercel-function-region-retry"
     epic: 16
@@ -1109,7 +1109,7 @@ action_items:
       production wording for seed-skip warnings, test_deploy.py pins excludeFiles
       away from settings/ and swp/ (F8, F9, F10)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
   - id: "epic-16-retro-item-125-reword-the-story-16-1-ac-in-epics-md-as"
     epic: 16

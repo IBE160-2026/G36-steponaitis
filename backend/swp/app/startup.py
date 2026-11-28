@@ -2,7 +2,9 @@
 
 `create_app()` and `swp db upgrade` run `check_startup()` before anything else. "Set" means the
 field came from the environment (`Settings.model_fields_set`), so local runs need no env vars
-while production must choose each value deliberately.
+while production must choose each value deliberately. An empty or blank `DATABASE_URL` counts as
+not set, and on Vercel (`VERCEL` set) a SQLite `DATABASE_URL` is refused: `e2e:production` runs
+production on SQLite without `VERCEL` and still starts.
 """
 
 import logging
@@ -26,6 +28,10 @@ WEAK_JWT_SECRET = (
 )
 DEMO_PASSWORD_UNSET = "DEMO_PASSWORD is not set. Choose the demo account's password explicitly."
 DATABASE_URL_UNSET = "DATABASE_URL is not set. Production needs its own database."
+SQLITE_ON_VERCEL = (
+    "DATABASE_URL is a SQLite database and VERCEL is set. Vercel's disk is read-only and "
+    "temporary: use the Postgres connection string."
+)
 
 
 class StartupRefused(RuntimeError):
@@ -57,8 +63,11 @@ def startup_problems(settings: Settings, environ: Mapping[str, str]) -> list[str
             problems.append(WEAK_JWT_SECRET)
         if "demo_password" not in is_set:
             problems.append(DEMO_PASSWORD_UNSET)
-        if "database_url" not in is_set:
-            problems.append(DATABASE_URL_UNSET)
+        database_url = settings.database_url.strip()
+        if "database_url" not in is_set or not database_url:
+            problems.append(DATABASE_URL_UNSET)  # an empty or blank value counts as unset
+        elif environ.get("VERCEL") and database_url.lower().startswith("sqlite"):
+            problems.append(SQLITE_ON_VERCEL)
     return problems
 
 

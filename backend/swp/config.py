@@ -84,8 +84,11 @@ def get_settings() -> Settings:
         with suppress(OSError):
             VAR_DIR.mkdir(parents=True, exist_ok=True)
     elif settings.database_url.startswith("sqlite:///"):
-        # A custom SQLite file (tests, e2e) also gets its directory created.
-        Path(settings.database_url.removeprefix("sqlite:///")).parent.mkdir(
-            parents=True, exist_ok=True
-        )
+        # A custom SQLite file (tests, e2e) also gets its directory created. A directory that
+        # cannot be created (read-only disk) is skipped, so swp.app.startup can refuse SQLite on
+        # Vercel with one line instead of an OSError traceback.
+        with suppress(OSError):
+            Path(settings.database_url.removeprefix("sqlite:///")).parent.mkdir(
+                parents=True, exist_ok=True
+            )
     return settings

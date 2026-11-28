@@ -300,8 +300,8 @@ def seed_starter_categories(
 
     The file is read only after both tables are found empty, so a database with the planner's
     lists never reads it. A busy lock (another writer, e.g. a worker seeding) is retried
-    `SEED_TRIES` times, then logged with its cause and skipped; the next start or
-    `swp db upgrade` seeds instead.
+    `SEED_TRIES` times, then logged with its cause and skipped; the next `swp db upgrade` or
+    local start seeds instead (production does not seed on start).
     """
     drafts: list[RuleDraft] | None = None
     aisles: dict[str, list[str]] = {}
@@ -319,8 +319,8 @@ def seed_starter_categories(
         except CategorySeedBusy as busy:
             if attempt == SEED_TRIES:
                 logger.warning(
-                    "Starter categories skipped: the database was busy (%s). They are added on "
-                    "the next start or swp db upgrade.",
+                    "Starter categories skipped: the database was busy (%s). Run swp db upgrade "
+                    "again to add them; a local start also adds them.",
                     busy,
                 )
                 return False

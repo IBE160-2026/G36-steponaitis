@@ -11,8 +11,9 @@ const repoRoot = join(__dirname, "..");
 // Throwaway secrets, generated per run and never written to disk; they pass the startup check.
 const jwtSecret = randomBytes(48).toString("base64url");
 // The demo password is also the Log in test's: Playwright loads this config again in every worker,
-// so the main process's value goes through the environment the workers inherit.
-process.env.E2E_DEMO_PASSWORD ??= randomBytes(8).toString("hex");
+// so the main process's value goes through the environment the workers inherit. `||=`: an exported
+// empty E2E_DEMO_PASSWORD gets a generated password too (an empty DEMO_PASSWORD refuses to start).
+process.env.E2E_DEMO_PASSWORD ||= randomBytes(8).toString("hex");
 const demoPassword = process.env.E2E_DEMO_PASSWORD;
 
 export default defineConfig({

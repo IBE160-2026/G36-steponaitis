@@ -151,9 +151,15 @@ def test_fr50_demo_seed_skips_busy_database_without_crashing(
     bootstrap(upgrade=False, seed=True)
 
     assert _count(UserRow) == 0
-    assert any(
-        "Demo account skipped: the database was busy (database is locked)" in r.getMessage()
-        for r in caplog.records
+    messages = [r.getMessage() for r in caplog.records if r.name == "swp.auth"]
+    # Production does not seed on start, so the line names `swp db upgrade` first.
+    assert (
+        messages
+        == [
+            "Demo account skipped: the database was busy (database is locked). "
+            "Run swp db upgrade again to add it; a local start or Demo version also adds it."
+        ]
+        * 2
     )
 
 
@@ -275,6 +281,33 @@ def test_fr50_demo_seeds_missing_row(client: TestClient) -> None:
     assert response.status_code == 200, response.text
     assert [row[1] for row in _demo_rows()] == ["demo"]
     assert client.get("/api/session").json()["user"] == "demo"
+
+
+def test_fr50_demo_with_busy_seed_answers_unavailable_without_cookie(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Epic 16 retro F2: no `demo` row, and the seed insert meets a busy database lock.
+    _delete_users()
+
+    def busy(_user: object) -> bool:
+        raise OperationalError("INSERT", {}, Exception("database is locked"))
+
+    with monkeypatch.context() as locked:
+        locked.setattr(user_store, "insert_user", busy)
+        response = _demo(client)
+
+    assert response.status_code == 503, response.text
+    assert _error(response) == {
+        "code": "unavailable",
+        "message": "The demo account is busy. Try again.",
+        "details": [],
+    }
+    assert "set-cookie" not in response.headers
+    assert _demo_rows() == []
+
+    # The lock is gone: the next press seeds the account and logs in.
+    assert _demo(client).status_code == 200
+    assert [row[1] for row in _demo_rows()] == ["demo"]
 
 
 def test_fr50_demo_off_is_not_found(empty_tables: str, monkeypatch: pytest.MonkeyPatch) -> None:

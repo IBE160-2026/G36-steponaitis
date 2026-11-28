@@ -204,7 +204,7 @@ def test_fr47_seed_retries_busy_then_logs_cause(
     messages = [r.getMessage() for r in caplog.records if r.name == "swp.categories"]
     assert messages == [
         "Starter categories skipped: the database was busy (database is locked). "
-        "They are added on the next start or swp db upgrade."
+        "Run swp db upgrade again to add them; a local start also adds them."
     ]
     assert _rules() == []
 
@@ -231,7 +231,7 @@ def test_fr47_seed_busy_on_empty_check_retries_then_skips(
     messages = [r.getMessage() for r in caplog.records if r.name == "swp.categories"]
     assert messages == [
         "Starter categories skipped: the database was busy (database is locked). "
-        "They are added on the next start or swp db upgrade."
+        "Run swp db upgrade again to add them; a local start also adds them."
     ]
 
 

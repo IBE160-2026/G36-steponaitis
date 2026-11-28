@@ -4,17 +4,23 @@ An attempt is counted (`reserve`) before the password is checked, so concurrent 
 never run more than `LOGIN_MAX_FAILURES` password checks; a success clears the row. Rows whose
 lock has passed are pruned whenever an attempt is counted: `after_failure` and
 `is_locked` already treat such a row as missing, so deleting it changes no throttle decision.
+Both writes raise `LoginAttemptsBusy` when another writer holds the lock.
 """
 
 from datetime import datetime
 
 from sqlalchemy import delete, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from swp.domain.accounts import LoginAttempts, after_failure, is_locked
-from swp.store.db import transaction, write_transaction
+from swp.store.db import is_busy, write_transaction
 from swp.store.models import LoginAttemptRow
+
+
+class LoginAttemptsBusy(Exception):
+    """Another writer holds the database lock (SQLite busy/locked, pg 55P03); the message is
+    the driver's cause."""
 
 
 def _reserve(key: str, now: datetime) -> bool:
@@ -72,15 +78,35 @@ def reserve(key: str, now: datetime) -> bool:
     The read-modify-write runs in one transaction under a row lock, so the
     `LOGIN_MAX_FAILURES`th concurrent reservation sets the lock and later ones see it. A
     concurrent first insert for the same key loses the primary key race with an
-    IntegrityError, and is retried once (it then finds the row).
+    IntegrityError, and is retried once (it then finds the row). Raise `LoginAttemptsBusy`
+    when the lock cannot be taken; any other database error raises unchanged.
     """
     try:
-        return _reserve(key, now)
-    except IntegrityError:
-        return _reserve(key, now)
+        try:
+            return _reserve(key, now)
+        except IntegrityError:
+            return _reserve(key, now)
+    except OperationalError as error:
+        if is_busy(error):
+            raise LoginAttemptsBusy(str(error.orig)) from error
+        raise
+
+
+def _clear(key: str) -> None:
+    # A write transaction, so Postgres applies the 3 s `lock_timeout` here as in `_reserve`.
+    with write_transaction() as session:
+        session.execute(delete(LoginAttemptRow).where(LoginAttemptRow.username_key == key))
 
 
 def clear(key: str) -> None:
-    """Forget the attempts counted for `key` (after a successful login)."""
-    with transaction() as session:
-        session.execute(delete(LoginAttemptRow).where(LoginAttemptRow.username_key == key))
+    """Forget the attempts counted for `key` (after a successful login).
+
+    Raise `LoginAttemptsBusy` when the lock cannot be taken; any other database error raises
+    unchanged.
+    """
+    try:
+        _clear(key)
+    except OperationalError as error:
+        if is_busy(error):
+            raise LoginAttemptsBusy(str(error.orig)) from error
+        raise

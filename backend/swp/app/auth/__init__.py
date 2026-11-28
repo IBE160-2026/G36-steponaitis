@@ -34,6 +34,8 @@ SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60  # seconds, the cookie's Max-Age
 JWT_ALGORITHM = "HS256"
 
 WRONG_LOGIN = "Wrong username or password. Check both and try again."
+LOGIN_BUSY = "Log in is busy. Try again."
+DEMO_BUSY = "The demo account is busy. Try again."
 
 
 @dataclass(frozen=True)
@@ -127,14 +129,20 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
     check against a dummy hash. Each attempt is counted per casefolded username, whether or
     not the account exists, before the password check, so concurrent requests run at most
     `LOGIN_MAX_FAILURES` checks; a success clears the count. 5 counted attempts block the name
-    for 60 s: a locked username gets `login_locked` without a password check (AD-18).
+    for 60 s: a locked username gets `login_locked` without a password check (AD-18). A busy
+    database lock while counting or clearing is `unavailable` (503, the user tries again): no
+    session is given with a count that was not cleared.
     """
     encoded = _password_bytes(password)
     # A malformed username (lone surrogate, NUL, ...) never reaches the database.
     if username_error(username) is not None or encoded is None or not encoded:
         raise DomainError("unauthenticated", WRONG_LOGIN)
     key = username_key(username)
-    if not login_attempts.reserve(key, now):
+    try:
+        reserved = login_attempts.reserve(key, now)
+    except login_attempts.LoginAttemptsBusy as error:
+        raise DomainError("unavailable", LOGIN_BUSY) from error
+    if not reserved:
         raise DomainError("login_locked", LOGIN_LOCKED)
     user = store.get_user_by_key(key)
     if user is None:
@@ -142,7 +150,10 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
         raise DomainError("unauthenticated", WRONG_LOGIN)
     if not bcrypt.checkpw(encoded, user.password_hash.encode("ascii")):
         raise DomainError("unauthenticated", WRONG_LOGIN)
-    login_attempts.clear(key)
+    try:
+        login_attempts.clear(key)
+    except login_attempts.LoginAttemptsBusy as error:
+        raise DomainError("unavailable", LOGIN_BUSY) from error
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 
@@ -151,7 +162,8 @@ def seed_demo_account(*, now: datetime) -> None:
 
     An existing `demo` row is never changed. A concurrent seed that wins the unique
     constraint counts as success. A busy database lock is logged and skipped: the account is
-    created on the next start, `swp db upgrade` or Demo version (`demo_login`).
+    created by the next `swp db upgrade`, local start (production does not seed on start) or
+    Demo version (`demo_login`).
     """
     if store.username_key_taken(DEMO_USERNAME):
         return
@@ -167,8 +179,8 @@ def seed_demo_account(*, now: datetime) -> None:
         )
     except store.UsersBusy as busy:
         logger.warning(
-            "Demo account skipped: the database was busy (%s). It is added on the next start, "
-            "swp db upgrade or Demo version.",
+            "Demo account skipped: the database was busy (%s). Run swp db upgrade again to add "
+            "it; a local start or Demo version also adds it.",
             busy,
         )
 
@@ -176,15 +188,16 @@ def seed_demo_account(*, now: datetime) -> None:
 def demo_login(*, now: datetime) -> SignedUp:
     """A session as `demo` with no password and no throttle (FR-50, Demo version).
 
-    Seeds the account first when it is missing, so the button survives a database reset.
-    Never reads or writes `login_attempts`.
+    Seeds the account first when it is missing, so the button survives a database reset. A
+    seed skipped on a busy database lock leaves no row: that is `unavailable` (503, the user
+    tries again). Never reads or writes `login_attempts`.
     """
     user = store.get_user_by_key(DEMO_USERNAME)
     if user is None:
         seed_demo_account(now=now)
         user = store.get_user_by_key(DEMO_USERNAME)
-    if user is None:  # the seed above always leaves a row; kept for the type checker
-        raise DomainError("internal", "The demo account could not be opened. Try again.")
+    if user is None:  # the seed was skipped: the database was busy (logged by the seed)
+        raise DomainError("unavailable", DEMO_BUSY)
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 
