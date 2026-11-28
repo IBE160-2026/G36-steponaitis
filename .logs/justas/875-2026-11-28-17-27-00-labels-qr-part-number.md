@@ -37,3 +37,19 @@ Gjennomgang: 21 funn. 16 rettet (elleve rettinger), 1 delvis utsatt, 4 avvist me
 ### Åpne punkter
 - Skriv ut en gate fra Chrome og skann en QR-kode med mobilkamera: den skal gi delenummeret. Story 14.1 står i `review` til Justas bekrefter det i en logg.
 - Print på etikettsiden henter ikke på nytt før utskrift slik flyttelista gjør (AD-17), så en annen planleggers lagring kommer først med etter neste henting. Ført i `deferred-work.md`.
+
+## 2026-11-28 kl. 18:18 — Justas
+
+### Oppgave
+Håndsjekken av de nye etikettene etter push.
+
+### Plan
+- Justas skriver ut en gate fra Chrome og skanner en QR-kode med mobilkamera.
+
+### Resultat
+- Etikettendringen ble pushet og deployet (`840f90e`, `origin/main` på `78a1b96`).
+- **Bekreftet av Justas i økten:** «all works good» på punktet «skriv ut en gate fra Chrome og skann en QR-kode: den skal gi delenummeret». Kriteriet i Story 14.1 som bare et menneske kan sjekke, er dermed oppfylt.
+- `sprint-status.yaml`: Story 14.1 er satt til `done` og Epic 14 til `done`. Punktet er lukket i `issues.md`.
+
+### Åpne punkter
+- Ingen nye. Fortsatt åpent fra denne loggen: Print på etikettsiden henter ikke på nytt før utskrift (ført i `deferred-work.md`).
