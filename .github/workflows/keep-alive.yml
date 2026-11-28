@@ -1,8 +1,10 @@
 name: Keep-alive
 
 # Wakes the public deployment and its free Supabase database once a day, and checks that the
-# deployment is still the public demo: GET /api/health runs SELECT 1, GET /api/session must show
-# FEATURE_AUTH and FEATURE_DEMO on, and POST /api/auth/demo (Demo version) must log in as `demo`.
+# deployment is still the public demo: GET /api/health runs SELECT 1 and must be answered by a
+# function in `arn1` (Stockholm, next to the database; set by `regions` in vercel.json), GET
+# /api/session must show FEATURE_AUTH and FEATURE_DEMO on, and POST /api/auth/demo (Demo version)
+# must log in as `demo`.
 # Demo version writes nothing while the `demo` row exists. A failed step fails the run, and
 # GitHub emails the owner.
 on:
@@ -30,8 +32,17 @@ jobs:
     # Three steps, each at most 4 tries of 30 s with 10 s between them (150 s).
     timeout-minutes: 10
     steps:
-      - name: GET /api/health answers 2xx
-        run: curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30 "$PUBLIC_URL/api/health"
+      - name: GET /api/health answers 2xx from a function in arn1
+        # `x-vercel-id` is `<edge region>::<function region>::<request id>`. A missing header or
+        # any other function region (Vercel's default is `iad1`) fails the step.
+        run: |
+          headers="$(mktemp)"
+          curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30 --dump-header "$headers" "$PUBLIC_URL/api/health"
+          echo
+          id="$(tr -d '\r' < "$headers" | awk 'tolower($1) == "x-vercel-id:" { id = $2 } END { print id }')"
+          echo "x-vercel-id: ${id:-missing}"
+          region="$(awk -F '::' '{ print $2 }' <<< "$id")"
+          [ "$region" = "arn1" ]
       - name: GET /api/session shows FEATURE_AUTH and FEATURE_DEMO on and no user
         run: >-
           curl --fail --retry 3 --retry-delay 10 --retry-all-errors --silent --show-error --max-time 30

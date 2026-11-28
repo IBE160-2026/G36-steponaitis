@@ -64,7 +64,7 @@ def signup(body: SignupRequest, response: Response) -> SignupResponse:
     return SignupResponse(user=signed_up.username)
 
 
-@router.post("/login", responses=error_responses(401, 403, 404, 422, 429))
+@router.post("/login", responses=error_responses(401, 403, 404, 422, 429, 503))
 def login(body: LoginRequest, response: Response) -> LoginResponse:
     logged_in = auth.login(body.username, body.password, now=datetime.now(UTC))
     set_session_cookie(response, logged_in.token)
@@ -88,7 +88,7 @@ def require_demo_feature() -> None:
 @router.post(
     "/demo",
     dependencies=[Depends(require_demo_feature)],
-    responses=error_responses(403, 404),
+    responses=error_responses(403, 404, 503),
 )
 def demo(response: Response) -> LoginResponse:
     """Demo version: log in as `demo` with no password and no throttle (FR-50)."""

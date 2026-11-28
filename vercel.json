@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["arn1"],
   "services": {
     "web": {
       "root": "frontend/",
@@ -11,7 +12,8 @@
       "entrypoint": "swp.main:app",
       "functions": {
         "swp/main.py": {
-          "excludeFiles": "{tests/**,var/**}"
+          "excludeFiles": "{tests/**,var/**}",
+          "regions": ["arn1"]
         }
       }
     }

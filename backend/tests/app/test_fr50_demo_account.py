@@ -1,7 +1,8 @@
 """FR-50/AD-10 seeded `demo` account and Demo version on SQLite and (CI) Postgres.
 
 `bootstrap(seed=True)` creates `demo` once with `DEMO_PASSWORD`; with `FEATURE_DEMO` on,
-`POST /api/auth/demo` logs in as `demo` with no password and no throttle.
+`POST /api/auth/demo` logs in as `demo` with no password and no throttle, and Log in as `demo`
+is not throttled either (decided 2026-11-28).
 """
 
 import logging
@@ -18,11 +19,12 @@ from swp.api.app import create_app
 from swp.app import auth
 from swp.app.bootstrap import bootstrap
 from swp.domain.accounts import LOGIN_LOCK, LOGIN_MAX_FAILURES
-from swp.domain.errors import DomainError
+from swp.store import login_attempts
 from swp.store import users as user_store
 from swp.store.db import get_engine
 from swp.store.models import ImportRow, LoginAttemptRow, PlanRow, UserRow
 from tests.app.test_create_plan import _multipart, _small_files
+from tests.app.test_fr40_login_throttle import _login_attempts_locked
 from tests.app.test_login import SAME_ORIGIN, _error, _login
 from tests.conftest import _clear_caches, production_env
 
@@ -255,11 +257,11 @@ def test_fr50_demo_skips_bcrypt_when_row_exists(
     assert calls == []
 
 
-def test_fr50_demo_works_while_demo_login_is_locked(client: TestClient) -> None:
+def test_fr50_demo_and_log_in_ignore_a_lock_row_left_for_demo(client: TestClient) -> None:
+    # A `demo` lock counted while the flag was off (or before 2026-11-28) blocks nothing.
     now = datetime.now(UTC)
     for _ in range(LOGIN_MAX_FAILURES):
-        with pytest.raises(DomainError):
-            auth.login("demo", "wrong", now=now)
+        assert login_attempts.reserve("demo", now) is True
     locked = {"demo": (LOGIN_MAX_FAILURES, now + LOGIN_LOCK)}
     assert _attempts() == locked
 
@@ -269,8 +271,85 @@ def test_fr50_demo_works_while_demo_login_is_locked(client: TestClient) -> None:
     assert response.json() == {"user": "demo"}
     assert _attempts() == locked
     login = _login(client, "demo", "demo")
-    assert login.status_code == 429
-    assert _error(login)["code"] == "login_locked"
+    assert login.status_code == 200, login.text
+    assert _attempts() == locked  # neither read nor written
+
+
+# --- Log in as `demo` while Demo version is on (decided 2026-11-28) ---------------------
+
+
+def test_fr50_log_in_as_demo_is_not_throttled_while_demo_is_on(client: TestClient) -> None:
+    for username in ("demo", "DEMO", "Demo", "dEmO", "demo", "DEMO"):
+        response = _login(client, username, "wrong")
+        assert response.status_code == 401, response.text
+        assert _error(response)["code"] == "unauthenticated"
+
+    response = _login(client, "Demo", "demo")
+
+    assert response.status_code == 200, response.text
+    assert response.json() == {"user": "demo"}
+    assert "swp_session=" in response.headers["set-cookie"]
+    assert _attempts() == {}
+
+
+def test_fr50_log_in_as_demo_never_calls_the_throttle_store(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def touched(*_args: object) -> bool:
+        raise AssertionError("login_attempts was read or written for demo")
+
+    monkeypatch.setattr(login_attempts, "reserve", touched)
+    monkeypatch.setattr(login_attempts, "clear", touched)
+
+    assert _login(client, "demo", "wrong").status_code == 401
+    assert _login(client, "DEMO", "demo").status_code == 200
+
+
+def test_fr50_log_in_as_demo_works_while_login_attempts_is_write_locked(
+    client: TestClient,
+) -> None:
+    with _login_attempts_locked():
+        response = _login(client, "demo", "demo")
+        # The lock is real: a throttle write fails as busy.
+        with pytest.raises(login_attempts.LoginAttemptsBusy):
+            login_attempts.clear("demo")
+
+    assert response.status_code == 200, response.text
+    assert response.json() == {"user": "demo"}
+    assert _attempts() == {}
+
+
+def test_fr40_log_in_as_demo_is_throttled_while_demo_is_off(
+    empty_tables: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _env(monkeypatch, FEATURE_AUTH="true", FEATURE_DEMO="false")
+
+    with TestClient(create_app()) as client:  # the lifespan seeds `demo`
+        for _ in range(LOGIN_MAX_FAILURES):
+            assert _login(client, "demo", "wrong").status_code == 401
+
+        response = _login(client, "demo", "demo")
+
+    assert response.status_code == 429, response.text
+    assert _error(response)["code"] == "login_locked"
+    assert "set-cookie" not in response.headers
+    assert [failures for failures, _locked in _attempts().values()] == [LOGIN_MAX_FAILURES]
+    assert list(_attempts()) == ["demo"]
+
+
+def test_fr40_other_username_is_throttled_while_demo_is_on(client: TestClient) -> None:
+    auth.signup("Kari7", "secret", "secret", now=NOW)
+    for _ in range(LOGIN_MAX_FAILURES):
+        assert _login(client, "kari7", "wrong").status_code == 401
+
+    response = _login(client, "kari7", "secret")
+
+    assert response.status_code == 429, response.text
+    assert _error(response)["code"] == "login_locked"
+    assert "set-cookie" not in response.headers
+    assert list(_attempts()) == ["kari7"]
+    # `demo` is still open.
+    assert _login(client, "demo", "demo").status_code == 200
 
 
 def test_fr50_demo_seeds_missing_row(client: TestClient) -> None:

@@ -33,6 +33,15 @@ def test_nfr5_vercel_deploys_only_main() -> None:
     assert enabled == {"**": False, "main": True}
 
 
+def test_nfr5_vercel_functions_run_in_stockholm() -> None:
+    # Epic 16 retro item 5: the database is in Stockholm, so the function runs in `arn1`.
+    # Both keys are set: the docs do not say whether the top-level one applies to `services`.
+    config = _vercel()
+
+    assert config["regions"] == ["arn1"]
+    assert config["services"]["api"]["functions"]["swp/main.py"]["regions"] == ["arn1"]
+
+
 def _brace_alternatives(glob: str) -> list[str]:
     """The patterns of a one-level `{a,b}` brace list; a glob without braces is itself."""
     if glob.startswith("{") and glob.endswith("}"):

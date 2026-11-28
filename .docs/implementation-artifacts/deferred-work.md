@@ -15,3 +15,19 @@
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-fixes.md`
   summary: `POST /api/auth/login` and `POST /api/auth/demo` can answer 503 `unavailable` since the Epic 16 retro fixes, but their routes do not declare 503, so the OpenAPI document and `frontend/lib/api/schema.ts` omit it.
   evidence: `backend/swp/api/routers/auth.py:67,91` list `error_responses(401, 403, 404, 422, 429)` and `(403, 404)`; every other busy-capable route lists 503. Adding it needs `npm run gen:api` (CI diffs `schema.ts`), which the spec's "no frontend source change" boundary excluded. Nothing user-visible depends on it: the forms show any error's message.
+  resolved: 2026-11-28 — `spec-epic-16-retro-followups.md`: both routes list 503 in `error_responses(...)`, `frontend/lib/api/schema.ts` is regenerated with `npm run gen:api`, and `test_fr40_login_and_demo_routes_declare_503` checks the OpenAPI document.
+- source_spec: none
+  summary: Change the location labels (Story 14.1, FR-48) so the QR code gives the part number the plan puts in the location: one label per part, no label for an empty location.
+  evidence: Split from the 2026-11-28 follow-up intent by Justas ("Two builds, then bookkeeping"); it is built as its own spec right after the Log in and deploy fixes.
+- source_spec: none
+  summary: Bookkeeping without code: reword the Story 16.1 criterion at `epics.md:2722` as built (Epic 16 retro item 7) and reconcile the 53 older open retro items in `sprint-status.yaml` against `issue-triage-2026-11-26.md` (retro item 8).
+  evidence: Split from the 2026-11-28 follow-up intent by Justas; done by hand after the two builds.
+- source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
+  summary: Unverified until the push (would be medium): the `arn1` function region in `vercel.json` may not be honoured by Vercel on a `services` project, leaving the function in `iad1`.
+  evidence: Vercel's docs do not say whether a top-level `regions` or a service function's `regions` applies with `services`; the JSON schema accepts both. After the push, `curl -s -o /dev/null -D - https://g36steponaitis.vercel.app/api/health | grep -i x-vercel-id` must show `arn1` as the second field, and the Keep-alive workflow now checks the same.
+- source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
+  summary: Create account answers 500, not 503, when the database lock is busy.
+  evidence: `backend/swp/store/users.py:24-39` (`insert_user`) catches only `IntegrityError` and runs in `transaction()`, so a SQLite "database is locked" `OperationalError` is not mapped to `unavailable` the way Log in, Demo version and the seed are. Pre-existing; found by the review of the Log in follow-ups.
+- source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
+  summary: `epics.md:1995` (Story 9.7) still says "Demo version still works while `demo` is locked by the throttle", but since 2026-11-28 Log in as `demo` is not throttled while Demo version is on.
+  evidence: The spec's boundary kept `epics.md` out of the build; the wording is corrected in the bookkeeping pass that follows the two builds (with `epics.md:2722`).

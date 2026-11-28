@@ -1,5 +1,6 @@
 """FR-40/AD-18 login throttle on SQLite and (CI) Postgres, with an injected clock (no sleep)."""
 
+import logging
 import sqlite3
 import threading
 from collections.abc import Iterator
@@ -327,25 +328,70 @@ def test_fr40_busy_attempt_count_answers_unavailable_without_cookie(
 
 
 @pytest.mark.parametrize("cause", _BUSY_CAUSES)
-def test_fr40_busy_clear_after_right_password_answers_unavailable_without_cookie(
-    client: TestClient, account: None, monkeypatch: pytest.MonkeyPatch, cause: Exception
+def test_fr40_busy_clear_after_right_password_logs_in_and_warns_once(
+    client: TestClient,
+    account: None,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    cause: Exception,
 ) -> None:
+    # Decided 2026-11-28: the password was right, so a busy lock while clearing the count
+    # gives the session and logs a warning; the count row stays.
     def busy(_key: str) -> None:
-        raise OperationalError("DELETE", {}, cause)
+        raise OperationalError("DELETE", {"username_key": "kari7"}, cause)
 
+    caplog.set_level(logging.WARNING, logger="swp.auth")
     with monkeypatch.context() as locked:
         locked.setattr(login_attempts, "_clear", busy)
         response = _post_login(client, "secret")
 
-    assert response.status_code == 503, response.text
-    assert response.json() == {"error": LOGIN_BUSY}
-    assert "set-cookie" not in response.headers
-    assert client.get("/api/session").json()["user"] is None
-    assert [failures for failures, _locked in _rows().values()] == [1]  # counted, not cleared
+    assert response.status_code == 200, response.text
+    assert response.json() == {"user": "Kari7"}
+    assert "swp_session=" in response.headers["set-cookie"]
+    assert client.get("/api/session").json()["user"] == "Kari7"
+    assert _rows() == {"kari7": (1, None)}  # counted, not cleared
+    records = [r for r in caplog.records if r.name == "swp.auth"]
+    assert [(r.levelno, r.exc_info) for r in records] == [(logging.WARNING, None)]
+    message = records[0].getMessage()
+    assert message == (
+        f"Login attempt count not cleared: the database was busy ({cause}). The login was "
+        "given; the count row stays, and a count that had reached 5 keeps the name locked "
+        "until the lock passes."
+    )
+    # The cause only: no username, no password, no SQL parameters.
+    assert "kari7" not in message.casefold()
+    assert "secret" not in message
 
-    # The lock is gone: the next try logs in and clears the count.
+    # The lock is gone: the next login clears the count.
     assert _post_login(client, "secret").status_code == 200
     assert _rows() == {}
+
+
+def test_fr40_busy_clear_on_the_fifth_attempt_logs_in_and_leaves_the_lock(
+    client: TestClient, account: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The right password is the fifth counted attempt: counting it set the 60 s lock, and the
+    # busy clear leaves it, so the name stays locked until the lock passes.
+    def busy(_key: str) -> None:
+        raise OperationalError("DELETE", {}, Exception("database is locked"))
+
+    for _ in range(4):
+        assert _post_login(client, "wrong").status_code == 401
+    with monkeypatch.context() as locked:
+        locked.setattr(login_attempts, "_clear", busy)
+        response = _post_login(client, "secret")
+
+    assert response.status_code == 200, response.text
+    assert "swp_session=" in response.headers["set-cookie"]
+    [(failures, locked_until)] = _rows().values()
+    assert failures == 5
+    assert locked_until is not None
+
+    again = _post_login(client, "secret")
+
+    assert again.status_code == 429, again.text
+    assert again.json()["error"]["code"] == "login_locked"
+    assert _rows() == {"kari7": (5, locked_until)}
 
 
 def test_fr40_busy_retry_after_integrity_error_answers_unavailable(
@@ -459,3 +505,17 @@ def test_fr40_clear_runs_in_a_write_transaction(
 
     assert opened == [None]
     assert _rows() == {}
+
+
+# --- OpenAPI ----------------------------------------------------------------------------
+
+
+def test_fr40_login_and_demo_routes_declare_503() -> None:
+    # Both routes can answer 503 `unavailable` on a busy database lock (AD-11).
+    document = create_app().openapi()
+
+    for path in ("/api/auth/login", "/api/auth/demo"):
+        responses = document["paths"][path]["post"]["responses"]
+        assert "503" in responses, path
+        schema = responses["503"]["content"]["application/json"]["schema"]
+        assert schema == {"$ref": "#/components/schemas/ErrorEnvelope"}, path

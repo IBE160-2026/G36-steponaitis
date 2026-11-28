@@ -128,32 +128,46 @@ def login(username: str, password: str, *, now: datetime) -> SignedUp:
     The message never says which part was wrong. An unknown username still runs one bcrypt
     check against a dummy hash. Each attempt is counted per casefolded username, whether or
     not the account exists, before the password check, so concurrent requests run at most
-    `LOGIN_MAX_FAILURES` checks; a success clears the count. 5 counted attempts block the name
-    for 60 s: a locked username gets `login_locked` without a password check (AD-18). A busy
-    database lock while counting or clearing is `unavailable` (503, the user tries again): no
-    session is given with a count that was not cleared.
+    `LOGIN_MAX_FAILURES` checks (except for `demo` with Demo version on, below); a success
+    clears the count. 5 counted attempts block the name for 60 s: a locked username gets
+    `login_locked` without a password check (AD-18). A busy database lock while counting is
+    `unavailable` (503, the user tries again). A busy lock while clearing after a right
+    password is logged and the session is given: the count row stays, and a count that had
+    reached 5 keeps the name locked until the lock passes.
+
+    With Demo version on, `demo` is not throttled: Log in as `demo` neither reads nor writes
+    `login_attempts`, since anyone gets a `demo` session without a password anyway.
     """
     encoded = _password_bytes(password)
     # A malformed username (lone surrogate, NUL, ...) never reaches the database.
     if username_error(username) is not None or encoded is None or not encoded:
         raise DomainError("unauthenticated", WRONG_LOGIN)
     key = username_key(username)
-    try:
-        reserved = login_attempts.reserve(key, now)
-    except login_attempts.LoginAttemptsBusy as error:
-        raise DomainError("unavailable", LOGIN_BUSY) from error
-    if not reserved:
-        raise DomainError("login_locked", LOGIN_LOCKED)
+    throttled = not (demo_enabled() and key == DEMO_USERNAME)
+    if throttled:
+        try:
+            reserved = login_attempts.reserve(key, now)
+        except login_attempts.LoginAttemptsBusy as error:
+            raise DomainError("unavailable", LOGIN_BUSY) from error
+        if not reserved:
+            raise DomainError("login_locked", LOGIN_LOCKED)
     user = store.get_user_by_key(key)
     if user is None:
         bcrypt.checkpw(encoded, _dummy_hash())
         raise DomainError("unauthenticated", WRONG_LOGIN)
     if not bcrypt.checkpw(encoded, user.password_hash.encode("ascii")):
         raise DomainError("unauthenticated", WRONG_LOGIN)
-    try:
-        login_attempts.clear(key)
-    except login_attempts.LoginAttemptsBusy as error:
-        raise DomainError("unavailable", LOGIN_BUSY) from error
+    if throttled:
+        try:
+            login_attempts.clear(key)
+        except login_attempts.LoginAttemptsBusy as busy:
+            # The password was right: log in anyway. Only the driver's cause is logged.
+            logger.warning(
+                "Login attempt count not cleared: the database was busy (%s). The login was "
+                "given; the count row stays, and a count that had reached 5 keeps the name "
+                "locked until the lock passes.",
+                busy,
+            )
     return SignedUp(username=user.username, token=session_token(user.id, now=now))
 
 

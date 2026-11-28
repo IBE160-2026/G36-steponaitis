@@ -5,8 +5,8 @@ import { expect, type Page, test } from "../support/test";
 // deployment (playwright.public.config.ts, `npm run e2e:public`): APP_ENV=production with
 // FEATURE_AUTH and FEATURE_DEMO on. Unlike e2e/front-page.spec.ts, nothing is rewritten in the
 // browser (no page.route). The tests create no plan and no new account (Demo version recreates the
-// `demo` account if its row is missing), so they are safe on the public site; Log in writes and
-// clears one login_attempts row.
+// `demo` account if its row is missing), so they are safe on the public site; Log in as `demo`
+// is not throttled while Demo version is on and writes nothing.
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
