@@ -1992,7 +1992,7 @@ So that I can try the full flow in seconds.
 **Given** the Log in page with `feature_demo` on
 **When** it renders
 **Then** a full-width tertiary **Demo version** button with a play glyph sits under an "or" rule; with the flag off it is absent (FR-50, UX-DR53)
-**And** Demo version still works while `demo` is locked by the throttle.
+**And** Demo version still works while a throttle lock row exists for `demo`. Since 2026-11-28, Log in as `demo` is itself not throttled while Demo version is on (AD-18), so only a row left from before can exist.
 
 **Given** a local install
 **When** the README is followed
@@ -2719,7 +2719,7 @@ So that it runs on the same origin it will be judged on.
 **Given** `vercel.json` with Vercel Services (frontend plus `swp.main:app`, `/api/(.*)` → backend) and preview deployments turned off
 **When** `main` is deployed
 **Then** the public URL serves the Next.js page and `/api/health` from the same origin against Supabase Postgres (transaction pooler, `NullPool`, `prepare_threshold=None`)
-**And** `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `APP_ENV=production` are set for Production only (`JWT_SECRET` and the auth flags follow in Story 16.2).
+**And** `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `APP_ENV=production`, `JWT_SECRET` and `DEMO_PASSWORD` are set for Production only: Story 16.0's startup check refuses production without the two secrets, so they were set here (as built, decided 2026-11-25). The auth flags follow in Story 16.2.
 
 **Given** the startup checks (AD-10, hardened in Story 16.0)
 **When** the backend starts with `VERCEL` set and `APP_ENV` unset

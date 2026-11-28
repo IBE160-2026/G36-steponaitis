@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 15:22
+last_updated: 11-28-2026 15:24
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -186,27 +186,27 @@ action_items:
     action: "Map a non-UUID plan id on GET /api/plans/{id} to plan_not_found so the
       shared hook redirects"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-5-give-a-retry-and-a-new-plan-link-when-ge"
     epic: 1
     action: "Give / a retry and a New Plan link when GET /api/plans fails"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-6-add-playwright-tests-for-toast-pause-on"
     epic: 1
     action: "Add Playwright tests for toast pause on hover/focus, Input Esc, plan-plate
       Escape and leaving New Plan mid-upload"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-7-pass-no-access-log-to-uvicorn-in-dev-bac"
     epic: 1
     action: "Pass --no-access-log to uvicorn in dev:backend so each request logs one
       line"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-8-add-an-import-linter-independence-contra"
     epic: 1
@@ -262,7 +262,7 @@ action_items:
     action: "Guard DataTable onKeyDown against Enter on interactive children and add
       an e2e test that opens a row with Enter after a user sort"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-16-make-plan-views-read-the-plan-without-lo"
     epic: 2
@@ -356,14 +356,14 @@ action_items:
     action: "Add an API test that summary empty_best_locations changes after a move
       into or out of a best location and matches /locations"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-29-make-the-postgres-plan-lock-fail-fast-no"
     epic: 4
     action: "Make the Postgres plan lock fail fast (nowait or lock_timeout) so 55P03
       maps to 503 unavailable, with a Postgres test"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-30-refuse-manual_move-and-the-move-preview"
     epic: 4
@@ -412,14 +412,14 @@ action_items:
     action: "Always assert next_move_number never decreases in apply and add max_length
       to manual move inputs and preview query"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-37-fix-e2e-flakiness-under-load-and-add-a-s"
     epic: 4
     action: "Fix e2e flakiness under load and add a shared tests/domain/conftest.py
       for answer-key fixtures"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-38-run-the-4-1-and-4-4-follow-up-reviews-an"
     epic: 4
@@ -465,7 +465,7 @@ action_items:
       outdated statuses and recommendations_outdated events before Story 7.5 un-skips
       step 15 (R8)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-44-decide-fr-26-partner-moving-in-the-same"
     epic: 5
@@ -605,7 +605,7 @@ action_items:
     action: "Align the no-op reset with AC1 after the item-7 decision: emit plan_reset
       with 0 or stop toasting Plan reset. 0 moves removed without an event (A5)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-62-fix-epic-7-ui-gaps-7-1-button-remount-fo"
     epic: 7
@@ -613,7 +613,7 @@ action_items:
       the summary loads, and an e2e test undoing a combined and a moved-back move
       (P4)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-63-run-the-7-1-and-7-2-follow-up-reviews-wi"
     epic: 7
@@ -662,7 +662,7 @@ action_items:
       combine when target held the part), record it in FR-38/AD-14, then implement
       with test_fr38 chain and in-cycle cases"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-69-make-print-immune-to-a-cancelled-refetch"
     epic: 8
@@ -670,7 +670,7 @@ action_items:
       when Print was pressed (or fetch with cancelRefetch false), with a createPrintFlow
       Vitest"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-70-close-print-verification-gaps-print-medi"
     epic: 8
@@ -833,7 +833,7 @@ action_items:
       into e2e/support and tests/support, move marking strings to lib/copy (A2, A3,
       A4)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-10-retro-item-90-decide-the-10-1-layout-limits-confirm-th"
     epic: 10
@@ -841,7 +841,7 @@ action_items:
       3.66 MB against the 4 MB limit needs a smaller encoding or a recorded margin
       (issues.md:176-177)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-10-retro-item-91-reconcile-epics-md-epic-10-and-the-spine"
     epic: 10
@@ -908,7 +908,7 @@ action_items:
       stories, and add the epic-6 item 58 runbook guard that recurred in Story 11.3
       (B1, P1-P3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
   - id: "epic-12-retro-item-99-fix-the-occupied-drop-dialog-so-swap-can"
     epic: 12
@@ -1020,7 +1020,7 @@ action_items:
     action: "Scan a Chrome-printed location-label QR code with a phone camera, record
       it in a session log and tick issues.md:223 (clears the epic-14 verdict, V1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
   - id: "epic-14-retro-item-113-move-the-duplicated-unmarked-locationref"
     epic: 14
@@ -1116,7 +1116,7 @@ action_items:
     action: "Reword the Story 16.1 AC in epics.md as built: JWT_SECRET and DEMO_PASSWORD
       were set in 16.1, the flags followed in 16.2 (S1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
   - id: "epic-16-retro-item-126-reconcile-the-remaining-open-retro-items"
     epic: 16
@@ -1124,5 +1124,5 @@ action_items:
       and flip sprint-status with --set-action-status whenever an issues.md retro
       line is closed (P2)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
