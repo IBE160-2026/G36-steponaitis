@@ -564,7 +564,7 @@ class LocationRef(BaseModel):
 
 
 def location_ref_of(code: str, location: LocationData, *, is_best: bool = False) -> LocationRef:
-    """The wire reference of `location`. Import-scoped views (wall layout, labels) have no
+    """The wire reference of `location`. Import-scoped views (the wall layout) have no
     marks, so their locations are never best."""
     return LocationRef(
         code=code,

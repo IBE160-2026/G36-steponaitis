@@ -1,16 +1,12 @@
-"""Location labels service (FR-48): import-scoped and read-only, it never writes."""
+"""Location labels service (FR-48): read-only, it never writes the plan (FR-9)."""
 
 import uuid
 
-from swp.app.plans import IMPORT_NOT_FOUND
-from swp.domain.errors import DomainError
+from swp.app.plans import require
 from swp.domain.labels import LabelsView, build_labels
-from swp.store import plans as store
 
 
-def labels(import_id: uuid.UUID) -> LabelsView:
-    """The location labels of the stored import; raise `not_found` for an unknown id."""
-    stored = store.get_import(import_id)
-    if stored is None:
-        raise DomainError("not_found", IMPORT_NOT_FOUND)
-    return build_labels(stored.data)
+def labels(plan_id: uuid.UUID) -> LabelsView:
+    """The location labels of the plan as it is now; raise `plan_not_found` for an unknown id."""
+    plan = require(plan_id)
+    return build_labels(plan.imported.data, plan.state, plan.version)

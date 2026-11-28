@@ -126,7 +126,9 @@ def test_ad18_nfr8_max_size_plan_views_under_4_mb(client: TestClient) -> None:
     _command(client, plan_id, apply)
 
     aisles = sorted({location.aisle for location in imported.data.locations.values()})
-    urls = [f"/api/plans/{plan_id}{view}" for view in [*VIEWS, "/move-list", "/warehouse"]]
+    urls = [
+        f"/api/plans/{plan_id}{view}" for view in [*VIEWS, "/move-list", "/warehouse", "/labels"]
+    ]
     urls += [f"/api/plans/{plan_id}/wall?aisle={aisle}" for aisle in aisles]
     urls.append(f"/api/imports/{created.import_id}/layout")
     sizes: dict[str, int] = {}

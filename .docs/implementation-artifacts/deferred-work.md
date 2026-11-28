@@ -33,3 +33,6 @@
   summary: `epics.md:1995` (Story 9.7) still says "Demo version still works while `demo` is locked by the throttle", but since 2026-11-28 Log in as `demo` is not throttled while Demo version is on.
   evidence: The spec's boundary kept `epics.md` out of the build; the wording is corrected in the bookkeeping pass that follows the two builds (with `epics.md:2722`).
   resolved: 2026-11-28 — `3216ab5`: the Story 9.7 line now says a lock row left for `demo` blocks nothing and Log in as `demo` is not throttled while Demo version is on.
+- source_spec: `.docs/implementation-artifacts/spec-14-1-label-qr-gives-the-part-number.md`
+  summary: Label Print does not refetch before printing as the move list does (AD-17), so a save by another planner is on the labels only after the next refetch.
+  evidence: `frontend/modules/labels/labels-page.tsx` disables Print while its query fetches or after a failed refetch, but calls `window.print()` on the cached data otherwise; `usePrintAfterRender` in `frontend/modules/move-list/move-list-page.tsx:76` is private to that module and would have to move to a common folder first.

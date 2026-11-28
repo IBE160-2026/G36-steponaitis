@@ -6,6 +6,7 @@ import { aisleRow } from "./support/before-after";
 import { addAisleCategory, addRule, aisleCategoryList, removeCategories, ruleRow } from "./support/categories";
 import { DEFAULT_SLOW_RGB, expectSlowBin, printOffenders, rootSlow, SHADE_6, SHADE_6_RGB } from "./support/colours";
 import { dragOver, startDrag, targetFor } from "./support/drag";
+import { aislePairs, cardPairs, labelsOf } from "./support/labels";
 import { gridButton, launcher, planReady, searchField, STEPS } from "./support/launcher";
 import { isMoveListGet, printCount, printedGenerated, stubPrint } from "./support/move-list";
 import { getJson, locationRows, moveFromPanel, partDetail, postCommand, type Ref } from "./support/plan-api";
@@ -1366,22 +1367,18 @@ test.describe("user journey steps of stage 2", () => {
 });
 
 // -------------------------------------------------------------------------------------------------
-// UJ-2 stage 2 (Epic 14): location labels with QR codes, printed from a plan for one aisle.
+// UJ-2 stage 2 (Epic 14): location labels with the part's QR code, printed from a plan for one aisle.
 
 test.describe("user journey steps of stage 2: location labels", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
   });
 
-  test("uj2 fr48 location labels with QR codes printed from a plan", async ({ page, request }) => {
+  test("uj2 fr48 location labels with the part's QR code printed from a plan", async ({ page, request }) => {
     test.setTimeout(120_000);
     const planId = (await createSamplePlan(request, `Labels ${randomUUID().slice(0, 8)}`)).id;
-    const summary = await getJson<Summary>(request, `/api/plans/${planId}`);
-    const labels = await getJson<{ aisles: { aisle: string; locations: Ref[] }[] }>(
-      request,
-      `/api/imports/${summary.import_id}/labels`,
-    );
-    const b = labels.aisles.find((aisle) => aisle.aisle === "B")?.locations.map((ref) => ref.code) ?? [];
+    const labels = await labelsOf(request, planId);
+    const b = aislePairs(labels, "B");
     expect(b.length).toBeGreaterThan(1);
     await page.goto(`/plans/${planId}/overview`);
     await planReady(page);
@@ -1398,22 +1395,88 @@ test.describe("user journey steps of stage 2: location labels", () => {
     await expect(picker).toHaveValue("A");
     await expect(picker.locator("option")).toHaveText(labels.aisles.map((aisle) => aisle.aisle));
 
-    // Picking aisle B shows its labels in the server's order.
+    // Picking aisle B shows one label per stocked (location, part) in the server's order: the
+    // location code large, the part number small, and a QR code of the part number.
     await picker.selectOption("B");
     await expect(page).toHaveURL(new RegExp(`/plans/${planId}/labels\\?aisle=B$`));
     await expect(main.getByRole("heading", { name: "Location labels · Aisle B", level: 1 })).toBeVisible();
     const cards = main.locator("[data-label]");
     await expect(cards).toHaveCount(b.length);
-    await expect(cards.first()).toHaveAttribute("data-label", b[0]);
-    await expect(cards.last()).toHaveAttribute("data-label", b[b.length - 1]);
-    await expect(cards.first().getByRole("img")).toHaveAttribute("aria-label", `QR code ${b[0]}`);
-    await expect(cards.last().getByRole("img")).toHaveAttribute("aria-label", `QR code ${b[b.length - 1]}`);
+    expect(await cardPairs(cards)).toEqual(b);
+    for (const [card, [code, part]] of [
+      [cards.first(), b[0]],
+      [cards.last(), b[b.length - 1]],
+    ] as const) {
+      await expect(card.locator("span").first()).toHaveText(code);
+      await expect(card.locator("[data-label-part-text]")).toHaveText(part);
+      await expect(card.getByRole("img")).toHaveAttribute("aria-label", `QR code ${part}`);
+    }
 
     // Print is the one primary button.
     const print = main.getByRole("button", { name: "Print", exact: true });
     await expect(print).toBeVisible();
     await expect(main.locator("button.bg-ink, a.bg-ink")).toHaveCount(1);
     await expect(main.locator("button.bg-ink, a.bg-ink")).toHaveText("Print");
+
+    // A move in the plan: a part stocked only at one location of aisle B goes, from its part panel
+    // on Parts, to an empty location of the same aisle.
+    // One read of the parts roster finds it; the part is alone in its location, so the move empties it.
+    const roster = await getJson<{ parts: { part: string; current_location: Ref | null; other_locations: Ref[] }[] }>(
+      request,
+      `/api/plans/${planId}/parts`,
+    );
+    const alone = roster.parts.find(
+      (row) =>
+        row.current_location?.aisle === "B" &&
+        row.other_locations.length === 0 &&
+        b.filter(([code]) => code === row.current_location?.code).length === 1,
+    );
+    if (!alone?.current_location) throw new Error("no part of aisle B stocked at one location only");
+    const part = alone.part;
+    const from = alone.current_location.code;
+    expect(b.filter(([code]) => code === from)).toEqual([[from, part]]);
+    const target = (await locationRows(request, planId)).find((row) => !row.occupied && row.location.aisle === "B")
+      ?.location.code;
+    if (target === undefined) throw new Error("no empty location in aisle B");
+    await page.goto(`/plans/${planId}/parts?part=${encodeURIComponent(part)}`);
+    await planReady(page);
+    const panel = page.getByRole("complementary", { name: part });
+    await expect(panel.getByRole("heading", { name: part, level: 2 })).toBeVisible();
+    await moveFromPanel(page, panel, part, from, target);
+
+    // Back on the labels of aisle B the label follows the part: none for the emptied location,
+    // one for the location the part is in now, at the server's place in the Walk Path order.
+    await gridButton(page).click();
+    await launcher(page).getByRole("link", { name: /LBL/ }).click();
+    await expect(page).toHaveURL(new RegExp(`/plans/${planId}/labels\\?aisle=A$`));
+    await picker.selectOption("B");
+    const after = aislePairs(await labelsOf(request, planId), "B");
+    expect(after).toContainEqual([target, part]);
+    expect(after.filter(([code]) => code === from)).toEqual([]);
+    expect(after).toHaveLength(b.length);
+    await expect.poll(() => cardPairs(cards)).toEqual(after);
+    await expect(main.locator(`[data-label="${from}"]`)).toHaveCount(0);
+    const arrived = main.locator(`[data-label="${target}"]`);
+    await expect(arrived).toHaveCount(1);
+    await expect(arrived).toHaveAttribute("data-label-part", part);
+    await expect(arrived.locator("[data-label-part-text]")).toHaveText(part);
+    await expect(arrived.getByRole("img")).toHaveAttribute("aria-label", `QR code ${part}`);
+
+    // Undo last move from the launcher, on the label page: the labels follow the confirmed command
+    // without a reload (the mark on `window` survives).
+    await page.evaluate(() => {
+      (window as unknown as { labelsPageKept?: boolean }).labelsPageKept = true;
+    });
+    await gridButton(page).click();
+    await launcher(page)
+      .getByRole("button", { name: `Undo move 1: ${part} ${from} → ${target}`, exact: true })
+      .click();
+    await expect(toasts(page).getByText("Undid move 1.", { exact: true })).toBeVisible();
+    await expect.poll(() => cardPairs(cards)).toEqual(b);
+    await expect(main.locator(`[data-label="${target}"]`)).toHaveCount(0);
+    await expect(main.locator(`[data-label="${from}"]`)).toHaveAttribute("data-label-part", part);
+    expect(await page.evaluate(() => (window as unknown as { labelsPageKept?: boolean }).labelsPageKept)).toBe(true);
+    await expect(page).toHaveURL(new RegExp(`/plans/${planId}/labels\\?aisle=B$`));
   });
 });
 

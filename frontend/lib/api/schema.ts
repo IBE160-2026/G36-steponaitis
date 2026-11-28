@@ -110,23 +110,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/imports/{import_id}/labels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Import Labels */
-        get: operations["get_import_labels_api_imports__import_id__labels_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/imports/{import_id}/layout": {
         parameters: {
             query?: never;
@@ -295,6 +278,23 @@ export interface paths {
         put?: never;
         /** Post Command */
         post: operations["post_command_api_plans__plan_id__commands_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/plans/{plan_id}/labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan Labels */
+        get: operations["get_plan_labels_api_plans__plan_id__labels_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -586,8 +586,8 @@ export interface components {
         AisleLabels: {
             /** Aisle */
             aisle: string;
-            /** Locations */
-            locations: components["schemas"]["LocationRef"][];
+            /** Labels */
+            labels: components["schemas"]["Label"][];
         };
         /** AisleLayout */
         AisleLayout: {
@@ -1021,10 +1021,21 @@ export interface components {
             /** Rules */
             rules: components["schemas"]["KeywordRule"][];
         };
+        /**
+         * Label
+         * @description One printed label: the location, and the part its QR code encodes.
+         */
+        Label: {
+            location: components["schemas"]["LocationRef"];
+            /** Part */
+            part: string;
+        };
         /** LabelsView */
         LabelsView: {
             /** Aisles */
             aisles: components["schemas"]["AisleLabels"][];
+            /** Version */
+            version: number;
         };
         /**
          * LayoutCell
@@ -2743,46 +2754,6 @@ export interface operations {
             };
         };
     };
-    get_import_labels_api_imports__import_id__labels_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                import_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LabelsView"];
-                };
-            };
-            /** @description Error */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorEnvelope"];
-                };
-            };
-            /** @description Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorEnvelope"];
-                };
-            };
-        };
-    };
     get_import_layout_api_imports__import_id__layout_get: {
         parameters: {
             query?: never;
@@ -3520,6 +3491,46 @@ export interface operations {
             };
             /** @description Error */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_plan_labels_api_plans__plan_id__labels_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LabelsView"];
+                };
+            };
+            /** @description Error */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

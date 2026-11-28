@@ -5,8 +5,8 @@
 // pick groups table (Story 2.5), the part detail and search (Story 2.6), the manual move
 // preview (Story 4.3), before/after (Story 4.6), the recommendations view (Stories 5.5,
 // 5.7), a recommendation's other locations (Story 7.2), the move list (Story 8.3) and an aisle's
-// wall (Story 10.2) and the whole warehouse (Story 10.6). The reads are GETs and never
-// change the plan (FR-9); `deletePlan` is the one write here.
+// wall (Story 10.2), the whole warehouse (Story 10.6) and the location labels (Story 14.1). The
+// reads are GETs and never change the plan (FR-9); `deletePlan` is the one write here.
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -24,6 +24,11 @@ export type LocationRow = components["schemas"]["LocationRow"];
 export type LocationContent = components["schemas"]["LocationContent"];
 export type Occupancy = components["schemas"]["Occupancy"];
 export type AisleOccupancy = components["schemas"]["AisleOccupancy"];
+/** Location labels (FR-48): every aisle with one label per stocked (location, part), in server order. */
+export type LabelsView = components["schemas"]["LabelsView"];
+export type AisleLabels = components["schemas"]["AisleLabels"];
+/** One label: its location, and the part number its QR code encodes. */
+export type Label = components["schemas"]["Label"];
 export type PickGroupsView = components["schemas"]["PickGroupsView"];
 export type PickGroupRow = components["schemas"]["PickGroupRow"];
 export type PickGroupPart = components["schemas"]["PickGroupPart"];
@@ -126,6 +131,11 @@ export function planLocationsKey(planId: string) {
   return [...planRootKey(planId), "locations"] as const;
 }
 
+/** Under `['plan', planId]`, so a confirmed command refetches the labels (they follow the stock). */
+export function planLabelsKey(planId: string) {
+  return [...planRootKey(planId), "labels"] as const;
+}
+
 export function planPickGroupsKey(planId: string) {
   return [...planRootKey(planId), "pick-groups"] as const;
 }
@@ -203,6 +213,14 @@ export function fetchPlanLocations(planId: string): Promise<LocationsView> {
 
 export function usePlanLocations(planId: string) {
   return useQuery({ queryKey: planLocationsKey(planId), queryFn: () => fetchPlanLocations(planId) });
+}
+
+export function fetchPlanLabels(planId: string): Promise<LabelsView> {
+  return getJson<LabelsView>(`/api/plans/${encodeURIComponent(planId)}/labels`);
+}
+
+export function usePlanLabels(planId: string) {
+  return useQuery({ queryKey: planLabelsKey(planId), queryFn: () => fetchPlanLabels(planId) });
 }
 
 export function fetchPlanWall(planId: string, aisle: string): Promise<WallView> {

@@ -123,7 +123,7 @@ Downstream documents use these terms exactly.
 - **Aisle categories** (stage 2) — the categories the planner assigns to an aisle.
 - **Category check** (stage 2) — the list of parts whose category is not among their aisle's categories.
 - **Warehouse view** — a visual view of all aisles, drawn shelf by shelf, with occupancy, movement classes and best locations (FR-42).
-- **Location label** (stage 2) — a printed label with a location code and its QR code.
+- **Location label** (stage 2) — a printed label with a location code, the part number of a part the plan stocks there and a QR code of that part number (decided 2026-11-28).
 
 ## 4. Features
 
@@ -676,16 +676,18 @@ The demo setup includes keyword rules and aisle categories for the demo data.
 
 ### 4.14 Location labels (stage 2)
 
-**Description:** Printable labels make locations easy to find and scan.
+**Description:** Printable labels make locations easy to find, and a scan gives the part the plan puts there.
 
 #### FR-48: Print location labels
 
-The planner can print a label for every location in a chosen aisle.
+The planner can print a label for every part stocked in a location of a chosen aisle, in the plan as it is now. Decided 2026-11-28 (after the hand check of the print): the QR code gives the part number, not the location code.
 
 **Consequences (testable):**
-- Each label shows the location code in large text (e.g. `A-01-10-C1`) and a QR code that encodes exactly that location code.
-- Labels are printed from a browser print view, one label per location in the aisle, in Walk Path order.
-- A QR code scanned with a standard phone camera app returns the location code.
+- Each label shows the location code in large text (e.g. `A-01-10-C1`), the part number in small text and a QR code that encodes exactly that part number.
+- Labels are printed from a browser print view, one label per location and part with stock above 0 in the planning copy of the aisle: locations in Walk Path order, the parts of one location in part-number order. A location with several parts gets one label per part; an empty location gets none.
+- The labels follow the plan: after a move, the part's label is at the location the part is in now.
+- The labels show each part where the plan puts it, so they are printed after the moves are carried out; the label view says so on screen.
+- A QR code scanned with a standard phone camera app returns the part number.
 
 ## 5. Cross-Cutting Non-Functional Requirements
 
@@ -813,7 +815,7 @@ No open questions remain. Both earlier questions were closed on 2026-11-11:
 - **One walk per round:** the brief's "one walk" becomes one walk per round, since rounds must be carried out in order.
 - **Data-as-of date:** the newest transaction date, shown with the upload date. The addendum called it "the import date".
 - **New Plan from an existing import:** gives the same recommendations as the original plan only with the same best-location marks, no moves and unchanged settings, since marks and moves are not carried over.
-- **Location labels:** QR codes only; barcodes dropped (user decision 2026-11-02).
+- **Location labels:** QR codes only; barcodes dropped (user decision 2026-11-02). The QR code gives the part number of the part the plan puts in the location, not the location code (decided 2026-11-28).
 - **Public deployment:** demo data only (user decision 2026-11-02).
 - **Demo flow metric:** must run from a clean checkout following only the README.
 - **Before/after table:** also shows pick groups in the same aisle.

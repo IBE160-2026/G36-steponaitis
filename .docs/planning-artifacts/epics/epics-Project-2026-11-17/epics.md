@@ -123,7 +123,7 @@ PRD glossary terms (§3) and IDs (FR-n, NFR-n, UJ-n, AD-n) are used verbatim. Wh
 
 **4.14 Location labels (stage 2)**
 
-- FR-48 `[S2]`: Print a label for every location in a chosen aisle from a browser print view, in Walk Path order: location code in large text and a QR code encoding exactly that code, scannable by a standard phone camera.
+- FR-48 `[S2]`: Print a label for every part stocked in a location of a chosen aisle (the plan as it is now) from a browser print view, locations in Walk Path order: location code in large text, part number in small text and a QR code encoding exactly that part number, scannable by a standard phone camera (decided 2026-11-28: the QR code gives the part number, not the location code).
 
 ### NonFunctional Requirements
 
@@ -443,7 +443,7 @@ The planner maintains keyword rules and aisle categories and sees every part sit
 **FRs covered:** FR-43, FR-44, FR-45, FR-46, FR-47
 
 ### Epic 14: Location labels with QR codes `[S2]`
-The planner prints a label with a scannable QR code for every location in an aisle.
+The planner prints a label for every part stocked in an aisle, with a scannable QR code of the part number, at the location the plan puts the part (decided 2026-11-28).
 **FRs covered:** FR-48
 
 ### Epic 15: Concurrent-edit warning `[ITA]`
@@ -2617,13 +2617,13 @@ So that the category check runs on the demo data with no manual setup.
 
 ## Epic 14: Location labels with QR codes
 
-Stage 2, started only after the milestone 2 gate. The planner prints a label for every location in an aisle, with the code in large text and a QR code a phone camera can read.
+Stage 2, started only after the milestone 2 gate. The planner prints a label for every part stocked in a location of an aisle, with the location code in large text, the part number in small text and a QR code of the part number a phone camera can read. Decided 2026-11-28, after the hand check of the print: the QR code gives the part number, not the location code, and the labels follow the plan.
 
 ### Story 14.1: Print location labels for an aisle
 
 As a planner,
-I want to print a label for every location in a chosen aisle,
-So that locations are easy to find and to scan with a phone.
+I want to print a label for every part stocked in a chosen aisle,
+So that locations are easy to find and a phone scan gives the part the plan puts there.
 
 **Acceptance Criteria:**
 
@@ -2633,17 +2633,20 @@ So that locations are easy to find and to scan with a phone.
 
 **Given** a chosen aisle
 **When** the view renders
-**Then** it shows one label per location of that aisle in the Locations file, in Walk Path order from the server's import-scoped data (`['import', importId]`, AD-3, AD-14), virtual locations excluded
-**And** each label shows the location code in large Barlow Semi Condensed bold text (for example `A-01-10-C1`) and a QR code that encodes exactly that code and nothing else (FR-48).
+**Then** it shows one label per location and part with stock above 0 in the plan as it is now (the planning copy), from the server's plan-scoped data (`GET /api/plans/{id}/labels`, `['plan', planId, 'labels']`, AD-3, AD-14): locations in Walk Path order, the parts of one location in part-number order, virtual locations excluded (decided 2026-11-28)
+**And** a location with several parts gets one label per part, an empty location gets none, and an aisle without stock stays in the picker and shows an empty paper, "0 labels" and a line saying no parts are stocked in the aisle
+**And** each label shows the location code in large Barlow Semi Condensed bold text (for example `A-01-10-C1`), the part number in small text and a QR code that encodes exactly that part number and nothing else (FR-48)
+**And** the labels follow the plan: after a confirmed command the view shows the new stock without a reload
+**And** the labels show each part where the plan puts it, so they are printed after the moves are carried out; a screen-only line next to the count says so.
 
 **Given** the QR library
 **When** it is chosen in this story
-**Then** it is an npm package bundled with the frontend that draws the code without any network call (NFR-2), its name and version are added to the spine's Stack table, and a Vitest test decodes every rendered QR code (with a bundled decoder such as jsQR) and checks it equals its location code (`test_fr48_qr_encodes_exact_code`).
+**Then** it is an npm package bundled with the frontend that draws the code without any network call (NFR-2), its name and version are added to the spine's Stack table, and a Vitest test decodes every rendered QR code (with a bundled decoder such as jsQR) and checks it equals the part number of its label, never the location code (`test_fr48_qr_encodes_exact_code`).
 
 **Given** the print
 **When** I click **Print** (primary) on the screen preview
-**Then** the app shell is hidden, labels print black on white on A4 in a fixed grid without splitting a label across pages, and nothing depends on printed backgrounds (NFR-9)
-**And** a Playwright print check runs in `chromium`, `firefox` and `msedge`, and a QR code printed from Chrome scans to its location code with a standard phone camera app (checked by hand and noted in the session log).
+**Then** the app shell is hidden, labels print black on white on A4 in a fixed grid without splitting a label across pages, nothing is clipped in a label, and nothing depends on printed backgrounds (NFR-9)
+**And** a Playwright print check runs in `chromium`, `firefox` and `msedge`, and a QR code printed from Chrome scans to its part number with a standard phone camera app (checked by hand and noted in the session log).
 
 ## Epic 15: Concurrent-edit warning
 

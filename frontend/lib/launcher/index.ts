@@ -227,7 +227,7 @@ export const LABELS_ENTRY: BandEntry = {
   id: "labels",
   code: "LBL",
   name: "Location labels",
-  description: "Print a QR label for every location in an aisle",
+  description: "Print a QR label for every part stocked in an aisle",
   keywords: ["labels", "qr"],
   href: (planId) => planLabelsHref(planId),
 };

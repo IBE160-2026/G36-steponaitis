@@ -149,6 +149,7 @@ describe("ux_dr7 launcher data", () => {
       planLabelsHref(PLAN),
     ]);
     expect(LABELS_ENTRY.href(PLAN)).toBe(`/plans/${PLAN}/labels`);
+    expect(LABELS_ENTRY.description).toBe("Print a QR label for every part stocked in an aisle");
     expect(STAGE2_ENTRIES.map((entry) => entry.code)).toEqual(["CAT", "LBL"]);
     expect(KEYBOARD_SHORTCUTS.map((shortcut) => shortcut.keys)).toEqual(["Ctrl K", "Ctrl /", "Alt A", "Esc"]);
     expect(KEYBOARD_NOTE).toBe("⌘ and ⌥ on a Mac.");

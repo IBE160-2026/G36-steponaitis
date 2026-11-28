@@ -1171,13 +1171,23 @@ export function categoryCheckCountLine(outside: number, aislesWithout: number): 
   return `${parts} · ${aisles}`;
 }
 
-// Location labels (Story 14.1, FR-48): the print view's title, aisle picker, heading and count.
-// Aisles, locations and their order are the server's (AD-3); only the words are made here.
+// Location labels (Story 14.1, FR-48): the print view's title, aisle picker, heading, count and
+// the line of an aisle without stock. Aisles, labels and their order are the server's (AD-3); only
+// the words are made here.
 
 export const LABELS_TITLE = "Location labels";
 export const LABELS_AISLE = "Aisle";
 export const BACK_TO_OVERVIEW = "Back to Overview";
 export const LABELS_LOAD_FAILED = "The location labels could not be loaded.";
+/** Shown on screen (never printed) when the chosen aisle has no label. */
+export const LABELS_EMPTY_AISLE = "No parts are stocked in this aisle.";
+/** Why Print is disabled on an aisle without labels. */
+export const NO_LABELS_TO_PRINT = "There are no labels to print.";
+/** Why Print is disabled while the labels are fetched again (they follow the plan's stock). */
+export const LABELS_PRINT_BUSY = "Getting the latest labels…";
+/** Shown on screen (never printed) next to the count: the labels are the stock after the plan's moves. */
+export const LABELS_AFTER_MOVES =
+  "The labels show each part where the plan puts it. Print them after the moves are carried out.";
 
 /** "Location labels · Aisle A". */
 export function labelsHeading(aisle: string): string {

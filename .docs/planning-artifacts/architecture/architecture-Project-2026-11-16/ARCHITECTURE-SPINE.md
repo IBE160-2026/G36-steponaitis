@@ -487,7 +487,7 @@ The walking skeleton runs `GET /api/health` and one page locally. Deployment to 
 | Warehouse wall (FR-42) | `domain/layout`, `modules/locations` | AD-15, AD-3, AD-20 |
 | Drag to move or swap (FR-51) | `modules/locations`, `domain/drag` (handlers for `move_parts`, `put_together`, `swap`, dispatched by `domain.apply`) | AD-16, AD-5, AD-3 (preview) |
 | Stage 2: category check (FR-43–FR-47) | `domain/categories`, `app/categories`, `store` (global `keyword_rules` and `aisle_categories` tables, starter seed), `api/routers/categories`, `modules/categories` | AD-9, AD-3, AD-14 |
-| Stage 2: location labels (FR-48) | `domain/labels`, `modules/labels` (QR drawn as inline SVG by the bundled `uqr`) | AD-3, AD-14 |
+| Stage 2: location labels (FR-48) | `domain/labels`, `app/labels`, `api/routers/labels` (plan-scoped `GET /api/plans/{id}/labels`: one label per location and part with stock in the planning copy; decided 2026-11-28), `modules/labels` (the part number's QR code drawn as inline SVG by the bundled `uqr`) | AD-3, AD-14 |
 
 ## Deferred
 
