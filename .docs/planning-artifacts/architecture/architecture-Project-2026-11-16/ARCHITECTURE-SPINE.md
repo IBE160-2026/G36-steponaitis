@@ -165,7 +165,7 @@ flowchart LR
     - **Text.** Text is trimmed, including non-breaking spaces, and keeps its case. Transaction Type matches the four known names ignoring case.
     - **Identifiers** (Part, Location, Aisle, Level, Section, Position, Transaction Code, Warehouse). An integer or integral numeric cell becomes integer text without `.0`; leading zeros already lost in a numeric `.xlsx` cell can't be recovered. A non-integral number is rejected.
     - **Numbers** (Quantity, Walk Path). A numeric cell, or text of the form optional `-`, digits, optional decimal part with `.` or `,`. Thousands separators are rejected. Quantity must be `≥ 0`.
-    - **Dates.** A date cell, or text `YYYY-MM-DD` or `DD.MM.YYYY`, optionally followed by a time. The time and any offset are discarded without conversion. Other formats are rejected as ambiguous.
+    - **Dates.** A date cell, or text `YYYY-MM-DD` or `DD.MM.YYYY`, optionally followed by a time. The time and any offset are discarded without conversion. Other formats are rejected as ambiguous. A date before 1900-01-01, or later than the day after the upload day (UTC; the extra day covers time zones ahead of UTC), is rejected (decided 2026-11-28).
     - **Empty and mixed files.** A file with no data rows is rejected. More than one distinct Warehouse value, within a file or across the three files, is rejected.
   - **Errors.** The `import_invalid` details are `[{file_role: locations | inventory | transactions, file_name, status: passed | failed | not_checked, errors: [{row, column, message}] (at most 20), more_count}]`.
   - **Saving.** Nothing is saved unless all three files pass. Then one transaction stores the import, the plan and its analysis.

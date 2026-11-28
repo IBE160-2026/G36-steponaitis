@@ -75,7 +75,7 @@ def create_plan(
         upload = uploads[role]
         assert upload is not None
         files[role] = _uploaded(upload)
-    imported = read_import(files)
+    imported = read_import(files, uploaded_on=now.date())
     return plans.created(plans.create(plan_name, imported, now=now, user=user))
 
 

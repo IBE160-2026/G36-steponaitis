@@ -3,7 +3,7 @@
 import json
 import time
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -19,7 +19,14 @@ from swp.domain.state import PlanState
 from swp.store import plans as store_plans
 from swp.store.db import get_engine
 from swp.store.models import ImportRow, PlanRow
-from tests.app.test_import_readers import DATA_DIR, INV_CSV, LOC_CSV, TX_CSV, _data_files
+from tests.app.test_import_readers import (
+    DATA_DIR,
+    INV_CSV,
+    LOC_CSV,
+    TX_CSV,
+    _data_files,
+    _transactions_dated,
+)
 from tests.conftest import _clear_caches
 from tests.domain.answer_key import CLASS_NAMES, expected
 
@@ -172,6 +179,51 @@ def test_fr3_failing_file_saves_nothing(empty_tables: str) -> None:
     assert error["code"] == "import_invalid"
     assert [d["file_role"] for d in error["details"]] == ["locations", "inventory", "transactions"]
     assert _counts() == (0, 0)
+
+
+@pytest.mark.parametrize(
+    ("day", "reason"),
+    [("0001-01-15", "is before 1900-01-01"), ("2999-01-01", "is in the future")],
+)
+def test_fr4_date_outside_the_range_is_import_invalid_not_500(
+    empty_tables: str, day: str, reason: str
+) -> None:
+    # Epic 1 retro R2: the year-1 date was `internal` (500) from `period_for`.
+    files = _small_files()
+    files["transactions"] = _transactions_dated(day)
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/api/plans", data={"name": "Bad"}, files=_multipart(files), headers=SAME_ORIGIN
+        )
+
+    assert response.status_code == 422, response.text
+    error = response.json()["error"]
+    assert error["code"] == "import_invalid"
+    assert error["details"][2]["errors"] == [
+        {
+            "row": 2,
+            "column": "Date",
+            "message": f"transactions.csv · row 2 · column Date: “{day}” {reason}.",
+        }
+    ]
+    assert _counts() == (0, 0)
+
+
+@pytest.mark.parametrize(("days_ahead", "status"), [(1, 201), (3, 422)])
+def test_fr4_upload_day_limit_follows_the_utc_clock(
+    empty_tables: str, days_ahead: int, status: int
+) -> None:
+    # The route passes today's UTC date: tomorrow passes, three days ahead is refused. (Two
+    # days ahead is the first refused day; three keeps the test steady across UTC midnight.)
+    day = datetime.now(UTC).date() + timedelta(days=days_ahead)
+    files = _small_files()
+    files["transactions"] = _transactions_dated(day.isoformat())
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/api/plans", data={"name": "Edge"}, files=_multipart(files), headers=SAME_ORIGIN
+        )
+
+    assert response.status_code == status, response.text
 
 
 def test_fr1_failure_mid_transaction_saves_nothing(

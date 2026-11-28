@@ -32,6 +32,7 @@ CheckStatus = Literal["passed", "failed", "not_checked"]
 
 ROLES: tuple[FileRole, ...] = ("locations", "inventory", "transactions")
 MAX_ERRORS_PER_FILE = 20
+EARLIEST_DATE = date(1900, 1, 1)
 IMPORT_STOPPED = "Import stopped: nothing was saved."
 
 REQUIRED_COLUMNS: Mapping[FileRole, tuple[str, ...]] = {
@@ -168,7 +169,7 @@ def _parse_number(cell: Cell) -> Decimal:
     raise _BadValue("is not a number")
 
 
-def _parse_date(cell: Cell) -> date:
+def _read_date(cell: Cell) -> date:
     if isinstance(cell, datetime):
         return cell.date()
     if isinstance(cell, date):
@@ -188,13 +189,27 @@ def _parse_date(cell: Cell) -> date:
     raise _BadValue("is not a valid date")
 
 
+def _parse_date(cell: Cell, latest_date: date | None) -> date:
+    """The date in `cell`, from `EARLIEST_DATE` up to `latest_date` (None: no upper limit).
+
+    A date outside the range is a cell error: a year-1 date would otherwise crash
+    `analysis.period_for`, and a date typed far in the future would become the data-as-of date.
+    """
+    value = _read_date(cell)
+    if value < EARLIEST_DATE:
+        raise _BadValue(f"is before {EARLIEST_DATE.isoformat()}")
+    if latest_date is not None and value > latest_date:
+        raise _BadValue("is in the future")
+    return value
+
+
 def _parse_text(cell: Cell) -> str:
     if isinstance(cell, Decimal):
         return _decimal_text(cell)
     return str(cell).strip()
 
 
-def _parse(column: str, cell: Cell) -> Value:
+def _parse(column: str, cell: Cell, latest_date: date | None) -> Value:
     kind = COLUMN_KINDS[column]
     if kind == "identifier":
         return _parse_identifier(cell)
@@ -204,7 +219,7 @@ def _parse(column: str, cell: Cell) -> Value:
             raise _BadValue("is negative")
         return number
     if kind == "date":
-        return _parse_date(cell)
+        return _parse_date(cell, latest_date)
     return _parse_text(cell)
 
 
@@ -225,8 +240,13 @@ def _failed(role: FileRole, file_name: str, errors: list[CellError]) -> CheckedF
     return CheckedFile(check=check, rows=())
 
 
-def check_file(role: FileRole, file_name: str, sheet: RawSheet) -> CheckedFile:
-    """Check the header and every value of one file; report every error found."""
+def check_file(
+    role: FileRole, file_name: str, sheet: RawSheet, *, latest_date: date | None = None
+) -> CheckedFile:
+    """Check the header and every value of one file; report every error found.
+
+    A date after `latest_date` is an error; None sets no upper limit.
+    """
     no_data = CellError(row=None, column=None, message=f"{file_name} has no data rows.")
     header_index = next(
         (i for i, row in enumerate(sheet.rows) if not all(_is_blank(c) for c in row)), None
@@ -294,7 +314,7 @@ def check_file(role: FileRole, file_name: str, sheet: RawSheet) -> CheckedFile:
                 continue
             prefix = f"{file_name} · row {row_number:,} · column {column}: “{_display(cell)}”"
             try:
-                value = _parse(column, cell)
+                value = _parse(column, cell, latest_date)
             except _BadValue as bad:
                 errors.append(
                     CellError(row=row_number, column=column, message=f"{prefix} {bad.reason}.")

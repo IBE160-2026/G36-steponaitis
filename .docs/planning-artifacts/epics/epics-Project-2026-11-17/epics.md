@@ -565,7 +565,7 @@ So that a bad export is stopped with the exact file, row and column instead of s
 
 **Given** required cells with values
 **When** they are validated
-**Then** a blank required cell, a Quantity that is not a number or is negative, a Walk Path that is not a number, a Date that is not a date cell, `YYYY-MM-DD` or `DD.MM.YYYY` (with an optional time that is discarded), a number with thousands separators, a non-integral identifier, or a location code that appears twice in the Locations file each give an error with file, row, column and value (FR-4)
+**Then** a blank required cell, a Quantity that is not a number or is negative, a Walk Path that is not a number, a Date that is not a date cell, `YYYY-MM-DD` or `DD.MM.YYYY` (with an optional time that is discarded), a Date before 1900-01-01 or later than the day after the upload day, a number with thousands separators, a non-integral identifier, or a location code that appears twice in the Locations file each give an error with file, row, column and value (FR-4)
 **And** a file with no data rows is rejected.
 
 **Given** a failing file

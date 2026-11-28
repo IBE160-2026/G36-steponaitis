@@ -21,9 +21,8 @@ DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 ROLE_NAMES = {"locations": "Locations", "inventory": "Inventory", "transactions": "transactions"}
 LOC_CSV = b"Location,Walk Path,Aisle,Level\nA-01,0,A,1\n"
 INV_CSV = b"Part,Part Description,Quantity,Location\nP1,Bolt,2,A-01\n"
-TX_CSV = (
-    b"Transaction Type,Part,Location,Transaction Code,Date\nIssue Part,P1,FLSKRS,7,2026-09-30\n"
-)
+TX_CSV_HEADER = b"Transaction Type,Part,Location,Transaction Code,Date\n"
+TX_CSV = TX_CSV_HEADER + b"Issue Part,P1,FLSKRS,7,2026-09-30\n"
 
 
 def _xlsx(rows: list[list[object]], *, start_row: int = 1) -> bytes:
@@ -41,6 +40,12 @@ def _xlsx(rows: list[list[object]], *, start_row: int = 1) -> bytes:
 
 def _read(name: str, data: bytes, max_rows: int = 25_000) -> tuple[tuple[Cell, ...], ...]:
     return read_sheet(name, data, max_rows=max_rows).rows
+
+
+def _transactions_dated(day: str) -> UploadedFile:
+    """A transactions file with one line dated `day`."""
+    line = b"Issue Part,P1,FLSKRS,7," + day.encode() + b"\n"
+    return UploadedFile("transactions.csv", TX_CSV_HEADER + line)
 
 
 def _good_files(**overrides: UploadedFile) -> dict[str, UploadedFile]:
@@ -223,6 +228,30 @@ def test_fr4_bad_values_in_xlsx_report_file_row_and_column() -> None:
             "row": 2,
             "column": "Date",
             "message": "transactions.xlsx · row 2 · column Date: “09/30/2026” is not a valid date.",
+        }
+    ]
+
+
+def test_fr4_date_one_day_after_the_upload_day_passes() -> None:
+    # The upload day is UTC; a warehouse east of UTC can already be on the next day.
+    files = _good_files(transactions=_transactions_dated("2026-10-01"))
+
+    _, _, transactions = check_files(files, uploaded_on=date(2026, 9, 30))
+
+    assert transactions.check.status == "passed"
+
+
+def test_fr4_date_two_days_after_the_upload_day_is_a_cell_error() -> None:
+    files = _good_files(transactions=_transactions_dated("2026-10-02"))
+
+    with pytest.raises(DomainError) as raised:
+        check_files(files, uploaded_on=date(2026, 9, 30))
+
+    assert raised.value.details[2]["errors"] == [
+        {
+            "row": 2,
+            "column": "Date",
+            "message": "transactions.csv · row 2 · column Date: “2026-10-02” is in the future.",
         }
     ]
 

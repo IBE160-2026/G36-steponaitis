@@ -5,8 +5,10 @@ from decimal import Decimal
 
 import pytest
 
+from swp.domain.analysis import period_for
 from swp.domain.errors import DomainError
 from swp.domain.import_ import (
+    EARLIEST_DATE,
     REQUIRED_COLUMNS,
     Cell,
     CheckedFile,
@@ -239,6 +241,55 @@ def test_fr4_unreadable_date(cell: Cell) -> None:
     assert _messages(_date(cell)) == [
         f"transactions.xlsx · row 2 · column Date: “{cell}” is not a valid date."
     ]
+
+
+@pytest.mark.parametrize(
+    "cell",
+    ["0001-01-15", "31.12.1899", date(1899, 12, 31), datetime(1, 1, 15, 8, 30)],
+)
+def test_fr4_date_before_1900_is_a_cell_error(cell: Cell) -> None:
+    # Epic 1 retro R2: a year-1 date as data-as-of made `period_for` raise (500).
+    assert _messages(_date(cell)) == [
+        f"transactions.xlsx · row 2 · column Date: “{cell}” is before 1900-01-01."
+    ]
+
+
+def test_fr4_earliest_date_passes_and_gives_a_period() -> None:
+    checked = _date("1900-01-01")
+
+    assert checked.check.status == "passed"
+    assert checked.rows[0].values["Date"] == EARLIEST_DATE
+    # A period of 100 years, far more than any real setting, still has a start.
+    assert period_for(EARLIEST_DATE, 12 * 100) == (date(1800, 1, 2), EARLIEST_DATE)
+
+
+@pytest.mark.parametrize("cell", ["2026-10-02", "02.10.2026 07:00", datetime(2999, 1, 1)])
+def test_fr4_date_after_the_latest_date_is_a_cell_error(cell: Cell) -> None:
+    checked = check_file(
+        "transactions",
+        "transactions.xlsx",
+        _sheet(TX_HEADER, ("Issue Part", "P1", "FLSKRS", "7", cell)),
+        latest_date=date(2026, 10, 1),
+    )
+
+    assert _messages(checked) == [
+        f"transactions.xlsx · row 2 · column Date: “{cell}” is in the future."
+    ]
+
+
+def test_fr4_date_on_the_latest_date_passes() -> None:
+    checked = check_file(
+        "transactions",
+        "transactions.xlsx",
+        _sheet(TX_HEADER, ("Issue Part", "P1", "FLSKRS", "7", "2026-10-01")),
+        latest_date=date(2026, 10, 1),
+    )
+
+    assert checked.check.status == "passed"
+
+
+def test_fr4_no_latest_date_sets_no_upper_limit() -> None:
+    assert _date("9999-12-31").check.status == "passed"
 
 
 def test_fr4_non_integral_identifier() -> None:

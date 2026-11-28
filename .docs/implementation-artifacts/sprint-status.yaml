@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 18:56
+last_updated: 11-28-2026 19:19
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -172,7 +172,7 @@ action_items:
     action: "Bound parsed dates in _parse_date and report out-of-range dates as cell
       errors so period_for cannot raise 500"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-3-make-the-new-plan-size-pre-check-and-the"
     epic: 1
