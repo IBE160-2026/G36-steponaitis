@@ -32,3 +32,26 @@ Bygg Story 16.2 (`bmad-build`): den offentlige deployen skal kjøre med innloggi
   - klikk Demo version én gang, slett «Testing», kjør `npm run e2e:public` og gå gjennom SM-2 på `data/sample/`;
   - logg resultatet, så kan 16.2 settes til `done`.
 - Epic 16-retrospektiv (valgfri) etter at 16.2 er `done`.
+
+## 2026-11-28 kl. 12:13 — Justas
+
+### Oppgave
+Fullfør forfatterens sjekker for Story 16.2 på den offentlige URL-en, sett storyen til `done` og push til `main`.
+
+### Plan
+- Sett flaggene i Vercel, sjekk Log in med demopassordet, slett «Testing», kjør `npm run e2e:public` og gå gjennom SM-2 på den offentlige URL-en.
+
+### Resultat
+- Vercel (Production): Justas satte `FEATURE_AUTH=true` og `FEATURE_DEMO=true` og redeployet. `DEMO_PASSWORD` var allerede `demo`, og `demo`-raden fra 16.1 hadde det samme passordet, så raden i Supabase ble ikke slettet.
+- Bekreftet av Justas på https://g36steponaitis.vercel.app:
+  - Demo version virker uten passord;
+  - Log in med `demo`/`demo` virker;
+  - testplanen «Testing» er slettet;
+  - SM-2 virker på `data/sample/`: New Plan, Overview, Parts, Pick groups, Locations, merking av gang A, Run recommendations og Apply, Before/after og Move list;
+  - `/api/health` svarer `{"status":"ok"}`.
+- Første kjøring av `npm run e2e:public` ga 2 av 3 bestått. Log in-testen nådde grensen på 5 s mens siden fortsatt viste «Logging in.» (kald funksjon og bcrypt mot Supabase). Begge ventingene på `/plans` fikk 30 s (`52a7fb5`). Ny kjøring: 3 bestått, Log in tok 5,0 s. `e2e:production`: 3 bestått.
+- `sprint-status.yaml`: 16-2 og epic-16 satt til `done`. Pushet til `main`.
+- Løst: dashboard-stegene for 16.2 og punktet om «Testing».
+
+### Åpne punkter
+- Epic 16-retrospektiv (valgfri), allerede ført i `issues.md`.
