@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 12:13
+last_updated: 11-28-2026 12:36
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -158,7 +158,7 @@ development_status:
   16-0-production-hardening-before-going-public: done
   16-1-live-on-the-public-vercel-url: done
   16-2-production-with-login-and-the-demo-on: done
-  epic-16-retrospective: optional
+  epic-16-retrospective: done
 action_items:
   - id: "epic-1-retro-item-1-reject-ambiguous-one-group-numbers-like"
     epic: 1
@@ -220,7 +220,7 @@ action_items:
     action: "Decide whether unknown Transaction Types are reported and whether data_as_of
       uses only kept rows; update FR-5/FR-7 if so"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-1-retro-2026-11-21.md"
   - id: "epic-1-retro-item-10-add-a-runbook-step-that-acts-on-followup"
     epic: 1
@@ -269,20 +269,20 @@ action_items:
     action: "Make plan views read the plan without loading transactions, or amend
       AD-4"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-17-require-a-test-of-the-in-page-user-path"
     epic: 2
     action: "Require a test of the in-page user path when a review patch changes when
       shared state resets"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-2-retro-item-18-decide-when-the-open-epic-1-action-items"
     epic: 2
     action: "Decide when the open epic 1 action items are scheduled"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-2-retro-2026-11-22.md"
   - id: "epic-3-retro-item-19-make-a-command-failure-with-the-backend"
     epic: 3
@@ -334,14 +334,14 @@ action_items:
       (422) and whether the Best locations step needs a mark that covers a location;
       record it in FR-21"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-3-retro-item-26-require-a-later-story-spec-to-list-the-f"
     epic: 3
     action: "Require a later story spec to list the failure paths handed over when
       an earlier story defers verification to it"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-3-retro-2026-11-22.md"
   - id: "epic-4-retro-item-27-make-the-manual-move-dialog-take-from-ch"
     epic: 4
@@ -391,21 +391,21 @@ action_items:
     action: "Decide whether manual_move is rejected when the effect differs from the
       preview, or waits for FR-41; record in AD-6"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-34-confirm-or-revert-the-story-4-2-spine-ed"
     epic: 4
     action: "Confirm or revert the Story 4.2 spine edits: AD-11 unavailable 503 and
       import data schema v2 virtual_locations"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-35-reconcile-epic-and-prd-with-as-built-ux"
     epic: 4
     action: "Reconcile epic and PRD with as-built: UX-DR26 From M2, FR-22 best in
       before/after table, 4.3 AC6 location path"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-36-always-assert-next_move_number-never-dec"
     epic: 4
@@ -426,7 +426,7 @@ action_items:
     action: "Run the 4.1 and 4.4 follow-up reviews and require stories that close
       retro items to name them and leave status changes to the retro"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-5-retro-item-39-make-rule-3-consider-fast-parts-that-rul"
     epic: 5
@@ -442,14 +442,14 @@ action_items:
       same round (FR-34 combine) stays applied or becomes outdated moved; record in
       AD-7 and pin with a view test (R1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-41-change-the-apply-all-confirm-question-so"
     epic: 5
     action: "Change the Apply all confirm question so it does not promise undo before
       FR-35 ships (Story 5.7 AC, lib/copy/index.ts:156) (R3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-42-fix-recommendations-page-edge-paths-newl"
     epic: 5
@@ -473,7 +473,7 @@ action_items:
       the confirmed run_id, and record the kept skip cause and no-op Apply all in
       AD-7 (R4, R6, A6)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-45-tie-_marks_fail-to-the-rule-selection-co"
     epic: 5
@@ -503,7 +503,7 @@ action_items:
       and add runbook rules: act on followup_review_recommended, name closed retro
       items in commits, forbid build subagents committing session logs (P1-P3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-6-retro-item-49-make-get_plan-read-the-plan-and-its-impo"
     epic: 6
@@ -576,7 +576,7 @@ action_items:
       28/29/36) as done, tick their issues.md lines, and add a runbook rule that each
       story prompt carries every deferral addressed to it (P2, P3, R5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-58-run-the-six-outstanding-follow-up-review"
     epic: 6
@@ -584,7 +584,7 @@ action_items:
       incl. row menu in Firefox and Edge) and add a runbook guard that a build agent
       may not hand back while its subagents still run (P4, P5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-7-retro-item-59-stop-the-flow-bar-showing-recommendation"
     epic: 7
@@ -621,7 +621,7 @@ action_items:
       add the runbook step that blocks the next story while followup_review_recommended
       is unhandled (P3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-64-clean-up-epic-7-duplication-e2e-command"
     epic: 7
@@ -646,7 +646,7 @@ action_items:
     action: "Decide whether to enforce base_version or add a reset epoch to undo before
       Epic 15, and record it in AD-6 (R4)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-67-confirm-the-nine-landed-retro-items-as-d"
     epic: 7
@@ -654,7 +654,7 @@ action_items:
       LAUNCHER_ACTIONS and PlanSummary as the launcher extension point in AGENTS.md,
       and require commits and logs to name only items that advanced (A1, P2, P4)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-8-retro-item-68-decide-the-same-part-move-list-order-fr"
     epic: 8
@@ -693,7 +693,7 @@ action_items:
     action: "In Story 12.4 store swap size or membership so a partly undone multi-part
       swap loses its swap mark, and add that case to test_fr38_swap_mark_only_when_intact"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-73-decide-how-the-milestone-2-gate-proves-t"
     epic: 8
@@ -701,7 +701,7 @@ action_items:
       (CI firefox/msedge for move-list specs or a recorded local gate step) and update
       AGENTS.md for the three browsers"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-74-copy-story-deferred-entries-that-need-a"
     epic: 8
@@ -709,7 +709,7 @@ action_items:
       action_items with an owner; run the outstanding follow-up reviews and confirm
       the nine landed items"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-75-share-the-e2e-sample-plan-setup-create-m"
     epic: 8
@@ -725,7 +725,7 @@ action_items:
       before bcrypt, a parallel-login test, and purge stale login_attempts rows (R1,
       R7); before Story 16.2"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-77-bind-a-held-command-to-the-user-whose-se"
     epic: 9
@@ -733,7 +733,7 @@ action_items:
       user or demo logs in, and keep the Log out destination on a 401 during Log out
       (R2, R9)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-78-close-the-production-startup-holes-verce"
     epic: 9
@@ -741,7 +741,7 @@ action_items:
       FEATURE_AUTH off or FEATURE_DEMO without auth, DEMO_PASSWORD=demo, and a Refusing-to-start
       line without the value for invalid settings (R3, R4, R14); before Story 16.2"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-79-decide-and-record-in-ad-18-and-epics-md"
     epic: 9
@@ -749,7 +749,7 @@ action_items:
       is off, server-side Log out revocation, NFKC or ASCII usernames, hard caps under
       concurrency, and the as-built additions (R4, R5, R6, R13, R17)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-80-close-the-client-auth-flow-gaps-keep-the"
     epic: 9
@@ -784,7 +784,7 @@ action_items:
       e2e in firefox and msedge before the milestone 2 gate, and add a real-flag e2e
       config in any story that adds a flag (P1, P2, P4)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-10-retro-item-84-find-and-fix-the-firefox-page-crash-in-t"
     epic: 10
@@ -792,7 +792,7 @@ action_items:
       (recommendations-page.spec.ts:231, 10.5 narrow-crop path) and keep the test
       green in all three browsers (B1)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-10-retro-item-85-keep-the-selected-move-and-chosen-aisle"
     epic: 10
@@ -858,7 +858,7 @@ action_items:
       when a review patch fixes a pattern, and give the open 10.x issues.md lines
       an owner (P1-P3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-11-retro-item-93-make-the-colour-store-keep-html-and-memo"
     epic: 11
@@ -899,7 +899,7 @@ action_items:
       stops in the recommendation detail) or only the entries its surface draws (epic-10
       item 88 R10), and record it in UX-DR48 (A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
   - id: "epic-11-retro-item-98-before-epic-12-schedule-epic-10-items-89"
     epic: 11
@@ -957,7 +957,7 @@ action_items:
       CI firefox/msedge, add the build-agent runbook guard (recurred in 12.1), carry
       AD-18 gzip and quadratic Apply all into 16.2/NFR-7 (A2, P1, P3, P4)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-13-retro-item-105-make-the-starter-seed-safe-at-startup-ch"
     epic: 13
@@ -965,7 +965,7 @@ action_items:
       reading the TOML, retry or log the real cause on a busy SQLite lock, fix the
       bootstrap docstring (R5, R6)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-106-add-a-stale-list-precondition-409-to-put"
     epic: 13
@@ -980,7 +980,7 @@ action_items:
       aisle-text in check, check invalidation, 503 toast, finally in categories.spec.ts,
       isolate the global reorder across browsers (R1, R3, R17, R21)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-108-reconcile-epics-md-context-ad-9-with-epi"
     epic: 13
@@ -989,7 +989,7 @@ action_items:
       resolve the skip placeholders against the 0-skipped gate, tick issues.md:210,212
       (A4, A5)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-109-unify-category-aisle-text-normalisation"
     epic: 13
@@ -997,7 +997,7 @@ action_items:
       picker = server) and merge sendJson and postJson into lib/api (R10, R11, R14,
       A2)"
     owner: "dev"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-13-retro-item-110-check-the-ai-drafted-starter_categories"
     epic: 13
@@ -1013,7 +1013,7 @@ action_items:
       guard for followup_review_recommended, and keep stories with a human-only AC
       out of done until confirmed (P1-P3)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-13-retro-2026-11-24.md"
   - id: "epic-14-retro-item-112-scan-a-chrome-printed-location-label-qr"
     epic: 14
@@ -1035,7 +1035,7 @@ action_items:
     action: "Withdraw the mark-Epics-14-15-dropped part of epic-13 item 108 and clear
       the uj3 fr41 and uj5 skip placeholders through Story 15.1 and Epic 16 (G1)"
     owner: "Justas"
-    status: open
+    status: done
     ref: ".docs/implementation-artifacts/epic-14-retro-2026-11-24.md"
   - id: "epic-14-retro-item-115-land-the-epic-13-item-111-rule-before-th"
     epic: 14
@@ -1066,3 +1066,63 @@ action_items:
     owner: "Justas"
     status: done
     ref: ".docs/implementation-artifacts/epic-15-retro-2026-11-24.md"
+  - id: "epic-16-retro-item-119-map-busy-locks-on-the-login-path-to-503"
+    epic: 16
+    action: "Map busy locks on the login path to 503: catch is_busy OperationalError
+      around login_attempts.reserve/clear, raise unavailable in demo_login when a
+      busy seed leaves no row, fix its false comment, one test per path (F1, F2)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-120-decide-how-the-throttle-treats-the-publi"
+    epic: 16
+    action: "Decide how the throttle treats the published demo login (exempt demo,
+      count only in-flight checks, or accept) and give stale unlocked login_attempts
+      rows a prune rule (F3, F4)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-121-refuse-an-empty-or-sqlite-database_url-u"
+    epic: 16
+    action: "Refuse an empty or SQLite DATABASE_URL under VERCEL and suppress OSError
+      on the custom-SQLite mkdir, with a test_nfr6 test per case (F5)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-122-extend-keep-alive-yml-to-assert-api-sess"
+    epic: 16
+    action: "Extend keep-alive.yml to assert /api/session has feature_auth and feature_demo
+      true and user null, optionally POST /api/auth/demo 200 (F6)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-123-decide-the-vercel-function-region-retry"
+    epic: 16
+    action: "Decide the Vercel function region: retry arn1 next to the Stockholm database
+      or record the 1-2 s per DB request latency as accepted (F7)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-124-small-fixes-e2e_demo_password-in-playwri"
+    epic: 16
+    action: "Small fixes: E2E_DEMO_PASSWORD ||= in playwright.production.config.ts,
+      production wording for seed-skip warnings, test_deploy.py pins excludeFiles
+      away from settings/ and swp/ (F8, F9, F10)"
+    owner: "dev"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-125-reword-the-story-16-1-ac-in-epics-md-as"
+    epic: 16
+    action: "Reword the Story 16.1 AC in epics.md as built: JWT_SECRET and DEMO_PASSWORD
+      were set in 16.1, the flags followed in 16.2 (S1)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
+  - id: "epic-16-retro-item-126-reconcile-the-remaining-open-retro-items"
+    epic: 16
+    action: "Reconcile the remaining open retro items against issue-triage-2026-11-26.md
+      and flip sprint-status with --set-action-status whenever an issues.md retro
+      line is closed (P2)"
+    owner: "Justas"
+    status: open
+    ref: ".docs/implementation-artifacts/epic-16-retro-2026-11-28.md"
