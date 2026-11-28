@@ -22,6 +22,7 @@
 - source_spec: none
   summary: Bookkeeping without code: reword the Story 16.1 criterion at `epics.md:2722` as built (Epic 16 retro item 7) and reconcile the 53 older open retro items in `sprint-status.yaml` against `issue-triage-2026-11-26.md` (retro item 8).
   evidence: Split from the 2026-11-28 follow-up intent by Justas; done by hand after the two builds.
+  resolved: 2026-11-28 — `3216ab5`: the Story 16.1 criterion is reworded as built, and 17 of the 53 older items are set to `done` in `sprint-status.yaml` with evidence (35 stay open; the list is in the session log of 2026-11-28).
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: Unverified until the push (would be medium): the `arn1` function region in `vercel.json` may not be honoured by Vercel on a `services` project, leaving the function in `iad1`.
   evidence: Vercel's docs do not say whether a top-level `regions` or a service function's `regions` applies with `services`; the JSON schema accepts both. After the push, `curl -s -o /dev/null -D - https://g36steponaitis.vercel.app/api/health | grep -i x-vercel-id` must show `arn1` as the second field, and the Keep-alive workflow now checks the same.
@@ -31,3 +32,4 @@
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: `epics.md:1995` (Story 9.7) still says "Demo version still works while `demo` is locked by the throttle", but since 2026-11-28 Log in as `demo` is not throttled while Demo version is on.
   evidence: The spec's boundary kept `epics.md` out of the build; the wording is corrected in the bookkeeping pass that follows the two builds (with `epics.md:2722`).
+  resolved: 2026-11-28 — `3216ab5`: the Story 9.7 line now says a lock row left for `demo` blocks nothing and Log in as `demo` is not throttled while Demo version is on.
