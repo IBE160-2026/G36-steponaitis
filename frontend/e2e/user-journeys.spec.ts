@@ -27,7 +27,8 @@ import { type APIRequestContext, expect, type Locator, type Page, test, toasts }
 // week", "another plan Spring re-slot") and to read view JSON for data-dependent picks (which part,
 // which location): the example values in EXPERIENCE.md are illustrative. UJ-1's category check
 // (Epic 13), UJ-2's location labels (Epic 14) and UJ-3's concurrent-edit warning (Epic 15) run near
-// the end; the step that needs Epic 16 is declared as a skipped test after them.
+// the end. UJ-5 on the public deployment is e2e/production/demo-front-page.spec.ts, run against the
+// public URL by `npm run e2e:public` (Story 16.2).
 // The existing specs stay the per-step detail tests:
 //
 // - UJ-1: new-plan, plan-overview, locations-wall, best-locations-wall, recommendations-page,
@@ -1417,7 +1418,7 @@ test.describe("user journey steps of stage 2: location labels", () => {
 });
 
 // -------------------------------------------------------------------------------------------------
-// Journey steps that need later epics: declared here so the report lists them as skipped.
+// UJ-3 stage 2: the concurrent-edit warning (Epic 15).
 
 test.describe("user journey steps of stage 2: concurrent edits", () => {
   const PLAN_CHANGED_TEXT =
@@ -1519,5 +1520,3 @@ test.describe("user journey steps of stage 2: concurrent edits", () => {
     }
   });
 });
-
-test.skip("uj5 the examiner opens the public deployment's demo front page (Epic 16, deployment)", async () => {});

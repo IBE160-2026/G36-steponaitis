@@ -4,7 +4,7 @@
 
 ## Goal
 
-Put the app, already built and approved locally, on the public Vercel URL against Supabase Postgres. First close the security and integrity gaps found in earlier retrospectives (Epics 9 and 13). Then deploy the skeleton to production. Finally, turn on login and the demo so examiners can use the app at the URL it will be judged on. The epic adds no new FRs. It takes FR-40 (login) and FR-50 (Demo version) to production under NFR-5 (public demo, synthetic data only) and NFR-6 (secrets from env). The deployment steps need the user's own Vercel and Supabase accounts, so this epic is not part of the autonomous run. Story 16.0 is local code work. Stories 16.1 and 16.2 need the user present.
+Put the app, already built and approved locally, on the public Vercel URL against Supabase Postgres, where it will be judged. First close the security and integrity gaps found in the Epic 9 and Epic 13 retrospectives. Then deploy the skeleton to production. Finally, turn on login and the demo so examiners can use the app at that URL. The epic adds no new FRs: it takes login (FR-40) and Demo version (FR-50) to production under the public-demo rule (NFR-5, synthetic data only) and the secrets rule (NFR-6, secrets from env, never committed). The deploy steps need the user's own Vercel and Supabase accounts, so the epic is not part of the autonomous run. Story 16.0 is local code work; Stories 16.1 and 16.2 need the user present.
 
 ## Stories
 
@@ -14,37 +14,42 @@ Put the app, already built and approved locally, on the public Vercel URL agains
 
 ## Requirements & Constraints
 
-- **Safe startup.** The backend refuses to start when `VERCEL` is set and `APP_ENV` is anything other than `production` (unset or `local`). It also refuses in production with an empty or default `JWT_SECRET`. An invalid setting, such as a `DEMO_PASSWORD` the validator rejects, produces exactly one `Refusing to start: …` line. That line names the setting and the reason, never the value, and no pydantic traceback is printed. This applies to both app startup and `swp db upgrade`. Tests cover every case.
-- **Login throttle under concurrency.** Every login attempt is counted per casefolded submitted username, whether or not the account exists, *before* the password is checked, so concurrent requests can't run more than 5 password checks. A successful login clears the count. After 5 counted attempts, logins for that name are blocked for 60 s with `login_locked` (429). The test sends the requests concurrently and runs on both SQLite and Postgres. `POST /api/auth/demo` bypasses the throttle.
-- **Starter seed (FR-47).** It reads `starter_categories.toml` only after checking that both `keyword_rules` and `aisle_categories` are empty, and it never overwrites the planner's lists. A locked SQLite database must not crash startup, and the bootstrap docstring describes what it does.
-- **Session-expiry handoff.** A change held back because the session expired is sent again only when the *same* user logs back in. If a different user logs in, the held change is dropped with a message and is never saved under that user's name.
-- **Secrets and data.** No real secret is ever committed. `.env.example` holds no real values. The deployment holds synthetic demo data only, and the README says so; the site itself shows no notice.
-- **Response size.** Vercel caps requests and responses at 4.5 MB. Test a maximum-size import (`MAX_ROWS_PER_FILE` = 25,000 locations, about 3.66 MB of wall layout uncompressed) on the public URL and record in the session log whether the limit applies to the gzipped or the uncompressed body. If the wall fails to load, lower the limit and update the limits decision (AD-18).
-- **Known accepted limit.** On a maximum-size import, Apply all can exceed the function time limit. This is documented and will not be optimized.
-- **Demo-only limits** (apply when `FEATURE_DEMO` is on): `MAX_PLANS` 50 and `MAX_ACCOUNTS` 200. The demo account does not count toward `MAX_ACCOUNTS`. Accepted risks: any visitor can delete any plan, and drive-by sign-ups can fill the account limit.
-- **Done criteria.** The public URL opens on the demo front page, and both Demo version and Log in work. The SM-2 flow runs on `data/sample/` and `GET /api/health` is green. The results are recorded in the session log.
+- **Safe startup.** The backend refuses to start when `VERCEL` is set and `APP_ENV` is not `production`, and in production with an empty or default `JWT_SECRET`, or with `DEMO_PASSWORD` or `DATABASE_URL` unset. An invalid setting gives exactly one `Refusing to start: …` line that names the setting and the reason, never the value, and prints no pydantic traceback. This applies to app startup and to `swp db upgrade`.
+- **Login throttle.** Attempts are counted per casefolded submitted username, whether or not the account exists, before the password is checked, so concurrent requests run at most 5 password checks. After 5 counted attempts, that name is locked for 60 s with `login_locked` (429). A successful login clears the count. `POST /api/auth/demo` bypasses the throttle.
+- **Starter seed (FR-47).** It reads `starter_categories.toml` only when both keyword rules and aisle categories are empty, never overwrites the planner's lists, and a locked SQLite database doesn't crash startup.
+- **Session-expiry handoff.** A change held back by an expired session is sent again only if the same user logs back in. If a different user (or demo) logs in, the change is dropped with a message.
+- **Secrets and data.** No real secret is committed, and `.env.example` holds no real values. The deployment holds synthetic demo data only. The README says so; the site shows no notice.
+- **Demo-only limits** (when `FEATURE_DEMO` is on): `MAX_PLANS` 50 and `MAX_ACCOUNTS` 200, with the demo account not counted. Accepted risks: any visitor can delete any plan, and drive-by sign-ups can fill the account limit. A job with more than 100 distinct parts adds no pick-group pairs (`MAX_JOB_PARTS`), which guards the public demo against quadratic pair counting.
+- **Accepted as built (decided 2026-11-26).**
+  - The `demo` account is seeded whether or not `FEATURE_DEMO` is on, and demo login seeds it on demand if the row is missing.
+  - Log out clears only the cookie, so the JWT stays valid until it expires. Rotating `JWT_SECRET` revokes every session.
+  - Usernames are casefolded, not NFKC-normalised.
+  - The plan and account limits check the count before inserting, so concurrent requests can overshoot them slightly.
+  - Five or more concurrent correct logins for one account can briefly get `login_locked`.
+- **Known limits.**
+  - Apply all on a maximum-size import can exceed the function time limit. This is documented and will not be optimized.
+  - Vercel caps requests and responses at 4.5 MB.
+- **Done criteria.** The public URL opens on the demo front page, and Demo version and Log in both work. The SM-2 flow runs there on `data/sample/`. `GET /api/health` is green. The results are recorded in the session log.
 
 ## Technical Decisions
 
-- **One origin.** `vercel.json` uses Vercel Services: the Next.js frontend plus the backend at `swp.main:app`, with `/api/(.*)` routed to the backend. The browser only ever calls relative `/api/*` paths. Preview deployments are off for the whole project, and `main` deploys to production. If Services (Beta) fails, the fallback is two Vercel projects joined by a Next.js rewrite, with the same API contract.
-- **Database.** The runtime uses the Supabase transaction pooler (port 6543), `NullPool` and psycopg `prepare_threshold=None`. A `postgresql://` URL is rewritten to `postgresql+psycopg://`. Migrations use `MIGRATION_DATABASE_URL` (the session pooler, port 5432).
-- **Migrate and seed.** `swp.app.bootstrap(upgrade, seed)` is the only path that migrates or seeds. The FastAPI lifespan calls it only when `APP_ENV=local`. In production, run `uv run swp db upgrade` by hand before deploying a schema change. Migrations are expand-only. The seed is idempotent: it creates the `demo` account (an integrity error counts as success), then the starter categories.
-- **Env scoping (Production only).** Story 16.1 sets `APP_ENV=production`, `DATABASE_URL` and `MIGRATION_DATABASE_URL`. Story 16.2 adds `JWT_SECRET`, `DEMO_PASSWORD`, `FEATURE_AUTH=on` and `FEATURE_DEMO=on`.
-- **Flags.** The frontend reads the flags at runtime from `GET /api/session` (`{user, feature_auth, feature_demo, max_upload_bytes}`). There are no `NEXT_PUBLIC_FEATURE_*` vars.
-- **Session cookie.** The session is an HS256 JWT in the httpOnly, `SameSite=Lax` cookie `swp_session`, valid for 30 days and `Secure` in production.
-- **Postgres writes** go through `store.db.write_transaction`, with `SET LOCAL lock_timeout = '3s'`. The login-throttle writes go through it too. CI runs `tests/app` against Postgres 17.
-- **Keep-alive.** `.github/workflows/keep-alive.yml` sends `GET /api/health` (which runs `SELECT 1`) to the public URL once a day and also supports `workflow_dispatch`.
-- **Out of scope.** No IP-based rate limiting, since serverless instances share no memory. No backups, Redis, monitoring beyond the keep-alive, or maintenance page.
+- **One origin.** `vercel.json` uses Vercel Services: the Next.js frontend plus the backend `swp.main:app`, with `/api/(.*)` routed to the backend. The browser calls only relative `/api/*` paths. Preview deployments are off, and `main` deploys to production. The fallback, if Services (Beta) fails, is two projects joined by a Next.js rewrite, with the same contract.
+- **Database.** The runtime uses the Supabase transaction pooler (port 6543), `NullPool` and psycopg `prepare_threshold=None`, and rewrites `postgresql://` to `postgresql+psycopg://`. Migrations use `MIGRATION_DATABASE_URL` (the session pooler, port 5432). Postgres writes go through `store.db.write_transaction` with `lock_timeout = '3s'`.
+- **Migrate and seed.** `swp.app.bootstrap` is the only path that migrates or seeds, and the lifespan runs it only when `APP_ENV=local`. In production, run `uv run swp db upgrade` by hand before a schema change. Migrations are expand-only, and the seed is idempotent.
+- **Env, scoped to Production only.** Set `APP_ENV=production`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET` and `DEMO_PASSWORD`. With `FEATURE_AUTH` and `FEATURE_DEMO` off, the app opens with no front page. Story 16.2 turns both flags on.
+- **Flags at runtime.** The frontend reads the flags from `GET /api/session` (`{user, feature_auth, feature_demo, max_upload_bytes}`). There are no `NEXT_PUBLIC_FEATURE_*` vars.
+- **Session.** An HS256 JWT in the httpOnly `SameSite=Lax` cookie `swp_session`, valid for 30 days and `Secure` in production.
+- **Keep-alive.** `.github/workflows/keep-alive.yml` calls `GET /api/health` on the public URL daily and also supports `workflow_dispatch`.
+- **Out of scope.** IP rate limiting, backups, Redis, monitoring beyond the keep-alive, and a maintenance page.
 
 ## UX & Interaction Patterns
 
 - **Public deployment.** The app opens on the demo front page with Log in (primary), Create account and Demo version. The Log in page also offers Demo version under an "or" rule. Log out returns to the demo front page. A local install has no front page and no Demo version.
-- **Demo version.** It opens the saved-plans list as the seeded `demo` account with no password. No plan is preloaded: visitors upload the three `data/sample/` files through New Plan, as the README describes.
-- **Expired session.** Log in opens. After the same user logs in, the unsaved change is sent again and the plan reopens where it was. Story 16.0 adds the different-user case, where the change is dropped with a message.
+- **Demo version.** It opens the saved-plans list as the seeded `demo` account with no password. No plan is preloaded: visitors upload the three `data/sample/` files through New Plan, following the README.
+- **Expired session.** Log in opens. After the same user logs back in, the held change is sent again and the plan reopens where it was.
 
 ## Cross-Story Dependencies
 
-- Story 16.0 must be finished before anything goes public. Story 16.1 relies on its hardened startup checks.
-- Story 16.2 needs Story 16.1 live and Story 9.7's production-like build (`npm run e2e:production`) passing locally.
-- Story 16.1 picks up the deferred response-size check from Story 12.5. Its result may require changing AD-18 and `MAX_ROWS_PER_FILE`.
-- The README (from Stories 9.7 and 12.x) gets the public URL and the manual `swp db upgrade` steps in Story 16.1.
+- Story 16.0 (done) had to be finished before anything went public. Story 16.1 (done) relies on its startup checks.
+- In Story 16.1, `JWT_SECRET` and `DEMO_PASSWORD` were already set in Vercel because the hardened startup check requires them. The maximum-size wall measured 3.66 MB uncompressed and 0.21 MB gzipped, both under the 4.5 MB limit, so AD-18 is unchanged.
+- Story 16.2 needs Story 16.1 live and Story 9.7's production-like build (`npm run e2e:production`) passing locally. Before turning the demo on, delete the 25,000-location test plan "Testing" from the public database, or decide to keep it (open point from Story 16.1).

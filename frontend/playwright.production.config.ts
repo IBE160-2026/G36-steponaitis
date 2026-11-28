@@ -10,7 +10,10 @@ const repoRoot = join(__dirname, "..");
 // Demo version are tested with the real FEATURE_DEMO flag. Run with `npm run e2e:production`.
 // Throwaway secrets, generated per run and never written to disk; they pass the startup check.
 const jwtSecret = randomBytes(48).toString("base64url");
-const demoPassword = randomBytes(8).toString("hex");
+// The demo password is also the Log in test's: Playwright loads this config again in every worker,
+// so the main process's value goes through the environment the workers inherit.
+process.env.E2E_DEMO_PASSWORD ??= randomBytes(8).toString("hex");
+const demoPassword = process.env.E2E_DEMO_PASSWORD;
 
 export default defineConfig({
   testDir: "./e2e/production",

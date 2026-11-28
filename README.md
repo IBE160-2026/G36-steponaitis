@@ -12,7 +12,7 @@ Applikasjonen er publisert på Vercel: https://g36steponaitis.vercel.app
 
 Den offentlige demoen inneholder **bare syntetiske demodata**. Ekte firmadata lastes aldri opp dit. Demofilene ligger i `data/sample/` (`Locations.xlsx`, `Inventory.xlsx`, `transactions.xlsx`) og lages av `data/generate_demo_data.py`.
 
-Slik kommer du inn i appen (når innloggingen er bygget, milestone 2):
+Slik kommer du inn i appen:
 
 - **Demo version** på forsiden: hopper over innloggingen og åpner appen med demokontoen.
 - **Log in** med demokontoen: brukernavn `demo`, passord `demo`.
@@ -51,6 +51,7 @@ Checks:
 | End-to-end, all browsers (Playwright: Chromium, Firefox, Edge) | `npm run e2e` |
 | End-to-end, Chromium only (what CI runs) | `npm run e2e -- --project=chromium` |
 | End-to-end, production-like build with the demo on (Chromium, also in CI) | `npm run e2e:production` |
+| End-to-end against the public deployment, after a deploy (Chromium, by hand only) | `npm run e2e:public` |
 
 Before the first end-to-end run, install the browsers once: `npx --workspace frontend playwright install chromium firefox`. The Edge project uses the installed Microsoft Edge; if it is missing, install it from https://www.microsoft.com/edge or with `npx --workspace frontend playwright install msedge`. Playwright builds and starts the app itself on port 3000 (stop `npm run dev` first) against `backend/var/e2e.db`, which is deleted each time Playwright starts the server itself (a server already running on port 3000 is reused as it is).
 
@@ -74,7 +75,7 @@ Every setting is a backend environment variable; `backend/.env.example` lists th
 | `APP_ENV` | `local` or `production`. Local migrates and seeds on startup; production does not and runs the checks below. | `local` |
 | `FEATURE_AUTH` | Accounts and login; every page needs a session. Off: everyone acts as `planner`. | `false` |
 | `FEATURE_DEMO` | Public demo: the front page, Demo version and the demo limits. | `false` |
-| `DEMO_PASSWORD` | Password of the seeded `demo` account, used only when the account is first created. | `demo` |
+| `DEMO_PASSWORD` | Password of the seeded `demo` account, used only when the account is first created. The public demo publishes `demo` on purpose. | `demo` |
 | `DATABASE_URL` | App database. `postgresql://` URLs use psycopg 3. | SQLite at `backend/var/swp.db` |
 | `MIGRATION_DATABASE_URL` | Connection `swp db upgrade` migrates through, e.g. a direct Postgres connection when `DATABASE_URL` goes through a pooler. It must name the same database as `DATABASE_URL` (the seed uses `DATABASE_URL`). | `DATABASE_URL` |
 | `JWT_SECRET` | Key that signs the `swp_session` cookie. | a local development key |
@@ -96,9 +97,9 @@ The backend (and `swp db upgrade`) refuses to start, logging one `Refusing to st
 
 Generate a `JWT_SECRET` with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. `swp db upgrade` migrates through `MIGRATION_DATABASE_URL` when it is set, otherwise `DATABASE_URL`, but seeds `demo` and the starter categories through `DATABASE_URL`, so both must name the same database; the running app always uses `DATABASE_URL`.
 
-`npm run e2e:production` runs the same checks locally: Playwright builds and starts the app with `APP_ENV=production`, `FEATURE_AUTH` and `FEATURE_DEMO` on and throwaway secrets it generates for that run, then walks the examiner journey (front page, Demo version as `demo`, Log out). It never reuses a running server, so stop `npm run dev` first.
+`npm run e2e:production` runs the same checks locally: Playwright builds and starts the app with `APP_ENV=production`, `FEATURE_AUTH` and `FEATURE_DEMO` on and throwaway secrets it generates for that run, then walks the examiner journey (front page, Demo version as `demo`, Log out, Log in as `demo` with that run's password, the Secure session cookie). It never reuses a running server, so stop `npm run dev` first. `npm run e2e:public` runs the same tests against the public deployment (or the origin in `PUBLIC_URL`; set `E2E_DEMO_PASSWORD` too if that deployment's demo password is not `demo`) with the password `demo`. It starts no server and creates no plan and no new account (Demo version recreates the `demo` account if its row is missing); Log in writes and clears one login-attempts row. Run it by hand after a deploy. It is not part of CI, which finishes before Vercel deploys.
 
-The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. *Deploy* below sets it up with `APP_ENV`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET` and `DEMO_PASSWORD`; turning on login and the demo (`FEATURE_AUTH`, `FEATURE_DEMO`) comes with Story 16.2.
+The public deployment at https://g36steponaitis.vercel.app holds synthetic data only (the files in `data/sample/`); real company data is never uploaded there or committed here. *Deploy* below sets it up with `APP_ENV`, `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `JWT_SECRET`, `DEMO_PASSWORD`, `FEATURE_AUTH` and `FEATURE_DEMO`. Its `DEMO_PASSWORD` is `demo` and published on purpose, so examiners can Log in as `demo`/`demo`: Demo version already gives the same access without a password. `JWT_SECRET` and the connection strings stay secret. Because the login is public, anyone can type five wrong passwords for `demo`; Log in as `demo` then answers "Too many failed logins for this username. Wait a minute and try again." for a minute, while **Demo version** is never throttled.
 
 ## Deploy
 
@@ -112,23 +113,33 @@ The public URL https://g36steponaitis.vercel.app is one Vercel project with two 
 2. **Migrate and seed (first time, and before every deploy that changes the schema):** production does not migrate or seed on startup, so run from the repo root, with the values only in your shell:
 
    ```sh
-   APP_ENV=production JWT_SECRET=… DEMO_PASSWORD=… \
+   APP_ENV=production JWT_SECRET=… DEMO_PASSWORD=demo \
      DATABASE_URL='postgresql://…:6543/postgres' MIGRATION_DATABASE_URL='postgresql://…:5432/postgres' \
      uv run --directory backend --locked swp db upgrade
    ```
 
    The line holds the database password and secrets, so keep it out of your shell history: start it with a space (zsh: `setopt HIST_IGNORE_SPACE`; bash: `HISTCONTROL=ignorespace`) or delete the line from the history afterwards. Run the upgrade *before* pushing a commit that contains a new migration: every push to `main` deploys at once, so pushing first means the new code briefly runs against the old schema.
 
-   It migrates through `MIGRATION_DATABASE_URL` and seeds the `demo` account and the starter categories through `DATABASE_URL`. The startup checks need `JWT_SECRET` and `DEMO_PASSWORD` even here: use the same values you store in Vercel in step 4. `DEMO_PASSWORD` sets the password the `demo` account is created with on this first run and is never applied again, so keep it identical in both places and out of the repo. Migrations only add, so the running deployment keeps working against the upgraded schema.
+   It migrates through `MIGRATION_DATABASE_URL` and seeds the `demo` account and the starter categories through `DATABASE_URL`. The startup checks need `JWT_SECRET` and `DEMO_PASSWORD` even here: use the same values you store in Vercel in step 4. `DEMO_PASSWORD` sets the password the `demo` account is created with on this first run and is never applied again, so keep it identical in both places. On the public deployment it is `demo`, which is published on purpose; `JWT_SECRET` and the database password stay out of the repo. Migrations only add, so the running deployment keeps working against the upgraded schema.
 3. **Vercel project:** *Add New → Project*, import this GitHub repository and keep the repository root as the root directory; Vercel reads `vercel.json` and builds both services (Python dependencies from `backend/pyproject.toml` and `uv.lock`).
 4. **Environment variables** (*Settings → Environment Variables*), each for **Production** only:
    - `APP_ENV=production`
    - `DATABASE_URL` (transaction pooler) and `MIGRATION_DATABASE_URL` (session pooler)
    - `JWT_SECRET`: generate it with `python -c "import secrets; print(secrets.token_urlsafe(48))"` (at least 32 bytes)
-   - `DEMO_PASSWORD`: the demo account's password, the same value as in step 2
+   - `DEMO_PASSWORD=demo`: the demo account's public password, the same value as in step 2
+   - `FEATURE_AUTH=true`: accounts and Log in
+   - `FEATURE_DEMO=true`: the demo front page, Demo version and the demo limits
 
-   Production refuses to start without `APP_ENV=production`, `DATABASE_URL`, `JWT_SECRET` or `DEMO_PASSWORD` (see *Accounts, secrets and the public demo*). `MIGRATION_DATABASE_URL` is not checked: it is what `swp db upgrade` migrates through, and without it the upgrade falls back to `DATABASE_URL`, the transaction pooler, which must not be used for migrations. `FEATURE_AUTH` and `FEATURE_DEMO` stay unset (off) until Story 16.2, so login and Demo version are hidden until then.
-5. **Deploy:** push to `main` (or *Redeploy* the latest Production deployment after changing a variable). Check that https://g36steponaitis.vercel.app opens and that https://g36steponaitis.vercel.app/api/health answers `{"status":"ok"}`.
+   Production refuses to start without `APP_ENV=production`, `DATABASE_URL`, `JWT_SECRET` or `DEMO_PASSWORD` (see *Accounts, secrets and the public demo*). `MIGRATION_DATABASE_URL` is not checked: it is what `swp db upgrade` migrates through, and without it the upgrade falls back to `DATABASE_URL`, the transaction pooler, which must not be used for migrations. The frontend reads both flags at runtime from `GET /api/session`, so a redeploy is all they need.
+5. **Deploy:** push to `main` (or *Redeploy* the latest Production deployment after changing a variable). Then check:
+   - https://g36steponaitis.vercel.app/api/health answers `{"status":"ok"}`;
+   - https://g36steponaitis.vercel.app opens on the demo front page (Log in, Create account, Demo version);
+   - **Demo version** opens Saved plans as `demo`, and **Log out** returns to the front page;
+   - **Log in** with `demo`/`demo` opens Saved plans as `demo`;
+   - leftover test plans (e.g. «Testing») are deleted under Saved plans;
+   - `npm run e2e:public` passes with 0 failed and 0 flaky. A Log in failure with "Too many failed logins" means someone locked `demo` for a minute: wait a minute and rerun.
+
+   **Upgrade note:** the seed never changes an existing `demo` row, so a `demo` account created with an older `DEMO_PASSWORD` keeps that password. Delete its row in Supabase (*Table Editor → `users`*; nothing references it by foreign key, and plans keep their creator name); the next **Demo version** click recreates it with the current `DEMO_PASSWORD`. Click **Demo version** once before running `npm run e2e:public`, so its Log in test does not run before the row exists. Existing `demo` sessions end, because the new row has a new id.
 6. **Keep-alive:** a free Supabase project pauses after a week without traffic. `.github/workflows/keep-alive.yml` calls `/api/health` (which runs `SELECT 1`) once a day; run it by hand under *Actions → Keep-alive → Run workflow* after the first deploy. A failed run means the site or the database is down, and GitHub emails the repository owner. GitHub disables scheduled workflows after 60 days without repository activity: re-enable it under *Actions → Keep-alive*. A project that has already paused does not wake from an HTTP request; restore it in the Supabase dashboard.
 
 ## Milestone 2 demo

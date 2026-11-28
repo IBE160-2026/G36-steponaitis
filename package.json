@@ -27,6 +27,7 @@
     "trace": "uv run --directory backend --locked python ../scripts/traceability.py",
     "e2e": "npm run e2e --workspace frontend --",
     "e2e:production": "npm run e2e --workspace frontend -- --config=playwright.production.config.ts",
+    "e2e:public": "npm run e2e --workspace frontend -- --config=playwright.public.config.ts",
     "gen:api": "uv run --directory backend --locked swp openapi | npm exec --workspace frontend -- openapi-typescript -o lib/api/schema.ts"
   },
   "devDependencies": {

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 10:51
+last_updated: 11-28-2026 11:42
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -157,7 +157,7 @@ development_status:
   epic-16: in-progress
   16-0-production-hardening-before-going-public: done
   16-1-live-on-the-public-vercel-url: done
-  16-2-production-with-login-and-the-demo-on: backlog
+  16-2-production-with-login-and-the-demo-on: review
   epic-16-retrospective: optional
 action_items:
   - id: "epic-1-retro-item-1-reject-ambiguous-one-group-numbers-like"
