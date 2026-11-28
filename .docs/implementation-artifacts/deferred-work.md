@@ -19,6 +19,7 @@
 - source_spec: none
   summary: Change the location labels (Story 14.1, FR-48) so the QR code gives the part number the plan puts in the location: one label per part, no label for an empty location.
   evidence: Split from the 2026-11-28 follow-up intent by Justas ("Two builds, then bookkeeping"); it is built as its own spec right after the Log in and deploy fixes.
+  resolved: 2026-11-28 — `840f90e`, `spec-14-1-label-qr-gives-the-part-number.md`; the hand check of the new print waits for Justas.
 - source_spec: none
   summary: Bookkeeping without code: reword the Story 16.1 criterion at `epics.md:2722` as built (Epic 16 retro item 7) and reconcile the 53 older open retro items in `sprint-status.yaml` against `issue-triage-2026-11-26.md` (retro item 8).
   evidence: Split from the 2026-11-28 follow-up intent by Justas; done by hand after the two builds.
