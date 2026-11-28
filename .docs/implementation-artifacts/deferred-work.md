@@ -27,6 +27,7 @@
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: Unverified until the push (would be medium): the `arn1` function region in `vercel.json` may not be honoured by Vercel on a `services` project, leaving the function in `iad1`.
   evidence: Vercel's docs do not say whether a top-level `regions` or a service function's `regions` applies with `services`; the JSON schema accepts both. After the push, `curl -s -o /dev/null -D - https://g36steponaitis.vercel.app/api/health | grep -i x-vercel-id` must show `arn1` as the second field, and the Keep-alive workflow now checks the same.
+  resolved: 2026-11-28 — verified after the push of `3329131`: `/api/health` answers with `x-vercel-id: arn1::arn1::…`, and Keep-alive run 46168932492 is green (`pdx1::arn1::…` from the runner). `/api/health` takes 0.6–0.75 s (was 1.04 s) and `GET /api/plans` as `demo` 0.63–0.75 s (was 1.9 s).
 - source_spec: `.docs/implementation-artifacts/spec-epic-16-retro-followups.md`
   summary: Create account answers 500, not 503, when the database lock is busy.
   evidence: `backend/swp/store/users.py:24-39` (`insert_user`) catches only `IntegrityError` and runs in `transaction()`, so a SQLite "database is locked" `OperationalError` is not mapped to `unavailable` the way Log in, Demo version and the seed are. Pre-existing; found by the review of the Log in follow-ups.
