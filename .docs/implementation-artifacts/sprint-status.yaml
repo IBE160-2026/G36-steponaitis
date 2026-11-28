@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-19-2026 19:11
-last_updated: 11-28-2026 18:09
+last_updated: 11-28-2026 18:56
 project: Smart Warehouse Planner
 project_key: NOKEY
 tracking_system: file-system
@@ -376,7 +376,8 @@ action_items:
     action: "Base the before/after no-moves note on whether anything differs, or pin
       has_moves with a test, before epic 5"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-4-retro-2026-11-22.md"
   - id: "epic-4-retro-item-32-fix-manual-move-dialog-details-single-re"
     epic: 4
@@ -480,7 +481,8 @@ action_items:
     action: "Tie _marks_fail to the rule selection conditions with shared predicates
       and replace the four inline slow/dead class sets with one kernel constant (A4)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-46-split-planning-py-move-check-recommendat"
     epic: 5
@@ -488,7 +490,8 @@ action_items:
       recommendations-page.tsx components and strings into lib/copy; merge duplicated
       test helpers (A2, A3, A5)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-5-retro-2026-11-22.md"
   - id: "epic-5-retro-item-47-update-agents-md-for-the-three-browser-l"
     epic: 5
@@ -535,7 +538,8 @@ action_items:
       test_fr12_delete_keeps_other_plans, a launcher test pinning the bare /plans/<id>
       href, and the deleted-in-another-tab e2e checking the list (A5, R7, R8)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-53-take-now-after-the-files-are-parsed-in-p"
     epic: 6
@@ -543,7 +547,8 @@ action_items:
       its own busy message, and fix the stale comment at new-plan-page.tsx:182 (R9,
       R10, R13)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-54-move-launcher-saved-plans-new-plan-and-p"
     epic: 6
@@ -551,7 +556,8 @@ action_items:
       Data as of in one helper, move duplicated e2e helpers into e2e/support, and
       include launcher.tsx in the epic-5 item-46 split (A2, A3, A4)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-6-retro-2026-11-22.md"
   - id: "epic-6-retro-item-55-reconcile-epics-md-and-the-architecture"
     epic: 6
@@ -630,7 +636,8 @@ action_items:
       filter, fix the other-location.tsx comment, include recommendations.py in the
       item-46 split (A2-A4)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-7-retro-2026-11-23.md"
   - id: "epic-7-retro-item-65-reconcile-epics-md-and-the-architecture"
     epic: 7
@@ -678,7 +685,8 @@ action_items:
       checking A4 width, MoveListPage first-load-error Vitest, one manual multi-page
       Firefox PDF check of band breaks, header and page numbers"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-8-retro-item-71-reconcile-ad-17-ux-dr52-and-epics-md-epi"
     epic: 8
@@ -717,7 +725,8 @@ action_items:
       in e2e/support and use it from both move-list specs, as part of the epic-7 item
       64 cleanup"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-8-retro-2026-11-23.md"
   - id: "epic-9-retro-item-76-make-the-login-throttle-hold-under-concu"
     epic: 9
@@ -767,7 +776,8 @@ action_items:
       auth helpers in e2e/support, split auth.test.tsx, guard test from the route
       table (A1-A3)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-82-add-the-low-severity-tests-and-fixes-dem"
     epic: 9
@@ -775,7 +785,8 @@ action_items:
       seed target with MIGRATION_DATABASE_URL, the plan-limit comment and the at most
       1 plans copy (R15, R16, R18, R19)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-9-retro-2026-11-23.md"
   - id: "epic-9-retro-item-83-give-the-nine-open-9-x-issues-md-deferra"
     epic: 9
@@ -824,7 +835,8 @@ action_items:
       placement geometry, cross-selection scrolling and the live crop resize (10.3,
       10.4, 10.5 deferrals)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-10-retro-2026-11-23.md"
   - id: "epic-10-retro-item-89-before-epics-11-12-split-wallgrid-and-ai"
     epic: 10
@@ -875,14 +887,16 @@ action_items:
       variable, including Selected changing --colour-selection and --colour-selected-tint
       (R4)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
   - id: "epic-11-retro-item-95-use-one-exported-rrggbb-predicate-in-lib"
     epic: 11
     action: "Use one exported #RRGGBB predicate in lib/colours for setKeyColour/previewKeyColour,
       the hex field and the rule the inline parser mirrors (R5)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-11-retro-2026-11-23.md"
   - id: "epic-11-retro-item-96-reconcile-epics-md-epic-11-and-epic-11-c"
     epic: 11
@@ -924,7 +938,8 @@ action_items:
       /moves/preview under 1 s, and debounce drag-over previews in drag-context.tsx
       (R2, R3)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-12-retro-item-101-count-moves-preview-requests-per-target"
     epic: 12
@@ -932,7 +947,8 @@ action_items:
       (fr35/fr38 at :491) to the five drag.spec.ts titles so SM-7 counts them (R4,
       R5)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: tests only"
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-12-retro-item-102-merge-dropmovereason-and-puttogetherreas"
     epic: 12
@@ -940,7 +956,8 @@ action_items:
       drag.py docstring: the drag check also refuses a virtual or unknown from-location
       (A3, R6)"
     owner: "dev"
-    status: open
+    status: done
+    resolution: "waived 2026-11-28, not built: refactoring and duplication only"
     ref: ".docs/implementation-artifacts/epic-12-retro-2026-11-24.md"
   - id: "epic-12-retro-item-103-reconcile-spine-and-epics-md-with-epic-1"
     epic: 12
