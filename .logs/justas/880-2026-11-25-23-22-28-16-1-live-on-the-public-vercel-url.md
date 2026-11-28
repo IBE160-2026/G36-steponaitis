@@ -66,7 +66,7 @@ Gjøre de manuelle sjekkene som holdt Story 16.1 i `review` (README «Deploy» 1
 - **Maks-import:** syntetiske filer laget fra `data/sample/` (10 gater × 25 seksjoner × 5 nivåer × 20 posisjoner = 25 000 lokasjoner, alle fylt med én lagerlinje, de 20 000 eksempeltransaksjonene; 2,6 MB xlsx) og sjekket mot `read_import` lokalt først. Lagt i `~/Downloads/swp-max-size/`, utenfor repoet. Planen «Testing» ble opprettet på den offentlige URL-en, og Locations-veggen viste gatene A–J.
 - **4,5 MB-spørsmålet:** `GET /api/imports/<id>/layout` for maks-importen er 3 658 040 byte ukomprimert og 207 358 byte gzippet. Begge er under 4,5 MB, så veggen passer uansett hvilken Vercel teller; spørsmålet trenger ikke avgjøres, og AD-18 er uendret.
 - **Funksjonsregion:** funksjonen kjører i `iad1` (Washington; `x-vercel-id: arn1::iad1::…`) mens databasen er i Stockholm. Et forsøk på å bytte til `arn1` ble ikke gjennomført (redeployen ble hengende og Justas fant ikke valget på gratisplanen). Godtatt slik det er: hver spørring tar en tur over Atlanteren.
-- **Status:** `16-1-live-on-the-public-vercel-url` satt til `done` i `sprint-status.yaml`. Endringen i sprint-status og `deferred-work.md` er ukommittert.
+- **Status:** `16-1-live-on-the-public-vercel-url` satt til `done` i `sprint-status.yaml`. Endringen i sprint-status og `deferred-work.md` er committet i `2c22a8e` og pushet til `origin/main` (`184070b..2c22a8e`), noe som utløser en ny Production-deploy med bare dokumentasjonsendringer.
 - Fire åpne punkter fra 2026-11-25 er lukket i `issues.md`.
 - Ikke gjort: rot-`npm install` kjører `uv sync` en gang til på Vercel (dev-verktøy som pytest og ruff), som koster ca. 3 s byggetid. Ufarlig, ikke tatt med som åpent punkt.
 
