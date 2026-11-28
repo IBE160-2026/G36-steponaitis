@@ -75,3 +75,6 @@ uploads/
 # Original company data: never commit
 data/private/*
 !data/private/.gitkeep
+.vercel
+.env*
+!.env.example
