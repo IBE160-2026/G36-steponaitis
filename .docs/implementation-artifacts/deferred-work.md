@@ -9,3 +9,4 @@
 - source_spec: `.docs/implementation-artifacts/spec-16-1-live-on-the-public-vercel-url.md`
   summary: Unverified (would be medium): the `api` service's `functions."swp/main.py".excludeFiles` in `vercel.json` may resolve against the repo root instead of the service root, so `backend/tests/` and `backend/var/` (local SQLite files) could be bundled into the Vercel function.
   evidence: Vercel's Services docs do not say what a service's `functions` key is relative to; the first Production build log (function bundle contents and size) settles it.
+  resolved: 2026-11-28 — verified on the live Production deployment: the function's Output tree in the Vercel dashboard has no `tests/` or `var/` folder, so `excludeFiles` resolves against the service root.
